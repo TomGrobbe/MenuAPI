@@ -146,7 +146,7 @@ namespace MenuAPI
                     if (currentMenu.Visible && !DisableMenuControls)
                     {
                         // Select / Enter
-                        if (Game.IsDisabledControlJustReleased(0, Control.FrontendAccept) || Game.IsControlJustReleased(0, Control.FrontendAccept))
+                        if (Game.IsDisabledControlJustReleased(0, Control.FrontendAccept) || Game.IsControlJustReleased(0, Control.FrontendAccept) || (Game.IsDisabledControlJustReleased(0, Control.VehicleMouseControlOverride) || Game.IsControlJustReleased(0, Control.VehicleMouseControlOverride)))
                         {
                             if (currentMenu.Size > 0)
                             {
