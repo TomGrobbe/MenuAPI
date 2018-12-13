@@ -279,7 +279,8 @@ namespace MenuAPI
 
                     #region Draw Header Menu Title
                     int font = 1;
-                    float size = 1.1f;
+                    float size = (45f * 27f) / MenuController.ScreenHeight;
+                    //float size = 1.1f;
 
                     SetScriptGfxAlign(76, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -328,7 +329,8 @@ namespace MenuAPI
                     if (!string.IsNullOrEmpty(MenuSubtitle))
                     {
                         int font = 0;
-                        float size = 0.34f;
+                        float size = (14f * 27f) / MenuController.ScreenHeight;
+                        //float size = 0.34f;
 
                         SetScriptGfxAlign(76, 84);
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -356,7 +358,8 @@ namespace MenuAPI
                     if (CounterPreText != null || MaxItemsOnScreen < Size)
                     {
                         int font = 0;
-                        float size = 0.34f;
+                        float size = (14f * 27f) / MenuController.ScreenHeight;
+                        //float size = 0.34f;
 
                         SetScriptGfxAlign(76, 84);
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -451,7 +454,8 @@ namespace MenuAPI
                         AddTextComponentSubstringPlayerName("↑");
 
                         SetTextFont(0);
-                        SetTextScale(0.35f, 0.35f);
+                        SetTextScale(1f, (14f * 27f) / MenuController.ScreenHeight);
+                        //SetTextScale(0.35f, 0.35f);
                         SetTextJustification(0);
                         if (LeftAligned)
                         {
@@ -471,7 +475,8 @@ namespace MenuAPI
                         AddTextComponentSubstringPlayerName("↓");
 
                         SetTextFont(0);
-                        SetTextScale(0.35f, 0.35f);
+                        SetTextScale(1f, (14f * 27f) / MenuController.ScreenHeight);
+                        //SetTextScale(0.35f, 0.35f);
                         SetTextJustification(0);
                         if (LeftAligned)
                         {
@@ -499,7 +504,8 @@ namespace MenuAPI
 
                         #region description text
                         int font = 0;
-                        float textSize = 0.35f;
+                        float textSize = (14f * 27f) / MenuController.ScreenHeight;
+                        //float textSize = 0.35f;
 
                         float textMinX = 0f + (10f / MenuController.ScreenWidth);
                         float textMaxX = Width / MenuController.ScreenWidth - (10f / MenuController.ScreenWidth);

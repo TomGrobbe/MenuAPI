@@ -334,7 +334,8 @@ namespace MenuAPI
 
                 #region Text
                 int font = 0;
-                float textSize = 0.34f;
+                float textSize = (14f * 27f) / MenuController.ScreenHeight;
+                //float textSize = 0.34f;
 
                 SetScriptGfxAlign(76, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
