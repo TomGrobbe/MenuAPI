@@ -37,8 +37,14 @@ namespace TestMenu
                 Style = MenuCheckboxItem.CheckboxStyle.Tick
             };
 
+            MenuCheckboxItem box2 = new MenuCheckboxItem("Another Checkbox Style", "There are two checkbox styles to choose from. A checkmark, and a cross.", false)
+            {
+                Style = MenuCheckboxItem.CheckboxStyle.Cross
+            };
+
             menu.AddMenuItem(item1);
             menu.AddMenuItem(box);
+            menu.AddMenuItem(box2);
             menu.AddMenuItem(item4);
 
             menu2.AddMenuItem(item2);
