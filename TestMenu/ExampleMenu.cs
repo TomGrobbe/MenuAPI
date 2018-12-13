@@ -74,11 +74,11 @@ namespace TestMenu
                 Debug.WriteLine($"Pressed item with text {_item.Text} and index {_index} in menu with title {_menu.MenuTitle}");
             };
 
-            menu.AddMenuItem(new MenuItem("Test Item #1", "Description (1). abc abc abc abc") { LeftIcon = MenuItem.Icon.AMMO, RightIcon = MenuItem.Icon.MEDAL_BRONZE });
-            menu.AddMenuItem(new MenuItem("Test Item #2", "Description (2). abc abc abc abc abc abc abc abc abc abc abc abc") { LeftIcon = MenuItem.Icon.ARMOR, RightIcon = MenuItem.Icon.MEDAL_GOLD });
-            menu.AddMenuItem(new MenuItem("Test Item #3", "Description ∑ (3). abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc") { LeftIcon = MenuItem.Icon.BARBER, RightIcon = MenuItem.Icon.MEDAL_SILVER });
-            menu.AddMenuItem(new MenuItem("Test Item #4", "Description (4). abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc") { LeftIcon = MenuItem.Icon.BIKE, RightIcon = MenuItem.Icon.METH });
-            menu.AddMenuItem(new MenuItem("Test Item #5", "Description (5). abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc") { LeftIcon = MenuItem.Icon.CAR, RightIcon = MenuItem.Icon.MICHAEL });
+            menu.AddMenuItem(new MenuItem("Test Item #1", "Description (1). abc abc abc abc"));
+            menu.AddMenuItem(new MenuItem("Test Item #2", "Description (2). abc abc abc abc abc abc abc abc abc abc abc abc"));
+            menu.AddMenuItem(new MenuItem("Test Item #3", "Description ∑ (3). abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc") { Label = "Right Label", RightIcon = MenuItem.Icon.MASK });
+            menu.AddMenuItem(new MenuItem("Test Item #4", "Description (4). abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc"));
+            menu.AddMenuItem(new MenuItem("Test Item #5", "Description (5). abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc"));
 
             for (var i = 0; i < 14; i++)
             {
