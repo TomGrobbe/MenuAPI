@@ -38,13 +38,13 @@ namespace MenuAPI
 
         public int MaxItemsOnScreen = 10;
 
-        public List<MenuItem> MenuItems { get; private set; } = new List<MenuItem>();
+        public List<MenuItem> MenuItems { get; internal set; } = new List<MenuItem>();
 
         public int Size => MenuItems.Count;
 
         public bool Visible { get; set; } = false;
 
-        public bool LeftAligned = true;
+        public bool LeftAligned = false;
 
         public PointF Position { get; private set; } = new PointF(0f, 0f);
 
@@ -52,7 +52,22 @@ namespace MenuAPI
 
         public string CounterPreText { get; set; }
 
-        public int CurrentIndex { get; private set; } = 0;
+        public int CurrentIndex { get; internal set; } = 0;
+
+        private int viewIndexOffset = 0;
+
+        private List<MenuItem> VisibleMenuItems
+        {
+            get
+            {
+                var items = MenuItems.GetRange(viewIndexOffset, Math.Min(MaxItemsOnScreen, Size - viewIndexOffset));
+                //foreach (MenuItem i in items)
+                //{
+                //    i.Draw(viewIndexOffset);
+                //}
+                return items;
+            }
+        }
         #endregion
 
         #region Constructors
@@ -83,12 +98,12 @@ namespace MenuAPI
         public void AddMenuItem(MenuItem item)
         {
             MenuItems.Add(item);
-            item.Index = MenuItems.Count - 1;
+            //item.Index = MenuItems.Count - 1;
             item.PositionOnScreen = item.Index;
-            foreach (var menuItem in MenuItems)
-            {
-                menuItem.Index = MenuItems.IndexOf(menuItem);
-            }
+            //foreach (var menuItem in MenuItems)
+            //{
+            //    menuItem.Index = MenuItems.IndexOf(menuItem);
+            //}
             item.ParentMenu = this;
         }
 
@@ -102,10 +117,10 @@ namespace MenuAPI
             {
                 MenuItems.Remove(item);
             }
-            foreach (var menuItem in MenuItems)
-            {
-                menuItem.Index = MenuItems.IndexOf(menuItem);
-            }
+            //foreach (var menuItem in MenuItems)
+            //{
+            //    menuItem.Index = MenuItems.IndexOf(menuItem);
+            //}
         }
 
         /// <summary>
@@ -129,6 +144,45 @@ namespace MenuAPI
             ItemSelectedEvent(item, item.Index);
         }
         #endregion
+
+        public void GoUp()
+        {
+            if (Visible)
+            {
+                CurrentIndex--; if (CurrentIndex < 0)
+                {
+                    CurrentIndex = Size - 1;
+                }
+                if (!VisibleMenuItems.Contains(MenuItems[CurrentIndex]))
+                {
+                    viewIndexOffset--;
+                    if (viewIndexOffset < 0)
+                    {
+                        viewIndexOffset = Math.Max(Size - MaxItemsOnScreen, 0);
+                    }
+                }
+            }
+        }
+
+        public void GoDown()
+        {
+            if (Visible)
+            {
+                CurrentIndex++;
+                if (CurrentIndex >= Size)
+                {
+                    CurrentIndex = 0;
+                }
+                if (!VisibleMenuItems.Contains(MenuItems[CurrentIndex]))
+                {
+                    viewIndexOffset++;
+                    if (CurrentIndex == 0)
+                    {
+                        viewIndexOffset = 0;
+                    }
+                }
+            }
+        }
 
         #region internal functions
         /// <summary>
@@ -282,7 +336,7 @@ namespace MenuAPI
                 SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-                float bgHeight = 38f * MenuItems.Count;
+                float bgHeight = 38f * MathUtil.Clamp(MenuItems.Count, 0, MaxItemsOnScreen);
 
 
                 float x = (Position.X + (headerSize.Width / 2f)) / Main.ScreenWidth;
@@ -300,81 +354,179 @@ namespace MenuAPI
             #region menuItems
             if (MenuItems.Count > 0)
             {
-                foreach (var item in MenuItems)
+                //foreach (var item in MenuItems)
+                //{
+                //    if (CurrentIndex + 1 >= MaxItemsOnScreen)
+                //    {
+                //        if (((CurrentIndex + 1) - MaxItemsOnScreen) - item.Index <= 0)
+                //            item.Draw((CurrentIndex + 1) - MaxItemsOnScreen);
+                //    }
+                //    else if (MaxItemsOnScreen - Size <= CurrentIndex)
+                //    {
+                //        if (item.Index < MaxItemsOnScreen || item.Selected)
+                //            item.Draw(0);
+                //    }
+                //}
+
+                foreach (var item in VisibleMenuItems)
                 {
-                    item.Draw();
+                    item.Draw(viewIndexOffset);
                 }
             }
             #endregion
 
-
-
-
-            /*
-             *   Drawing description.
-             *  
-             */
-
-
-            #region Description
-            if (!string.IsNullOrEmpty(MenuItems[CurrentIndex].Description))
+            float descriptionYOffset = 0f;
+            #region Up Down overflow Indicator
+            if (Size > MaxItemsOnScreen)
             {
-                /*
-                 *   Drawing background gradient.
-                 *  
-                 */
                 #region background
-
-                float descWidth = Width / Main.ScreenWidth;
-                float descHeight = MathUtil.Clamp((10f + MenuItems[CurrentIndex].GetDescriptionHeight()), 45f, 600f) / Main.ScreenHeight;
-                float descX = (Position.X + (Width / 2f)) / Main.ScreenWidth;
-                float descY = (2f + MenuItemsYOffset + ((descHeight / 2f) * Main.ScreenHeight)) / Main.ScreenHeight + (28f / Main.ScreenHeight);
+                float width = 500f / Main.ScreenWidth;
+                float height = 60f / Main.ScreenWidth;
+                float x = (Position.X + (Width / 2f)) / Main.ScreenWidth;
+                float y = MenuItemsYOffset / Main.ScreenHeight + (height / 2f) + (2f / Main.ScreenHeight);
 
                 SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-                DrawRect(descX, descY - descHeight / 2f, descWidth, 4f / Main.ScreenHeight, 0, 0, 0, 200);
-                DrawSprite(Main._texture_dict, "gradient_bgd", descX, descY, descWidth, descHeight, 0f, 255, 255, 255, 255);
-
+                DrawRect(x, y, width, height, 0, 0, 0, 200);
+                descriptionYOffset = height;
                 ResetScriptGfxAlign();
                 #endregion
 
-                /*
-                 *   Drawing description text.
-                 *  
-                 */
+                #region up/down icons
+                SetScriptGfxAlign(76, 84);
+                SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                float xMin = 0f;
+                float xMax = 500f / Main.ScreenWidth;
+                float xCenter = 250f / Main.ScreenWidth;
+                float yTop = y - (20f / Main.ScreenHeight);
+                float yBottom = y - (10f / Main.ScreenHeight);
+
+                BeginTextCommandDisplayText("STRING");
+                AddTextComponentSubstringPlayerName("↑");
+
+                SetTextFont(0);
+                SetTextScale(0.35f, 0.35f);
+                SetTextJustification(0);
+                if (LeftAligned)
+                {
+                    SetTextWrap(xMin, xMax);
+                    EndTextCommandDisplayText(xCenter, yTop);
+                }
+                else
+                {
+                    xMin = GetSafeZoneSize() - ((Width - 10f) / Main.ScreenWidth);
+                    xMax = GetSafeZoneSize() - (10f / Main.ScreenWidth);
+                    xCenter = GetSafeZoneSize() - (250f / Main.ScreenWidth);
+                    SetTextWrap(xMin, xMax);
+                    EndTextCommandDisplayText(xCenter, yTop);
+                }
+
+                BeginTextCommandDisplayText("STRING");
+                AddTextComponentSubstringPlayerName("↓");
+
+                SetTextFont(0);
+                SetTextScale(0.35f, 0.35f);
+                SetTextJustification(0);
+                if (LeftAligned)
+                {
+                    SetTextWrap(xMin, xMax);
+                    EndTextCommandDisplayText(xCenter, yBottom);
+                }
+                else
+                {
+                    SetTextWrap(xMin, xMax);
+                    EndTextCommandDisplayText(xCenter, yBottom);
+                }
+
+                ResetScriptGfxAlign();
+                #endregion
+            }
+            #endregion
+
+            #region Description
+            if (!string.IsNullOrEmpty(MenuItems[CurrentIndex].Description))
+            {
+
                 #region description text
                 int font = 0;
-                float size = 0.35f;
+                float textSize = 0.35f;
+
+                float textMinX = 0f + (10f / Main.ScreenWidth);
+                float textMaxX = Width / Main.ScreenWidth - (10f / Main.ScreenWidth);
+                float textY = MenuItemsYOffset / Main.ScreenHeight + (16f / Main.ScreenHeight) + descriptionYOffset;
 
                 SetScriptGfxAlign(76, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
                 BeginTextCommandDisplayText("CELL_EMAIL_BCON");
                 SetTextFont(font);
-                SetTextScale(size, size);
+                SetTextScale(textSize, textSize);
                 SetTextJustification(1);
                 string text = MenuItems[CurrentIndex].Description;
-                string[] strings = CitizenFX.Core.UI.Screen.StringToArray(text);
-                foreach (string s in strings)
+                foreach (string s in CitizenFX.Core.UI.Screen.StringToArray(text))
                 {
                     AddTextComponentSubstringPlayerName(s);
                 }
-
+                float textHeight = GetTextScaleHeight(textSize, font);
                 if (LeftAligned)
                 {
-                    SetTextWrap(0f, 500f / Main.ScreenWidth);
-                    EndTextCommandDisplayText(15f / Main.ScreenWidth, descY - (descHeight / 2f) + (4f / Main.ScreenHeight));
+                    SetTextWrap(textMinX, textMaxX);
+                    EndTextCommandDisplayText(textMinX, textY);
                 }
                 else
                 {
-                    SetTextWrap(0f, GetSafeZoneSize() - (15f / Main.ScreenWidth));
-                    EndTextCommandDisplayText((Main.ScreenWidth - 485f) / Main.ScreenWidth - (1f - GetSafeZoneSize()), descY - (descHeight / 2f) + (4f / Main.ScreenHeight));
+                    textMinX = GetSafeZoneSize() - ((Width - 10f) / Main.ScreenWidth);
+                    textMaxX = GetSafeZoneSize() - (10f / Main.ScreenWidth);
+                    SetTextWrap(textMinX, textMaxX);
+                    EndTextCommandDisplayText(textMinX, textY);
+                    //SetTextWrap(0f, GetSafeZoneSize() - (15f / Main.ScreenWidth));
+                    //EndTextCommandDisplayText((Main.ScreenWidth - 485f) / Main.ScreenWidth - (1f - GetSafeZoneSize()), descY - (descHeight / 2f) + (4f / Main.ScreenHeight));
+                }
+
+                BeginTextCommandLineCount("CELL_EMAIL_BCON");
+                SetTextScale(textSize, textSize);
+                SetTextJustification(1);
+                SetTextFont(font);
+                int lineCount = 1;
+                foreach (string s in CitizenFX.Core.UI.Screen.StringToArray(text))
+                {
+                    AddTextComponentSubstringPlayerName(s);
+                }
+                if (LeftAligned)
+                {
+                    SetTextWrap(textMinX, textMaxX);
+                    lineCount = GetTextScreenLineCount(textMinX, textY);
+                }
+                else
+                {
+                    SetTextWrap(textMinX, textMaxX);
+                    lineCount = GetTextScreenLineCount(textMinX, textY);
+                    //SetTextWrap(0f, GetSafeZoneSize() - (15f / Main.ScreenWidth));
+                    //EndTextCommandDisplayText((Main.ScreenWidth - 485f) / Main.ScreenWidth - (1f - GetSafeZoneSize()), descY - (descHeight / 2f) + (4f / Main.ScreenHeight));
                 }
 
                 ResetScriptGfxAlign();
 
                 #endregion
+
+                #region background
+                float descWidth = Width / Main.ScreenWidth;
+                float descHeight = (textHeight + 0.005f) * lineCount + (8f / Main.ScreenHeight) + (1.5f / Main.ScreenHeight);
+                float descX = (Position.X + (Width / 2f)) / Main.ScreenWidth;
+                float descY = textY - (6f / Main.ScreenHeight) + (descHeight / 2f);
+
+                SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+
+                DrawRect(descX, descY - (descHeight / 2f) + (2f / Main.ScreenHeight), descWidth, 4f / Main.ScreenHeight, 0, 0, 0, 200);
+                DrawSprite(Main._texture_dict, "gradient_bgd", descX, descY, descWidth, descHeight, 0f, 255, 255, 255, 225);
+
+                ResetScriptGfxAlign();
+                #endregion
+
+
+
             }
 
             #endregion
