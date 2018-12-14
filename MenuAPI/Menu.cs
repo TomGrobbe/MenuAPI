@@ -12,21 +12,193 @@ namespace MenuAPI
     public class Menu
     {
         #region Setting up events
-        public delegate void ItemSelectEvent(Menu parentMenu, MenuItem menuItem, int itemIndex);
-        public delegate void CheckboxItemChangeEvent(Menu parentMenu, MenuCheckboxItem menuItem, int itemIndex, bool checkedState);
 
+        #region delegates
+        /// <summary>
+        /// Triggered when a <see cref="MenuItem"/> is selected.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this event occurred.</param>
+        /// <param name="menuItem">The <see cref="MenuItem"/> that was selected.</param>
+        /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuItem"/>.</param>
+        public delegate void ItemSelectEvent(Menu menu, MenuItem menuItem, int itemIndex);
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuCheckboxItem"/> was toggled.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this event occurred.</param>
+        /// <param name="menuItem">The <see cref="MenuCheckboxItem"/> that was toggled.</param>
+        /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuCheckboxItem"/>.</param>
+        /// <param name="newCheckedState">The new <see cref="MenuCheckboxItem.Checked"/> state of this <see cref="MenuCheckboxItem"/>.</param>
+        public delegate void CheckboxItemChangeEvent(Menu menu, MenuCheckboxItem menuItem, int itemIndex, bool newCheckedState);
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuListItem"/> is selected.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnListItemSelect"/> event occurred.</param>
+        /// <param name="listItem">The <see cref="MenuListItem"/> that was selected.</param>
+        /// <param name="selectedIndex">The <see cref="MenuListItem.ListIndex"/> of the <see cref="MenuListItem"/>.</param>
+        /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of the <see cref="MenuListItem"/> in the <see cref="Menu"/>.</param>
+        public delegate void ListItemSelectedEvent(Menu menu, MenuListItem listItem, int selectedIndex, int itemIndex);
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuListItem"/>'s index was changed.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnListIndexChange"/> event occurred.</param>
+        /// <param name="listItem">The <see cref="MenuListItem"/> that was changed.</param>
+        /// <param name="oldSelectionIndex">The old <see cref="MenuListItem.ListIndex"/> of the <see cref="MenuListItem"/>.</param>
+        /// <param name="newSelectionIndex">The new <see cref="MenuListItem.ListIndex"/> of the <see cref="MenuListItem"/>.</param>
+        /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of the <see cref="MenuListItem"/> in the <see cref="Menu"/>.</param>
+        public delegate void ListItemIndexChangedEvent(Menu menu, MenuListItem listItem, int oldSelectionIndex, int newSelectionIndex, int itemIndex);
+
+        /// <summary>
+        /// Triggered when a <see cref="Menu"/> is closed.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> that was closed.</param>
+        public delegate void MenuClosedEvent(Menu menu);
+
+        /// <summary>
+        /// Triggered when a <see cref="Menu"/> is opened.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> that has been opened.</param>
+        public delegate void MenuOpenedEvent(Menu menu);
+
+        /// <summary>
+        /// Triggered when the <see cref="CurrentIndex"/> changes.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnIndexChange"/></param> event occurred.
+        /// <param name="oldItem">The old <see cref="MenuItem"/> that was previously selected.</param>
+        /// <param name="newItem">The new <see cref="MenuItem"/> that is now selected.</param>
+        /// <param name="oldIndex">The old <see cref="MenuItem.Index"/> of this item.</param>
+        /// <param name="newIndex">The new <see cref="MenuItem.Index"/> of this item.</param>
+        public delegate void IndexChangedEvent(Menu menu, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex);
+        #endregion
+
+        #region events
+        /// <summary>
+        /// Triggered when a <see cref="MenuItem"/> is selected.
+        /// Parameters: <see cref="Menu"/> parentMenu, <see cref="MenuItem"/> menuItem, <see cref="int"/> itemIndex.
+        /// </summary>
         public event ItemSelectEvent OnItemSelect;
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuCheckboxItem"/> was toggled.
+        /// Parameters: <see cref="Menu"/> parentMenu, <see cref="MenuCheckboxItem"/> menuItem, <see cref="int"/> itemIndex, <see cref="bool"/> newCheckedState.
+        /// </summary>
         public event CheckboxItemChangeEvent OnCheckboxChange;
 
+        /// <summary>
+        /// Triggered when a <see cref="MenuListItem"/> is selected.
+        /// Parameters: <see cref="Menu"/> menu, <see cref="MenuListItem"/> listItem, <see cref="MenuListItem.ListIndex"/> selectedIndex, <see cref="int"/> itemIndex.
+        /// </summary>
+        public event ListItemSelectedEvent OnListItemSelect;
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuListItem"/>'s index was changed.
+        /// Parameters: <see cref="Menu"/> menu, <see cref="MenuListItem"/> listItem, <see cref="MenuListItem.ListIndex"/> oldSelectionIndex, <see cref="int"/> newSelectionIndex, <see cref="int"/> itemIndex.
+        /// </summary>
+        public event ListItemIndexChangedEvent OnListIndexChange;
+
+        /// <summary>
+        /// Triggered when a <see cref="Menu"/> is closed.
+        /// Parameters: <see cref="Menu"/> closedMenu.
+        /// </summary>
+        public event MenuClosedEvent OnMenuClose;
+
+        /// <summary>
+        /// Triggered when a <see cref="Menu"/> is opened.
+        /// Parameters: <see cref="Menu"/> openedMenu.
+        /// </summary>
+        public event MenuOpenedEvent OnMenuOpen;
+
+        /// <summary>
+        /// Triggered when the <see cref="CurrentIndex"/> changes.
+        /// Parameters: <see cref="Menu"/> menu, <see cref="MenuItem"/> oldSelectedItem, <see cref="MenuItem"/> newSelectedItem, <see cref="int"/> oldIndex, <see cref="int"/> newIndex.
+        /// </summary>
+        public event IndexChangedEvent OnIndexChange;
+        #endregion
+
+        #region virtual voids
+        /// <summary>
+        /// Triggered when a <see cref="MenuItem"/> is selected.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this event occurred.</param>
+        /// <param name="menuItem">The <see cref="MenuItem"/> that was selected.</param>
+        /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuItem"/>.</param>
         protected virtual void ItemSelectedEvent(MenuItem menuItem, int itemIndex)
         {
             OnItemSelect?.Invoke(this, menuItem, itemIndex);
         }
 
+        /// <summary>
+        /// Triggered when a <see cref="MenuCheckboxItem"/> was toggled.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this event occurred.</param>
+        /// <param name="menuItem">The <see cref="MenuCheckboxItem"/> that was toggled.</param>
+        /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuCheckboxItem"/>.</param>
+        /// <param name="newCheckedState">The new <see cref="MenuCheckboxItem.Checked"/> state of this <see cref="MenuCheckboxItem"/>.</param>
         protected virtual void CheckboxChangedEvent(MenuCheckboxItem menuItem, int itemIndex, bool _checked)
         {
             OnCheckboxChange?.Invoke(this, menuItem, itemIndex, _checked);
         }
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuListItem"/> is selected.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnListItemSelect"/> event occurred.</param>
+        /// <param name="listItem">The <see cref="MenuListItem"/> that was selected.</param>
+        /// <param name="selectedIndex">The <see cref="MenuListItem.ListIndex"/> of the <see cref="MenuListItem"/>.</param>
+        /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of the <see cref="MenuListItem"/> in the <see cref="Menu"/>.</param>
+        protected virtual void ListItemSelectEvent(Menu menu, MenuListItem listItem, int selectedIndex, int itemIndex)
+        {
+            OnListItemSelect?.Invoke(menu, listItem, selectedIndex, itemIndex);
+        }
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuListItem"/>'s index was changed.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnListIndexChange"/> event occurred.</param>
+        /// <param name="listItem">The <see cref="MenuListItem"/> that was changed.</param>
+        /// <param name="oldSelectionIndex">The old <see cref="MenuListItem.ListIndex"/> of the <see cref="MenuListItem"/>.</param>
+        /// <param name="newSelectionIndex">The new <see cref="MenuListItem.ListIndex"/> of the <see cref="MenuListItem"/>.</param>
+        /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of the <see cref="MenuListItem"/> in the <see cref="Menu"/>.</param>
+        protected virtual void ListItemIndexChangeEvent(Menu menu, MenuListItem listItem, int oldSelectionIndex, int newSelectionIndex, int itemIndex)
+        {
+            OnListIndexChange?.Invoke(menu, listItem, oldSelectionIndex, newSelectionIndex, itemIndex);
+        }
+
+        /// <summary>
+        /// Triggered when a <see cref="Menu"/> is closed.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> that was closed.</param>
+        protected virtual void MenuCloseEvent(Menu menu)
+        {
+            OnMenuClose?.Invoke(menu);
+        }
+
+        /// <summary>
+        /// Triggered when a <see cref="Menu"/> is opened.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> that has been opened.</param>
+        protected virtual void MenuOpenEvent(Menu menu)
+        {
+            OnMenuOpen?.Invoke(menu);
+        }
+
+        /// <summary>
+        /// Triggered when the <see cref="CurrentIndex"/> changes.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnIndexChange"/></param> event occurred.
+        /// <param name="oldItem">The old <see cref="MenuItem"/> that was previously selected.</param>
+        /// <param name="newItem">The new <see cref="MenuItem"/> that is now selected.</param>
+        /// <param name="oldIndex">The old <see cref="MenuItem.Index"/> of this item.</param>
+        /// <param name="newIndex">The new <see cref="MenuItem.Index"/> of this item.</param>
+        protected virtual void IndexChangeEvent(Menu menu, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex)
+        {
+            OnIndexChange?.Invoke(menu, oldItem, newItem, oldIndex, newIndex);
+        }
+
+        #endregion
+
         #endregion
 
         #region constants or readonlys
@@ -50,6 +222,8 @@ namespace MenuAPI
 
         private List<MenuItem> _MenuItems { get; set; } = new List<MenuItem>();
 
+        private int ColorPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_02");
+        private int OpacityPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_01");
         #endregion
 
         #region Public Variables
@@ -57,7 +231,33 @@ namespace MenuAPI
 
         public string MenuSubtitle { get; set; }
 
-        public int MaxItemsOnScreen { get; set; } = 10;
+        /// <summary>
+        /// Automatically returns a safe amount of max items depending on the screen size of the user.
+        /// Prevents the menu from going off the screen near the bottom if the menu is too long.
+        /// </summary>
+        public int MaxItemsOnScreen
+        {
+            get
+            {
+                if (MenuController.ScreenHeight >= 900)
+                {
+                    return 10;
+                }
+                else if (MenuController.ScreenHeight >= 768)
+                {
+                    return 8;
+                }
+                else if (MenuController.ScreenHeight >= 720)
+                {
+                    return 6;
+                }
+                else if (MenuController.ScreenHeight >= 664)
+                {
+                    return 5;
+                }
+                return 4;
+            }
+        }
 
         public int Size => _MenuItems.Count;
 
@@ -74,6 +274,11 @@ namespace MenuAPI
         public Menu ParentMenu { get; internal set; } = null;
 
         public int CurrentIndex { get; internal set; } = 0;
+
+        public bool EnableInstructionalButtons { get; set; } = true;
+
+        public Dictionary<Control, string> InstructionalButtons = new Dictionary<Control, string>() { { Control.FrontendAccept, GetLabelText("HUD_INPUT28") }, { Control.FrontendCancel, GetLabelText("HUD_INPUT53") } };
+
         #endregion
 
         #region Constructors
@@ -153,6 +358,10 @@ namespace MenuAPI
                     checkbox.Checked = !checkbox.Checked;
                     CheckboxChangedEvent(checkbox, item.Index, checkbox.Checked);
                 }
+                else if (item is MenuListItem listItem)
+                {
+                    ListItemSelectEvent(this, listItem, listItem.ListIndex, listItem.Index);
+                }
                 else
                 {
                     ItemSelectedEvent(item, item.Index);
@@ -160,12 +369,12 @@ namespace MenuAPI
                 PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                 if (MenuController.MenuButtons.ContainsKey(item))
                 {
+                    MenuController.MenuButtons[item].OpenMenu();
                     var currentMenu = MenuController.GetCurrentMenu();
                     if (currentMenu != null)
                     {
-                        currentMenu.Visible = false;
+                        currentMenu.CloseMenu();
                     }
-                    MenuController.MenuButtons[item].Visible = true;
                 }
             }
             else if (item != null && !item.Enabled)
@@ -179,19 +388,31 @@ namespace MenuAPI
         {
             if (ParentMenu != null)
             {
-                ParentMenu.Visible = true;
+                ParentMenu.OpenMenu();
             }
             PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            CloseMenu();
+        }
+
+        /// <summary>
+        /// Closes the menu. Also triggers the <see cref="OnMenuClose"/> event.
+        /// </summary>
+        public void CloseMenu()
+        {
+            if (Visible)
+            {
+                MenuCloseEvent(this);
+            }
             Visible = false;
         }
 
         /// <summary>
-        /// Closes the current menu.
+        /// Opens the menu and triggers the <see cref="OnMenuOpen"/> event.
         /// </summary>
-        public void CloseMenu()
+        public void OpenMenu()
         {
-            Visible = false;
-            PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            MenuOpenEvent(this);
+            Visible = true;
         }
 
         /// <summary>
@@ -241,17 +462,71 @@ namespace MenuAPI
             }
         }
 
-        public void GoLeft() { }
-        public void GoRight() { }
+        /// <summary>
+        /// Go left for list items and slider items.
+        /// </summary>
+        public void GoLeft()
+        {
+            if (MenuController.AreMenuButtonsEnabled)
+            {
+                var item = _MenuItems.ElementAt(CurrentIndex);
+                if (item.Enabled && item is MenuListItem)
+                {
+                    MenuListItem listItem = (MenuListItem)item;
+                    if (listItem.ItemsCount > 0)
+                    {
+                        int oldIndex = listItem.ListIndex;
+                        int newIndex = oldIndex;
+                        if (listItem.ListIndex < 1)
+                        {
+                            newIndex = listItem.ItemsCount - 1;
+                        }
+                        else
+                        {
+                            newIndex--;
+                        }
+                        listItem.ListIndex = newIndex;
+                        ListItemIndexChangeEvent(this, listItem, oldIndex, newIndex, listItem.Index);
+                        PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+                    }
+                }
+            }
+        }
+        public void GoRight()
+        {
+            if (MenuController.AreMenuButtonsEnabled)
+            {
+                var item = _MenuItems.ElementAt(CurrentIndex);
+                if (item.Enabled && item is MenuListItem)
+                {
+                    MenuListItem listItem = (MenuListItem)item;
+                    if (listItem.ItemsCount > 0)
+                    {
+                        int oldIndex = listItem.ListIndex;
+                        int newIndex = oldIndex;
+                        if (listItem.ListIndex >= listItem.ItemsCount - 1)
+                        {
+                            newIndex = 0;
+                        }
+                        else
+                        {
+                            newIndex++;
+                        }
+                        listItem.ListIndex = newIndex;
+                        ListItemIndexChangeEvent(this, listItem, oldIndex, newIndex, listItem.Index);
+                        PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+                    }
+                }
+            }
+        }
 
         #endregion
-
-        #region internal task function
+        #region internal task functions
         /// <summary>
         /// Draws the menu title + subtitle, calls all Draw functions for all menu items and draws the description for the selected item.
         /// </summary>
         /// <returns></returns>
-        internal async Task Draw()
+        internal async void Draw()
         {
             if (!Game.IsPaused && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.PlayerPed.IsDead)
             {
@@ -405,7 +680,8 @@ namespace MenuAPI
                     float width = headerSize.Width / MenuController.ScreenWidth;
                     float height = (bgHeight + 1f) / MenuController.ScreenHeight;
 
-                    DrawSprite(MenuController._texture_dict, "gradient_bgd", x, y, width, height, 0f, 255, 255, 255, 255);
+                    //DrawSprite(MenuController._texture_dict, "gradient_bgd", x, y, width, height, 0f, 255, 255, 255, 255);
+                    DrawRect(x, y, width, height, 0, 0, 0, 180);
                     ResetScriptGfxAlign();
                     MenuItemsYOffset += bgHeight - 1f;
                 }
@@ -431,13 +707,13 @@ namespace MenuAPI
                         float width = 500f / MenuController.ScreenWidth;
                         float height = 60f / MenuController.ScreenWidth;
                         float x = (Position.X + (Width / 2f)) / MenuController.ScreenWidth;
-                        float y = MenuItemsYOffset / MenuController.ScreenHeight + (height / 2f) + (2f / MenuController.ScreenHeight);
+                        float y = MenuItemsYOffset / MenuController.ScreenHeight + (height / 2f) + (6f / MenuController.ScreenHeight);
 
                         SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-                        DrawRect(x, y, width, height, 0, 0, 0, 200);
-                        descriptionYOffset = height;
+                        DrawRect(x, y, width, height, 0, 0, 0, 180);
+                        descriptionYOffset = height;// + (1f / MenuController.ScreenHeight);
                         ResetScriptGfxAlign();
                         #endregion
 
@@ -496,12 +772,13 @@ namespace MenuAPI
 
                 #endregion
 
+
+
                 #region Draw Description
                 if (Size > 0)
                 {
                     if (!string.IsNullOrEmpty(_MenuItems[CurrentIndex].Description))
                     {
-
                         #region description text
                         int font = 0;
                         float textSize = (14f * 27f) / MenuController.ScreenHeight;
@@ -563,7 +840,7 @@ namespace MenuAPI
 
                         #region background
                         float descWidth = Width / MenuController.ScreenWidth;
-                        float descHeight = (textHeight + 0.005f) * lineCount + (8f / MenuController.ScreenHeight) + (1.5f / MenuController.ScreenHeight);
+                        float descHeight = (textHeight + 0.005f) * lineCount + (8f / MenuController.ScreenHeight) + (2.5f / MenuController.ScreenHeight);
                         float descX = (Position.X + (Width / 2f)) / MenuController.ScreenWidth;
                         float descY = textY - (6f / MenuController.ScreenHeight) + (descHeight / 2f);
 
@@ -571,18 +848,131 @@ namespace MenuAPI
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
                         DrawRect(descX, descY - (descHeight / 2f) + (2f / MenuController.ScreenHeight), descWidth, 4f / MenuController.ScreenHeight, 0, 0, 0, 200);
-                        DrawSprite(MenuController._texture_dict, "gradient_bgd", descX, descY, descWidth, descHeight, 0f, 255, 255, 255, 225);
+                        DrawRect(descX, descY, descWidth, descHeight, 0, 0, 0, 180);
 
                         ResetScriptGfxAlign();
                         #endregion
+
+                        descriptionYOffset += descY + (descHeight / 2f) - (4f / MenuController.ScreenHeight);
+                    }
+                    else
+                    {
+                        descriptionYOffset += MenuItemsYOffset / MenuController.ScreenHeight + (2f / MenuController.ScreenHeight) + descriptionYOffset;
                     }
                 }
 
+                #endregion
+
+                #region Draw Color and opacity palletes
+                if (Size > 0)
+                {
+                    var currentItem = _MenuItems[CurrentIndex];
+                    if (currentItem is MenuListItem listItem)
+                    {
+                        /// OPACITY PANEL
+                        if (listItem.ShowOpacityPanel)
+                        {
+                            PushScaleformMovieFunction(OpacityPanelScaleform, "SET_TITLE");
+                            PushScaleformMovieMethodParameterString("Opacity");
+                            PushScaleformMovieMethodParameterString("");
+                            PushScaleformMovieMethodParameterInt(listItem.ListIndex * 10); // opacity percent
+                            EndScaleformMovieMethod();
+
+                            //PushScaleformMovieFunction(OpacityPanelScaleform, "SET_DATA_SLOT_EMPTY");
+                            //EndScaleformMovieMethod();
+
+                            //PushScaleformMovieFunction(OpacityPanelScaleform, "SHOW_OPACITY");
+                            //PushScaleformMovieMethodParameterBool(true);
+                            //PushScaleformMovieMethodParameterBool(false);
+                            //EndScaleformMovieMethod();
+
+                            float width = Width / MenuController.ScreenWidth;
+                            float height = 700f / MenuController.ScreenHeight;
+                            float x = ((Width / 2f) / MenuController.ScreenWidth);
+                            float y = descriptionYOffset + (height / 2f) + (4f / MenuController.ScreenHeight);
+                            if (Size > MaxItemsOnScreen)
+                            {
+                                y -= (30f / MenuController.ScreenHeight);
+                            }
+
+                            SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                            DrawScaleformMovie(OpacityPanelScaleform, x, y, width, height, 255, 255, 255, 255, 0);
+                            ResetScriptGfxAlign();
+                        }
+
+                        /// COLOR PALLETE
+                        else if (listItem.ShowColorPanel)
+                        {
+                            PushScaleformMovieFunction(ColorPanelScaleform, "SET_TITLE");
+                            PushScaleformMovieMethodParameterString("Opacity");
+                            BeginTextCommandScaleformString("FACE_COLOUR");
+                            AddTextComponentInteger(listItem.ListIndex + 1);
+                            AddTextComponentInteger(listItem.ItemsCount);
+                            EndTextCommandScaleformString();
+                            PushScaleformMovieMethodParameterInt(0); // opacity percent unused
+                            PushScaleformMovieMethodParameterBool(true);
+                            EndScaleformMovieMethod();
+
+                            PushScaleformMovieFunction(ColorPanelScaleform, "SET_DATA_SLOT_EMPTY");
+                            EndScaleformMovieMethod();
+
+                            for (int i = 0; i < 64; i++)
+                            {
+                                var r = 0;
+                                var g = 0;
+                                var b = 0;
+                                if (listItem.ColorPanelColorType == MenuListItem.ColorPanelType.Hair)
+                                {
+                                    N_0x4852fc386e2e1bb5(i, ref r, ref g, ref b); // _GetHairRgbColor
+                                }
+                                else
+                                {
+                                    N_0x013e5cfc38cd5387(i, ref r, ref g, ref b); // _GetMakeupRgbColor
+                                }
+
+                                PushScaleformMovieFunction(ColorPanelScaleform, "SET_DATA_SLOT");
+                                PushScaleformMovieMethodParameterInt(i); // index
+                                PushScaleformMovieMethodParameterInt(r); // r
+                                PushScaleformMovieMethodParameterInt(g); // g
+                                PushScaleformMovieMethodParameterInt(b); // b
+                                EndScaleformMovieMethod();
+                            }
+
+                            PushScaleformMovieFunction(ColorPanelScaleform, "DISPLAY_VIEW");
+                            EndScaleformMovieMethod();
+
+                            PushScaleformMovieFunction(ColorPanelScaleform, "SET_HIGHLIGHT");
+                            PushScaleformMovieMethodParameterInt(listItem.ListIndex);
+                            EndScaleformMovieMethod();
+
+                            PushScaleformMovieFunction(ColorPanelScaleform, "SHOW_OPACITY");
+                            PushScaleformMovieMethodParameterBool(false);
+                            PushScaleformMovieMethodParameterBool(true);
+                            EndScaleformMovieMethod();
+
+                            float width = Width / MenuController.ScreenWidth;
+                            float height = 700f / MenuController.ScreenHeight;
+                            float x = ((Width / 2f) / MenuController.ScreenWidth);
+                            float y = descriptionYOffset + (height / 2f) + (4f / MenuController.ScreenHeight);
+                            if (Size > MaxItemsOnScreen)
+                            {
+                                y -= (30f / MenuController.ScreenHeight);
+                            }
+
+                            SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                            DrawScaleformMovie(ColorPanelScaleform, x, y, width, height, 255, 255, 255, 255, 0);
+                            ResetScriptGfxAlign();
+                        }
+                    }
+                }
 
                 #endregion
             }
         }
         #endregion
+
 
     }
 }

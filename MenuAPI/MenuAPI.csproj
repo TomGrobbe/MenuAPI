@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="items\MenuCheckboxItem.cs" />
     <Compile Include="items\MenuItem.cs" />
+    <Compile Include="items\MenuListItem.cs" />
     <Compile Include="MenuController.cs" />
     <Compile Include="Menu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -17,16 +17,18 @@ namespace MenuAPI
         public static float ScreenWidth { get { int width = 0, height = 0; GetScreenActiveResolution(ref width, ref height); return (float)width; } }
         public static float ScreenHeight { get { int width = 0, height = 0; GetScreenActiveResolution(ref width, ref height); return (float)height; } }
         public static bool DisableMenuButtons { get; set; } = false;
-        public static bool AreMenuButtonsEnabled => Menus.Any((m) => m.Visible) && !Game.IsPaused && CitizenFX.Core.UI.Screen.Fading.IsFadedIn && !IsPlayerSwitchInProgress() && !DisableMenuButtons;
+        public static bool AreMenuButtonsEnabled => Menus.Any((m) => m.Visible) && !Game.IsPaused && CitizenFX.Core.UI.Screen.Fading.IsFadedIn && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !Game.Player.IsDead;
 
         public static bool EnableManualGCs = true;
         public static bool DontOpenAnyMenu = false;
         public static bool PreventExitingMenu = false;
-        public static bool DisableMenuControls = false;
 
         internal static Dictionary<MenuItem, Menu> MenuButtons { get; private set; } = new Dictionary<MenuItem, Menu>();
 
         public static Menu MainMenu = null;
+        internal static int _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
+
+        private static int ManualTimerForGC = GetGameTimer();
 
         public static MenuAlignmentOption MenuAlignment = MenuAlignmentOption.Left;
         public enum MenuAlignmentOption
@@ -41,24 +43,35 @@ namespace MenuAPI
         public MenuController()
         {
             Tick += ProcessMenus;
+            Tick += DrawInstructionalButtons;
             Tick += ProcessMainButtons;
             Tick += ProcessDirectionalButtons;
             Tick += ProcessToggleMenuButton;
         }
 
-        public static void BindMenuItem(Menu parent, Menu child, MenuItem item)
+        /// <summary>
+        /// This binds the <paramref name="childMenu"/> menu to the <paramref name="menuItem"/> and sets the menu's parent to <paramref name="parentMenu"/>.
+        /// </summary>
+        /// <param name="parentMenu"></param>
+        /// <param name="childMenu"></param>
+        /// <param name="menuItem"></param>
+        public static void BindMenuItem(Menu parentMenu, Menu childMenu, MenuItem menuItem)
         {
-            AddSubmenu(parent, child);
-            if (MenuButtons.ContainsKey(item))
+            AddSubmenu(parentMenu, childMenu);
+            if (MenuButtons.ContainsKey(menuItem))
             {
-                MenuButtons[item] = child;
+                MenuButtons[menuItem] = childMenu;
             }
             else
             {
-                MenuButtons.Add(item, child);
+                MenuButtons.Add(menuItem, childMenu);
             }
         }
 
+        /// <summary>
+        /// This adds the <paramref name="menu"/> <see cref="Menu"/> to the <see cref="Menus"/> list.
+        /// </summary>
+        /// <param name="menu"></param>
         public static void AddMenu(Menu menu)
         {
             if (!Menus.Contains(menu))
@@ -72,6 +85,11 @@ namespace MenuAPI
             }
         }
 
+        /// <summary>
+        /// Adds the <paramref name="child"/> <see cref="Menu"/> to the menus list and sets the menu's parent to <paramref name="parent"/>.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="child"></param>
         public static void AddSubmenu(Menu parent, Menu child)
         {
             if (!Menus.Contains(child))
@@ -123,7 +141,6 @@ namespace MenuAPI
         /// <returns></returns>
         public static bool IsAnyMenuOpen() => Menus.Any((m) => m.Visible);
 
-        private static int timer = GetGameTimer();
 
         #region Process Menu Buttons
         /// <summary>
@@ -143,7 +160,7 @@ namespace MenuAPI
                         Game.DisableControlThisFrame(0, Control.FrontendPauseAlternate);
                     }
 
-                    if (currentMenu.Visible && !DisableMenuControls)
+                    if (currentMenu.Visible && AreMenuButtonsEnabled)
                     {
                         // Select / Enter
                         if (Game.IsDisabledControlJustReleased(0, Control.FrontendAccept) || Game.IsControlJustReleased(0, Control.FrontendAccept) || (Game.IsDisabledControlJustReleased(0, Control.VehicleMouseControlOverride) || Game.IsControlJustReleased(0, Control.VehicleMouseControlOverride)))
@@ -167,10 +184,6 @@ namespace MenuAPI
                         }
                     }
                 }
-                else
-                {
-                    await Delay(0);
-                }
             }
         }
 
@@ -180,8 +193,8 @@ namespace MenuAPI
         /// <returns></returns>
         private bool IsUpPressed()
         {
-            // return false (not pressed) if the pause menu is active.
-            if (Game.IsPaused)
+            // Return false if the buttons are not currently enabled.
+            if (!AreMenuButtonsEnabled)
             {
                 return false;
             }
@@ -217,8 +230,8 @@ namespace MenuAPI
         /// <returns></returns>
         private bool IsDownPressed()
         {
-            // return false (not pressed) if the pause menu is active.
-            if (Game.IsPaused)
+            // Return false if the buttons are not currently enabled.
+            if (!AreMenuButtonsEnabled)
             {
                 return false;
             }
@@ -254,59 +267,61 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessToggleMenuButton()
         {
-
-            if (IsAnyMenuOpen())
+            if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.Player.IsDead)
             {
-                if (Game.CurrentInputMode == InputMode.MouseAndKeyboard)
+                if (IsAnyMenuOpen())
                 {
-                    if ((Game.IsControlJustPressed(0, Control.InteractionMenu) || Game.IsDisabledControlJustPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !PreventExitingMenu)
+                    if (Game.CurrentInputMode == InputMode.MouseAndKeyboard)
                     {
-                        var menu = GetCurrentMenu();
-                        if (menu != null)
+                        if ((Game.IsControlJustPressed(0, Control.InteractionMenu) || Game.IsDisabledControlJustPressed(0, Control.InteractionMenu)) && !PreventExitingMenu)
                         {
-                            menu.CloseMenu();
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (Game.CurrentInputMode == InputMode.GamePad)
-                {
-                    int tmpTimer = GetGameTimer();
-                    while ((Game.IsControlPressed(0, Control.InteractionMenu) || Game.IsDisabledControlPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !PreventExitingMenu)
-                    {
-                        if (GetGameTimer() - tmpTimer > 400)
-                        {
-                            if (MainMenu != null)
+                            var menu = GetCurrentMenu();
+                            if (menu != null)
                             {
-                                MainMenu.Visible = true;
+                                menu.CloseMenu();
                             }
-                            else
-                            {
-                                if (Menus.Count > 0)
-                                {
-                                    Menus[0].Visible = true;
-                                }
-                            }
-                            break;
                         }
-                        await Delay(0);
                     }
                 }
                 else
                 {
-                    if ((Game.IsControlJustPressed(0, Control.InteractionMenu) || Game.IsDisabledControlJustPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !PreventExitingMenu)
+                    if (Game.CurrentInputMode == InputMode.GamePad)
                     {
-                        if (Menus.Count > 0)
+                        int tmpTimer = GetGameTimer();
+                        while ((Game.IsControlPressed(0, Control.InteractionMenu) || Game.IsDisabledControlPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !Game.Player.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
                         {
-                            if (MainMenu != null)
+                            if (GetGameTimer() - tmpTimer > 400)
                             {
-                                MainMenu.Visible = true;
+                                if (MainMenu != null)
+                                {
+                                    MainMenu.OpenMenu();
+                                }
+                                else
+                                {
+                                    if (Menus.Count > 0)
+                                    {
+                                        Menus[0].OpenMenu();
+                                    }
+                                }
+                                break;
                             }
-                            else
+                            await Delay(0);
+                        }
+                    }
+                    else
+                    {
+                        if ((Game.IsControlJustPressed(0, Control.InteractionMenu) || Game.IsDisabledControlJustPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !Game.Player.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
+                        {
+                            if (Menus.Count > 0)
                             {
-                                Menus[0].Visible = true;
+                                if (MainMenu != null)
+                                {
+                                    MainMenu.OpenMenu();
+                                }
+                                else
+                                {
+                                    Menus[0].OpenMenu();
+                                }
                             }
                         }
                     }
@@ -320,65 +335,125 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessDirectionalButtons()
         {
-            if (IsAnyMenuOpen())
+            // Return if the buttons are not currently enabled.
+            if (!AreMenuButtonsEnabled)
             {
-                // Get the currently open menu.
-                var currentMenu = GetCurrentMenu();
-                // If it exists.
-                if (currentMenu != null && !DontOpenAnyMenu && currentMenu.Size > 0)
+                return;
+            }
+
+            // Get the currently open menu.
+            var currentMenu = GetCurrentMenu();
+            // If it exists.
+            if (currentMenu != null && !DontOpenAnyMenu && currentMenu.Size > 0)
+            {
+                if (currentMenu.Visible)
                 {
-                    if (currentMenu.Visible && !DisableMenuControls)
+                    // Check if the Go Up controls are pressed.
+                    if (IsUpPressed())
                     {
-                        // Check if the Go Up controls are pressed.
-                        if (IsUpPressed())
-                        {
-                            // Update the currently selected item to the new one.
-                            currentMenu.GoUp();
+                        // Update the currently selected item to the new one.
+                        currentMenu.GoUp();
 
-                            // Get the current game time.
+                        // Get the current game time.
+                        var time = GetGameTimer();
+                        var times = 0;
+                        var delay = 200;
+
+                        // Do the following as long as the controls are being pressed.
+                        while (IsUpPressed() && IsAnyMenuOpen() && GetCurrentMenu() != null)
+                        {
+                            // Update the current menu.
+                            currentMenu = GetCurrentMenu();
+
+                            // Check if the game time has changed by "delay" amount.
+                            if (GetGameTimer() - time > delay)
+                            {
+                                // Increment the "changed indexes" counter
+                                times++;
+
+                                // If the controls are still being held down after moving 3 indexes, reduce the delay between index changes.
+                                if (times > 2)
+                                {
+                                    delay = 150;
+                                }
+
+                                // Update the currently selected item to the new one.
+                                currentMenu.GoUp();
+
+                                // Reset the time to the current game timer.
+                                time = GetGameTimer();
+                            }
+
+                            // Wait for the next game tick.
+                            await Delay(0);
+                        }
+                    }
+
+                    // Check if the Go Down controls are pressed.
+                    else if (IsDownPressed())
+                    {
+                        currentMenu.GoDown();
+
+                        var time = GetGameTimer();
+                        var times = 0;
+                        var delay = 200;
+                        while (IsDownPressed() && GetCurrentMenu() != null)
+                        {
+                            currentMenu = GetCurrentMenu();
+                            if (GetGameTimer() - time > delay)
+                            {
+                                times++;
+                                if (times > 2)
+                                {
+                                    delay = 150;
+                                }
+                                currentMenu.GoDown();
+
+                                time = GetGameTimer();
+                            }
+                            await Delay(0);
+                        }
+                    }
+
+                    // Check if the Go Left controls are pressed.
+                    else if (Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) && !Game.IsControlPressed(0, Control.SelectWeapon))
+                    {
+                        var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
+                        if (item.Enabled) //&& item is MenuItemButton)
+                        {
+                            currentMenu.GoLeft();
                             var time = GetGameTimer();
                             var times = 0;
                             var delay = 200;
-
-                            // Do the following as long as the controls are being pressed.
-                            while (IsUpPressed() && IsAnyMenuOpen() && GetCurrentMenu() != null)
+                            while (Game.IsDisabledControlPressed(0, Control.PhoneLeft) && !Game.IsControlPressed(0, Control.SelectWeapon) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
                             {
-                                // Update the current menu.
                                 currentMenu = GetCurrentMenu();
-
-                                // Check if the game time has changed by "delay" amount.
                                 if (GetGameTimer() - time > delay)
                                 {
-                                    // Increment the "changed indexes" counter
                                     times++;
-
-                                    // If the controls are still being held down after moving 3 indexes, reduce the delay between index changes.
                                     if (times > 2)
                                     {
                                         delay = 150;
                                     }
-
-                                    // Update the currently selected item to the new one.
-                                    currentMenu.GoUp();
-
-                                    // Reset the time to the current game timer.
+                                    currentMenu.GoLeft();
                                     time = GetGameTimer();
                                 }
-
-                                // Wait for the next game tick.
                                 await Delay(0);
                             }
                         }
+                    }
 
-                        // Check if the Go Down controls are pressed.
-                        else if (IsDownPressed())
+                    // Check if the Go Right controls are pressed.
+                    else if (Game.IsDisabledControlJustPressed(0, Control.PhoneRight) && !Game.IsControlPressed(0, Control.SelectWeapon))
+                    {
+                        var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
+                        if (item.Enabled)
                         {
-                            currentMenu.GoDown();
-
+                            currentMenu.GoRight();
                             var time = GetGameTimer();
                             var times = 0;
                             var delay = 200;
-                            while (IsDownPressed() && GetCurrentMenu() != null)
+                            while ((Game.IsDisabledControlPressed(0, Control.PhoneRight) || Game.IsControlPressed(0, Control.PhoneRight)) && !Game.IsControlPressed(0, Control.SelectWeapon) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
                             {
                                 currentMenu = GetCurrentMenu();
                                 if (GetGameTimer() - time > delay)
@@ -388,75 +463,14 @@ namespace MenuAPI
                                     {
                                         delay = 150;
                                     }
-                                    currentMenu.GoDown();
-
+                                    currentMenu.GoRight();
                                     time = GetGameTimer();
                                 }
                                 await Delay(0);
-                            }
-                        }
-
-                        // Check if the Go Left controls are pressed.
-                        else if (Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) && !Game.IsControlPressed(0, Control.SelectWeapon))
-                        {
-                            var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
-                            if (item.Enabled) //&& item is MenuItemButton)
-                            {
-                                currentMenu.GoLeft();
-                                var time = GetGameTimer();
-                                var times = 0;
-                                var delay = 200;
-                                while (Game.IsDisabledControlPressed(0, Control.PhoneLeft) && !Game.IsControlPressed(0, Control.SelectWeapon) && GetCurrentMenu() != null)
-                                {
-                                    currentMenu = GetCurrentMenu();
-                                    if (GetGameTimer() - time > delay)
-                                    {
-                                        times++;
-                                        if (times > 2)
-                                        {
-                                            delay = 150;
-                                        }
-                                        currentMenu.GoLeft();
-                                        time = GetGameTimer();
-                                    }
-                                    await Delay(0);
-                                }
-                            }
-                        }
-
-                        // Check if the Go Right controls are pressed.
-                        else if (Game.IsDisabledControlJustPressed(0, Control.PhoneRight) && !Game.IsControlPressed(0, Control.SelectWeapon))
-                        {
-                            var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
-                            if (item.Enabled)
-                            {
-                                currentMenu.GoRight();
-                                var time = GetGameTimer();
-                                var times = 0;
-                                var delay = 200;
-                                while ((Game.IsDisabledControlPressed(0, Control.PhoneRight) || Game.IsControlPressed(0, Control.PhoneRight)) && !Game.IsControlPressed(0, Control.SelectWeapon) && GetCurrentMenu() != null)
-                                {
-                                    currentMenu = GetCurrentMenu();
-                                    if (GetGameTimer() - time > delay)
-                                    {
-                                        times++;
-                                        if (times > 2)
-                                        {
-                                            delay = 150;
-                                        }
-                                        currentMenu.GoRight();
-                                        time = GetGameTimer();
-                                    }
-                                    await Delay(0);
-                                }
                             }
                         }
                     }
                 }
-            }
-            else
-            {
-                await Delay(0);
             }
         }
         #endregion
@@ -466,7 +480,7 @@ namespace MenuAPI
         /// </summary>
         public static void CloseAllMenus()
         {
-            Menus.ForEach((m) => m.Visible = false);
+            Menus.ForEach((m) => m.CloseMenu());
         }
 
         /// <summary>
@@ -553,37 +567,93 @@ namespace MenuAPI
         /// <returns></returns>
         private static async Task ProcessMenus()
         {
-            if (Menus.Count > 0)
+            if (Menus.Count > 0 && IsAnyMenuOpen() && !Game.IsPaused && !Game.Player.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress())
             {
                 await LoadAssets();
+
+                DisableControls();
+
+                Menu menu = GetCurrentMenu();
+                if (menu != null)
+                {
+                    if (DontOpenAnyMenu)
+                    {
+                        if (menu.Visible)
+                        {
+                            menu.CloseMenu();
+                        }
+                    }
+                    else if (menu.Visible)
+                    {
+                        menu.Draw();
+                    }
+                }
+
+                if (EnableManualGCs)
+                {
+                    // once a minute
+                    if (GetGameTimer() - ManualTimerForGC > 60000)
+                    {
+                        GC.Collect();
+                        ManualTimerForGC = GetGameTimer();
+                    }
+                }
             }
             else
             {
                 UnloadAssets();
             }
+        }
 
-            //Debug.WriteLine(Menus.Count.ToString())
-
-            if (IsAnyMenuOpen())
+        internal static async Task DrawInstructionalButtons()
+        {
+            if (!Game.IsPaused && !Game.Player.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress())
             {
-                DisableControls();
-            }
-
-            if (EnableManualGCs)
-            {
-                // once a minute
-                if (GetGameTimer() - timer > 60000)
+                Menu menu = GetCurrentMenu();
+                if (menu != null && menu.Visible && menu.EnableInstructionalButtons)
                 {
-                    GC.Collect();
-                    timer = GetGameTimer();
+                    if (!HasScaleformMovieLoaded(_scale))
+                    {
+                        _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
+                    }
+                    while (!HasScaleformMovieLoaded(_scale))
+                    {
+                        await Delay(0);
+                    }
+
+                    PushScaleformMovieFunction(_scale, "CLEAR_ALL");
+                    EndScaleformMovieMethod();
+
+
+                    for (int i = 0; i < menu.InstructionalButtons.Count; i++)
+                    {
+                        string text = menu.InstructionalButtons.ElementAt(i).Value;
+                        Control control = menu.InstructionalButtons.ElementAt(i).Key;
+
+                        PushScaleformMovieFunction(_scale, "SET_DATA_SLOT");
+                        PushScaleformMovieMethodParameterInt(i);
+                        string buttonName = GetControlInstructionalButton(0, (int)control, 1);
+                        PushScaleformMovieMethodParameterString(buttonName);
+                        PushScaleformMovieMethodParameterString(text);
+                        EndScaleformMovieMethod();
+                    }
+
+                    PushScaleformMovieFunction(_scale, "DRAW_INSTRUCTIONAL_BUTTONS");
+                    PushScaleformMovieMethodParameterInt(0);
+                    EndScaleformMovieMethod();
+
+                    DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
+                    return;
                 }
             }
+            DisposeInstructionalButtonsScaleform();
+        }
 
-            var menu = GetCurrentMenu();
-            if (menu != null)
+        private static void DisposeInstructionalButtonsScaleform()
+        {
+            if (HasScaleformMovieLoaded(_scale))
             {
-                if (menu.Visible)
-                    await menu.Draw();
+                SetScaleformMovieAsNoLongerNeeded(ref _scale);
             }
         }
     }

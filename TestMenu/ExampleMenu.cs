@@ -42,11 +42,48 @@ namespace TestMenu
                 Style = MenuCheckboxItem.CheckboxStyle.Cross
             };
 
+            //menu.AddMenuItem(new MenuListItem("Left Text", new List<string>() { "Item one", "Item Two", "Item Three" }, 0, "Description for this stuffs.") { ShowOpacityPanel = true });
+            //menu.AddMenuItem(new MenuListItem("Wow!", new List<string>() { "Item one", "Item Two", "Item Three" }, 0, "Holy crap! It's a list item with a right icon! Very cool!") { RightIcon = MenuItem.Icon.HEALTH_HEART, ShowOpacityPanel = true });
+            var colorList = new List<string>();
+            for (var i = 0; i < 64; i++)
+            {
+                colorList.Add($"Color #{i}");
+            }
+            var hairColors = new MenuListItem("Hair Color", colorList, 0, "Choose a hair color.")
+            {
+                ShowColorPanel = true
+            };
+            menu.AddMenuItem(hairColors);
+
+            var makeupColorList = new List<string>();
+            for (var i = 0; i < 64; i++)
+            {
+                makeupColorList.Add($"Color #{i}");
+            }
+            var makeupColors = new MenuListItem("Makeup Color", makeupColorList, 0, "Choose a makeup color.")
+            {
+                ShowColorPanel = true,
+                ColorPanelColorType = MenuListItem.ColorPanelType.Makeup
+            };
+            menu.AddMenuItem(makeupColors);
+
+            var opacityList = new List<string>();
+            for (var i = 0; i < 11; i++)
+            {
+                opacityList.Add($"Opacity {i * 10}%");
+            }
+            var opacity = new MenuListItem("Makeup Opacity", opacityList, 0, "Set a makeup opacity.")
+            {
+                ShowOpacityPanel = true
+            };
+            menu.AddMenuItem(opacity);
+
+
+
             menu.AddMenuItem(item1);
             menu.AddMenuItem(box);
             menu.AddMenuItem(box2);
             menu.AddMenuItem(item4);
-
             menu2.AddMenuItem(item2);
             menu2.AddMenuItem(item3);
             menu2.AddMenuItem(item5);
