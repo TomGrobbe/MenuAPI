@@ -40,7 +40,9 @@ namespace MenuAPI
             MICHAEL,
             TATTOO,
             TICK,
-            TREVOR
+            TREVOR,
+            FEMALE,
+            MALE
         }
 
         public string Text { get; set; }
@@ -73,7 +75,7 @@ namespace MenuAPI
             Description = description;
         }
 
-        private string GetSpriteName(Icon icon, bool selected)
+        protected string GetSpriteName(Icon icon, bool selected)
         {
             switch (icon)
             {
@@ -104,13 +106,15 @@ namespace MenuAPI
                 case Icon.TREVOR: return selected ? "shop_trevor_icon_b" : "shop_trevor_icon_a";
                 case Icon.WARNING: return "mp_alerttriangle";
                 case Icon.WEED: return "mp_specitem_weed";
+                case Icon.MALE: return "leaderboard_male_icon";
+                case Icon.FEMALE: return "leaderboard_female_icon";
                 default:
                     break;
             }
             return "";
         }
 
-        private float GetSpriteSize(Icon icon, bool width)
+        protected float GetSpriteSize(Icon icon, bool width)
         {
             switch (icon)
             {
@@ -126,38 +130,19 @@ namespace MenuAPI
                     return 52f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
                 case Icon.MEDAL_SILVER:
                     return 22f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
-
-                //case Icon.AMMO:
-                //case Icon.ARMOR:
-                //case Icon.BARBER:
-                //case Icon.BIKE:
-                //case Icon.CAR:
-                //case Icon.CLOTHING:
-                //case Icon.FRANKLIN:
-                //case Icon.GUN:
-                //case Icon.HEALTH_HEART:
-                //case Icon.LOCK:
-                //case Icon.MAKEUP_BRUSH:
-                //case Icon.MASK:
-                //case Icon.MEDAL_BRONZE:
-                //case Icon.MEDAL_GOLD:
-                //case Icon.MICHAEL:
-                //case Icon.TATTOO:
-                //case Icon.TICK:
-                //case Icon.TREVOR:
-                //case Icon.WARNING:
-                //return 38f / (width ? Main.ScreenWidth : Main.ScreenHeight);
                 default:
                     return 38f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
             }
         }
 
-        private int GetSpriteColour(Icon icon, bool selected)
+        protected int GetSpriteColour(Icon icon, bool selected)
         {
             switch (icon)
             {
                 case Icon.CROWN:
                 case Icon.TICK:
+                case Icon.MALE:
+                case Icon.FEMALE:
                     return selected ? 0 : 255;
                 case Icon.LOCK: return selected ? (Enabled ? 0 : 100) : (Enabled ? 255 : 190);
                 default:
@@ -165,7 +150,7 @@ namespace MenuAPI
             }
         }
 
-        private float GetSpriteX(Icon icon, bool leftAligned, bool leftSide)
+        protected float GetSpriteX(Icon icon, bool leftAligned, bool leftSide)
         {
             switch (icon)
             {
@@ -196,6 +181,8 @@ namespace MenuAPI
                 case Icon.TREVOR:
                 case Icon.WARNING:
                 case Icon.WEED:
+                case Icon.FEMALE:
+                case Icon.MALE:
                     return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (500f - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
                 default:
                     break;
@@ -203,7 +190,7 @@ namespace MenuAPI
             return 0f;
         }
 
-        private float GetSpriteY(Icon icon)
+        protected float GetSpriteY(Icon icon)
         {
             switch (icon)
             {
@@ -234,6 +221,8 @@ namespace MenuAPI
                 case Icon.TREVOR:
                 case Icon.WARNING:
                 case Icon.WEED:
+                case Icon.MALE:
+                case Icon.FEMALE:
                     break;
                 default:
                     break;
@@ -241,29 +230,6 @@ namespace MenuAPI
             return 0f;
         }
 
-        ///// <summary>
-        ///// Selects the currently selected item.
-        ///// </summary>
-        //public static void SelectItem()
-        //{
-
-        //}
-        ///// <summary>
-        ///// Throws NotImplementedException
-        ///// </summary>
-        ///// <param name="index"></param>
-        //public static void SelectItem(int index)
-        //{
-        //    throw new NotImplementedException();
-        //}
-        ///// <summary>
-        ///// Throws NotImplementedException
-        ///// </summary>
-        ///// <param name="item"></param>
-        //public static void SelectItem(MenuItem item)
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         /// <summary>
         /// Draws the item on the screen.
@@ -305,8 +271,13 @@ namespace MenuAPI
                     float spriteHeight = GetSpriteSize(LeftIcon, false);
                     float spriteWidth = GetSpriteSize(LeftIcon, true);
                     int color = GetSpriteColour(LeftIcon, Selected);
+                    string textureDictionary = "commonmenu";
+                    if (LeftIcon == Icon.MALE || LeftIcon == Icon.FEMALE)
+                    {
+                        textureDictionary = "mpleaderboard";
+                    }
 
-                    DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
+                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
                     ResetScriptGfxAlign();
                 }
                 #endregion
@@ -326,8 +297,13 @@ namespace MenuAPI
                     float spriteHeight = GetSpriteSize(RightIcon, false);
                     float spriteWidth = GetSpriteSize(RightIcon, true);
                     int color = GetSpriteColour(RightIcon, Selected);
+                    string textureDictionary = "commonmenu";
+                    if (RightIcon == Icon.MALE || RightIcon == Icon.FEMALE)
+                    {
+                        textureDictionary = "mpleaderboard";
+                    }
 
-                    DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
+                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
                     ResetScriptGfxAlign();
                 }
                 #endregion

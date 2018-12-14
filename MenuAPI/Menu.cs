@@ -71,6 +71,25 @@ namespace MenuAPI
         /// <param name="oldIndex">The old <see cref="MenuItem.Index"/> of this item.</param>
         /// <param name="newIndex">The new <see cref="MenuItem.Index"/> of this item.</param>
         public delegate void IndexChangedEvent(Menu menu, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex);
+
+        /// <summary>
+        /// Triggered when the <see cref="MenuSliderItem.Position"/> changes.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnSliderPositionChange"/> event occurred.</param>
+        /// <param name="sliderItem">The <see cref="MenuSliderItem>"/> that was changed.</param>
+        /// <param name="oldPosition">The old position of the slider bar.</param>
+        /// <param name="newPosition">The new position of the slider bar.</param>
+        /// <param name="itemIndex">The index of this <see cref="MenuSliderItem"/>.</param>
+        public delegate void SliderPositionChangedEvent(Menu menu, MenuSliderItem sliderItem, int oldPosition, int newPosition, int itemIndex);
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuSliderItem"/> was selected.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnSliderItemSelect"/> event occurred.</param>
+        /// <param name="sliderItem">The <see cref="MenuSliderItem>"/> that was pressed.</param>
+        /// <param name="sliderPosition">The current position of the slider bar.</param>
+        /// <param name="itemIndex">The index of this <see cref="MenuSliderItem"/>.</param>
+        public delegate void SliderItemSelectedEvent(Menu menu, MenuSliderItem sliderItem, int sliderPosition, int itemIndex);
         #endregion
 
         #region events
@@ -115,6 +134,18 @@ namespace MenuAPI
         /// Parameters: <see cref="Menu"/> menu, <see cref="MenuItem"/> oldSelectedItem, <see cref="MenuItem"/> newSelectedItem, <see cref="int"/> oldIndex, <see cref="int"/> newIndex.
         /// </summary>
         public event IndexChangedEvent OnIndexChange;
+
+        /// <summary>
+        /// Triggered when the <see cref="MenuSliderItem.Position"/> changes.
+        /// Parameters: <see cref="Menu"/> menu, <see cref="MenuSliderItem"/> sliderItem, <see cref="int"/> oldPosition, <see cref="int"/> newPosition, <see cref="int"/> itemIndex
+        /// </summary>
+        public event SliderPositionChangedEvent OnSliderPositionChange;
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuSliderItem"/> was selected.
+        /// Parameters: <see cref="Menu"/> menu, <see cref="MenuSliderItem"/> sliderItem, <see cref="int"/> sliderPosition, <see cref="int"/> itemIndex.
+        /// </summary>
+        public event SliderItemSelectedEvent OnSliderItemSelect;
         #endregion
 
         #region virtual voids
@@ -187,7 +218,7 @@ namespace MenuAPI
         /// <summary>
         /// Triggered when the <see cref="CurrentIndex"/> changes.
         /// </summary>
-        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnIndexChange"/></param> event occurred.
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnIndexChange"/> event occurred.</param>
         /// <param name="oldItem">The old <see cref="MenuItem"/> that was previously selected.</param>
         /// <param name="newItem">The new <see cref="MenuItem"/> that is now selected.</param>
         /// <param name="oldIndex">The old <see cref="MenuItem.Index"/> of this item.</param>
@@ -195,6 +226,31 @@ namespace MenuAPI
         protected virtual void IndexChangeEvent(Menu menu, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex)
         {
             OnIndexChange?.Invoke(menu, oldItem, newItem, oldIndex, newIndex);
+        }
+
+        /// <summary>
+        /// Triggered when the <see cref="MenuSliderItem.Position"/> changes.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnSliderPositionChange"/> event occurred.</param>
+        /// <param name="sliderItem">The <see cref="MenuSliderItem>"/> that was changed.</param>
+        /// <param name="oldPosition">The old position of the slider bar.</param>
+        /// <param name="newPosition">The new position of the slider bar.</param>
+        /// <param name="itemIndex">The index of this <see cref="MenuSliderItem"/>.</param>
+        protected virtual void SliderItemChangedEvent(Menu menu, MenuSliderItem sliderItem, int oldPosition, int newPosition, int itemIndex)
+        {
+            OnSliderPositionChange?.Invoke(menu, sliderItem, oldPosition, newPosition, itemIndex);
+        }
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuSliderItem"/> was selected.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnSliderItemSelect"/> event occurred.</param>
+        /// <param name="sliderItem">The <see cref="MenuSliderItem>"/> that was pressed.</param>
+        /// <param name="sliderPosition">The current position of the slider bar.</param>
+        /// <param name="itemIndex">The index of this <see cref="MenuSliderItem"/>.</param>
+        protected virtual void SliderSelectedEvent(Menu menu, MenuSliderItem sliderItem, int sliderPosition, int itemIndex)
+        {
+            OnSliderItemSelect?.Invoke(menu, sliderItem, sliderPosition, itemIndex);
         }
 
         #endregion
@@ -222,8 +278,8 @@ namespace MenuAPI
 
         private List<MenuItem> _MenuItems { get; set; } = new List<MenuItem>();
 
-        private int ColorPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_02");
-        private int OpacityPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_01");
+        private readonly int ColorPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_02"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
+        private readonly int OpacityPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_01"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
         #endregion
 
         #region Public Variables
@@ -362,6 +418,10 @@ namespace MenuAPI
                 {
                     ListItemSelectEvent(this, listItem, listItem.ListIndex, listItem.Index);
                 }
+                else if (item is MenuSliderItem slider)
+                {
+                    SliderSelectedEvent(this, slider, slider.Position, slider.Index);
+                }
                 else
                 {
                     ItemSelectedEvent(item, item.Index);
@@ -369,12 +429,8 @@ namespace MenuAPI
                 PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                 if (MenuController.MenuButtons.ContainsKey(item))
                 {
+                    MenuController.GetCurrentMenu().CloseMenu();
                     MenuController.MenuButtons[item].OpenMenu();
-                    var currentMenu = MenuController.GetCurrentMenu();
-                    if (currentMenu != null)
-                    {
-                        currentMenu.CloseMenu();
-                    }
                 }
             }
             else if (item != null && !item.Enabled)
@@ -391,7 +447,7 @@ namespace MenuAPI
                 ParentMenu.OpenMenu();
             }
             PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
-            CloseMenu();
+            this.CloseMenu();
         }
 
         /// <summary>
@@ -399,11 +455,8 @@ namespace MenuAPI
         /// </summary>
         public void CloseMenu()
         {
-            if (Visible)
-            {
-                MenuCloseEvent(this);
-            }
-            Visible = false;
+            MenuCloseEvent(this);
+            this.Visible = false;
         }
 
         /// <summary>
@@ -411,7 +464,7 @@ namespace MenuAPI
         /// </summary>
         public void OpenMenu()
         {
-            MenuOpenEvent(this);
+            this.MenuOpenEvent(this);
             Visible = true;
         }
 
@@ -422,6 +475,7 @@ namespace MenuAPI
         {
             if (Visible && Size > 1)
             {
+                var oldItem = _MenuItems[CurrentIndex];
                 CurrentIndex--; if (CurrentIndex < 0)
                 {
                     CurrentIndex = Size - 1;
@@ -434,6 +488,8 @@ namespace MenuAPI
                         viewIndexOffset = Math.Max(Size - MaxItemsOnScreen, 0);
                     }
                 }
+
+                IndexChangeEvent(this, oldItem, _MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
             }
         }
@@ -445,6 +501,7 @@ namespace MenuAPI
         {
             if (Visible && Size > 1)
             {
+                var oldItem = _MenuItems[CurrentIndex];
                 CurrentIndex++;
                 if (CurrentIndex >= Size)
                 {
@@ -458,21 +515,21 @@ namespace MenuAPI
                         viewIndexOffset = 0;
                     }
                 }
+                IndexChangeEvent(this, oldItem, _MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
             }
         }
 
         /// <summary>
-        /// Go left for list items and slider items.
+        /// If the item is a <see cref="MenuListItem"/> or a <see cref="MenuSliderItem"/> then it'll go left if possible.
         /// </summary>
         public void GoLeft()
         {
             if (MenuController.AreMenuButtonsEnabled)
             {
                 var item = _MenuItems.ElementAt(CurrentIndex);
-                if (item.Enabled && item is MenuListItem)
+                if (item.Enabled && item is MenuListItem listItem)
                 {
-                    MenuListItem listItem = (MenuListItem)item;
                     if (listItem.ItemsCount > 0)
                     {
                         int oldIndex = listItem.ListIndex;
@@ -490,16 +547,31 @@ namespace MenuAPI
                         PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                     }
                 }
+                else if (item.Enabled && item is MenuSliderItem slider)
+                {
+                    if (slider.Position > slider.Min)
+                    {
+                        SliderItemChangedEvent(this, slider, slider.Position, slider.Position - 1, slider.Index);
+                        slider.Position--;
+                        PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+                    }
+                    else
+                    {
+                        PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+                    }
+                }
             }
         }
+        /// <summary>
+        /// If the item is a <see cref="MenuListItem"/> or a <see cref="MenuSliderItem"/> then it'll go right if possible.
+        /// </summary>
         public void GoRight()
         {
             if (MenuController.AreMenuButtonsEnabled)
             {
                 var item = _MenuItems.ElementAt(CurrentIndex);
-                if (item.Enabled && item is MenuListItem)
+                if (item.Enabled && item is MenuListItem listItem)
                 {
-                    MenuListItem listItem = (MenuListItem)item;
                     if (listItem.ItemsCount > 0)
                     {
                         int oldIndex = listItem.ListIndex;
@@ -515,6 +587,19 @@ namespace MenuAPI
                         listItem.ListIndex = newIndex;
                         ListItemIndexChangeEvent(this, listItem, oldIndex, newIndex, listItem.Index);
                         PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+                    }
+                }
+                else if (item.Enabled && item is MenuSliderItem slider)
+                {
+                    if (slider.Position < slider.Max)
+                    {
+                        SliderItemChangedEvent(this, slider, slider.Position, slider.Position + 1, slider.Index);
+                        slider.Position++;
+                        PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+                    }
+                    else
+                    {
+                        PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                     }
                 }
             }
@@ -772,8 +857,6 @@ namespace MenuAPI
 
                 #endregion
 
-
-
                 #region Draw Description
                 if (Size > 0)
                 {
@@ -877,14 +960,6 @@ namespace MenuAPI
                             PushScaleformMovieMethodParameterString("");
                             PushScaleformMovieMethodParameterInt(listItem.ListIndex * 10); // opacity percent
                             EndScaleformMovieMethod();
-
-                            //PushScaleformMovieFunction(OpacityPanelScaleform, "SET_DATA_SLOT_EMPTY");
-                            //EndScaleformMovieMethod();
-
-                            //PushScaleformMovieFunction(OpacityPanelScaleform, "SHOW_OPACITY");
-                            //PushScaleformMovieMethodParameterBool(true);
-                            //PushScaleformMovieMethodParameterBool(false);
-                            //EndScaleformMovieMethod();
 
                             float width = Width / MenuController.ScreenWidth;
                             float height = 700f / MenuController.ScreenHeight;
