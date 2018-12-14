@@ -124,7 +124,7 @@ namespace TestMenu
             MenuController.BindMenuItem(menu, submenu, menuButton);
 
             // Adding items with sprites left & right to the submenu.
-            for (var i = 0; i < 28; i++)
+            for (var i = 0; i < 30; i++)
             {
                 var tmpItem = new MenuItem($"Icon Sprite #{i}", "This menu item has a left and right sprite, and some also have a right label! Very cool huh?!");
                 if (i % 4 == 0)
