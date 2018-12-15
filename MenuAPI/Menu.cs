@@ -271,7 +271,8 @@ namespace MenuAPI
         {
             get
             {
-                var items = _MenuItems.GetRange(viewIndexOffset, Math.Min(MaxItemsOnScreen, Size - viewIndexOffset));
+                // Create a duplicate list, just in case the original list is modified while we're looping through it.
+                var items = GetMenuItems().ToList().GetRange(viewIndexOffset, Math.Min(MaxItemsOnScreen, Size - viewIndexOffset));
                 return items;
             }
         }
@@ -358,6 +359,24 @@ namespace MenuAPI
 
         #region Public functions
         /// <summary>
+        /// Returns the menu items in this menu.
+        /// </summary>
+        /// <returns></returns>
+        public List<MenuItem> GetMenuItems()
+        {
+            return _MenuItems.ToList();
+        }
+
+        /// <summary>
+        /// Removes all menu items.
+        /// </summary>
+        public void ClearMenuItems()
+        {
+            CurrentIndex = 0;
+            _MenuItems.Clear();
+        }
+
+        /// <summary>
         /// Adds a <see cref="MenuItem"/> to this <see cref="Menu"/>.
         /// </summary>
         /// <param name="item"></param>
@@ -369,12 +388,27 @@ namespace MenuAPI
         }
 
         /// <summary>
-        /// Returns the menu items in this menu.
+        /// Removes the item at that index.
         /// </summary>
-        /// <returns></returns>
-        public List<MenuItem> GetMenuItems()
+        /// <param name="itemIndex"></param>
+        public void RemoveMenuItem(int itemIndex)
         {
-            return _MenuItems.ToList();
+            if (CurrentIndex >= itemIndex)
+            {
+                if (Size > CurrentIndex)
+                {
+                    CurrentIndex--;
+                }
+                else
+                {
+                    CurrentIndex = 0;
+                }
+            }
+            if (itemIndex < Size && itemIndex > -1)
+            {
+                RemoveMenuItem(_MenuItems[itemIndex]);
+                RemoveMenuItem(_MenuItems[itemIndex]);
+            }
         }
 
         /// <summary>
@@ -385,6 +419,17 @@ namespace MenuAPI
         {
             if (_MenuItems.Contains(item))
             {
+                if (CurrentIndex >= item.Index)
+                {
+                    if (Size > CurrentIndex)
+                    {
+                        CurrentIndex--;
+                    }
+                    else
+                    {
+                        CurrentIndex = 0;
+                    }
+                }
                 _MenuItems.Remove(item);
             }
         }
@@ -562,6 +607,7 @@ namespace MenuAPI
                 }
             }
         }
+
         /// <summary>
         /// If the item is a <see cref="MenuListItem"/> or a <see cref="MenuSliderItem"/> then it'll go right if possible.
         /// </summary>
