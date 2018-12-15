@@ -265,14 +265,14 @@ namespace MenuAPI
         #region private variables
         private static SizeF headerSize = new SizeF(500f, 110f);
 
-        private int viewIndexOffset = 0;
+        public int ViewIndexOffset { get; private set; } = 0;
 
         private List<MenuItem> VisibleMenuItems
         {
             get
             {
                 // Create a duplicate list, just in case the original list is modified while we're looping through it.
-                var items = GetMenuItems().ToList().GetRange(viewIndexOffset, Math.Min(MaxItemsOnScreen, Size - viewIndexOffset));
+                var items = GetMenuItems().ToList().GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
                 return items;
             }
         }
@@ -363,7 +363,9 @@ namespace MenuAPI
         /// <summary>
         /// Resets the index to 0
         /// </summary>
-        public void RefreshIndex() { CurrentIndex = 0; viewIndexOffset = 0; }
+        public void RefreshIndex() => RefreshIndex(0, 0);
+        public void RefreshIndex(int index) => RefreshIndex(index, index > MaxItemsOnScreen ? index - MaxItemsOnScreen : 0);
+        public void RefreshIndex(int index, int viewOffset) { CurrentIndex = index; ViewIndexOffset = viewOffset; }
 
         /// <summary>
         /// Returns the menu items in this menu.
@@ -380,6 +382,19 @@ namespace MenuAPI
         public void ClearMenuItems()
         {
             CurrentIndex = 0;
+            ViewIndexOffset = 0;
+            _MenuItems.Clear();
+        }
+        /// <summary>
+        /// Removes all menu items.
+        /// </summary>
+        public void ClearMenuItems(bool dontResetIndex)
+        {
+            if (!dontResetIndex)
+            {
+                CurrentIndex = 0;
+                ViewIndexOffset = 0;
+            }
             _MenuItems.Clear();
         }
 
@@ -537,10 +552,10 @@ namespace MenuAPI
                 }
                 if (!VisibleMenuItems.Contains(_MenuItems[CurrentIndex]))
                 {
-                    viewIndexOffset--;
-                    if (viewIndexOffset < 0)
+                    ViewIndexOffset--;
+                    if (ViewIndexOffset < 0)
                     {
-                        viewIndexOffset = Math.Max(Size - MaxItemsOnScreen, 0);
+                        ViewIndexOffset = Math.Max(Size - MaxItemsOnScreen, 0);
                     }
                 }
 
@@ -564,10 +579,10 @@ namespace MenuAPI
                 }
                 if (!VisibleMenuItems.Contains(_MenuItems[CurrentIndex]))
                 {
-                    viewIndexOffset++;
+                    ViewIndexOffset++;
                     if (CurrentIndex == 0)
                     {
-                        viewIndexOffset = 0;
+                        ViewIndexOffset = 0;
                     }
                 }
                 IndexChangeEvent(this, oldItem, _MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
@@ -842,7 +857,7 @@ namespace MenuAPI
                 {
                     foreach (var item in VisibleMenuItems)
                     {
-                        item.Draw(viewIndexOffset);
+                        item.Draw(ViewIndexOffset);
                     }
                 }
                 #endregion

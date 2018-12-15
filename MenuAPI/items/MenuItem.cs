@@ -143,7 +143,7 @@ namespace MenuAPI
                 case Icon.TICK:
                 case Icon.MALE:
                 case Icon.FEMALE:
-                    //return selected ? 0 : 255;
+                //return selected ? 0 : 255;
                 case Icon.LOCK: return selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
                 default:
                     return 255;
@@ -270,14 +270,14 @@ namespace MenuAPI
                     float spriteX = GetSpriteX(LeftIcon, ParentMenu.LeftAligned, true);
                     float spriteHeight = GetSpriteSize(LeftIcon, false);
                     float spriteWidth = GetSpriteSize(LeftIcon, true);
-                    int color = GetSpriteColour(LeftIcon, Selected);
+                    int spriteColor = GetSpriteColour(LeftIcon, Selected);
                     string textureDictionary = "commonmenu";
                     if (LeftIcon == Icon.MALE || LeftIcon == Icon.FEMALE)
                     {
                         textureDictionary = "mpleaderboard";
                     }
 
-                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
+                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor, spriteColor, spriteColor, 255);
                     ResetScriptGfxAlign();
                 }
                 #endregion
@@ -296,14 +296,14 @@ namespace MenuAPI
                     float spriteX = GetSpriteX(RightIcon, ParentMenu.LeftAligned, false);
                     float spriteHeight = GetSpriteSize(RightIcon, false);
                     float spriteWidth = GetSpriteSize(RightIcon, true);
-                    int color = GetSpriteColour(RightIcon, Selected);
+                    int spriteColor = GetSpriteColour(RightIcon, Selected);
                     string textureDictionary = "commonmenu";
                     if (RightIcon == Icon.MALE || RightIcon == Icon.FEMALE)
                     {
                         textureDictionary = "mpleaderboard";
                     }
 
-                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
+                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor, spriteColor, spriteColor, 255);
                     ResetScriptGfxAlign();
                 }
                 #endregion
@@ -320,18 +320,24 @@ namespace MenuAPI
                 SetTextJustification(1);
                 BeginTextCommandDisplayText("STRING");
                 AddTextComponentSubstringPlayerName(Text ?? "N/A");
-                if (Selected)
+                int textColor = Selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
+                if (Selected || !Enabled)
                 {
-                    if (Enabled)
-                        SetTextColour(0, 0, 0, 255);
-                    else
-                        SetTextColour(0, 0, 0, 190);
+                    SetTextColour(textColor, textColor, textColor, 255);
                 }
-                else
-                {
-                    if (!Enabled)
-                        SetTextColour(255, 255, 255, 150);
-                }
+                //selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
+                //if (Selected)
+                //{
+                //    if (Enabled)
+                //        SetTextColour(textColor, textColor, textColor, 255);
+                //    else
+                //        SetTextColour(textColor, textColor, textColor, 255);
+                //}
+                //else
+                //{
+                //    if (!Enabled)
+                //        SetTextColour(textColor, textColor, textColor, 255);
+                //}
                 float textMinX = (textXOffset / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
                 float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
                 float textHeight = GetTextScaleHeight(textSize, font);
@@ -363,10 +369,14 @@ namespace MenuAPI
                     SetTextScale(textSize, textSize);
                     SetTextJustification(2);
                     AddTextComponentSubstringPlayerName(Label);
-                    if (Selected)
+                    if (Selected || !Enabled)
                     {
-                        SetTextColour(0, 0, 0, 255);
+                        SetTextColour(textColor, textColor, textColor, 255);
                     }
+                    //if (Selected)
+                    //{
+                    //    SetTextColour(0, 0, 0, 255);
+                    //}
                     if (ParentMenu.LeftAligned)
                     {
                         SetTextWrap(0f, ((490f - rightTextIconOffset) / MenuController.ScreenWidth));
