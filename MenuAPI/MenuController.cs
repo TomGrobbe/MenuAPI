@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,18 +19,20 @@ namespace MenuAPI
         public static bool DisableMenuButtons { get; set; } = false;
         public static bool AreMenuButtonsEnabled => Menus.Any((m) => m.Visible) && !Game.IsPaused && CitizenFX.Core.UI.Screen.Fading.IsFadedIn && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !Game.Player.IsDead;
 
-        public static bool EnableManualGCs = true;
-        public static bool DontOpenAnyMenu = false;
-        public static bool PreventExitingMenu = false;
+        public static bool EnableManualGCs { get; set; } = true;
+        public static bool DontOpenAnyMenu { get; set; } = false;
+        public static bool PreventExitingMenu { get; set; } = false;
+        public static Control MenuToggleKey { get; set; } = Control.InteractionMenu;
 
         internal static Dictionary<MenuItem, Menu> MenuButtons { get; private set; } = new Dictionary<MenuItem, Menu>();
 
-        public static Menu MainMenu = null;
+        public static Menu MainMenu { get; set; } = null;
+
         internal static int _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
 
         private static int ManualTimerForGC = GetGameTimer();
 
-        public static MenuAlignmentOption MenuAlignment = MenuAlignmentOption.Left;
+        public static MenuAlignmentOption MenuAlignment { get; set; } = MenuAlignmentOption.Left;
         public enum MenuAlignmentOption
         {
             Left,
@@ -274,7 +276,7 @@ namespace MenuAPI
                 {
                     if (Game.CurrentInputMode == InputMode.MouseAndKeyboard)
                     {
-                        if ((Game.IsControlJustPressed(0, Control.InteractionMenu) || Game.IsDisabledControlJustPressed(0, Control.InteractionMenu)) && !PreventExitingMenu)
+                        if ((Game.IsControlJustPressed(0, MenuToggleKey) || Game.IsDisabledControlJustPressed(0, MenuToggleKey)) && !PreventExitingMenu)
                         {
                             var menu = GetCurrentMenu();
                             if (menu != null)
@@ -311,7 +313,7 @@ namespace MenuAPI
                     }
                     else
                     {
-                        if ((Game.IsControlJustPressed(0, Control.InteractionMenu) || Game.IsDisabledControlJustPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !Game.Player.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
+                        if ((Game.IsControlJustPressed(0, MenuToggleKey) || Game.IsDisabledControlJustPressed(0, MenuToggleKey)) && !Game.IsPaused && IsScreenFadedIn() && !Game.Player.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
                         {
                             if (Menus.Count > 0)
                             {
