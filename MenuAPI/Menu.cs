@@ -288,6 +288,8 @@ namespace MenuAPI
 
         public string MenuSubtitle { get; set; }
 
+        public bool IgnoreDontOpenMenus { get; set; } = false;
+
         /// <summary>
         /// Automatically returns a safe amount of max items depending on the screen size of the user.
         /// Prevents the menu from going off the screen near the bottom if the menu is too long.
@@ -358,6 +360,11 @@ namespace MenuAPI
         #endregion
 
         #region Public functions
+        /// <summary>
+        /// Resets the index to 0
+        /// </summary>
+        public void RefreshIndex() { CurrentIndex = 0; viewIndexOffset = 0; }
+
         /// <summary>
         /// Returns the menu items in this menu.
         /// </summary>
@@ -474,6 +481,9 @@ namespace MenuAPI
                 PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                 if (MenuController.MenuButtons.ContainsKey(item))
                 {
+                    // this updates the parent menu.
+                    MenuController.AddSubmenu(MenuController.GetCurrentMenu(), MenuController.MenuButtons[item]);
+
                     MenuController.GetCurrentMenu().CloseMenu();
                     MenuController.MenuButtons[item].OpenMenu();
                 }
@@ -487,12 +497,12 @@ namespace MenuAPI
         /// </summary>
         public void GoBack()
         {
+            PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            CloseMenu();
             if (ParentMenu != null)
             {
                 ParentMenu.OpenMenu();
             }
-            PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
-            this.CloseMenu();
         }
 
         /// <summary>
@@ -500,8 +510,8 @@ namespace MenuAPI
         /// </summary>
         public void CloseMenu()
         {
+            Visible = false;
             MenuCloseEvent(this);
-            this.Visible = false;
         }
 
         /// <summary>
@@ -509,8 +519,8 @@ namespace MenuAPI
         /// </summary>
         public void OpenMenu()
         {
-            this.MenuOpenEvent(this);
             Visible = true;
+            MenuOpenEvent(this);
         }
 
         /// <summary>
@@ -649,6 +659,15 @@ namespace MenuAPI
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Allows you to sort the menu items using your own compare function.
+        /// </summary>
+        /// <param name="compare"></param>
+        public void SortMenuItems(Comparison<MenuItem> compare)
+        {
+            _MenuItems.Sort(compare);
         }
 
         #endregion

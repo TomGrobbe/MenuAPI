@@ -40,6 +40,15 @@ namespace MenuAPI
 
         internal override void Draw(int indexOffset)
         {
+            while (ListIndex < 0)
+            {
+                ListIndex += ItemsCount;
+            }
+            while (ListIndex >= ItemsCount)
+            {
+                ListIndex -= ItemsCount;
+            }
+
             Label = $"~s~← {GetCurrentSelection() ?? ""} ~s~→";
             base.Draw(indexOffset);
         }

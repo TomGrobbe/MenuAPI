@@ -483,7 +483,7 @@ namespace MenuAPI
         /// </summary>
         public static void CloseAllMenus()
         {
-            Menus.ForEach((m) => m.CloseMenu());
+            Menus.ForEach((m) => { if (m.Visible) { m.CloseMenu(); } });
         }
 
         /// <summary>
@@ -581,7 +581,7 @@ namespace MenuAPI
                 {
                     if (DontOpenAnyMenu)
                     {
-                        if (menu.Visible)
+                        if (menu.Visible && !menu.IgnoreDontOpenMenus)
                         {
                             menu.CloseMenu();
                         }

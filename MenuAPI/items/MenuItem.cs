@@ -143,8 +143,8 @@ namespace MenuAPI
                 case Icon.TICK:
                 case Icon.MALE:
                 case Icon.FEMALE:
-                    return selected ? 0 : 255;
-                case Icon.LOCK: return selected ? (Enabled ? 0 : 100) : (Enabled ? 255 : 190);
+                    //return selected ? 0 : 255;
+                case Icon.LOCK: return selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
                 default:
                     return 255;
             }
