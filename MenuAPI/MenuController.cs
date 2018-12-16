@@ -14,8 +14,9 @@ namespace MenuAPI
         public const string _texture_dict = "commonmenu";
         public const string _header_texture = "interaction_bgd";
 
-        public static float ScreenWidth { get { int width = 0, height = 0; GetScreenActiveResolution(ref width, ref height); return (float)width; } }
-        public static float ScreenHeight { get { int width = 0, height = 0; GetScreenActiveResolution(ref width, ref height); return (float)height; } }
+        private static float AspectRatio => GetScreenAspectRatio(false);
+        public static float ScreenWidth => 1080 * AspectRatio;
+        public static float ScreenHeight => 1080;
         public static bool DisableMenuButtons { get; set; } = false;
         public static bool AreMenuButtonsEnabled => Menus.Any((m) => m.Visible) && !Game.IsPaused && CitizenFX.Core.UI.Screen.Fading.IsFadedIn && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !Game.Player.IsDead;
 
