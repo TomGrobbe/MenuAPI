@@ -12,6 +12,7 @@ namespace MenuAPI
     {
         public int ListIndex { get; set; } = 0;
         public List<string> ListItems { get; set; } = new List<string>();
+        public bool HideArrowsWhenNotSelected { get; set; } = false;
         public bool ShowOpacityPanel { get; set; } = false;
         public bool ShowColorPanel { get; set; } = false;
         public ColorPanelType ColorPanelColorType = ColorPanelType.Hair;
@@ -49,7 +50,15 @@ namespace MenuAPI
                 ListIndex -= ItemsCount;
             }
 
-            Label = $"~s~← {GetCurrentSelection() ?? ""} ~s~→";
+            if (HideArrowsWhenNotSelected && !Selected)
+            {
+                Label = GetCurrentSelection() ?? "~r~N/A";
+            }
+            else
+            {
+                Label = $"~s~← {GetCurrentSelection() ?? "~r~N/A~s~"} ~s~→";
+            }
+
             base.Draw(indexOffset);
         }
 
