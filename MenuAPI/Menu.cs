@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -1079,11 +1079,11 @@ namespace MenuAPI
                                 var b = 0;
                                 if (listItem.ColorPanelColorType == MenuListItem.ColorPanelType.Hair)
                                 {
-                                    N_0x4852fc386e2e1bb5(i, ref r, ref g, ref b); // _GetHairRgbColor
+                                    GetHairRgbColor(i, ref r, ref g, ref b); // _GetHairRgbColor
                                 }
                                 else
                                 {
-                                    N_0x013e5cfc38cd5387(i, ref r, ref g, ref b); // _GetMakeupRgbColor
+                                    GetMakeupRgbColor(i, ref r, ref g, ref b); // _GetMakeupRgbColor
                                 }
 
                                 PushScaleformMovieFunction(ColorPanelScaleform, "SET_DATA_SLOT");
