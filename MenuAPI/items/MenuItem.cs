@@ -55,7 +55,7 @@ namespace MenuAPI
         public bool Selected { get { if (ParentMenu != null) { return ParentMenu.CurrentIndex == Index; } return false; } }
         public Menu ParentMenu { get; set; }
         public int PositionOnScreen { get; internal set; }
-        protected const float Width = 500f;
+        protected const float Width = Menu.Width;
         protected const float RowHeight = 38f;
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace MenuAPI
                 case Icon.WEED:
                 case Icon.FEMALE:
                 case Icon.MALE:
-                    return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (500f - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
+                    return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (Width - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
                 default:
                     break;
             }

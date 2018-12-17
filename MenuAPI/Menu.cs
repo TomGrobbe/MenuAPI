@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -263,7 +263,7 @@ namespace MenuAPI
         #endregion
 
         #region private variables
-        private static SizeF headerSize = new SizeF(500f, 110f);
+        private static SizeF headerSize = new SizeF(Width, 110f);
 
         public int ViewIndexOffset { get; private set; } = 0;
 
@@ -869,7 +869,7 @@ namespace MenuAPI
                     if (Size > MaxItemsOnScreen)
                     {
                         #region background
-                        float width = 500f / MenuController.ScreenWidth;
+                        float width = Width / MenuController.ScreenWidth;
                         float height = 60f / MenuController.ScreenWidth;
                         float x = (Position.X + (Width / 2f)) / MenuController.ScreenWidth;
                         float y = MenuItemsYOffset / MenuController.ScreenHeight + (height / 2f) + (6f / MenuController.ScreenHeight);
@@ -886,7 +886,7 @@ namespace MenuAPI
                         SetScriptGfxAlign(76, 84);
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
                         float xMin = 0f;
-                        float xMax = 500f / MenuController.ScreenWidth;
+                        float xMax = Width / MenuController.ScreenWidth;
                         float xCenter = 250f / MenuController.ScreenWidth;
                         float yTop = y - (20f / MenuController.ScreenHeight);
                         float yBottom = y - (10f / MenuController.ScreenHeight);
@@ -1042,7 +1042,7 @@ namespace MenuAPI
                             EndScaleformMovieMethod();
 
                             float width = Width / MenuController.ScreenWidth;
-                            float height = 700f / MenuController.ScreenHeight;
+                            float height = ((700f / 500f) * Width) / MenuController.ScreenHeight;
                             float x = ((Width / 2f) / MenuController.ScreenWidth);
                             float y = descriptionYOffset + (height / 2f) + (4f / MenuController.ScreenHeight);
                             if (Size > MaxItemsOnScreen)
@@ -1107,7 +1107,7 @@ namespace MenuAPI
                             EndScaleformMovieMethod();
 
                             float width = Width / MenuController.ScreenWidth;
-                            float height = 700f / MenuController.ScreenHeight;
+                            float height = ((700f / 500f) * Width) / MenuController.ScreenHeight;
                             float x = ((Width / 2f) / MenuController.ScreenWidth);
                             float y = descriptionYOffset + (height / 2f) + (4f / MenuController.ScreenHeight);
                             if (Size > MaxItemsOnScreen)
