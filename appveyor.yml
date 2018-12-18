@@ -1,0 +1,9 @@
+pull_requests:
+  do_not_increment_build_number: false
+image: Visual Studio 2017
+configuration: Release
+build:
+  parallel: true                  # enable MSBuild parallel builds
+  project: MenuAPI.sln            # path to Visual Studio solution or project
+  include_nuget_references: true  # add -IncludeReferencedProjects option while packaging NuGet artifacts
+  verbosity: minimal
