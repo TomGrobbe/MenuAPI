@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\vMenu\vMenu\dependencies\client\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -56,4 +56,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if /I "$(SolutionDir)"=="D:\Tom Grobbe\Documents\GitHub-Repos\fivem-menu-api\MenuAPI\" (
+    copy /Y "$(TargetDir)\MenuAPI.net.dll" "D:\FXserver\vMenu\resources\MenuAPI\"
+    copy /Y "$(TargetDir)\MenuAPI.net.dll" "D:\Tom Grobbe\Documents\GitHub-Repos\vMenu\vMenu\dependencies\client\"
+)</PostBuildEvent>
+  </PropertyGroup>
 </Project>
