@@ -38,8 +38,7 @@
     </Reference>
     <Reference Include="MenuAPI.net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\FXserver\vMenu\resources\MenuAPI\MenuAPI.net.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\dependencies\MenuAPI.net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

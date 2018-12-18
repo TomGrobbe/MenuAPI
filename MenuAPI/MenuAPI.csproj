@@ -60,6 +60,7 @@
     <PostBuildEvent>if /I "$(SolutionDir)"=="D:\Tom Grobbe\Documents\GitHub-Repos\fivem-menu-api\MenuAPI\" (
     copy /Y "$(TargetDir)\MenuAPI.net.dll" "D:\FXserver\vMenu\resources\MenuAPI\"
     copy /Y "$(TargetDir)\MenuAPI.net.dll" "D:\Tom Grobbe\Documents\GitHub-Repos\vMenu\vMenu\dependencies\client\"
-)</PostBuildEvent>
+)
+copy /Y "$(TargetDir)\MenuAPI.net.dll" "$(TargetDir)\..\..\..\dependencies\"</PostBuildEvent>
   </PropertyGroup>
 </Project>
