@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="items\MenuCheckboxItem.cs" />
+    <Compile Include="items\MenuDynamicListItem.cs" />
     <Compile Include="items\MenuItem.cs" />
     <Compile Include="items\MenuListItem.cs" />
     <Compile Include="items\MenuSliderItem.cs" />

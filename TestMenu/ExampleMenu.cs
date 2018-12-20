@@ -68,6 +68,16 @@ namespace TestMenu
             menu.AddMenuItem(box2);
             menu.AddMenuItem(box3);
 
+            // Dynamic list item
+            string ChangeCallback(MenuDynamicListItem item, bool left)
+            {
+                if (left)
+                    return (int.Parse(item.CurrentItem) - 1).ToString();
+                return (int.Parse(item.CurrentItem) + 1).ToString();
+            }
+            MenuDynamicListItem dynList = new MenuDynamicListItem("Dynamic list item.", "0", new MenuDynamicListItem.ChangeItemCallback(ChangeCallback), "Description for this dynamic item. Pressing left will make the value smaller, pressing right will make the value bigger.");
+            menu.AddMenuItem(dynList);
+
             // List items (first the 3 special variants, then a normal one)
             List<string> colorList = new List<string>();
             for (var i = 0; i < 64; i++)

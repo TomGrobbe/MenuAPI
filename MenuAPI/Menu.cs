@@ -290,33 +290,7 @@ namespace MenuAPI
 
         public bool IgnoreDontOpenMenus { get; set; } = false;
 
-        /// <summary>
-        /// Automatically returns a safe amount of max items depending on the screen size of the user.
-        /// Prevents the menu from going off the screen near the bottom if the menu is too long.
-        /// </summary>
-        public int MaxItemsOnScreen
-        {
-            get
-            {
-                if (MenuController.ScreenHeight >= 900)
-                {
-                    return 10;
-                }
-                else if (MenuController.ScreenHeight >= 768)
-                {
-                    return 8;
-                }
-                else if (MenuController.ScreenHeight >= 720)
-                {
-                    return 6;
-                }
-                else if (MenuController.ScreenHeight >= 664)
-                {
-                    return 5;
-                }
-                return 4;
-            }
-        }
+        public int MaxItemsOnScreen { get; internal set; } = 10;
 
         public int Size => _MenuItems.Count;
 
@@ -360,6 +334,19 @@ namespace MenuAPI
         #endregion
 
         #region Public functions
+        /// <summary>
+        /// Sets the max amount of visible items on screen at a time.
+        /// Min = 3, max = 10.
+        /// </summary>
+        /// <param name="max">A value between 3 and 10 (inclusive).</param>
+        public void SetMaxItemsOnScreen(int max)
+        {
+            if (max < 11 && max > 2)
+            {
+                MaxItemsOnScreen = max;
+            }
+        }
+
         /// <summary>
         /// Resets the index to 0
         /// </summary>
@@ -630,6 +617,12 @@ namespace MenuAPI
                         PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                     }
                 }
+                else if (item.Enabled && item is MenuDynamicListItem dynList)
+                {
+                    string newSelectedItem = dynList.Callback(dynList, true);
+                    dynList.CurrentItem = newSelectedItem;
+                    PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+                }
             }
         }
 
@@ -672,6 +665,12 @@ namespace MenuAPI
                     {
                         PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                     }
+                }
+                else if (item.Enabled && item is MenuDynamicListItem dynList)
+                {
+                    string newSelectedItem = dynList.Callback(dynList, false);
+                    dynList.CurrentItem = newSelectedItem;
+                    PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                 }
             }
         }
