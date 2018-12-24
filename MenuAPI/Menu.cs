@@ -976,6 +976,11 @@ namespace MenuAPI
                             EndTextCommandDisplayText(textMinX, textY);
                         }
 
+                        ResetScriptGfxAlign();
+
+                        SetScriptGfxAlign(76, 84);
+                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+
                         BeginTextCommandLineCount("CELL_EMAIL_BCON");
                         SetTextScale(textSize, textSize);
                         SetTextJustification(1);
