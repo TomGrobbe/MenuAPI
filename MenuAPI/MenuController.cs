@@ -28,6 +28,7 @@ namespace MenuAPI
         public static bool EnableManualGCs { get; set; } = true;
         public static bool DontOpenAnyMenu { get; set; } = false;
         public static bool PreventExitingMenu { get; set; } = false;
+        public static bool DisableBackButton { get; set; } = false;
         public static Control MenuToggleKey { get; set; } = Control.InteractionMenu;
 
         internal static Dictionary<MenuItem, Menu> MenuButtons { get; private set; } = new Dictionary<MenuItem, Menu>();
@@ -207,16 +208,20 @@ namespace MenuAPI
                             }
                         }
                         // Cancel / Go Back
-                        else if (Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) && !PreventExitingMenu)
+                        else if (Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) && !DisableBackButton)
                         {
                             // Wait for the next frame to make sure the "cinematic camera" button doesn't get "re-enabled" before the menu gets closed.
                             await Delay(0);
                             currentMenu.GoBack();
                         }
-                        else if (Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) && PreventExitingMenu)
+                        else if (Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) && PreventExitingMenu && !DisableBackButton)
                         {
+                            // if there's a parent menu, allow going back to that, but don't allow a 'top-level' menu to be closed.
+                            if (currentMenu.ParentMenu != null)
+                            {
+                                currentMenu.GoBack();
+                            }
                             await Delay(0);
-                            //Notify.Alert("You must save your ped first before exiting, or click the ~r~Exit Without Saving~s~ button.");
                         }
                     }
                 }
