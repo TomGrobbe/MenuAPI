@@ -11,7 +11,7 @@ namespace MenuAPI
     public class MenuDynamicListItem : MenuItem
     {
         public bool HideArrowsWhenNotSelected { get; set; } = false;
-        public string CurrentItem { get; internal set; } = null;
+        public string CurrentItem { get; set; } = null;
 
         public delegate string ChangeItemCallback(MenuDynamicListItem item, bool left);
 
