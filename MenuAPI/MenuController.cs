@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -547,6 +547,9 @@ namespace MenuAPI
                     {
                         Game.DisableControlThisFrame(0, Control.VehicleHeadlight);
                         Game.DisableControlThisFrame(0, Control.VehicleDuck);
+
+                        // toggles boost in some dlc vehicles, hence it's disabled for controllers only (pressing select in the menu would trigger this).
+                        Game.DisableControlThisFrame(0, Control.VehicleFlyTransform);
                     }
                 }
                 else // when not using a controller.
@@ -590,6 +593,7 @@ namespace MenuAPI
                 Game.DisableControlThisFrame(0, Control.VehicleFlyAttack);
                 Game.DisableControlThisFrame(0, Control.VehiclePassengerAttack);
                 Game.DisableControlThisFrame(0, Control.Aim);
+                Game.DisableControlThisFrame(0, Control.VehicleAim); // fires vehicle specific weapons when using right click on the mouse sometimes.
 
                 // When in a vehicle
                 if (Game.PlayerPed.IsInVehicle())
