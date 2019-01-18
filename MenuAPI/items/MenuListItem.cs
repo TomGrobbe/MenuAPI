@@ -41,10 +41,17 @@ namespace MenuAPI
 
         internal override void Draw(int indexOffset)
         {
+            if (ItemsCount < 1)
+            {
+                // Add a dummy item to prevent the other while loops from freezing the game.
+                ListItems.Add("N/A");
+            }
+
             while (ListIndex < 0)
             {
                 ListIndex += ItemsCount;
             }
+
             while (ListIndex >= ItemsCount)
             {
                 ListIndex -= ItemsCount;
