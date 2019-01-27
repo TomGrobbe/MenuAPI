@@ -57,6 +57,9 @@ namespace MenuAPI
         public int PositionOnScreen { get; internal set; }
         protected const float Width = Menu.Width;
         protected const float RowHeight = 38f;
+        
+        // Allows you to attach data to a menu item if you want to identify the menu item without having to put identification info in the visible text or description.
+        public dynamic ItemData { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="MenuItem"/>.
