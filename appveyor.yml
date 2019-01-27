@@ -3,7 +3,35 @@ pull_requests:
 image: Visual Studio 2017
 configuration: Release
 build:
-  parallel: true                  # enable MSBuild parallel builds
-  project: MenuAPI.sln            # path to Visual Studio solution or project
-  include_nuget_references: true  # add -IncludeReferencedProjects option while packaging NuGet artifacts
+  parallel: true
+  project: MenuAPI.sln
+  include_nuget_references: true
   verbosity: minimal
+after_build:
+  - cmd: copy README.md .\MenuAPI\bin\Release\README.md
+  - cmd: if %APPVEYOR_REPO_TAG%==true (appveyor SetVariable -Name VERSION_NAME -Value %APPVEYOR_REPO_TAG_NAME%) else (appveyor SetVariable -Name VERSION_NAME -Value dev)
+  - cmd: 7z a MenuAPI-%VERSION_NAME%.zip -r .\MenuAPI\bin\Release\*
+  - cmd: appveyor PushArtifact MenuAPI-%VERSION_NAME%.zip
+deploy:
+  - provider: GitHub
+    release: "[Release] MenuAPI $(VERSION_NAME)"
+    tag: $(VERSION_NAME)
+    artifact: MenuAPI-$(VERSION_NAME).zip
+    draft: false
+    prerelease: false
+    auth_token: ($github_auth)
+    on:
+      APPVEYOR_REPO_TAG: true
+    description: "MenuAPI release, version $(VERSION_NAME). For a changelog check the [docs](https://docs.vespura.com/) or checkout the recent commits on GitHub."
+before_build:
+  - ps: if($env:APPVEYOR_REPO_TAG -eq $True) {Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1; ./send.ps1 start $env:WEBHOOK_URL; rm send.ps1;}
+after_deploy:
+  - ps: if($env:APPVEYOR_REPO_TAG -eq $True) {Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1; ./send.ps1 deploy $env:WEBHOOK_URL; rm send.ps1;}
+on_success:
+  - ps: Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1
+  - ps: ./send.ps1 success $env:WEBHOOK_URL
+  - ps: rm send.ps1
+on_failure:
+  - ps: Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1
+  - ps: ./send.ps1 failure $env:WEBHOOK_URL
+  - ps: rm send.ps1
