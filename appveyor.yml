@@ -19,7 +19,7 @@ deploy:
     artifact: MenuAPI-$(VERSION_NAME).zip
     draft: false
     prerelease: false
-    auth_token: ($github_auth)
+    auth_token: $(github_auth)
     on:
       APPVEYOR_REPO_TAG: true
     description: "MenuAPI release, version $(VERSION_NAME). For a changelog check the [docs](https://docs.vespura.com/) or checkout the recent commits on GitHub."
