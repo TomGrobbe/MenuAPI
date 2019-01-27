@@ -30,6 +30,7 @@ namespace MenuAPI
         public static bool PreventExitingMenu { get; set; } = false;
         public static bool DisableBackButton { get; set; } = false;
         public static Control MenuToggleKey { get; set; } = Control.InteractionMenu;
+        public static bool EnableMenuToggleKeyOnController { get; set; } = true;
 
         internal static Dictionary<MenuItem, Menu> MenuButtons { get; private set; } = new Dictionary<MenuItem, Menu>();
 
@@ -328,6 +329,9 @@ namespace MenuAPI
                 {
                     if (Game.CurrentInputMode == InputMode.GamePad)
                     {
+                        if (!EnableMenuToggleKeyOnController)
+                            return;
+
                         int tmpTimer = GetGameTimer();
                         while ((Game.IsControlPressed(0, Control.InteractionMenu) || Game.IsDisabledControlPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !Game.Player.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
                         {
