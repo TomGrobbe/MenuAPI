@@ -259,7 +259,6 @@ namespace MenuAPI
 
         #region constants or readonlys
         public const float Width = 500f;
-
         #endregion
 
         #region private variables
@@ -287,6 +286,8 @@ namespace MenuAPI
         public string MenuTitle { get; set; }
 
         public string MenuSubtitle { get; set; }
+
+        public KeyValuePair<string, string> HeaderTexture { get; set; } = new KeyValuePair<string, string>();
 
         public bool IgnoreDontOpenMenus { get; set; } = false;
 
@@ -711,7 +712,23 @@ namespace MenuAPI
                     float width = headerSize.Width / MenuController.ScreenWidth;
                     float height = headerSize.Height / MenuController.ScreenHeight;
 
-                    DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 255, 255, 255, 255);
+                    if (!string.IsNullOrEmpty(HeaderTexture.Key) && !string.IsNullOrEmpty(HeaderTexture.Value))
+                    {
+                        if (!HasStreamedTextureDictLoaded(HeaderTexture.Key))
+                        {
+                            RequestStreamedTextureDict(HeaderTexture.Key, false);
+                            while (!HasStreamedTextureDictLoaded(HeaderTexture.Key))
+                            {
+                                await BaseScript.Delay(0);
+                            }
+                        }
+                        DrawSprite(HeaderTexture.Key, HeaderTexture.Value, x, y, width, height, 0f, 255, 255, 255, 255);
+                    }
+                    else
+                    {
+                        DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 255, 255, 255, 255);
+                    }
+
 
                     ResetScriptGfxAlign();
                     #endregion
