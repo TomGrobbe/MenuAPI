@@ -248,6 +248,11 @@ namespace TestMenu
                 Debug.WriteLine($"OnMenuOpen: [{_menu}]");
             };
 
+            menu.OnMenuDynamicListItemCurrentItemChange += ( _menu, _dynamicListItem, _oldCurrentItem, __newCurrentItem) => 
+            {
+                // Code in here would get executed whenever the value of the current item of a dynamic list item changes.
+                Debug.WriteLine($"OnMenuDynamicListItemCurrentItemChange: [{_menu}, {_dynamicListItem}, {_oldCurrentItem}, {__newCurrentItem}]");
+            };
 
         }
     }
