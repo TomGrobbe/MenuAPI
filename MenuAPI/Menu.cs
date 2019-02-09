@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -298,11 +298,21 @@ namespace MenuAPI
             get
             {
                 // Create a duplicate list, just in case the original list is modified while we're looping through it.
-                var items = GetMenuItems().ToList().GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
-                return items;
+                if (filterActive)
+                {
+                    var items = _FilterItems.ToList().GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
+                    return items;
+                }
+                else
+                {
+                    var items = GetMenuItems().ToList().GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
+                    return items;
+                }
+
             }
         }
 
+        private List<MenuItem> _FilterItems { get; set; } = new List<MenuItem>();
         private List<MenuItem> _MenuItems { get; set; } = new List<MenuItem>();
 
         private readonly int ColorPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_02"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
@@ -320,7 +330,7 @@ namespace MenuAPI
 
         public int MaxItemsOnScreen { get; internal set; } = 10;
 
-        public int Size => _MenuItems.Count;
+        public int Size => filterActive ? _FilterItems.Count : _MenuItems.Count;
 
         public bool Visible { get; set; } = false;
 
@@ -337,6 +347,8 @@ namespace MenuAPI
         public int CurrentIndex { get; internal set; } = 0;
 
         public bool EnableInstructionalButtons { get; set; } = true;
+
+        private bool filterActive = false;
 
         public Dictionary<Control, string> InstructionalButtons = new Dictionary<Control, string>() { { Control.FrontendAccept, GetLabelText("HUD_INPUT28") }, { Control.FrontendCancel, GetLabelText("HUD_INPUT53") } };
 
@@ -417,7 +429,7 @@ namespace MenuAPI
         /// <returns></returns>
         public List<MenuItem> GetMenuItems()
         {
-            return _MenuItems.ToList();
+            return filterActive ? _FilterItems.ToList() : _MenuItems.ToList();
         }
 
         /// <summary>
@@ -428,6 +440,7 @@ namespace MenuAPI
             CurrentIndex = 0;
             ViewIndexOffset = 0;
             _MenuItems.Clear();
+            _FilterItems.Clear();
         }
         /// <summary>
         /// Removes all menu items.
@@ -440,6 +453,7 @@ namespace MenuAPI
                 ViewIndexOffset = 0;
             }
             _MenuItems.Clear();
+            _FilterItems.Clear();
         }
 
         /// <summary>
@@ -506,9 +520,19 @@ namespace MenuAPI
         /// <param name="index"></param>
         public void SelectItem(int index)
         {
-            if (index > -1 && _MenuItems.Count - 1 >= index)
+            if (!filterActive)
             {
-                SelectItem(_MenuItems[index]);
+                if (index > -1 && _MenuItems.Count - 1 >= index)
+                {
+                    SelectItem(_MenuItems[index]);
+                }
+            }
+            else
+            {
+                if (index > -1 && _FilterItems.Count - 1 >= index)
+                {
+                    SelectItem(_FilterItems[index]);
+                }
             }
         }
 
@@ -589,12 +613,24 @@ namespace MenuAPI
         {
             if (Visible && Size > 1)
             {
-                var oldItem = _MenuItems[CurrentIndex];
+                MenuItem oldItem = null;
+
+                if (filterActive)
+                {
+                    oldItem = _FilterItems[CurrentIndex];
+                }
+                else
+                {
+                    oldItem = _MenuItems[CurrentIndex];
+                }
+
                 CurrentIndex--; if (CurrentIndex < 0)
                 {
                     CurrentIndex = Size - 1;
                 }
-                if (!VisibleMenuItems.Contains(_MenuItems[CurrentIndex]))
+
+
+                if (!VisibleMenuItems.Contains(filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex]))
                 {
                     ViewIndexOffset--;
                     if (ViewIndexOffset < 0)
@@ -603,7 +639,7 @@ namespace MenuAPI
                     }
                 }
 
-                IndexChangeEvent(this, oldItem, _MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
+                IndexChangeEvent(this, oldItem, filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
             }
         }
@@ -615,13 +651,23 @@ namespace MenuAPI
         {
             if (Visible && Size > 1)
             {
-                var oldItem = _MenuItems[CurrentIndex];
+                MenuItem oldItem = null;
+
+                if (filterActive)
+                {
+                    oldItem = _FilterItems[CurrentIndex];
+                }
+                else
+                {
+                    oldItem = _MenuItems[CurrentIndex];
+                }
+
                 CurrentIndex++;
                 if (CurrentIndex >= Size)
                 {
                     CurrentIndex = 0;
                 }
-                if (!VisibleMenuItems.Contains(_MenuItems[CurrentIndex]))
+                if (!VisibleMenuItems.Contains(filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex]))
                 {
                     ViewIndexOffset++;
                     if (CurrentIndex == 0)
@@ -629,7 +675,7 @@ namespace MenuAPI
                         ViewIndexOffset = 0;
                     }
                 }
-                IndexChangeEvent(this, oldItem, _MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
+                IndexChangeEvent(this, oldItem, filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
             }
         }
@@ -641,7 +687,7 @@ namespace MenuAPI
         {
             if (MenuController.AreMenuButtonsEnabled)
             {
-                var item = _MenuItems.ElementAt(CurrentIndex);
+                var item = filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex];
                 if (item.Enabled && item is MenuListItem listItem)
                 {
                     if (listItem.ItemsCount > 0)
@@ -692,7 +738,7 @@ namespace MenuAPI
         {
             if (MenuController.AreMenuButtonsEnabled)
             {
-                var item = _MenuItems.ElementAt(CurrentIndex);
+                var item = filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex];
                 if (item.Enabled && item is MenuListItem listItem)
                 {
                     if (listItem.ItemsCount > 0)
@@ -742,7 +788,31 @@ namespace MenuAPI
         /// <param name="compare"></param>
         public void SortMenuItems(Comparison<MenuItem> compare)
         {
+            if (filterActive)
+            {
+                filterActive = false;
+                _FilterItems.Clear();
+            }
             _MenuItems.Sort(compare);
+        }
+
+        public void FilterMenuItems(Func<MenuItem, bool> predicate)
+        {
+            if (filterActive)
+            {
+                ResetFilter();
+            }
+            RefreshIndex(0, 0);
+            ViewIndexOffset = 0;
+            _FilterItems = _MenuItems.Where(i => predicate.Invoke(i)).ToList();
+            filterActive = true;
+        }
+
+        public void ResetFilter()
+        {
+            RefreshIndex(0, 0);
+            filterActive = false;
+            _FilterItems.Clear();
         }
 
         #endregion
@@ -945,7 +1015,7 @@ namespace MenuAPI
                     SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-                    float bgHeight = 38f * MathUtil.Clamp(_MenuItems.Count, 0, MaxItemsOnScreen);
+                    float bgHeight = 38f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
 
 
                     float x = (Position.X + (headerSize.Width / 2f)) / MenuController.ScreenWidth;
@@ -1048,7 +1118,7 @@ namespace MenuAPI
                 #region Draw Description
                 if (Size > 0)
                 {
-                    if (!string.IsNullOrEmpty(_MenuItems[CurrentIndex].Description))
+                    if (!string.IsNullOrEmpty(filterActive ? _FilterItems[CurrentIndex].Description : _MenuItems[CurrentIndex].Description))
                     {
                         #region description text
                         int font = 0;
@@ -1066,7 +1136,7 @@ namespace MenuAPI
                         SetTextFont(font);
                         SetTextScale(textSize, textSize);
                         SetTextJustification(1);
-                        string text = _MenuItems[CurrentIndex].Description;
+                        string text = filterActive ? _FilterItems[CurrentIndex].Description : _MenuItems[CurrentIndex].Description;
                         foreach (string s in CitizenFX.Core.UI.Screen.StringToArray(text))
                         {
                             AddTextComponentSubstringPlayerName(s);
@@ -1142,7 +1212,7 @@ namespace MenuAPI
                 #region Draw Color and opacity palletes
                 if (Size > 0)
                 {
-                    var currentItem = _MenuItems[CurrentIndex];
+                    var currentItem = filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex];
                     if (currentItem is MenuListItem listItem)
                     {
                         /// OPACITY PANEL
