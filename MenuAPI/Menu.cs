@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -339,6 +339,35 @@ namespace MenuAPI
         public bool EnableInstructionalButtons { get; set; } = true;
 
         public Dictionary<Control, string> InstructionalButtons = new Dictionary<Control, string>() { { Control.FrontendAccept, GetLabelText("HUD_INPUT28") }, { Control.FrontendCancel, GetLabelText("HUD_INPUT53") } };
+
+        public enum ControlPressCheckType
+        {
+            JUST_RELEASED,
+            JUST_PRESSED,
+            RELEASED,
+            PRESSED
+        }
+
+        public struct ButtonPressHandler
+        {
+            // The control to listen for.
+            internal Control control;
+            // The type. 
+            internal ControlPressCheckType pressType;
+            // The function to call when the control is triggered.
+            internal Action<Menu, Control> function;
+            // Whether or not the control needs to be disabled if the menu is visible.
+            internal bool disableControl;
+
+            public ButtonPressHandler(Control control, ControlPressCheckType pressType, Action<Menu, Control> function, bool disableControl)
+            {
+                this.control = control;
+                this.pressType = pressType;
+                this.function = function;
+                this.disableControl = disableControl;
+            }
+        }
+        public List<ButtonPressHandler> ButtonPressHandlers = new List<ButtonPressHandler>();
 
         #endregion
 
@@ -726,8 +755,40 @@ namespace MenuAPI
         {
             if (!Game.IsPaused && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.PlayerPed.IsDead)
             {
-                // impossible to reach this code, but i don't like Visual studio warnings.
-                if (CurrentIndex == -2) { await BaseScript.Delay(0); }
+                #region Listen for custom key presses.
+                if (ButtonPressHandlers.Count > 0)
+                {
+                    foreach (ButtonPressHandler handler in ButtonPressHandlers)
+                    {
+                        if (handler.disableControl)
+                        {
+                            Game.DisableControlThisFrame(0, handler.control);
+                        }
+
+                        switch (handler.pressType)
+                        {
+                            case ControlPressCheckType.JUST_PRESSED:
+                                if (Game.IsControlJustPressed(0, handler.control) || Game.IsDisabledControlJustPressed(0, handler.control))
+                                    handler.function.Invoke(this, handler.control);
+                                break;
+                            case ControlPressCheckType.JUST_RELEASED:
+                                if (Game.IsControlJustReleased(0, handler.control) || Game.IsDisabledControlJustReleased(0, handler.control))
+                                    handler.function.Invoke(this, handler.control);
+                                break;
+                            case ControlPressCheckType.PRESSED:
+                                if (Game.IsControlPressed(0, handler.control) || Game.IsDisabledControlPressed(0, handler.control))
+                                    handler.function.Invoke(this, handler.control);
+                                break;
+                            case ControlPressCheckType.RELEASED:
+                                if (!Game.IsControlPressed(0, handler.control) && !Game.IsDisabledControlPressed(0, handler.control))
+                                    handler.function.Invoke(this, handler.control);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                #endregion
 
                 MenuItemsYOffset = 0f;
 
