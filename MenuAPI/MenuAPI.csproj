@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\..\FXserver\vMenu\resources\MenuAPI\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -58,10 +58,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if /I "$(SolutionDir)"=="D:\Tom Grobbe\Documents\GitHub-Repos\fivem-menu-api\MenuAPI\" (
-    copy /Y "$(TargetDir)\MenuAPI.net.dll" "D:\FXserver\vMenu\resources\MenuAPI\"
-    copy /Y "$(TargetDir)\MenuAPI.net.dll" "D:\Tom Grobbe\Documents\GitHub-Repos\vMenu\vMenu\dependencies\client\"
-)
-copy /Y "$(TargetDir)\MenuAPI.net.dll" "$(TargetDir)\..\..\..\dependencies\"</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(OS)' == 'Unix'"></PostBuildEvent>
+    <PostBuildEvent Condition=" '$(OS)' == 'Windows_NT'">
+copy /Y "$(TargetDir)\MenuAPI.net.dll" "$(TargetDir)\..\..\..\dependencies\"
+if exist "$(SolutionDir)\postbuild.cmd" "$(SolutionDir)\postbuild.cmd"
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
