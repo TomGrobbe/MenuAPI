@@ -94,11 +94,19 @@ namespace MenuAPI
         /// <summary>
         /// Triggered when a <see cref="MenuDynamicListItem"/>'s value was changed.
         /// </summary>
-        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnMenuDynamicListItemCurrentItemChange"/> event occurred.</param>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnDynamicListItemCurrentItemChange"/> event occurred.</param>
         /// <param name="dynamicListItem">The <see cref="MenuDynamicListItem"/> that was changed.</param>
         /// <param name="oldValue">The old <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/>.</param>
         /// <param name="newValue">The new <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/>.</param>
-        public delegate void MenuDynamicListItemCurrentItemChangedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string oldValue, string newValue);
+        public delegate void DynamicListItemCurrentItemChangedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string oldValue, string newValue);
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuDynamicListItem"/> is selected.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnDynamicListItemSelect"/> event occurred.</param>
+        /// <param name="dynamicListItem">The <see cref="MenuDynamicListItem"/> that was selected.</param>
+        /// <param name="currentItem">The <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/> in the <see cref="Menu"/>.</param>
+        public delegate void DynamicListItemSelectedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string currentItem);
         #endregion
 
         #region events
@@ -160,7 +168,13 @@ namespace MenuAPI
         /// Triggered when a <see cref="MenuDynamicListItem"/>'s value was changed.
         /// Parameters: <see cref="Menu"/> menu, <see cref="MenuListItem"/> dynamicListItem, <see cref="MenuDynamicListItem.CurrentItem"/> oldValue, <see cref="MenuDynamicListItem.CurrentItem"/> newValue.
         /// </summary>
-        public event MenuDynamicListItemCurrentItemChangedEvent OnMenuDynamicListItemCurrentItemChange;
+        public event DynamicListItemCurrentItemChangedEvent OnDynamicListItemCurrentItemChange;
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuDynamicListItem"/> is selected.
+        /// Parameters: <see cref="Menu"/> menu, <see cref="MenuDynamicListItem"/> dynamicListItem, <see cref="MenuDynamicListItem.CurrentItem"/> itemValue.
+        /// </summary>
+        public event DynamicListItemSelectedEvent OnDynamicListItemSelect;
         #endregion
 
         #region virtual voids
@@ -271,13 +285,24 @@ namespace MenuAPI
         /// <summary>
         /// Triggered when a <see cref="MenuDynamicListItem"/>'s value was changed.
         /// </summary>
-        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnMenuDynamicListItemCurrentItemChange"/> event occurred.</param>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnDynamicListItemCurrentItemChange"/> event occurred.</param>
         /// <param name="dynamicListItem">The <see cref="MenuDynamicListItem"/> that was changed.</param>
         /// <param name="oldValue">The old <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/>.</param>
         /// <param name="newValue">The new <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/>.</param>
-        protected virtual void MenuDynamicListItemCurrentItemChanged(Menu menu, MenuDynamicListItem dynamicListItem, string oldValue, string newValue)
+        protected virtual void DynamicListItemCurrentItemChanged(Menu menu, MenuDynamicListItem dynamicListItem, string oldValue, string newValue)
         {
-            OnMenuDynamicListItemCurrentItemChange?.Invoke(menu, dynamicListItem, oldValue, newValue);
+            OnDynamicListItemCurrentItemChange?.Invoke(menu, dynamicListItem, oldValue, newValue);
+        }
+
+        /// <summary>
+        /// Triggered when a <see cref="MenuDynamicListItem"/> is selected.
+        /// </summary>
+        /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnDynamicListItemSelect"/> event occurred.</param>
+        /// <param name="dynamicListItem">The <see cref="MenuDynamicListItem"/> that was selected.</param>
+        /// <param name="currentItem">The <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/> in the <see cref="Menu"/>.</param>
+        protected virtual void DynamicListItemSelectEvent(Menu menu, MenuDynamicListItem dynamicListItem, string currentItem)
+        {
+            OnDynamicListItemSelect?.Invoke(menu, dynamicListItem, currentItem);
         }
 
         #endregion
@@ -557,6 +582,10 @@ namespace MenuAPI
                 {
                     SliderSelectedEvent(this, slider, slider.Position, slider.Index);
                 }
+                else if (item is MenuDynamicListItem dynamicListItem)
+                {
+                    DynamicListItemSelectEvent(this, dynamicListItem, dynamicListItem.CurrentItem);
+                }
                 else
                 {
                     ItemSelectedEvent(item, item.Index);
@@ -725,7 +754,7 @@ namespace MenuAPI
                     string oldValue = dynList.CurrentItem;
                     string newSelectedItem = dynList.Callback(dynList, true);
                     dynList.CurrentItem = newSelectedItem;
-                    MenuDynamicListItemCurrentItemChanged(this, dynList, oldValue, newSelectedItem);
+                    DynamicListItemCurrentItemChanged(this, dynList, oldValue, newSelectedItem);
                     PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                 }
             }
@@ -776,7 +805,7 @@ namespace MenuAPI
                     string oldValue = dynList.CurrentItem;
                     string newSelectedItem = dynList.Callback(dynList, false);
                     dynList.CurrentItem = newSelectedItem;
-                    MenuDynamicListItemCurrentItemChanged(this, dynList, oldValue, newSelectedItem);
+                    DynamicListItemCurrentItemChanged(this, dynList, oldValue, newSelectedItem);
                     PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                 }
             }
