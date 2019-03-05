@@ -461,16 +461,16 @@ namespace MenuAPI
                     }
 
                     // Check if the Go Left controls are pressed.
-                    else if (Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) && !Game.IsControlPressed(0, Control.SelectWeapon))
+                    else if (Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) || Game.IsControlJustPressed(0, Control.PhoneLeft))
                     {
                         var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
-                        if (item.Enabled) //&& item is MenuItemButton)
+                        if (item.Enabled)
                         {
                             currentMenu.GoLeft();
                             var time = GetGameTimer();
                             var times = 0;
                             var delay = 200;
-                            while (Game.IsDisabledControlPressed(0, Control.PhoneLeft) && !Game.IsControlPressed(0, Control.SelectWeapon) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+                            while ((Game.IsDisabledControlPressed(0, Control.PhoneLeft) || Game.IsControlPressed(0, Control.PhoneLeft)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
                             {
                                 currentMenu = GetCurrentMenu();
                                 if (GetGameTimer() - time > delay)
@@ -489,7 +489,7 @@ namespace MenuAPI
                     }
 
                     // Check if the Go Right controls are pressed.
-                    else if (Game.IsDisabledControlJustPressed(0, Control.PhoneRight) && !Game.IsControlPressed(0, Control.SelectWeapon))
+                    else if (Game.IsDisabledControlJustPressed(0, Control.PhoneRight) || Game.IsControlJustPressed(0, Control.PhoneRight))
                     {
                         var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
                         if (item.Enabled)
@@ -498,7 +498,7 @@ namespace MenuAPI
                             var time = GetGameTimer();
                             var times = 0;
                             var delay = 200;
-                            while ((Game.IsDisabledControlPressed(0, Control.PhoneRight) || Game.IsControlPressed(0, Control.PhoneRight)) && !Game.IsControlPressed(0, Control.SelectWeapon) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+                            while ((Game.IsDisabledControlPressed(0, Control.PhoneRight) || Game.IsControlPressed(0, Control.PhoneRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
                             {
                                 currentMenu = GetCurrentMenu();
                                 if (GetGameTimer() - time > delay)
@@ -536,6 +536,16 @@ namespace MenuAPI
             #region Disable Inputs when any menu is open.
             if (IsAnyMenuOpen())
             {
+                var currentItem = GetCurrentMenu()?.Size > GetCurrentMenu()?.CurrentIndex ? GetCurrentMenu()?.GetMenuItems()[GetCurrentMenu().CurrentIndex] : null;
+                if (currentItem != null)
+                {
+                    if (currentItem is MenuSliderItem || currentItem is MenuListItem || currentItem is MenuDynamicListItem)
+                    {
+                        if (Game.CurrentInputMode == InputMode.GamePad)
+                            Game.DisableControlThisFrame(0, Control.SelectWeapon);
+                    }
+                }
+
                 // Close all menus when the player dies.
                 if (Game.PlayerPed.IsDead)
                 {
