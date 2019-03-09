@@ -84,6 +84,7 @@ namespace MenuAPI
             Tick += ProcessMainButtons;
             Tick += ProcessDirectionalButtons;
             Tick += ProcessToggleMenuButton;
+            Tick += MenuButtonsDisableChecks;
         }
 
         /// <summary>
@@ -309,7 +310,7 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessToggleMenuButton()
         {
-            if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.Player.IsDead)
+            if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.Player.IsDead && !DisableMenuButtons)
             {
                 if (IsAnyMenuOpen())
                 {
@@ -516,6 +517,28 @@ namespace MenuAPI
                         }
                     }
                 }
+            }
+        }
+
+        private async Task MenuButtonsDisableChecks()
+        {
+
+            bool isInputVisible() => UpdateOnscreenKeyboard() == 0;
+            if (isInputVisible())
+            {
+                bool buttonsState = DisableMenuButtons;
+                while (isInputVisible())
+                {
+                    await Delay(0);
+                    DisableMenuButtons = true;
+                }
+                int timer = GetGameTimer();
+                while (GetGameTimer() - timer < 300)
+                {
+                    await Delay(0);
+                    DisableMenuButtons = true;
+                }
+                DisableMenuButtons = buttonsState;
             }
         }
         #endregion
