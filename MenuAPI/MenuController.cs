@@ -689,7 +689,7 @@ namespace MenuAPI
 
         internal static async Task DrawInstructionalButtons()
         {
-            if (!Game.IsPaused && !Game.Player.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress())
+            if (!Game.IsPaused && !Game.Player.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !IsWarningMessageActive() && UpdateOnscreenKeyboard() != 0)
             {
                 Menu menu = GetCurrentMenu();
                 if (menu != null && menu.Visible && menu.EnableInstructionalButtons)
