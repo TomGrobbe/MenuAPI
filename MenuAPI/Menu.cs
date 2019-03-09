@@ -857,33 +857,36 @@ namespace MenuAPI
                 #region Listen for custom key presses.
                 if (ButtonPressHandlers.Count > 0)
                 {
-                    foreach (ButtonPressHandler handler in ButtonPressHandlers)
+                    if (!MenuController.DisableMenuButtons)
                     {
-                        if (handler.disableControl)
+                        foreach (ButtonPressHandler handler in ButtonPressHandlers)
                         {
-                            Game.DisableControlThisFrame(0, handler.control);
-                        }
+                            if (handler.disableControl)
+                            {
+                                Game.DisableControlThisFrame(0, handler.control);
+                            }
 
-                        switch (handler.pressType)
-                        {
-                            case ControlPressCheckType.JUST_PRESSED:
-                                if (Game.IsControlJustPressed(0, handler.control) || Game.IsDisabledControlJustPressed(0, handler.control))
-                                    handler.function.Invoke(this, handler.control);
-                                break;
-                            case ControlPressCheckType.JUST_RELEASED:
-                                if (Game.IsControlJustReleased(0, handler.control) || Game.IsDisabledControlJustReleased(0, handler.control))
-                                    handler.function.Invoke(this, handler.control);
-                                break;
-                            case ControlPressCheckType.PRESSED:
-                                if (Game.IsControlPressed(0, handler.control) || Game.IsDisabledControlPressed(0, handler.control))
-                                    handler.function.Invoke(this, handler.control);
-                                break;
-                            case ControlPressCheckType.RELEASED:
-                                if (!Game.IsControlPressed(0, handler.control) && !Game.IsDisabledControlPressed(0, handler.control))
-                                    handler.function.Invoke(this, handler.control);
-                                break;
-                            default:
-                                break;
+                            switch (handler.pressType)
+                            {
+                                case ControlPressCheckType.JUST_PRESSED:
+                                    if (Game.IsControlJustPressed(0, handler.control) || Game.IsDisabledControlJustPressed(0, handler.control))
+                                        handler.function.Invoke(this, handler.control);
+                                    break;
+                                case ControlPressCheckType.JUST_RELEASED:
+                                    if (Game.IsControlJustReleased(0, handler.control) || Game.IsDisabledControlJustReleased(0, handler.control))
+                                        handler.function.Invoke(this, handler.control);
+                                    break;
+                                case ControlPressCheckType.PRESSED:
+                                    if (Game.IsControlPressed(0, handler.control) || Game.IsDisabledControlPressed(0, handler.control))
+                                        handler.function.Invoke(this, handler.control);
+                                    break;
+                                case ControlPressCheckType.RELEASED:
+                                    if (!Game.IsControlPressed(0, handler.control) && !Game.IsDisabledControlPressed(0, handler.control))
+                                        handler.function.Invoke(this, handler.control);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     }
                 }
