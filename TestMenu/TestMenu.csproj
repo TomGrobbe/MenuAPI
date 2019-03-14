@@ -32,10 +32,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CitizenFX.Core.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CitizenFX.Core.Client.1.0.1116\lib\net45\CitizenFX.Core.Client.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="MenuAPI">
       <HintPath>..\dependencies\MenuAPI.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -56,7 +52,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <PackageReference Include="CitizenFX.Core.Client">
+      <Version>1.0.1117</Version>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
