@@ -63,7 +63,6 @@
     <PostBuildEvent Condition=" '$(OS)' == 'Unix'">
     </PostBuildEvent>
     <PostBuildEvent Condition=" '$(OS)' == 'Windows_NT'">
-copy /Y "$(TargetDir)\MenuAPI.dll" "$(TargetDir)\..\..\..\dependencies\"
 if exist "$(SolutionDir)\postbuild.cmd" "$(SolutionDir)\postbuild.cmd"
     </PostBuildEvent>
   </PropertyGroup>
