@@ -325,7 +325,7 @@ namespace MenuAPI
                 // Create a duplicate list, just in case the original list is modified while we're looping through it.
                 if (filterActive)
                 {
-                    var items = _FilterItems.ToList().GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
+                    var items = FilterItems.ToList().GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
                     return items;
                 }
                 else
@@ -337,8 +337,8 @@ namespace MenuAPI
             }
         }
 
-        private List<MenuItem> _FilterItems { get; set; } = new List<MenuItem>();
-        private List<MenuItem> _MenuItems { get; set; } = new List<MenuItem>();
+        private List<MenuItem> FilterItems { get; set; } = new List<MenuItem>();
+        private List<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
 
         private readonly int ColorPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_02"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
         private readonly int OpacityPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_01"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
@@ -355,7 +355,7 @@ namespace MenuAPI
 
         public int MaxItemsOnScreen { get; internal set; } = 10;
 
-        public int Size => filterActive ? _FilterItems.Count : _MenuItems.Count;
+        public int Size => filterActive ? FilterItems.Count : MenuItems.Count;
 
         public bool Visible { get; set; } = false;
 
@@ -454,7 +454,7 @@ namespace MenuAPI
         /// <returns></returns>
         public List<MenuItem> GetMenuItems()
         {
-            return filterActive ? _FilterItems.ToList() : _MenuItems.ToList();
+            return filterActive ? FilterItems.ToList() : MenuItems.ToList();
         }
 
         /// <summary>
@@ -464,8 +464,8 @@ namespace MenuAPI
         {
             CurrentIndex = 0;
             ViewIndexOffset = 0;
-            _MenuItems.Clear();
-            _FilterItems.Clear();
+            MenuItems.Clear();
+            FilterItems.Clear();
         }
         /// <summary>
         /// Removes all menu items.
@@ -477,8 +477,8 @@ namespace MenuAPI
                 CurrentIndex = 0;
                 ViewIndexOffset = 0;
             }
-            _MenuItems.Clear();
-            _FilterItems.Clear();
+            MenuItems.Clear();
+            FilterItems.Clear();
         }
 
         /// <summary>
@@ -487,7 +487,7 @@ namespace MenuAPI
         /// <param name="item"></param>
         public void AddMenuItem(MenuItem item)
         {
-            _MenuItems.Add(item);
+            MenuItems.Add(item);
             item.PositionOnScreen = item.Index;
             item.ParentMenu = this;
         }
@@ -511,8 +511,8 @@ namespace MenuAPI
             }
             if (itemIndex < Size && itemIndex > -1)
             {
-                RemoveMenuItem(_MenuItems[itemIndex]);
-                RemoveMenuItem(_MenuItems[itemIndex]);
+                RemoveMenuItem(MenuItems[itemIndex]);
+                RemoveMenuItem(MenuItems[itemIndex]);
             }
         }
 
@@ -522,7 +522,7 @@ namespace MenuAPI
         /// <param name="item"></param>
         public void RemoveMenuItem(MenuItem item)
         {
-            if (_MenuItems.Contains(item))
+            if (MenuItems.Contains(item))
             {
                 if (CurrentIndex >= item.Index)
                 {
@@ -535,7 +535,7 @@ namespace MenuAPI
                         CurrentIndex = 0;
                     }
                 }
-                _MenuItems.Remove(item);
+                MenuItems.Remove(item);
             }
         }
 
@@ -547,16 +547,16 @@ namespace MenuAPI
         {
             if (!filterActive)
             {
-                if (index > -1 && _MenuItems.Count - 1 >= index)
+                if (index > -1 && MenuItems.Count - 1 >= index)
                 {
-                    SelectItem(_MenuItems[index]);
+                    SelectItem(MenuItems[index]);
                 }
             }
             else
             {
-                if (index > -1 && _FilterItems.Count - 1 >= index)
+                if (index > -1 && FilterItems.Count - 1 >= index)
                 {
-                    SelectItem(_FilterItems[index]);
+                    SelectItem(FilterItems[index]);
                 }
             }
         }
@@ -642,15 +642,15 @@ namespace MenuAPI
         {
             if (Visible && Size > 1)
             {
-                MenuItem oldItem = null;
+                MenuItem oldItem;
 
                 if (filterActive)
                 {
-                    oldItem = _FilterItems[CurrentIndex];
+                    oldItem = FilterItems[CurrentIndex];
                 }
                 else
                 {
-                    oldItem = _MenuItems[CurrentIndex];
+                    oldItem = MenuItems[CurrentIndex];
                 }
 
                 CurrentIndex--; if (CurrentIndex < 0)
@@ -659,7 +659,7 @@ namespace MenuAPI
                 }
 
 
-                if (!VisibleMenuItems.Contains(filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex]))
+                if (!VisibleMenuItems.Contains(filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex]))
                 {
                     ViewIndexOffset--;
                     if (ViewIndexOffset < 0)
@@ -668,7 +668,7 @@ namespace MenuAPI
                     }
                 }
 
-                IndexChangeEvent(this, oldItem, filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
+                IndexChangeEvent(this, oldItem, filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
             }
         }
@@ -680,15 +680,15 @@ namespace MenuAPI
         {
             if (Visible && Size > 1)
             {
-                MenuItem oldItem = null;
+                MenuItem oldItem;
 
                 if (filterActive)
                 {
-                    oldItem = _FilterItems[CurrentIndex];
+                    oldItem = FilterItems[CurrentIndex];
                 }
                 else
                 {
-                    oldItem = _MenuItems[CurrentIndex];
+                    oldItem = MenuItems[CurrentIndex];
                 }
 
                 CurrentIndex++;
@@ -696,7 +696,7 @@ namespace MenuAPI
                 {
                     CurrentIndex = 0;
                 }
-                if (!VisibleMenuItems.Contains(filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex]))
+                if (!VisibleMenuItems.Contains(filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex]))
                 {
                     ViewIndexOffset++;
                     if (CurrentIndex == 0)
@@ -704,7 +704,7 @@ namespace MenuAPI
                         ViewIndexOffset = 0;
                     }
                 }
-                IndexChangeEvent(this, oldItem, filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
+                IndexChangeEvent(this, oldItem, filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
             }
         }
@@ -716,7 +716,7 @@ namespace MenuAPI
         {
             if (MenuController.AreMenuButtonsEnabled)
             {
-                var item = filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex];
+                var item = filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex];
                 if (item.Enabled && item is MenuListItem listItem)
                 {
                     if (listItem.ItemsCount > 0)
@@ -767,7 +767,7 @@ namespace MenuAPI
         {
             if (MenuController.AreMenuButtonsEnabled)
             {
-                var item = filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex];
+                var item = filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex];
                 if (item.Enabled && item is MenuListItem listItem)
                 {
                     if (listItem.ItemsCount > 0)
@@ -820,9 +820,9 @@ namespace MenuAPI
             if (filterActive)
             {
                 filterActive = false;
-                _FilterItems.Clear();
+                FilterItems.Clear();
             }
-            _MenuItems.Sort(compare);
+            MenuItems.Sort(compare);
         }
 
         public void FilterMenuItems(Func<MenuItem, bool> predicate)
@@ -833,7 +833,7 @@ namespace MenuAPI
             }
             RefreshIndex(0, 0);
             ViewIndexOffset = 0;
-            _FilterItems = _MenuItems.Where(i => predicate.Invoke(i)).ToList();
+            FilterItems = MenuItems.Where(i => predicate.Invoke(i)).ToList();
             filterActive = true;
         }
 
@@ -841,10 +841,11 @@ namespace MenuAPI
         {
             RefreshIndex(0, 0);
             filterActive = false;
-            _FilterItems.Clear();
+            FilterItems.Clear();
         }
 
         #endregion
+
         #region internal task functions
         /// <summary>
         /// Draws the menu title + subtitle, calls all Draw functions for all menu items and draws the description for the selected item.
@@ -989,7 +990,16 @@ namespace MenuAPI
                         SetTextFont(font);
                         SetTextScale(size, size);
                         SetTextJustification(1);
-                        AddTextComponentSubstringPlayerName("~HUD_COLOUR_HB_BLUE~" + MenuSubtitle.ToUpper());
+                        // Don't make the text blue if another color is used in the string.
+                        if (MenuSubtitle.Contains("~"))
+                        {
+                            AddTextComponentSubstringPlayerName(MenuSubtitle.ToUpper());
+                        }
+                        else
+                        {
+                            AddTextComponentSubstringPlayerName("~HUD_COLOUR_HB_BLUE~" + MenuSubtitle.ToUpper());
+                        }
+
                         if (LeftAligned)
                         {
                             EndTextCommandDisplayText(10f / MenuController.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)));
@@ -1150,7 +1160,7 @@ namespace MenuAPI
                 #region Draw Description
                 if (Size > 0)
                 {
-                    if (!string.IsNullOrEmpty(filterActive ? _FilterItems[CurrentIndex].Description : _MenuItems[CurrentIndex].Description))
+                    if (!string.IsNullOrEmpty(filterActive ? FilterItems[CurrentIndex].Description : MenuItems[CurrentIndex].Description))
                     {
                         #region description text
                         int font = 0;
@@ -1168,7 +1178,7 @@ namespace MenuAPI
                         SetTextFont(font);
                         SetTextScale(textSize, textSize);
                         SetTextJustification(1);
-                        string text = filterActive ? _FilterItems[CurrentIndex].Description : _MenuItems[CurrentIndex].Description;
+                        string text = filterActive ? FilterItems[CurrentIndex].Description : MenuItems[CurrentIndex].Description;
                         foreach (string s in CitizenFX.Core.UI.Screen.StringToArray(text))
                         {
                             AddTextComponentSubstringPlayerName(s);
@@ -1244,7 +1254,7 @@ namespace MenuAPI
                 #region Draw Color and opacity palletes
                 if (Size > 0)
                 {
-                    var currentItem = filterActive ? _FilterItems[CurrentIndex] : _MenuItems[CurrentIndex];
+                    var currentItem = filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex];
                     if (currentItem is MenuListItem listItem)
                     {
                         /// OPACITY PANEL
@@ -1342,7 +1352,5 @@ namespace MenuAPI
             }
         }
         #endregion
-
-
     }
 }
