@@ -1042,7 +1042,14 @@ namespace MenuAPI
                         SetTextFont(font);
                         SetTextScale(size, size);
                         SetTextJustification(2);
-                        AddTextComponentSubstringPlayerName("~HUD_COLOUR_HB_BLUE~" + counterText.ToUpper());
+                        if (MenuSubtitle.Contains("~") || CounterPreText.Contains("~"))
+                        {
+                            AddTextComponentSubstringPlayerName(counterText.ToUpper());
+                        }
+                        else
+                        {
+                            AddTextComponentSubstringPlayerName("~HUD_COLOUR_HB_BLUE~" + counterText.ToUpper());
+                        }
                         if (LeftAligned)
                         {
                             SetTextWrap(0f, (485f / MenuController.ScreenWidth));
