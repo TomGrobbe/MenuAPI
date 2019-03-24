@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -372,6 +372,9 @@ namespace MenuAPI
         public int CurrentIndex { get; internal set; } = 0;
 
         public bool EnableInstructionalButtons { get; set; } = true;
+
+        public float[] WeaponStats { get; private set; } = new float[4] { 0.5f, 0.5f, 0.5f, 0.5f };
+        public bool ShowWeaponStatsPanel { get; set; } = false;
 
         private bool filterActive = false;
 
@@ -858,6 +861,11 @@ namespace MenuAPI
             FilterItems.Clear();
         }
 
+        public void SetWeaponStats(float damage, float fireRate, float accuracy, float range)
+        {
+            WeaponStats = new float[4] { MathUtil.Clamp(damage, 0f, 1f), MathUtil.Clamp(fireRate, 0f, 1f), MathUtil.Clamp(accuracy, 0f, 1f), MathUtil.Clamp(range, 0f, 1f) };
+        }
+
         #endregion
 
         #region internal task functions
@@ -1270,6 +1278,178 @@ namespace MenuAPI
                     }
                 }
 
+                #endregion
+
+                #region Draw Weapon Stats
+                {
+                    if (Size > 0)
+                    {
+                        var currentItem = filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex];
+                        if (currentItem is MenuListItem listItem)
+                        {
+                            if (listItem.ShowColorPanel || listItem.ShowOpacityPanel)
+                            {
+                                goto SKIP_WEAPON_STATS;
+                            }
+                        }
+                    }
+
+                    if (ShowWeaponStatsPanel)
+                    {
+                        float textSize = (14f * 27f) / MenuController.ScreenHeight;
+                        float width = Width / MenuController.ScreenWidth;
+                        float height = (140f) / MenuController.ScreenHeight;
+                        float x = ((Width / 2f) / MenuController.ScreenWidth);
+                        float y = descriptionYOffset + (height / 2f) + (8f / MenuController.ScreenHeight);
+                        if (Size > MaxItemsOnScreen)
+                        {
+                            y -= (30f / MenuController.ScreenHeight);
+                        }
+
+
+                        #region background
+                        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                        DrawRect(x, y, width, height, 0, 0, 0, 180);
+                        ResetScriptGfxAlign();
+                        #endregion
+
+                        float bgStatBarWidth = (Width / 2f) / MenuController.ScreenWidth;
+                        float bgStatBarX = x + (bgStatBarWidth / 2f) - (10f / MenuController.ScreenWidth);
+
+                        if (!LeftAligned)
+                        {
+                            bgStatBarX = x - (bgStatBarWidth / 2f) - (10f / MenuController.ScreenWidth);
+                        }
+                        float barWidth;
+                        float barY = y - (height / 2f) + (25f / MenuController.ScreenHeight);
+                        float bgStatBarHeight = 10f / MenuController.ScreenHeight;
+                        float barX;
+                        #region damage bar
+                        barWidth = bgStatBarWidth * WeaponStats[0];
+                        if (LeftAligned)
+                        {
+                            barX = bgStatBarX - (bgStatBarWidth / 2f) + (barWidth / 2f);
+                        }
+                        else
+                        {
+                            barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
+                        }
+                        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                        // bar bg
+                        DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180);
+                        // real bar
+                        DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
+                        ResetScriptGfxAlign();
+                        #endregion
+
+                        #region fire rate bar
+                        barWidth = bgStatBarWidth * WeaponStats[1];
+                        barY += 30f / MenuController.ScreenHeight;
+                        if (LeftAligned)
+                        {
+                            barX = bgStatBarX - (bgStatBarWidth / 2f) + (barWidth / 2f);
+                        }
+                        else
+                        {
+                            barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
+                        }
+                        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                        // bar bg
+                        DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180);
+                        // real bar
+                        DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
+                        ResetScriptGfxAlign();
+                        #endregion
+
+                        #region accuracy bar
+                        barWidth = bgStatBarWidth * WeaponStats[2];
+                        barY += 30f / MenuController.ScreenHeight;
+                        if (LeftAligned)
+                        {
+                            barX = bgStatBarX - (bgStatBarWidth / 2f) + (barWidth / 2f);
+                        }
+                        else
+                        {
+                            barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
+                        }
+                        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                        // bar bg
+                        DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180);
+                        // real bar
+                        DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
+                        ResetScriptGfxAlign();
+                        #endregion
+
+                        #region range bar
+                        barWidth = bgStatBarWidth * WeaponStats[3];
+                        barY += 30f / MenuController.ScreenHeight;
+                        if (LeftAligned)
+                        {
+                            barX = bgStatBarX - (bgStatBarWidth / 2f) + (barWidth / 2f);
+                        }
+                        else
+                        {
+                            barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
+                        }
+                        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                        // bar bg
+                        DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180);
+                        // real bar
+                        DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
+                        ResetScriptGfxAlign();
+                        #endregion
+
+                        #region weapon stats text
+                        float textX = LeftAligned ? x - (width / 2f) + (10f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 10f) / MenuController.ScreenWidth);
+                        float textY = y - (height / 2f) + (10f / MenuController.ScreenHeight);
+
+                        SetScriptGfxAlign(76, 84);
+                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                        BeginTextCommandDisplayText("PM_DAMAGE");
+                        SetTextJustification(1);
+                        SetTextScale(textSize, textSize);
+
+                        EndTextCommandDisplayText(textX, textY);
+                        ResetScriptGfxAlign();
+
+                        SetScriptGfxAlign(76, 84);
+                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                        BeginTextCommandDisplayText("PM_FIRERATE");
+                        SetTextJustification(1);
+                        SetTextScale(textSize, textSize);
+                        textY += 30f / MenuController.ScreenHeight;
+                        EndTextCommandDisplayText(textX, textY);
+                        ResetScriptGfxAlign();
+
+                        SetScriptGfxAlign(76, 84);
+                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                        BeginTextCommandDisplayText("PM_ACCURACY");
+                        SetTextJustification(1);
+                        SetTextScale(textSize, textSize);
+                        textY += 30f / MenuController.ScreenHeight;
+                        EndTextCommandDisplayText(textX, textY);
+                        ResetScriptGfxAlign();
+
+                        SetScriptGfxAlign(76, 84);
+                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                        BeginTextCommandDisplayText("PM_RANGE");
+                        SetTextJustification(1);
+                        SetTextScale(textSize, textSize);
+                        textY += 30f / MenuController.ScreenHeight;
+                        EndTextCommandDisplayText(textX, textY);
+                        ResetScriptGfxAlign();
+                        #endregion
+
+                    }
+                }
+
+
+            SKIP_WEAPON_STATS:
                 #endregion
 
                 #region Draw Color and opacity palletes
