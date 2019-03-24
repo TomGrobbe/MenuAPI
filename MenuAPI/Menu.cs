@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -1005,7 +1005,7 @@ namespace MenuAPI
                         SetTextScale(size, size);
                         SetTextJustification(1);
                         // Don't make the text blue if another color is used in the string.
-                        if (MenuSubtitle.Contains("~"))
+                        if (MenuSubtitle.Contains("~") || string.IsNullOrEmpty(MenuTitle))
                         {
                             AddTextComponentSubstringPlayerName(MenuSubtitle.ToUpper());
                         }
@@ -1029,7 +1029,7 @@ namespace MenuAPI
 
                     #region draw counter + pre-counter text
                     string counterText = $"{CounterPreText ?? ""}{CurrentIndex + 1} / {Size}";
-                    if (CounterPreText != null || MaxItemsOnScreen < Size)
+                    if (!string.IsNullOrEmpty(CounterPreText) || MaxItemsOnScreen < Size)
                     {
                         int font = 0;
                         float size = (14f * 27f) / MenuController.ScreenHeight;
@@ -1042,7 +1042,7 @@ namespace MenuAPI
                         SetTextFont(font);
                         SetTextScale(size, size);
                         SetTextJustification(2);
-                        if (MenuSubtitle.Contains("~") || CounterPreText.Contains("~"))
+                        if (MenuSubtitle.Contains("~") || (CounterPreText ?? "").Contains("~") || string.IsNullOrEmpty(MenuTitle))
                         {
                             AddTextComponentSubstringPlayerName(counterText.ToUpper());
                         }
