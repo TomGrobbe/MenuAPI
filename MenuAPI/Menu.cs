@@ -377,6 +377,20 @@ namespace MenuAPI
 
         public Dictionary<Control, string> InstructionalButtons = new Dictionary<Control, string>() { { Control.FrontendAccept, GetLabelText("HUD_INPUT28") }, { Control.FrontendCancel, GetLabelText("HUD_INPUT53") } };
 
+        public List<InstructionalButton> CustomInstructionalButtons = new List<InstructionalButton>();
+
+        public struct InstructionalButton
+        {
+            public string controlString;
+            public string instructionText;
+
+            public InstructionalButton(string controlString, string instructionText)
+            {
+                this.controlString = controlString;
+                this.instructionText = instructionText;
+            }
+        }
+
         public enum ControlPressCheckType
         {
             JUST_RELEASED,
@@ -1260,10 +1274,10 @@ namespace MenuAPI
                         /// OPACITY PANEL
                         if (listItem.ShowOpacityPanel)
                         {
-                            PushScaleformMovieFunction(OpacityPanelScaleform, "SET_TITLE");
+                            BeginScaleformMovieMethod(OpacityPanelScaleform, "SET_TITLE");
                             PushScaleformMovieMethodParameterString("Opacity");
                             PushScaleformMovieMethodParameterString("");
-                            PushScaleformMovieMethodParameterInt(listItem.ListIndex * 10); // opacity percent
+                            ScaleformMovieMethodAddParamInt(listItem.ListIndex * 10); // opacity percent
                             EndScaleformMovieMethod();
 
                             float width = Width / MenuController.ScreenWidth;
@@ -1284,17 +1298,17 @@ namespace MenuAPI
                         /// COLOR PALLETE
                         else if (listItem.ShowColorPanel)
                         {
-                            PushScaleformMovieFunction(ColorPanelScaleform, "SET_TITLE");
+                            BeginScaleformMovieMethod(ColorPanelScaleform, "SET_TITLE");
                             PushScaleformMovieMethodParameterString("Opacity");
                             BeginTextCommandScaleformString("FACE_COLOUR");
                             AddTextComponentInteger(listItem.ListIndex + 1);
                             AddTextComponentInteger(listItem.ItemsCount);
                             EndTextCommandScaleformString();
-                            PushScaleformMovieMethodParameterInt(0); // opacity percent unused
-                            PushScaleformMovieMethodParameterBool(true);
+                            ScaleformMovieMethodAddParamInt(0); // opacity percent unused
+                            ScaleformMovieMethodAddParamBool(true);
                             EndScaleformMovieMethod();
 
-                            PushScaleformMovieFunction(ColorPanelScaleform, "SET_DATA_SLOT_EMPTY");
+                            BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT_EMPTY");
                             EndScaleformMovieMethod();
 
                             for (int i = 0; i < 64; i++)
@@ -1311,24 +1325,24 @@ namespace MenuAPI
                                     GetMakeupRgbColor(i, ref r, ref g, ref b); // _GetMakeupRgbColor
                                 }
 
-                                PushScaleformMovieFunction(ColorPanelScaleform, "SET_DATA_SLOT");
-                                PushScaleformMovieMethodParameterInt(i); // index
-                                PushScaleformMovieMethodParameterInt(r); // r
-                                PushScaleformMovieMethodParameterInt(g); // g
-                                PushScaleformMovieMethodParameterInt(b); // b
+                                BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT");
+                                ScaleformMovieMethodAddParamInt(i); // index
+                                ScaleformMovieMethodAddParamInt(r); // r
+                                ScaleformMovieMethodAddParamInt(g); // g
+                                ScaleformMovieMethodAddParamInt(b); // b
                                 EndScaleformMovieMethod();
                             }
 
-                            PushScaleformMovieFunction(ColorPanelScaleform, "DISPLAY_VIEW");
+                            BeginScaleformMovieMethod(ColorPanelScaleform, "DISPLAY_VIEW");
                             EndScaleformMovieMethod();
 
-                            PushScaleformMovieFunction(ColorPanelScaleform, "SET_HIGHLIGHT");
-                            PushScaleformMovieMethodParameterInt(listItem.ListIndex);
+                            BeginScaleformMovieMethod(ColorPanelScaleform, "SET_HIGHLIGHT");
+                            ScaleformMovieMethodAddParamInt(listItem.ListIndex);
                             EndScaleformMovieMethod();
 
-                            PushScaleformMovieFunction(ColorPanelScaleform, "SHOW_OPACITY");
-                            PushScaleformMovieMethodParameterBool(false);
-                            PushScaleformMovieMethodParameterBool(true);
+                            BeginScaleformMovieMethod(ColorPanelScaleform, "SHOW_OPACITY");
+                            ScaleformMovieMethodAddParamBool(false);
+                            ScaleformMovieMethodAddParamBool(true);
                             EndScaleformMovieMethod();
 
                             float width = Width / MenuController.ScreenWidth;
