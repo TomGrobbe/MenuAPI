@@ -699,8 +699,9 @@ namespace MenuAPI
                     CurrentIndex = Size - 1;
                 }
 
+                var currItem = GetCurrentMenuItem();
 
-                if (!VisibleMenuItems.Contains(filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex]))
+                if (currItem == null || !VisibleMenuItems.Contains(currItem))
                 {
                     ViewIndexOffset--;
                     if (ViewIndexOffset < 0)
@@ -709,7 +710,7 @@ namespace MenuAPI
                     }
                 }
 
-                IndexChangeEvent(this, oldItem, filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
+                IndexChangeEvent(this, oldItem, currItem, oldItem.Index, CurrentIndex);
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
             }
         }
@@ -737,7 +738,8 @@ namespace MenuAPI
                 {
                     CurrentIndex = 0;
                 }
-                if (!VisibleMenuItems.Contains(filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex]))
+                var currItem = GetCurrentMenuItem();
+                if (currItem == null || !VisibleMenuItems.Contains(currItem))
                 {
                     ViewIndexOffset++;
                     if (CurrentIndex == 0)
@@ -745,7 +747,7 @@ namespace MenuAPI
                         ViewIndexOffset = 0;
                     }
                 }
-                IndexChangeEvent(this, oldItem, filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex], oldItem.Index, CurrentIndex);
+                IndexChangeEvent(this, oldItem, currItem, oldItem.Index, CurrentIndex);
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
             }
         }
@@ -757,8 +759,8 @@ namespace MenuAPI
         {
             if (MenuController.AreMenuButtonsEnabled)
             {
-                var item = filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex];
-                if (item.Enabled && item is MenuListItem listItem)
+                var item = GetCurrentMenuItem();
+                if (item != null && item.Enabled && item is MenuListItem listItem)
                 {
                     if (listItem.ItemsCount > 0)
                     {
@@ -808,8 +810,8 @@ namespace MenuAPI
         {
             if (MenuController.AreMenuButtonsEnabled)
             {
-                var item = filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex];
-                if (item.Enabled && item is MenuListItem listItem)
+                var item = GetCurrentMenuItem();
+                if (item != null && item.Enabled && item is MenuListItem listItem)
                 {
                     if (listItem.ItemsCount > 0)
                     {
@@ -1245,7 +1247,7 @@ namespace MenuAPI
                         SetTextFont(font);
                         SetTextScale(textSize, textSize);
                         SetTextJustification(1);
-                        string text = filterActive ? FilterItems[CurrentIndex].Description : MenuItems[CurrentIndex].Description;
+                        string text = currentMenuItem.Description;
                         foreach (string s in CitizenFX.Core.UI.Screen.StringToArray(text))
                         {
                             AddTextComponentSubstringPlayerName(s);
@@ -1323,13 +1325,20 @@ namespace MenuAPI
                 {
                     if (Size > 0)
                     {
-                        var currentItem = filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex];
-                        if (currentItem is MenuListItem listItem)
+                        var currentItem = GetCurrentMenuItem();
+                        if (currentItem != null)
                         {
-                            if (listItem.ShowColorPanel || listItem.ShowOpacityPanel)
+                            if (currentItem is MenuListItem listItem)
                             {
-                                goto SKIP_WEAPON_STATS;
+                                if (listItem.ShowColorPanel || listItem.ShowOpacityPanel)
+                                {
+                                    goto SKIP_WEAPON_STATS;
+                                }
                             }
+                        }
+                        else
+                        {
+                            goto SKIP_WEAPON_STATS;
                         }
                     }
 
@@ -1516,98 +1525,99 @@ namespace MenuAPI
                 #region Draw Color and opacity palletes
                 if (Size > 0)
                 {
-                    var currentItem = filterActive ? FilterItems[CurrentIndex] : MenuItems[CurrentIndex];
-                    if (currentItem is MenuListItem listItem)
-                    {
-                        /// OPACITY PANEL
-                        if (listItem.ShowOpacityPanel)
+                    var currentItem = GetCurrentMenuItem();
+                    if (currentItem != null)
+                        if (currentItem is MenuListItem listItem)
                         {
-                            BeginScaleformMovieMethod(OpacityPanelScaleform, "SET_TITLE");
-                            PushScaleformMovieMethodParameterString("Opacity");
-                            PushScaleformMovieMethodParameterString("");
-                            ScaleformMovieMethodAddParamInt(listItem.ListIndex * 10); // opacity percent
-                            EndScaleformMovieMethod();
-
-                            float width = Width / MenuController.ScreenWidth;
-                            float height = ((700f / 500f) * Width) / MenuController.ScreenHeight;
-                            float x = ((Width / 2f) / MenuController.ScreenWidth);
-                            float y = descriptionYOffset + (height / 2f) + (4f / MenuController.ScreenHeight);
-                            if (Size > MaxItemsOnScreen)
+                            /// OPACITY PANEL
+                            if (listItem.ShowOpacityPanel)
                             {
-                                y -= (30f / MenuController.ScreenHeight);
-                            }
-
-                            SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-                            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                            DrawScaleformMovie(OpacityPanelScaleform, x, y, width, height, 255, 255, 255, 255, 0);
-                            ResetScriptGfxAlign();
-                        }
-
-                        /// COLOR PALLETE
-                        else if (listItem.ShowColorPanel)
-                        {
-                            BeginScaleformMovieMethod(ColorPanelScaleform, "SET_TITLE");
-                            PushScaleformMovieMethodParameterString("Opacity");
-                            BeginTextCommandScaleformString("FACE_COLOUR");
-                            AddTextComponentInteger(listItem.ListIndex + 1);
-                            AddTextComponentInteger(listItem.ItemsCount);
-                            EndTextCommandScaleformString();
-                            ScaleformMovieMethodAddParamInt(0); // opacity percent unused
-                            ScaleformMovieMethodAddParamBool(true);
-                            EndScaleformMovieMethod();
-
-                            BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT_EMPTY");
-                            EndScaleformMovieMethod();
-
-                            for (int i = 0; i < 64; i++)
-                            {
-                                var r = 0;
-                                var g = 0;
-                                var b = 0;
-                                if (listItem.ColorPanelColorType == MenuListItem.ColorPanelType.Hair)
-                                {
-                                    GetHairRgbColor(i, ref r, ref g, ref b); // _GetHairRgbColor
-                                }
-                                else
-                                {
-                                    GetMakeupRgbColor(i, ref r, ref g, ref b); // _GetMakeupRgbColor
-                                }
-
-                                BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT");
-                                ScaleformMovieMethodAddParamInt(i); // index
-                                ScaleformMovieMethodAddParamInt(r); // r
-                                ScaleformMovieMethodAddParamInt(g); // g
-                                ScaleformMovieMethodAddParamInt(b); // b
+                                BeginScaleformMovieMethod(OpacityPanelScaleform, "SET_TITLE");
+                                PushScaleformMovieMethodParameterString("Opacity");
+                                PushScaleformMovieMethodParameterString("");
+                                ScaleformMovieMethodAddParamInt(listItem.ListIndex * 10); // opacity percent
                                 EndScaleformMovieMethod();
+
+                                float width = Width / MenuController.ScreenWidth;
+                                float height = ((700f / 500f) * Width) / MenuController.ScreenHeight;
+                                float x = ((Width / 2f) / MenuController.ScreenWidth);
+                                float y = descriptionYOffset + (height / 2f) + (4f / MenuController.ScreenHeight);
+                                if (Size > MaxItemsOnScreen)
+                                {
+                                    y -= (30f / MenuController.ScreenHeight);
+                                }
+
+                                SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                                SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                                DrawScaleformMovie(OpacityPanelScaleform, x, y, width, height, 255, 255, 255, 255, 0);
+                                ResetScriptGfxAlign();
                             }
 
-                            BeginScaleformMovieMethod(ColorPanelScaleform, "DISPLAY_VIEW");
-                            EndScaleformMovieMethod();
-
-                            BeginScaleformMovieMethod(ColorPanelScaleform, "SET_HIGHLIGHT");
-                            ScaleformMovieMethodAddParamInt(listItem.ListIndex);
-                            EndScaleformMovieMethod();
-
-                            BeginScaleformMovieMethod(ColorPanelScaleform, "SHOW_OPACITY");
-                            ScaleformMovieMethodAddParamBool(false);
-                            ScaleformMovieMethodAddParamBool(true);
-                            EndScaleformMovieMethod();
-
-                            float width = Width / MenuController.ScreenWidth;
-                            float height = ((700f / 500f) * Width) / MenuController.ScreenHeight;
-                            float x = ((Width / 2f) / MenuController.ScreenWidth);
-                            float y = descriptionYOffset + (height / 2f) + (4f / MenuController.ScreenHeight);
-                            if (Size > MaxItemsOnScreen)
+                            /// COLOR PALLETE
+                            else if (listItem.ShowColorPanel)
                             {
-                                y -= (30f / MenuController.ScreenHeight);
-                            }
+                                BeginScaleformMovieMethod(ColorPanelScaleform, "SET_TITLE");
+                                PushScaleformMovieMethodParameterString("Opacity");
+                                BeginTextCommandScaleformString("FACE_COLOUR");
+                                AddTextComponentInteger(listItem.ListIndex + 1);
+                                AddTextComponentInteger(listItem.ItemsCount);
+                                EndTextCommandScaleformString();
+                                ScaleformMovieMethodAddParamInt(0); // opacity percent unused
+                                ScaleformMovieMethodAddParamBool(true);
+                                EndScaleformMovieMethod();
 
-                            SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-                            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                            DrawScaleformMovie(ColorPanelScaleform, x, y, width, height, 255, 255, 255, 255, 0);
-                            ResetScriptGfxAlign();
+                                BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT_EMPTY");
+                                EndScaleformMovieMethod();
+
+                                for (int i = 0; i < 64; i++)
+                                {
+                                    var r = 0;
+                                    var g = 0;
+                                    var b = 0;
+                                    if (listItem.ColorPanelColorType == MenuListItem.ColorPanelType.Hair)
+                                    {
+                                        GetHairRgbColor(i, ref r, ref g, ref b); // _GetHairRgbColor
+                                    }
+                                    else
+                                    {
+                                        GetMakeupRgbColor(i, ref r, ref g, ref b); // _GetMakeupRgbColor
+                                    }
+
+                                    BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT");
+                                    ScaleformMovieMethodAddParamInt(i); // index
+                                    ScaleformMovieMethodAddParamInt(r); // r
+                                    ScaleformMovieMethodAddParamInt(g); // g
+                                    ScaleformMovieMethodAddParamInt(b); // b
+                                    EndScaleformMovieMethod();
+                                }
+
+                                BeginScaleformMovieMethod(ColorPanelScaleform, "DISPLAY_VIEW");
+                                EndScaleformMovieMethod();
+
+                                BeginScaleformMovieMethod(ColorPanelScaleform, "SET_HIGHLIGHT");
+                                ScaleformMovieMethodAddParamInt(listItem.ListIndex);
+                                EndScaleformMovieMethod();
+
+                                BeginScaleformMovieMethod(ColorPanelScaleform, "SHOW_OPACITY");
+                                ScaleformMovieMethodAddParamBool(false);
+                                ScaleformMovieMethodAddParamBool(true);
+                                EndScaleformMovieMethod();
+
+                                float width = Width / MenuController.ScreenWidth;
+                                float height = ((700f / 500f) * Width) / MenuController.ScreenHeight;
+                                float x = ((Width / 2f) / MenuController.ScreenWidth);
+                                float y = descriptionYOffset + (height / 2f) + (4f / MenuController.ScreenHeight);
+                                if (Size > MaxItemsOnScreen)
+                                {
+                                    y -= (30f / MenuController.ScreenHeight);
+                                }
+
+                                SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                                SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                                DrawScaleformMovie(ColorPanelScaleform, x, y, width, height, 255, 255, 255, 255, 0);
+                                ResetScriptGfxAlign();
+                            }
                         }
-                    }
                 }
 
                 #endregion
