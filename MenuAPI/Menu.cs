@@ -478,6 +478,27 @@ namespace MenuAPI
         }
 
         /// <summary>
+        /// Retuns the currently selected menu item. Or null if there are no menu items, or the current menu index is out of range.
+        /// </summary>
+        /// <returns></returns>
+        public MenuItem GetCurrentMenuItem()
+        {
+            var items = GetMenuItems();
+            if (items.Count > CurrentIndex)
+            {
+                try
+                {
+                    return items[CurrentIndex];
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine($"[MenuAPI ({GetCurrentResourceName()})] Error: Could not get currrent menu item, error details: {e.Message}.");
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Removes all menu items.
         /// </summary>
         public void ClearMenuItems()
