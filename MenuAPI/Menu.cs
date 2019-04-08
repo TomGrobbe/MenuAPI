@@ -553,7 +553,6 @@ namespace MenuAPI
             if (itemIndex < Size && itemIndex > -1)
             {
                 RemoveMenuItem(MenuItems[itemIndex]);
-                RemoveMenuItem(MenuItems[itemIndex]);
             }
         }
 
