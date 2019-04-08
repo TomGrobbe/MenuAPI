@@ -559,86 +559,92 @@ namespace MenuAPI
             #region Disable Inputs when any menu is open.
             if (IsAnyMenuOpen())
             {
-                var currentItem = GetCurrentMenu()?.Size > GetCurrentMenu()?.CurrentIndex ? GetCurrentMenu()?.GetMenuItems()[GetCurrentMenu().CurrentIndex] : null;
-                if (currentItem != null)
+                var currMenu = GetCurrentMenu();
+                if (currMenu != null)
                 {
-                    if (currentItem is MenuSliderItem || currentItem is MenuListItem || currentItem is MenuDynamicListItem)
+                    //var currentItem = currMenu.Size > currMenu.CurrentIndex ? currMenu.GetMenuItems()[currMenu.CurrentIndex] : null;
+                    var currentItem = currMenu.GetCurrentMenuItem();
+                    if (currentItem != null)
                     {
-                        if (Game.CurrentInputMode == InputMode.GamePad)
-                            Game.DisableControlThisFrame(0, Control.SelectWeapon);
+                        if (currentItem is MenuSliderItem || currentItem is MenuListItem || currentItem is MenuDynamicListItem)
+                        {
+                            if (Game.CurrentInputMode == InputMode.GamePad)
+                                Game.DisableControlThisFrame(0, Control.SelectWeapon);
+                        }
                     }
-                }
 
-                // Close all menus when the player dies.
-                if (Game.PlayerPed.IsDead)
-                {
-                    CloseAllMenus();
-                }
+                    // Close all menus when the player dies.
+                    if (Game.PlayerPed.IsDead)
+                    {
+                        CloseAllMenus();
+                    }
 
-                // Disable Gamepad/Controller Specific controls:
-                if (Game.CurrentInputMode == InputMode.GamePad)
-                {
-                    Game.DisableControlThisFrame(0, Control.MultiplayerInfo);
-                    // when in a vehicle.
+                    // Disable Gamepad/Controller Specific controls:
+                    if (Game.CurrentInputMode == InputMode.GamePad)
+                    {
+                        Game.DisableControlThisFrame(0, Control.MultiplayerInfo);
+                        // when in a vehicle.
+                        if (Game.PlayerPed.IsInVehicle())
+                        {
+                            Game.DisableControlThisFrame(0, Control.VehicleHeadlight);
+                            Game.DisableControlThisFrame(0, Control.VehicleDuck);
+
+                            // toggles boost in some dlc vehicles, hence it's disabled for controllers only (pressing select in the menu would trigger this).
+                            Game.DisableControlThisFrame(0, Control.VehicleFlyTransform);
+                        }
+                    }
+                    else // when not using a controller.
+                    {
+                        Game.DisableControlThisFrame(0, Control.FrontendPauseAlternate); // disable the escape key opening the pause menu, pressing P still works.
+
+                        // Disable the scrollwheel button changing weapons while the menu is open.
+                        // Only if you press TAB (to show the weapon wheel) then it will allow you to change weapons.
+                        if (!Game.IsControlPressed(0, Control.SelectWeapon))
+                        {
+                            Game.DisableControlThisFrame(24, Control.SelectNextWeapon);
+                            Game.DisableControlThisFrame(24, Control.SelectPrevWeapon);
+                        }
+                    }
+                    // Disable Shared Controls
+
+                    // Radio Inputs
+                    Game.DisableControlThisFrame(0, Control.RadioWheelLeftRight);
+                    Game.DisableControlThisFrame(0, Control.RadioWheelUpDown);
+                    Game.DisableControlThisFrame(0, Control.VehicleNextRadio);
+                    Game.DisableControlThisFrame(0, Control.VehicleRadioWheel);
+                    Game.DisableControlThisFrame(0, Control.VehiclePrevRadio);
+
+                    // Phone / Arrows Inputs
+                    Game.DisableControlThisFrame(0, Control.Phone);
+                    Game.DisableControlThisFrame(0, Control.PhoneCancel);
+                    Game.DisableControlThisFrame(0, Control.PhoneDown);
+                    Game.DisableControlThisFrame(0, Control.PhoneLeft);
+                    Game.DisableControlThisFrame(0, Control.PhoneRight);
+
+                    // Attack Controls
+                    Game.DisableControlThisFrame(0, Control.Attack);
+                    Game.DisableControlThisFrame(0, Control.Attack2);
+                    Game.DisableControlThisFrame(0, Control.MeleeAttack1);
+                    Game.DisableControlThisFrame(0, Control.MeleeAttack2);
+                    Game.DisableControlThisFrame(0, Control.MeleeAttackAlternate);
+                    Game.DisableControlThisFrame(0, Control.MeleeAttackHeavy);
+                    Game.DisableControlThisFrame(0, Control.MeleeAttackLight);
+                    Game.DisableControlThisFrame(0, Control.VehicleAttack);
+                    Game.DisableControlThisFrame(0, Control.VehicleAttack2);
+                    Game.DisableControlThisFrame(0, Control.VehicleFlyAttack);
+                    Game.DisableControlThisFrame(0, Control.VehiclePassengerAttack);
+                    Game.DisableControlThisFrame(0, Control.Aim);
+                    Game.DisableControlThisFrame(0, Control.VehicleAim); // fires vehicle specific weapons when using right click on the mouse sometimes.
+
+                    // When in a vehicle
                     if (Game.PlayerPed.IsInVehicle())
                     {
-                        Game.DisableControlThisFrame(0, Control.VehicleHeadlight);
-                        Game.DisableControlThisFrame(0, Control.VehicleDuck);
-
-                        // toggles boost in some dlc vehicles, hence it's disabled for controllers only (pressing select in the menu would trigger this).
-                        Game.DisableControlThisFrame(0, Control.VehicleFlyTransform);
+                        Game.DisableControlThisFrame(0, Control.VehicleSelectNextWeapon);
+                        Game.DisableControlThisFrame(0, Control.VehicleSelectPrevWeapon);
+                        Game.DisableControlThisFrame(0, Control.VehicleCinCam);
                     }
                 }
-                else // when not using a controller.
-                {
-                    Game.DisableControlThisFrame(0, Control.FrontendPauseAlternate); // disable the escape key opening the pause menu, pressing P still works.
 
-                    // Disable the scrollwheel button changing weapons while the menu is open.
-                    // Only if you press TAB (to show the weapon wheel) then it will allow you to change weapons.
-                    if (!Game.IsControlPressed(0, Control.SelectWeapon))
-                    {
-                        Game.DisableControlThisFrame(24, Control.SelectNextWeapon);
-                        Game.DisableControlThisFrame(24, Control.SelectPrevWeapon);
-                    }
-                }
-                // Disable Shared Controls
-
-                // Radio Inputs
-                Game.DisableControlThisFrame(0, Control.RadioWheelLeftRight);
-                Game.DisableControlThisFrame(0, Control.RadioWheelUpDown);
-                Game.DisableControlThisFrame(0, Control.VehicleNextRadio);
-                Game.DisableControlThisFrame(0, Control.VehicleRadioWheel);
-                Game.DisableControlThisFrame(0, Control.VehiclePrevRadio);
-
-                // Phone / Arrows Inputs
-                Game.DisableControlThisFrame(0, Control.Phone);
-                Game.DisableControlThisFrame(0, Control.PhoneCancel);
-                Game.DisableControlThisFrame(0, Control.PhoneDown);
-                Game.DisableControlThisFrame(0, Control.PhoneLeft);
-                Game.DisableControlThisFrame(0, Control.PhoneRight);
-
-                // Attack Controls
-                Game.DisableControlThisFrame(0, Control.Attack);
-                Game.DisableControlThisFrame(0, Control.Attack2);
-                Game.DisableControlThisFrame(0, Control.MeleeAttack1);
-                Game.DisableControlThisFrame(0, Control.MeleeAttack2);
-                Game.DisableControlThisFrame(0, Control.MeleeAttackAlternate);
-                Game.DisableControlThisFrame(0, Control.MeleeAttackHeavy);
-                Game.DisableControlThisFrame(0, Control.MeleeAttackLight);
-                Game.DisableControlThisFrame(0, Control.VehicleAttack);
-                Game.DisableControlThisFrame(0, Control.VehicleAttack2);
-                Game.DisableControlThisFrame(0, Control.VehicleFlyAttack);
-                Game.DisableControlThisFrame(0, Control.VehiclePassengerAttack);
-                Game.DisableControlThisFrame(0, Control.Aim);
-                Game.DisableControlThisFrame(0, Control.VehicleAim); // fires vehicle specific weapons when using right click on the mouse sometimes.
-
-                // When in a vehicle
-                if (Game.PlayerPed.IsInVehicle())
-                {
-                    Game.DisableControlThisFrame(0, Control.VehicleSelectNextWeapon);
-                    Game.DisableControlThisFrame(0, Control.VehicleSelectPrevWeapon);
-                    Game.DisableControlThisFrame(0, Control.VehicleCinCam);
-                }
             }
             #endregion
         }
