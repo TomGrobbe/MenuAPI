@@ -562,7 +562,6 @@ namespace MenuAPI
                 var currMenu = GetCurrentMenu();
                 if (currMenu != null)
                 {
-                    //var currentItem = currMenu.Size > currMenu.CurrentIndex ? currMenu.GetMenuItems()[currMenu.CurrentIndex] : null;
                     var currentItem = currMenu.GetCurrentMenuItem();
                     if (currentItem != null)
                     {

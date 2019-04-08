@@ -994,7 +994,6 @@ namespace MenuAPI
                     #region Draw Header Menu Title
                     int font = 1;
                     float size = (45f * 27f) / MenuController.ScreenHeight;
-                    //float size = 1.1f;
 
                     SetScriptGfxAlign(76, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -1168,7 +1167,7 @@ namespace MenuAPI
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
                         DrawRect(x, y, width, height, 0, 0, 0, 180);
-                        descriptionYOffset = height;// + (1f / MenuController.ScreenHeight);
+                        descriptionYOffset = height;
                         ResetScriptGfxAlign();
                         #endregion
 
@@ -1186,7 +1185,6 @@ namespace MenuAPI
 
                         SetTextFont(0);
                         SetTextScale(1f, (14f * 27f) / MenuController.ScreenHeight);
-                        //SetTextScale(0.35f, 0.35f);
                         SetTextJustification(0);
                         if (LeftAligned)
                         {
@@ -1207,7 +1205,6 @@ namespace MenuAPI
 
                         SetTextFont(0);
                         SetTextScale(1f, (14f * 27f) / MenuController.ScreenHeight);
-                        //SetTextScale(0.35f, 0.35f);
                         SetTextJustification(0);
                         if (LeftAligned)
                         {
@@ -1230,12 +1227,12 @@ namespace MenuAPI
                 #region Draw Description
                 if (Size > 0)
                 {
-                    if (!string.IsNullOrEmpty(filterActive ? FilterItems[CurrentIndex].Description : MenuItems[CurrentIndex].Description))
+                    var currentMenuItem = GetCurrentMenuItem();
+                    if (currentMenuItem != null && !string.IsNullOrEmpty(currentMenuItem.Description))
                     {
                         #region description text
                         int font = 0;
                         float textSize = (14f * 27f) / MenuController.ScreenHeight;
-                        //float textSize = 0.35f;
 
                         float textMinX = 0f + (10f / MenuController.ScreenWidth);
                         float textMaxX = Width / MenuController.ScreenWidth - (10f / MenuController.ScreenWidth);
@@ -1317,6 +1314,7 @@ namespace MenuAPI
                     {
                         descriptionYOffset += MenuItemsYOffset / MenuController.ScreenHeight + (2f / MenuController.ScreenHeight) + descriptionYOffset;
                     }
+
                 }
 
                 #endregion
