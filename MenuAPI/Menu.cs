@@ -315,7 +315,7 @@ namespace MenuAPI
 
         #region private variables
         private static SizeF headerSize = new SizeF(Width, 110f);
-
+        private int index = 0;
         public int ViewIndexOffset { get; private set; } = 0;
 
         private List<MenuItem> VisibleMenuItems
@@ -369,7 +369,7 @@ namespace MenuAPI
 
         public Menu ParentMenu { get; internal set; } = null;
 
-        public int CurrentIndex { get; internal set; } = 0;
+        public int CurrentIndex { get { return index; } internal set { index = MathUtil.Clamp(value, 0, Math.Max(0, Size - 1)); } }
 
         public bool EnableInstructionalButtons { get; set; } = true;
 
@@ -492,7 +492,13 @@ namespace MenuAPI
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine($"[MenuAPI ({GetCurrentResourceName()})] Error: Could not get currrent menu item, error details: {e.Message}.");
+                    string itemsString = "";
+                    foreach (var d in items)
+                    {
+                        itemsString += d.Text + ", ";
+                    }
+                    itemsString = itemsString.Trim(',', ' ');
+                    Debug.WriteLine($"[MenuAPI ({GetCurrentResourceName()})] Error: Could not get currrent menu item, error details: {e.Message}. Current index: {CurrentIndex}. Current menu size: {Size}. Current menu name: {MenuTitle}. List of menu items: {itemsString}.");
                 }
             }
             return null;
