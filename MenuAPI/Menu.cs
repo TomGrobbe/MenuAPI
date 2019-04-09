@@ -699,9 +699,13 @@ namespace MenuAPI
                     oldItem = MenuItems[CurrentIndex];
                 }
 
-                CurrentIndex--; if (CurrentIndex < 0)
+                if (CurrentIndex == 0)
                 {
                     CurrentIndex = Size - 1;
+                }
+                else
+                {
+                    CurrentIndex--;
                 }
 
                 var currItem = GetCurrentMenuItem();
@@ -738,11 +742,15 @@ namespace MenuAPI
                     oldItem = MenuItems[CurrentIndex];
                 }
 
-                CurrentIndex++;
-                if (CurrentIndex >= Size)
+                if (CurrentIndex > 0 && CurrentIndex >= Size - 1)
                 {
                     CurrentIndex = 0;
                 }
+                else
+                {
+                    CurrentIndex++;
+                }
+
                 var currItem = GetCurrentMenuItem();
                 if (currItem == null || !VisibleMenuItems.Contains(currItem))
                 {
