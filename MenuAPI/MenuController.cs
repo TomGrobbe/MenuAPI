@@ -714,23 +714,11 @@ namespace MenuAPI
                     EndScaleformMovieMethod();
 
 
-                    // Use custom instructional buttons FIRST if they're present.
-                    if (menu.CustomInstructionalButtons.Count > 0)
-                    {
-                        for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)
-                        {
-                            Menu.InstructionalButton button = menu.CustomInstructionalButtons[i];
-                            BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
-                            ScaleformMovieMethodAddParamInt(i);
-                            PushScaleformMovieMethodParameterString(button.controlString);
-                            PushScaleformMovieMethodParameterString(button.instructionText);
-                            EndScaleformMovieMethod();
-                        }
-                    }
+                    
 
                     for (int i = 0; i < menu.InstructionalButtons.Count; i++)
                     {
-                        int buttonIndex = i + menu.CustomInstructionalButtons.Count;
+                        int buttonIndex = i;
                         string text = menu.InstructionalButtons.ElementAt(i).Value;
                         Control control = menu.InstructionalButtons.ElementAt(i).Key;
 
@@ -740,6 +728,20 @@ namespace MenuAPI
                         PushScaleformMovieMethodParameterString(buttonName);
                         PushScaleformMovieMethodParameterString(text);
                         EndScaleformMovieMethod();
+                    }
+
+                    // Use custom instructional buttons FIRST if they're present.
+                    if (menu.CustomInstructionalButtons.Count > 0)
+                    {
+                        for (int i = 0; i < menu.CustomInstructionalButtons.Count + menu.InstructionalButtons.Count; i++)
+                        {
+                            Menu.InstructionalButton button = menu.CustomInstructionalButtons[i];
+                            BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
+                            ScaleformMovieMethodAddParamInt(i + menu.InstructionalButtons.Count);
+                            PushScaleformMovieMethodParameterString(button.controlString);
+                            PushScaleformMovieMethodParameterString(button.instructionText);
+                            EndScaleformMovieMethod();
+                        }
                     }
 
                     BeginScaleformMovieMethod(_scale, "DRAW_INSTRUCTIONAL_BUTTONS");
