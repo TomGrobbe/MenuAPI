@@ -718,12 +718,11 @@ namespace MenuAPI
 
                     for (int i = 0; i < menu.InstructionalButtons.Count; i++)
                     {
-                        int buttonIndex = i;
                         string text = menu.InstructionalButtons.ElementAt(i).Value;
                         Control control = menu.InstructionalButtons.ElementAt(i).Key;
 
                         BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
-                        ScaleformMovieMethodAddParamInt(buttonIndex);
+                        ScaleformMovieMethodAddParamInt(i);
                         string buttonName = GetControlInstructionalButton(0, (int)control, 1);
                         PushScaleformMovieMethodParameterString(buttonName);
                         PushScaleformMovieMethodParameterString(text);
@@ -733,7 +732,7 @@ namespace MenuAPI
                     // Use custom instructional buttons FIRST if they're present.
                     if (menu.CustomInstructionalButtons.Count > 0)
                     {
-                        for (int i = 0; i < menu.CustomInstructionalButtons.Count + menu.InstructionalButtons.Count; i++)
+                        for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)
                         {
                             Menu.InstructionalButton button = menu.CustomInstructionalButtons[i];
                             BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
