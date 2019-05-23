@@ -8,11 +8,6 @@ using static CitizenFX.Core.Native.API;
 
 namespace MenuAPI
 {
-    public class AspectRatioException : Exception
-    {
-        public AspectRatioException(string message) : base(message) { }
-    }
-
     public class MenuController : BaseScript
     {
         public static List<Menu> Menus { get; protected set; } = new List<Menu>();
@@ -62,9 +57,9 @@ namespace MenuAPI
                     // so (re)set it to be left aligned.
                     _alignment = MenuAlignmentOption.Left;
 
-                    // In case the value was being changed to be right aligned, throw an exception so the resource can handle this and notify the user properly.
+                    // In case the value was being changed to be right aligned, notify the user properly.
                     if (value == MenuAlignmentOption.Right)
-                        throw new AspectRatioException("Right aligned menus are not supported for aspect ratios 17:9 or 21:9.");
+                        Debug.WriteLine($"[MenuAPI ({GetCurrentResourceName()})] Warning: Right aligned menus are not supported for aspect ratios 17:9 or 21:9, left aligned will be used instead.");
                 }
             }
         }
