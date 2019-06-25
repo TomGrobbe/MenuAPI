@@ -1105,7 +1105,7 @@ namespace MenuAPI
                         SetTextFont(font);
                         SetTextScale(size, size);
                         SetTextJustification(2);
-                        if (MenuSubtitle.Contains("~") || (CounterPreText ?? "").Contains("~") || string.IsNullOrEmpty(MenuTitle))
+                        if ((MenuSubtitle ?? "").Contains("~") || (CounterPreText ?? "").Contains("~") || string.IsNullOrEmpty(MenuTitle))
                         {
                             AddTextComponentSubstringPlayerName(counterText.ToUpper());
                         }
