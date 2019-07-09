@@ -197,7 +197,12 @@ namespace MenuAPI
                     if (currentMenu.Visible && AreMenuButtonsEnabled)
                     {
                         // Select / Enter
-                        if (Game.IsDisabledControlJustReleased(0, Control.FrontendAccept) || Game.IsControlJustReleased(0, Control.FrontendAccept) || (Game.IsDisabledControlJustReleased(0, Control.VehicleMouseControlOverride) || Game.IsControlJustReleased(0, Control.VehicleMouseControlOverride)))
+                        if (
+                            Game.IsDisabledControlJustReleased(0, Control.FrontendAccept) ||
+                            Game.IsControlJustReleased(0, Control.FrontendAccept) ||
+                            Game.IsDisabledControlJustReleased(0, Control.VehicleMouseControlOverride) ||
+                            Game.IsControlJustReleased(0, Control.VehicleMouseControlOverride)
+                            )
                         {
                             if (currentMenu.Size > 0)
                             {
@@ -709,7 +714,7 @@ namespace MenuAPI
                     EndScaleformMovieMethod();
 
 
-                    
+
 
                     for (int i = 0; i < menu.InstructionalButtons.Count; i++)
                     {

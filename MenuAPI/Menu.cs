@@ -813,6 +813,16 @@ namespace MenuAPI
                     DynamicListItemCurrentItemChanged(this, dynList, oldValue, newSelectedItem);
                     PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                 }
+                // If it's a checkbox, just trigger the box instead.
+                else if (item.Enabled && item is MenuCheckboxItem checkbox)
+                {
+                    SelectItem(checkbox);
+                }
+                // If the item is enabled and it's not any of the above, just select it.
+                else if (item.Enabled)
+                {
+                    SelectItem(item);
+                }
             }
         }
 
@@ -863,6 +873,16 @@ namespace MenuAPI
                     dynList.CurrentItem = newSelectedItem;
                     DynamicListItemCurrentItemChanged(this, dynList, oldValue, newSelectedItem);
                     PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+                }
+                // If it's a checkbox, just trigger the box instead.
+                else if (item.Enabled && item is MenuCheckboxItem checkbox)
+                {
+                    SelectItem(checkbox);
+                }
+                // If the item is enabled and it's not any of the above, just select it.
+                else if (item.Enabled)
+                {
+                    SelectItem(item);
                 }
             }
         }
