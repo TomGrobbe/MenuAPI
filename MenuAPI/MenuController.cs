@@ -18,7 +18,7 @@ namespace MenuAPI
         public static float ScreenWidth => 1080 * AspectRatio;
         public static float ScreenHeight => 1080;
         public static bool DisableMenuButtons { get; set; } = false;
-        public static bool AreMenuButtonsEnabled => Menus.Any((m) => m.Visible) && !Game.IsPaused && CitizenFX.Core.UI.Screen.Fading.IsFadedIn && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !Game.Player.IsDead;
+        public static bool AreMenuButtonsEnabled => Menus.Any((m) => m.Visible) && !Game.IsPaused && CitizenFX.Core.UI.Screen.Fading.IsFadedIn && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !Game.PlayerPed.IsDead;
 
         public static bool EnableManualGCs { get; set; } = true;
         public static bool DontOpenAnyMenu { get; set; } = false;
@@ -312,7 +312,7 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessToggleMenuButton()
         {
-            if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.Player.IsDead && !DisableMenuButtons)
+            if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.PlayerPed.IsDead && !DisableMenuButtons)
             {
                 if (IsAnyMenuOpen())
                 {
@@ -336,7 +336,7 @@ namespace MenuAPI
                             return;
 
                         int tmpTimer = GetGameTimer();
-                        while ((Game.IsControlPressed(0, Control.InteractionMenu) || Game.IsDisabledControlPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !Game.Player.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
+                        while ((Game.IsControlPressed(0, Control.InteractionMenu) || Game.IsDisabledControlPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !Game.PlayerPed.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
                         {
                             if (GetGameTimer() - tmpTimer > 400)
                             {
@@ -358,7 +358,7 @@ namespace MenuAPI
                     }
                     else
                     {
-                        if ((Game.IsControlJustPressed(0, MenuToggleKey) || Game.IsDisabledControlJustPressed(0, MenuToggleKey)) && !Game.IsPaused && IsScreenFadedIn() && !Game.Player.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
+                        if ((Game.IsControlJustPressed(0, MenuToggleKey) || Game.IsDisabledControlJustPressed(0, MenuToggleKey)) && !Game.IsPaused && IsScreenFadedIn() && !Game.PlayerPed.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
                         {
                             if (Menus.Count > 0)
                             {
@@ -656,7 +656,7 @@ namespace MenuAPI
         /// <returns></returns>
         private static async Task ProcessMenus()
         {
-            if (Menus.Count > 0 && IsAnyMenuOpen() && !Game.IsPaused && !Game.Player.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress())
+            if (Menus.Count > 0 && IsAnyMenuOpen() && !Game.IsPaused && !Game.PlayerPed.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress())
             {
                 await LoadAssets();
 
@@ -696,7 +696,7 @@ namespace MenuAPI
 
         internal static async Task DrawInstructionalButtons()
         {
-            if (!Game.IsPaused && !Game.Player.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !IsWarningMessageActive() && UpdateOnscreenKeyboard() != 0)
+            if (!Game.IsPaused && !Game.PlayerPed.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !IsWarningMessageActive() && UpdateOnscreenKeyboard() != 0)
             {
                 Menu menu = GetCurrentMenu();
                 if (menu != null && menu.Visible && menu.EnableInstructionalButtons)
