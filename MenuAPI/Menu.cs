@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -992,7 +992,7 @@ namespace MenuAPI
                 #endregion
 
                 MenuItemsYOffset = 0f;
-
+                SetScriptGfxDrawOrder(1);
                 #region Draw Header
                 if (!string.IsNullOrEmpty(MenuTitle))
                 {
@@ -1308,7 +1308,7 @@ namespace MenuAPI
                         SetTextScale(textSize, textSize);
                         SetTextJustification(1);
                         SetTextFont(font);
-                        int lineCount = 1;
+                        int lineCount;
                         foreach (string s in CitizenFX.Core.UI.Screen.StringToArray(text))
                         {
                             AddTextComponentSubstringPlayerName(s);
@@ -1654,6 +1654,7 @@ namespace MenuAPI
                 }
 
                 #endregion
+                SetScriptGfxDrawOrder(0);
             }
         }
         #endregion
