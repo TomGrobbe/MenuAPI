@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,8 +50,6 @@ namespace MenuAPI
             MISSION_STAR,
             DEATHMATCH,
             CASTLE,
-            CROWN2,
-            THREE_CROWNS,
             TROPHY,
             RACE_FLAG,
             RACE_FLAG_PLANE,
@@ -114,8 +112,6 @@ namespace MenuAPI
                 case Icon.MISSION_STAR:
                 case Icon.DEATHMATCH:
                 case Icon.CASTLE:
-                case Icon.CROWN2:
-                case Icon.THREE_CROWNS:
                 case Icon.TROPHY:
                 case Icon.RACE_FLAG:
                 case Icon.RACE_FLAG_PLANE:
@@ -176,8 +172,6 @@ namespace MenuAPI
                 case Icon.MISSION_STAR: return "custom_mission";
                 case Icon.DEATHMATCH: return "deathmatch";
                 case Icon.CASTLE: return "gang_attack";
-                case Icon.CROWN2: return "king_of_the_hill";
-                case Icon.THREE_CROWNS: return "king_of_the_hill_teams";
                 case Icon.TROPHY: return "last_team_standing";
                 case Icon.RACE_FLAG: return "race";
                 case Icon.RACE_FLAG_PLANE: return "race_air";
@@ -214,8 +208,6 @@ namespace MenuAPI
                 case Icon.MISSION_STAR:
                 case Icon.DEATHMATCH:
                 case Icon.CASTLE:
-                case Icon.CROWN2:
-                case Icon.THREE_CROWNS:
                 case Icon.TROPHY:
                 case Icon.RACE_FLAG:
                 case Icon.RACE_FLAG_PLANE:
