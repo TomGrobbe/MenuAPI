@@ -138,7 +138,7 @@ namespace TestMenu
             // Adding items with sprites left & right to the submenu.
             for (var i = 0; i < 53; i++)
             {
-                var tmpItem = new MenuItem($"Icon Sprite #{i}", "This menu item has a left and right sprite, and some also have a right label! Very cool huh?!");
+                var tmpItem = new MenuItem($"Icon.{Enum.GetName(typeof(MenuItem.Icon), ((MenuItem.Icon)i))}", "This menu item has a left and right sprite, and some also have a right label! Very cool huh?!");
                 if (i % 4 == 0)
                 {
                     tmpItem.Label = "Wowzers";
