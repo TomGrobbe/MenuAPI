@@ -136,11 +136,12 @@ namespace MenuAPI
         /// <returns></returns>
         private static async Task LoadAssets()
         {
-            if (!HasStreamedTextureDictLoaded(_texture_dict) || !HasStreamedTextureDictLoaded("mpleaderboard"))
+            if (!HasStreamedTextureDictLoaded(_texture_dict) || !HasStreamedTextureDictLoaded("mpleaderboard") || !HasStreamedTextureDictLoaded("commonmenutu"))
             {
                 RequestStreamedTextureDict(_texture_dict, false);
                 RequestStreamedTextureDict("mpleaderboard", false);
-                while (!HasStreamedTextureDictLoaded(_texture_dict) || !HasStreamedTextureDictLoaded("mpleaderboard"))
+                RequestStreamedTextureDict("commonmenutu", false);
+                while (!HasStreamedTextureDictLoaded(_texture_dict) || !HasStreamedTextureDictLoaded("mpleaderboard") || !HasStreamedTextureDictLoaded("commonmenutu"))
                 {
                     await Delay(0);
                 }

@@ -42,7 +42,30 @@ namespace MenuAPI
             TICK,
             TREVOR,
             FEMALE,
-            MALE
+            MALE,
+            LOCK_ARENA,
+            ADVERSARY,
+            BASE_JUMPING,
+            BRIEFCASE,
+            MISSION_STAR,
+            DEATHMATCH,
+            CASTLE,
+            CROWN2,
+            THREE_CROWNS,
+            TROPHY,
+            RACE_FLAG,
+            RACE_FLAG_PLANE,
+            RACE_FLAG_BICYCLE,
+            RACE_FLAG_PERSON,
+            RACE_FLAG_CAR,
+            RACE_FLAG_BOAT_ANCHOR,
+            ROCKSTAR,
+            STUNT,
+            STUNT_PREMIUM,
+            RACE_FLAG_STUNT_JUMP,
+            SHIELD,
+            TEAM_DEATHMATCH,
+            VEHICLE_DEATHMATCH,
         }
 
         public string Text { get; set; }
@@ -57,7 +80,7 @@ namespace MenuAPI
         public int PositionOnScreen { get; internal set; }
         protected const float Width = Menu.Width;
         protected const float RowHeight = 38f;
-        
+
         // Allows you to attach data to a menu item if you want to identify the menu item without having to put identification info in the visible text or description.
         public dynamic ItemData { get; set; }
 
@@ -76,6 +99,41 @@ namespace MenuAPI
         {
             Text = text;
             Description = description;
+        }
+
+        protected string GetSpriteDictionary(Icon icon)
+        {
+            switch (icon)
+            {
+                case Icon.MALE:
+                case Icon.FEMALE:
+                    return "mpleaderboard";
+                case Icon.ADVERSARY:
+                case Icon.BASE_JUMPING:
+                case Icon.BRIEFCASE:
+                case Icon.MISSION_STAR:
+                case Icon.DEATHMATCH:
+                case Icon.CASTLE:
+                case Icon.CROWN2:
+                case Icon.THREE_CROWNS:
+                case Icon.TROPHY:
+                case Icon.RACE_FLAG:
+                case Icon.RACE_FLAG_PLANE:
+                case Icon.RACE_FLAG_BICYCLE:
+                case Icon.RACE_FLAG_PERSON:
+                case Icon.RACE_FLAG_CAR:
+                case Icon.RACE_FLAG_BOAT_ANCHOR:
+                case Icon.ROCKSTAR:
+                case Icon.STUNT:
+                case Icon.STUNT_PREMIUM:
+                case Icon.RACE_FLAG_STUNT_JUMP:
+                case Icon.SHIELD:
+                case Icon.TEAM_DEATHMATCH:
+                case Icon.VEHICLE_DEATHMATCH:
+                    return "commonmenutu";
+                default:
+                    return "commonmenu";
+            }
         }
 
         protected string GetSpriteName(Icon icon, bool selected)
@@ -111,6 +169,29 @@ namespace MenuAPI
                 case Icon.WEED: return "mp_specitem_weed";
                 case Icon.MALE: return "leaderboard_male_icon";
                 case Icon.FEMALE: return "leaderboard_female_icon";
+                case Icon.LOCK_ARENA: return "shop_lock_arena";
+                case Icon.ADVERSARY: return "adversary";
+                case Icon.BASE_JUMPING: return "base_jumping";
+                case Icon.BRIEFCASE: return "capture_the_flag";
+                case Icon.MISSION_STAR: return "custom_mission";
+                case Icon.DEATHMATCH: return "deathmatch";
+                case Icon.CASTLE: return "gang_attack";
+                case Icon.CROWN2: return "king_of_the_hill";
+                case Icon.THREE_CROWNS: return "king_of_the_hill_teams";
+                case Icon.TROPHY: return "last_team_standing";
+                case Icon.RACE_FLAG: return "race";
+                case Icon.RACE_FLAG_PLANE: return "race_air";
+                case Icon.RACE_FLAG_BICYCLE: return "race_bicycle";
+                case Icon.RACE_FLAG_PERSON: return "race_foot";
+                case Icon.RACE_FLAG_CAR: return "race_land";
+                case Icon.RACE_FLAG_BOAT_ANCHOR: return "race_water";
+                case Icon.ROCKSTAR: return "rockstar";
+                case Icon.STUNT: return "stunt";
+                case Icon.STUNT_PREMIUM: return "stunt_premium";
+                case Icon.RACE_FLAG_STUNT_JUMP: return "stunt_race";
+                case Icon.SHIELD: return "survival";
+                case Icon.TEAM_DEATHMATCH: return "team_deathmatch";
+                case Icon.VEHICLE_DEATHMATCH: return "vehicle_deathmatch";
                 default:
                     break;
             }
@@ -127,9 +208,32 @@ namespace MenuAPI
                 case Icon.HEROIN:
                 case Icon.METH:
                 case Icon.WEED:
+                case Icon.ADVERSARY:
+                case Icon.BASE_JUMPING:
+                case Icon.BRIEFCASE:
+                case Icon.MISSION_STAR:
+                case Icon.DEATHMATCH:
+                case Icon.CASTLE:
+                case Icon.CROWN2:
+                case Icon.THREE_CROWNS:
+                case Icon.TROPHY:
+                case Icon.RACE_FLAG:
+                case Icon.RACE_FLAG_PLANE:
+                case Icon.RACE_FLAG_BICYCLE:
+                case Icon.RACE_FLAG_PERSON:
+                case Icon.RACE_FLAG_CAR:
+                case Icon.RACE_FLAG_BOAT_ANCHOR:
+                case Icon.ROCKSTAR:
+                case Icon.STUNT:
+                case Icon.STUNT_PREMIUM:
+                case Icon.RACE_FLAG_STUNT_JUMP:
+                case Icon.SHIELD:
+                case Icon.TEAM_DEATHMATCH:
+                case Icon.VEHICLE_DEATHMATCH:
                     return 30f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
 
                 case Icon.STAR:
+                case Icon.LOCK_ARENA:
                     return 52f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
                 case Icon.MEDAL_SILVER:
                     return 22f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
@@ -146,8 +250,31 @@ namespace MenuAPI
                 case Icon.TICK:
                 case Icon.MALE:
                 case Icon.FEMALE:
-                //return selected ? 0 : 255;
-                case Icon.LOCK: return selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
+                case Icon.LOCK:
+                case Icon.LOCK_ARENA:
+                case Icon.ADVERSARY:
+                case Icon.BASE_JUMPING:
+                case Icon.BRIEFCASE:
+                case Icon.MISSION_STAR:
+                case Icon.DEATHMATCH:
+                case Icon.CASTLE:
+                case Icon.CROWN2:
+                case Icon.THREE_CROWNS:
+                case Icon.TROPHY:
+                case Icon.RACE_FLAG:
+                case Icon.RACE_FLAG_PLANE:
+                case Icon.RACE_FLAG_BICYCLE:
+                case Icon.RACE_FLAG_PERSON:
+                case Icon.RACE_FLAG_CAR:
+                case Icon.RACE_FLAG_BOAT_ANCHOR:
+                case Icon.ROCKSTAR:
+                case Icon.STUNT:
+                case Icon.STUNT_PREMIUM:
+                case Icon.RACE_FLAG_STUNT_JUMP:
+                case Icon.SHIELD:
+                case Icon.TEAM_DEATHMATCH:
+                case Icon.VEHICLE_DEATHMATCH:
+                    return selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
                 default:
                     return 255;
             }
@@ -186,6 +313,29 @@ namespace MenuAPI
                 case Icon.WEED:
                 case Icon.FEMALE:
                 case Icon.MALE:
+                case Icon.LOCK_ARENA:
+                case Icon.ADVERSARY:
+                case Icon.BASE_JUMPING:
+                case Icon.BRIEFCASE:
+                case Icon.MISSION_STAR:
+                case Icon.DEATHMATCH:
+                case Icon.CASTLE:
+                case Icon.CROWN2:
+                case Icon.THREE_CROWNS:
+                case Icon.TROPHY:
+                case Icon.RACE_FLAG:
+                case Icon.RACE_FLAG_PLANE:
+                case Icon.RACE_FLAG_BICYCLE:
+                case Icon.RACE_FLAG_PERSON:
+                case Icon.RACE_FLAG_CAR:
+                case Icon.RACE_FLAG_BOAT_ANCHOR:
+                case Icon.ROCKSTAR:
+                case Icon.STUNT:
+                case Icon.STUNT_PREMIUM:
+                case Icon.RACE_FLAG_STUNT_JUMP:
+                case Icon.SHIELD:
+                case Icon.TEAM_DEATHMATCH:
+                case Icon.VEHICLE_DEATHMATCH:
                     return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (Width - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
                 default:
                     break;
@@ -226,6 +376,29 @@ namespace MenuAPI
                 case Icon.WEED:
                 case Icon.MALE:
                 case Icon.FEMALE:
+                case Icon.LOCK_ARENA:
+                case Icon.ADVERSARY:
+                case Icon.BASE_JUMPING:
+                case Icon.BRIEFCASE:
+                case Icon.MISSION_STAR:
+                case Icon.DEATHMATCH:
+                case Icon.CASTLE:
+                case Icon.CROWN2:
+                case Icon.THREE_CROWNS:
+                case Icon.TROPHY:
+                case Icon.RACE_FLAG:
+                case Icon.RACE_FLAG_PLANE:
+                case Icon.RACE_FLAG_BICYCLE:
+                case Icon.RACE_FLAG_PERSON:
+                case Icon.RACE_FLAG_CAR:
+                case Icon.RACE_FLAG_BOAT_ANCHOR:
+                case Icon.ROCKSTAR:
+                case Icon.STUNT:
+                case Icon.STUNT_PREMIUM:
+                case Icon.RACE_FLAG_STUNT_JUMP:
+                case Icon.SHIELD:
+                case Icon.TEAM_DEATHMATCH:
+                case Icon.VEHICLE_DEATHMATCH:
                     break;
                 default:
                     break;
@@ -274,11 +447,12 @@ namespace MenuAPI
                     float spriteHeight = GetSpriteSize(LeftIcon, false);
                     float spriteWidth = GetSpriteSize(LeftIcon, true);
                     int spriteColor = GetSpriteColour(LeftIcon, Selected);
-                    string textureDictionary = "commonmenu";
-                    if (LeftIcon == Icon.MALE || LeftIcon == Icon.FEMALE)
-                    {
-                        textureDictionary = "mpleaderboard";
-                    }
+                    string textureDictionary = GetSpriteDictionary(LeftIcon);
+                    //string textureDictionary = "commonmenu";
+                    //if (LeftIcon == Icon.MALE || LeftIcon == Icon.FEMALE)
+                    //{
+                    //    textureDictionary = "mpleaderboard";
+                    //}
 
                     DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor, spriteColor, spriteColor, 255);
                     ResetScriptGfxAlign();
@@ -300,11 +474,12 @@ namespace MenuAPI
                     float spriteHeight = GetSpriteSize(RightIcon, false);
                     float spriteWidth = GetSpriteSize(RightIcon, true);
                     int spriteColor = GetSpriteColour(RightIcon, Selected);
-                    string textureDictionary = "commonmenu";
-                    if (RightIcon == Icon.MALE || RightIcon == Icon.FEMALE)
-                    {
-                        textureDictionary = "mpleaderboard";
-                    }
+                    string textureDictionary = GetSpriteDictionary(RightIcon);
+                    //string textureDictionary = "commonmenu";
+                    //if (RightIcon == Icon.MALE || RightIcon == Icon.FEMALE)
+                    //{
+                    //    textureDictionary = "mpleaderboard";
+                    //}
 
                     DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor, spriteColor, spriteColor, 255);
                     ResetScriptGfxAlign();
@@ -343,7 +518,7 @@ namespace MenuAPI
                 //}
                 float textMinX = (textXOffset / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
                 float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
-                float textHeight = GetTextScaleHeight(textSize, font);
+                //float textHeight = GetTextScaleHeight(textSize, font);
                 float textY = y - ((30f / 2f) / MenuController.ScreenHeight);
                 if (ParentMenu.LeftAligned)
                 {
