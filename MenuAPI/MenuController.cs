@@ -157,6 +157,14 @@ namespace MenuAPI
             {
                 SetStreamedTextureDictAsNoLongerNeeded(_texture_dict);
             }
+            if (HasStreamedTextureDictLoaded("mpleaderboard"))
+            {
+                SetStreamedTextureDictAsNoLongerNeeded("mpleaderboard");
+            }
+            if (HasStreamedTextureDictLoaded("commonmenutu"))
+            {
+                SetStreamedTextureDictAsNoLongerNeeded("commonmenutu");
+            }
         }
 
         /// <summary>
