@@ -13,6 +13,18 @@ namespace MenuAPI
         public static List<Menu> Menus { get; protected set; } = new List<Menu>();
         public const string _texture_dict = "commonmenu";
         public const string _header_texture = "interaction_bgd";
+        private static List<string> menuTextureAssets = new List<string>()
+        {
+            "commonmenu",
+            "commonmenutu",
+            "mpleaderboard",
+            "mphud",
+            "mpshopsale",
+            "mpinventory",
+            "mprankbadge",
+            "mpcarhud",
+            "mpcarhud2",
+        };
 
         private static float AspectRatio => GetScreenAspectRatio(false);
         public static float ScreenWidth => 1080 * AspectRatio;
@@ -130,21 +142,23 @@ namespace MenuAPI
             child.ParentMenu = parent;
         }
 
+
         /// <summary>
         /// Loads the texture dict for the common menu sprites.
         /// </summary>
         /// <returns></returns>
         private static async Task LoadAssets()
         {
-            if (!HasStreamedTextureDictLoaded(_texture_dict) || !HasStreamedTextureDictLoaded("mpleaderboard") || !HasStreamedTextureDictLoaded("commonmenutu"))
+            menuTextureAssets.ForEach(asset =>
             {
-                RequestStreamedTextureDict(_texture_dict, false);
-                RequestStreamedTextureDict("mpleaderboard", false);
-                RequestStreamedTextureDict("commonmenutu", false);
-                while (!HasStreamedTextureDictLoaded(_texture_dict) || !HasStreamedTextureDictLoaded("mpleaderboard") || !HasStreamedTextureDictLoaded("commonmenutu"))
+                if (!HasStreamedTextureDictLoaded(asset))
                 {
-                    await Delay(0);
+                    RequestStreamedTextureDict(asset, false);
                 }
+            });
+            while (menuTextureAssets.Any(asset => { return !HasStreamedTextureDictLoaded(asset); }))
+            {
+                await Delay(0);
             }
         }
 
@@ -153,18 +167,7 @@ namespace MenuAPI
         /// </summary>
         private static void UnloadAssets()
         {
-            if (HasStreamedTextureDictLoaded(_texture_dict))
-            {
-                SetStreamedTextureDictAsNoLongerNeeded(_texture_dict);
-            }
-            if (HasStreamedTextureDictLoaded("mpleaderboard"))
-            {
-                SetStreamedTextureDictAsNoLongerNeeded("mpleaderboard");
-            }
-            if (HasStreamedTextureDictLoaded("commonmenutu"))
-            {
-                SetStreamedTextureDictAsNoLongerNeeded("commonmenutu");
-            }
+            menuTextureAssets.ForEach(asset => { if (HasStreamedTextureDictLoaded(asset)) { SetStreamedTextureDictAsNoLongerNeeded(asset); } });
         }
 
         /// <summary>
