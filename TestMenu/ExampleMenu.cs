@@ -136,22 +136,27 @@ namespace TestMenu
             MenuController.BindMenuItem(menu, submenu, menuButton);
 
             // Adding items with sprites left & right to the submenu.
-            for (var i = 0; i < 53; i++)
+            for (var i = 0; i < Enum.GetValues(typeof(MenuItem.Icon)).Length; i++)
             {
-                var tmpItem = new MenuItem($"Icon.{Enum.GetName(typeof(MenuItem.Icon), ((MenuItem.Icon)i))}", "This menu item has a left and right sprite, and some also have a right label! Very cool huh?!");
-                if (i % 4 == 0)
+                var tmpItem = new MenuItem($"Icon.{Enum.GetName(typeof(MenuItem.Icon), ((MenuItem.Icon)i))}", "This menu item has a left and right sprite. Press ~r~HOME~s~ to toggle the 'enabled' state on these items.")
                 {
-                    tmpItem.Label = "Wowzers";
-                }
-                if (i % 7 == 0)
-                {
-                    tmpItem.Label = "Snailsome!";
-                }
-                tmpItem.LeftIcon = (MenuItem.Icon)i;
-                tmpItem.RightIcon = (MenuItem.Icon)i;
+                    Label = $"(#{i})",
+                    LeftIcon = (MenuItem.Icon)i,
+                    RightIcon = (MenuItem.Icon)i
+                };
+
+                //var tmpItem2 = new MenuItem($"Icon.{Enum.GetName(typeof(MenuItem.Icon), ((MenuItem.Icon)i))}", "This menu item has a left and right sprite, and it's ~h~disabled~h~.");
+                //tmpItem2.LeftIcon = (MenuItem.Icon)i;
+                //tmpItem2.RightIcon = (MenuItem.Icon)i;
+                //tmpItem2.Enabled = false;
 
                 submenu.AddMenuItem(tmpItem);
+                //submenu.AddMenuItem(tmpItem2);
             }
+            submenu.ButtonPressHandlers.Add(new Menu.ButtonPressHandler(Control.FrontendSocialClubSecondary, Menu.ControlPressCheckType.JUST_RELEASED, new Action<Menu, Control>((m, c) =>
+            {
+                m.GetMenuItems().ForEach(a => a.Enabled = !a.Enabled);
+            }), true));
 
             // Instructional buttons setup for the second (submenu) menu.
             submenu.InstructionalButtons.Add(Control.CharacterWheel, "Right?!");

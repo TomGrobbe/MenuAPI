@@ -77,34 +77,26 @@ namespace MenuAPI
                 x -= 40f / MenuController.ScreenWidth;
 
                 var leftColor = GetSpriteColour(SliderLeftIcon, Selected);
-                var rightColor = GetSpriteColour(SliderRightIcon, Selected);
-
 
                 SetScriptGfxAlign(ParentMenu.LeftAligned ? 76 : 82, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-                string textureDictionary = "commonmenu";
-                if (SliderLeftIcon == Icon.MALE || SliderLeftIcon == Icon.FEMALE)
-                {
-                    textureDictionary = "mpleaderboard";
-                }
+                string textureDictionary = GetSpriteDictionary(SliderLeftIcon);
 
                 if (ParentMenu.LeftAligned)
                 {
                     // left sprite left aligned.
-                    DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width / 2f + (4f / MenuController.ScreenWidth)) - (GetSpriteSize(SliderLeftIcon, true) / 2f), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor, leftColor, leftColor, 255);
+                    DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width / 2f + (4f / MenuController.ScreenWidth)) - (GetSpriteSize(SliderLeftIcon, true) / 2f), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor[0], leftColor[1], leftColor[2], 255);
 
                     // right sprite is managed by the regular function in MenuItem that handles the right icon.
                 }
                 else
                 {
                     // left sprite right aligned.
-                    DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width + (4f / MenuController.ScreenWidth)) - GetSpriteSize(SliderLeftIcon, true) - (20f / MenuController.ScreenWidth), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor, leftColor, leftColor, 255);
+                    DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width + (4f / MenuController.ScreenWidth)) - GetSpriteSize(SliderLeftIcon, true) - (20f / MenuController.ScreenWidth), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor[0], leftColor[1], leftColor[2], 255);
 
                     // right sprite is managed by the regular function in MenuItem that handles the right icon.
                 }
-
-
 
                 ResetScriptGfxAlign();
             }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -64,6 +64,134 @@ namespace MenuAPI
             SHIELD,
             TEAM_DEATHMATCH,
             VEHICLE_DEATHMATCH,
+            MP_AMMO_PICKUP,
+            MP_AMMO,
+            MP_CASH,
+            MP_RP,
+            MP_SPECTATING,
+            SALE,
+            GLOBE_WHITE,
+            GLOBE_RED,
+            GLOBE_BLUE,
+            GLOBE_YELLOW,
+            GLOBE_GREEN,
+            GLOBE_ORANGE,
+            INV_ARM_WRESTLING,
+            INV_BASEJUMP,
+            INV_MISSION,
+            INV_DARTS,
+            INV_DEATHMATCH,
+            INV_DRUG,
+            INV_CASTLE,
+            INV_GOLF,
+            INV_BIKE,
+            INV_BOAT,
+            INV_ANCHOR,
+            INV_CAR,
+            INV_DOLLAR,
+            INV_COKE,
+            INV_KEY,
+            INV_DATA,
+            INV_HELI,
+            INV_HEORIN,
+            INV_KEYCARD,
+            INV_METH,
+            INV_BRIEFCASE,
+            INV_LINK,
+            INV_PERSON,
+            INV_PLANE,
+            INV_PLANE2,
+            INV_QUESTIONMARK,
+            INV_REMOTE,
+            INV_SAFE,
+            INV_STEER_WHEEL,
+            INV_WEAPON,
+            INV_WEED,
+            INV_RACE_FLAG_PLANE,
+            INV_RACE_FLAG_BICYCLE,
+            INV_RACE_FLAG_BOAT_ANCHOR,
+            INV_RACE_FLAG_PERSON,
+            INV_RACE_FLAG_CAR,
+            INV_RACE_FLAG_HELMET,
+            INV_SHOOTING_RANGE,
+            INV_SURVIVAL,
+            INV_TEAM_DEATHMATCH,
+            INV_TENNIS,
+            INV_VEHICLE_DEATHMATCH,
+            AUDIO_MUTE,
+            AUDIO_INACTIVE,
+            AUDIO_VOL1,
+            AUDIO_VOL2,
+            AUDIO_VOL3,
+            COUNTRY_USA,
+            COUNTRY_UK,
+            COUNTRY_SWEDEN,
+            COUNTRY_KOREA,
+            COUNTRY_JAPAN,
+            COUNTRY_ITALY,
+            COUNTRY_GERMANY,
+            COUNTRY_FRANCE,
+            BRAND_ALBANY,
+            BRAND_ANNIS,
+            BRAND_BANSHEE,
+            BRAND_BENEFACTOR,
+            BRAND_BF,
+            BRAND_BOLLOKAN,
+            BRAND_BRAVADO,
+            BRAND_BRUTE,
+            BRAND_BUCKINGHAM,
+            BRAND_CANIS,
+            BRAND_CHARIOT,
+            BRAND_CHEVAL,
+            BRAND_CLASSIQUE,
+            BRAND_COIL,
+            BRAND_DECLASSE,
+            BRAND_DEWBAUCHEE,
+            BRAND_DILETTANTE,
+            BRAND_DINKA,
+            BRAND_DUNDREARY,
+            BRAND_EMPORER,
+            BRAND_ENUS,
+            BRAND_FATHOM,
+            BRAND_GALIVANTER,
+            BRAND_GROTTI,
+            BRAND_GROTTI2,
+            BRAND_HIJAK,
+            BRAND_HVY,
+            BRAND_IMPONTE,
+            BRAND_INVETERO,
+            BRAND_JACKSHEEPE,
+            BRAND_LCC,
+            BRAND_JOBUILT,
+            BRAND_KARIN,
+            BRAND_LAMPADATI,
+            BRAND_MAIBATSU,
+            BRAND_MAMMOTH,
+            BRAND_MTL,
+            BRAND_NAGASAKI,
+            BRAND_OBEY,
+            BRAND_OCELOT,
+            BRAND_OVERFLOD,
+            BRAND_PED,
+            BRAND_PEGASSI,
+            BRAND_PFISTER,
+            BRAND_PRINCIPE,
+            BRAND_PROGEN,
+            BRAND_PROGEN2,
+            BRAND_RUNE,
+            BRAND_SCHYSTER,
+            BRAND_SHITZU,
+            BRAND_SPEEDOPHILE,
+            BRAND_STANLEY,
+            BRAND_TRUFFADE,
+            BRAND_UBERMACHT,
+            BRAND_VAPID,
+            BRAND_VULCAR,
+            BRAND_WEENY,
+            BRAND_WESTERN,
+            BRAND_WESTERNMOTORCYCLE,
+            BRAND_WILLARD,
+            BRAND_ZIRCONIUM,
         }
 
         public string Text { get; set; }
@@ -105,7 +233,55 @@ namespace MenuAPI
             {
                 case Icon.MALE:
                 case Icon.FEMALE:
+                case Icon.AUDIO_MUTE:
+                case Icon.AUDIO_INACTIVE:
+                case Icon.AUDIO_VOL1:
+                case Icon.AUDIO_VOL2:
+                case Icon.AUDIO_VOL3:
                     return "mpleaderboard";
+                case Icon.INV_ARM_WRESTLING:
+                case Icon.INV_BASEJUMP:
+                case Icon.INV_MISSION:
+                case Icon.INV_DARTS:
+                case Icon.INV_DEATHMATCH:
+                case Icon.INV_DRUG:
+                case Icon.INV_CASTLE:
+                case Icon.INV_GOLF:
+                case Icon.INV_BIKE:
+                case Icon.INV_BOAT:
+                case Icon.INV_ANCHOR:
+                case Icon.INV_CAR:
+                case Icon.INV_DOLLAR:
+                case Icon.INV_COKE:
+                case Icon.INV_KEY:
+                case Icon.INV_DATA:
+                case Icon.INV_HELI:
+                case Icon.INV_HEORIN:
+                case Icon.INV_KEYCARD:
+                case Icon.INV_METH:
+                case Icon.INV_BRIEFCASE:
+                case Icon.INV_LINK:
+                case Icon.INV_PERSON:
+                case Icon.INV_PLANE:
+                case Icon.INV_PLANE2:
+                case Icon.INV_QUESTIONMARK:
+                case Icon.INV_REMOTE:
+                case Icon.INV_SAFE:
+                case Icon.INV_STEER_WHEEL:
+                case Icon.INV_WEAPON:
+                case Icon.INV_WEED:
+                case Icon.INV_RACE_FLAG_PLANE:
+                case Icon.INV_RACE_FLAG_BICYCLE:
+                case Icon.INV_RACE_FLAG_BOAT_ANCHOR:
+                case Icon.INV_RACE_FLAG_PERSON:
+                case Icon.INV_RACE_FLAG_CAR:
+                case Icon.INV_RACE_FLAG_HELMET:
+                case Icon.INV_SHOOTING_RANGE:
+                case Icon.INV_SURVIVAL:
+                case Icon.INV_TEAM_DEATHMATCH:
+                case Icon.INV_TENNIS:
+                case Icon.INV_VEHICLE_DEATHMATCH:
+                    return "mpinventory";
                 case Icon.ADVERSARY:
                 case Icon.BASE_JUMPING:
                 case Icon.BRIEFCASE:
@@ -127,6 +303,92 @@ namespace MenuAPI
                 case Icon.TEAM_DEATHMATCH:
                 case Icon.VEHICLE_DEATHMATCH:
                     return "commonmenutu";
+                case Icon.MP_AMMO_PICKUP:
+                case Icon.MP_AMMO:
+                case Icon.MP_CASH:
+                case Icon.MP_RP:
+                case Icon.MP_SPECTATING:
+                    return "mphud";
+                case Icon.SALE:
+                    return "mpshopsale";
+                case Icon.GLOBE_WHITE:
+                case Icon.GLOBE_RED:
+                case Icon.GLOBE_BLUE:
+                case Icon.GLOBE_YELLOW:
+                case Icon.GLOBE_GREEN:
+                case Icon.GLOBE_ORANGE:
+                    return "mprankbadge";
+                case Icon.COUNTRY_USA:
+                case Icon.COUNTRY_UK:
+                case Icon.COUNTRY_SWEDEN:
+                case Icon.COUNTRY_KOREA:
+                case Icon.COUNTRY_JAPAN:
+                case Icon.COUNTRY_ITALY:
+                case Icon.COUNTRY_GERMANY:
+                case Icon.COUNTRY_FRANCE:
+                case Icon.BRAND_ALBANY:
+                case Icon.BRAND_ANNIS:
+                case Icon.BRAND_BANSHEE:
+                case Icon.BRAND_BENEFACTOR:
+                case Icon.BRAND_BF:
+                case Icon.BRAND_BOLLOKAN:
+                case Icon.BRAND_BRAVADO:
+                case Icon.BRAND_BRUTE:
+                case Icon.BRAND_BUCKINGHAM:
+                case Icon.BRAND_CANIS:
+                case Icon.BRAND_CHARIOT:
+                case Icon.BRAND_CHEVAL:
+                case Icon.BRAND_CLASSIQUE:
+                case Icon.BRAND_COIL:
+                case Icon.BRAND_DECLASSE:
+                case Icon.BRAND_DEWBAUCHEE:
+                case Icon.BRAND_DILETTANTE:
+                case Icon.BRAND_DINKA:
+                case Icon.BRAND_DUNDREARY:
+                case Icon.BRAND_EMPORER:
+                case Icon.BRAND_ENUS:
+                case Icon.BRAND_FATHOM:
+                case Icon.BRAND_GALIVANTER:
+                case Icon.BRAND_GROTTI:
+                case Icon.BRAND_HIJAK:
+                case Icon.BRAND_HVY:
+                case Icon.BRAND_IMPONTE:
+                case Icon.BRAND_INVETERO:
+                case Icon.BRAND_JACKSHEEPE:
+                case Icon.BRAND_JOBUILT:
+                case Icon.BRAND_KARIN:
+                case Icon.BRAND_LAMPADATI:
+                case Icon.BRAND_MAIBATSU:
+                case Icon.BRAND_MAMMOTH:
+                case Icon.BRAND_MTL:
+                case Icon.BRAND_NAGASAKI:
+                case Icon.BRAND_OBEY:
+                case Icon.BRAND_OCELOT:
+                case Icon.BRAND_OVERFLOD:
+                case Icon.BRAND_PED:
+                case Icon.BRAND_PEGASSI:
+                case Icon.BRAND_PFISTER:
+                case Icon.BRAND_PRINCIPE:
+                case Icon.BRAND_PROGEN:
+                case Icon.BRAND_SCHYSTER:
+                case Icon.BRAND_SHITZU:
+                case Icon.BRAND_SPEEDOPHILE:
+                case Icon.BRAND_STANLEY:
+                case Icon.BRAND_TRUFFADE:
+                case Icon.BRAND_UBERMACHT:
+                case Icon.BRAND_VAPID:
+                case Icon.BRAND_VULCAR:
+                case Icon.BRAND_WEENY:
+                case Icon.BRAND_WESTERN:
+                case Icon.BRAND_WESTERNMOTORCYCLE:
+                case Icon.BRAND_WILLARD:
+                case Icon.BRAND_ZIRCONIUM:
+                    return "mpcarhud";
+                case Icon.BRAND_GROTTI2:
+                case Icon.BRAND_LCC:
+                case Icon.BRAND_PROGEN2:
+                case Icon.BRAND_RUNE:
+                    return "mpcarhud2";
                 default:
                     return "commonmenu";
             }
@@ -186,6 +448,135 @@ namespace MenuAPI
                 case Icon.SHIELD: return "survival";
                 case Icon.TEAM_DEATHMATCH: return "team_deathmatch";
                 case Icon.VEHICLE_DEATHMATCH: return "vehicle_deathmatch";
+                case Icon.MP_AMMO_PICKUP: return "ammo_pickup";
+                case Icon.MP_AMMO: return "mp_anim_ammo";
+                case Icon.MP_CASH: return "mp_anim_cash";
+                case Icon.MP_RP: return "mp_anim_rp";
+                case Icon.MP_SPECTATING: return "spectating";
+                case Icon.SALE: return "saleicon";
+                case Icon.GLOBE_WHITE:
+                case Icon.GLOBE_RED:
+                case Icon.GLOBE_BLUE:
+                case Icon.GLOBE_YELLOW:
+                case Icon.GLOBE_GREEN:
+                case Icon.GLOBE_ORANGE:
+                    return "globe";
+                case Icon.INV_ARM_WRESTLING: return "arm_wrestling";
+                case Icon.INV_BASEJUMP: return "basejump";
+                case Icon.INV_MISSION: return "custom_mission";
+                case Icon.INV_DARTS: return "darts";
+                case Icon.INV_DEATHMATCH: return "deathmatch";
+                case Icon.INV_DRUG: return "drug_trafficking";
+                case Icon.INV_CASTLE: return "gang_attack";
+                case Icon.INV_GOLF: return "golf";
+                case Icon.INV_BIKE: return "mp_specitem_bike";
+                case Icon.INV_BOAT: return "mp_specitem_boat";
+                case Icon.INV_ANCHOR: return "mp_specitem_boatpickup";
+                case Icon.INV_CAR: return "mp_specitem_car";
+                case Icon.INV_DOLLAR: return "mp_specitem_cash";
+                case Icon.INV_COKE: return "mp_specitem_coke";
+                case Icon.INV_KEY: return "mp_specitem_cuffkeys";
+                case Icon.INV_DATA: return "mp_specitem_data";
+                case Icon.INV_HELI: return "mp_specitem_heli";
+                case Icon.INV_HEORIN: return "mp_specitem_heroin";
+                case Icon.INV_KEYCARD: return "mp_specitem_keycard";
+                case Icon.INV_METH: return "mp_specitem_meth";
+                case Icon.INV_BRIEFCASE: return "mp_specitem_package";
+                case Icon.INV_LINK: return "mp_specitem_partnericon";
+                case Icon.INV_PERSON: return "mp_specitem_ped";
+                case Icon.INV_PLANE: return "mp_specitem_plane";
+                case Icon.INV_PLANE2: return "mp_specitem_plane2";
+                case Icon.INV_QUESTIONMARK: return "mp_specitem_randomobject";
+                case Icon.INV_REMOTE: return "mp_specitem_remote";
+                case Icon.INV_SAFE: return "mp_specitem_safe";
+                case Icon.INV_STEER_WHEEL: return "mp_specitem_steer_wheel";
+                case Icon.INV_WEAPON: return "mp_specitem_weapons";
+                case Icon.INV_WEED: return "mp_specitem_weed";
+                case Icon.INV_RACE_FLAG_PLANE: return "race_air";
+                case Icon.INV_RACE_FLAG_BICYCLE: return "race_bike";
+                case Icon.INV_RACE_FLAG_BOAT_ANCHOR: return "race_boat";
+                case Icon.INV_RACE_FLAG_PERSON: return "race_foot";
+                case Icon.INV_RACE_FLAG_CAR: return "race_land";
+                case Icon.INV_RACE_FLAG_HELMET: return "race_offroad";
+                case Icon.INV_SHOOTING_RANGE: return "shooting_range";
+                case Icon.INV_SURVIVAL: return "survival";
+                case Icon.INV_TEAM_DEATHMATCH: return "team_deathmatch";
+                case Icon.INV_TENNIS: return "tennis";
+                case Icon.INV_VEHICLE_DEATHMATCH: return "vehicle_deathmatch";
+                case Icon.AUDIO_MUTE: return "leaderboard_audio_mute";
+                case Icon.AUDIO_INACTIVE: return "leaderboard_audio_inactive";
+                case Icon.AUDIO_VOL1: return "leaderboard_audio_1";
+                case Icon.AUDIO_VOL2: return "leaderboard_audio_2";
+                case Icon.AUDIO_VOL3: return "leaderboard_audio_3";
+                case Icon.COUNTRY_USA: return "vehicle_card_icons_flag_usa";
+                case Icon.COUNTRY_UK: return "vehicle_card_icons_flag_uk";
+                case Icon.COUNTRY_SWEDEN: return "vehicle_card_icons_flag_sweden";
+                case Icon.COUNTRY_KOREA: return "vehicle_card_icons_flag_korea";
+                case Icon.COUNTRY_JAPAN: return "vehicle_card_icons_flag_japan";
+                case Icon.COUNTRY_ITALY: return "vehicle_card_icons_flag_italy";
+                case Icon.COUNTRY_GERMANY: return "vehicle_card_icons_flag_germany";
+                case Icon.COUNTRY_FRANCE: return "vehicle_card_icons_flag_france";
+                case Icon.BRAND_ALBANY: return "albany";
+                case Icon.BRAND_ANNIS: return "annis";
+                case Icon.BRAND_BANSHEE: return "banshee";
+                case Icon.BRAND_BENEFACTOR: return "benefactor";
+                case Icon.BRAND_BF: return "bf";
+                case Icon.BRAND_BOLLOKAN: return "bollokan";
+                case Icon.BRAND_BRAVADO: return "bravado";
+                case Icon.BRAND_BRUTE: return "brute";
+                case Icon.BRAND_BUCKINGHAM: return "buckingham";
+                case Icon.BRAND_CANIS: return "canis";
+                case Icon.BRAND_CHARIOT: return "chariot";
+                case Icon.BRAND_CHEVAL: return "cheval";
+                case Icon.BRAND_CLASSIQUE: return "classique";
+                case Icon.BRAND_COIL: return "coil";
+                case Icon.BRAND_DECLASSE: return "declasse";
+                case Icon.BRAND_DEWBAUCHEE: return "dewbauchee";
+                case Icon.BRAND_DILETTANTE: return "dilettante";
+                case Icon.BRAND_DINKA: return "dinka";
+                case Icon.BRAND_DUNDREARY: return "dundreary";
+                case Icon.BRAND_EMPORER: return "emporer";
+                case Icon.BRAND_ENUS: return "enus";
+                case Icon.BRAND_FATHOM: return "fathom";
+                case Icon.BRAND_GALIVANTER: return "galivanter";
+                case Icon.BRAND_GROTTI: return "grotti";
+                case Icon.BRAND_HIJAK: return "hijak";
+                case Icon.BRAND_HVY: return "hvy";
+                case Icon.BRAND_IMPONTE: return "imponte";
+                case Icon.BRAND_INVETERO: return "invetero";
+                case Icon.BRAND_JACKSHEEPE: return "jacksheepe";
+                case Icon.BRAND_JOBUILT: return "jobuilt";
+                case Icon.BRAND_KARIN: return "karin";
+                case Icon.BRAND_LAMPADATI: return "lampadati";
+                case Icon.BRAND_MAIBATSU: return "maibatsu";
+                case Icon.BRAND_MAMMOTH: return "mammoth";
+                case Icon.BRAND_MTL: return "mtl";
+                case Icon.BRAND_NAGASAKI: return "nagasaki";
+                case Icon.BRAND_OBEY: return "obey";
+                case Icon.BRAND_OCELOT: return "ocelot";
+                case Icon.BRAND_OVERFLOD: return "overflod";
+                case Icon.BRAND_PED: return "ped";
+                case Icon.BRAND_PEGASSI: return "pegassi";
+                case Icon.BRAND_PFISTER: return "pfister";
+                case Icon.BRAND_PRINCIPE: return "principe";
+                case Icon.BRAND_PROGEN: return "progen";
+                case Icon.BRAND_SCHYSTER: return "schyster";
+                case Icon.BRAND_SHITZU: return "shitzu";
+                case Icon.BRAND_SPEEDOPHILE: return "speedophile";
+                case Icon.BRAND_STANLEY: return "stanley";
+                case Icon.BRAND_TRUFFADE: return "truffade";
+                case Icon.BRAND_UBERMACHT: return "ubermacht";
+                case Icon.BRAND_VAPID: return "vapid";
+                case Icon.BRAND_VULCAR: return "vulcar";
+                case Icon.BRAND_WEENY: return "weeny";
+                case Icon.BRAND_WESTERN: return "western";
+                case Icon.BRAND_WESTERNMOTORCYCLE: return "westernmotorcycle";
+                case Icon.BRAND_WILLARD: return "willard";
+                case Icon.BRAND_ZIRCONIUM: return "zirconium";
+                case Icon.BRAND_GROTTI2: return "grotti_2";
+                case Icon.BRAND_LCC: return "lcc";
+                case Icon.BRAND_PROGEN2: return "progen";
+                case Icon.BRAND_RUNE: return "rune";
                 default:
                     break;
             }
@@ -222,19 +613,144 @@ namespace MenuAPI
                 case Icon.SHIELD:
                 case Icon.TEAM_DEATHMATCH:
                 case Icon.VEHICLE_DEATHMATCH:
+                case Icon.AUDIO_MUTE:
+                case Icon.AUDIO_INACTIVE:
+                case Icon.AUDIO_VOL1:
+                case Icon.AUDIO_VOL2:
+                case Icon.AUDIO_VOL3:
+                case Icon.BRAND_ALBANY:
+                case Icon.BRAND_ANNIS:
+                case Icon.BRAND_BANSHEE:
+                case Icon.BRAND_BENEFACTOR:
+                case Icon.BRAND_BF:
+                case Icon.BRAND_BOLLOKAN:
+                case Icon.BRAND_BRAVADO:
+                case Icon.BRAND_BRUTE:
+                case Icon.BRAND_BUCKINGHAM:
+                case Icon.BRAND_CANIS:
+                case Icon.BRAND_CHARIOT:
+                case Icon.BRAND_CHEVAL:
+                case Icon.BRAND_CLASSIQUE:
+                case Icon.BRAND_COIL:
+                case Icon.BRAND_DECLASSE:
+                case Icon.BRAND_DEWBAUCHEE:
+                case Icon.BRAND_DILETTANTE:
+                case Icon.BRAND_DINKA:
+                case Icon.BRAND_DUNDREARY:
+                case Icon.BRAND_EMPORER:
+                case Icon.BRAND_ENUS:
+                case Icon.BRAND_FATHOM:
+                case Icon.BRAND_GALIVANTER:
+                case Icon.BRAND_GROTTI:
+                case Icon.BRAND_HIJAK:
+                case Icon.BRAND_HVY:
+                case Icon.BRAND_IMPONTE:
+                case Icon.BRAND_INVETERO:
+                case Icon.BRAND_JACKSHEEPE:
+                case Icon.BRAND_JOBUILT:
+                case Icon.BRAND_KARIN:
+                case Icon.BRAND_LAMPADATI:
+                case Icon.BRAND_MAIBATSU:
+                case Icon.BRAND_MAMMOTH:
+                case Icon.BRAND_MTL:
+                case Icon.BRAND_NAGASAKI:
+                case Icon.BRAND_OBEY:
+                case Icon.BRAND_OCELOT:
+                case Icon.BRAND_OVERFLOD:
+                case Icon.BRAND_PED:
+                case Icon.BRAND_PEGASSI:
+                case Icon.BRAND_PFISTER:
+                case Icon.BRAND_PRINCIPE:
+                case Icon.BRAND_PROGEN:
+                case Icon.BRAND_SCHYSTER:
+                case Icon.BRAND_SHITZU:
+                case Icon.BRAND_SPEEDOPHILE:
+                case Icon.BRAND_STANLEY:
+                case Icon.BRAND_TRUFFADE:
+                case Icon.BRAND_UBERMACHT:
+                case Icon.BRAND_VAPID:
+                case Icon.BRAND_VULCAR:
+                case Icon.BRAND_WEENY:
+                case Icon.BRAND_WESTERN:
+                case Icon.BRAND_WESTERNMOTORCYCLE:
+                case Icon.BRAND_WILLARD:
+                case Icon.BRAND_ZIRCONIUM:
+                case Icon.BRAND_GROTTI2:
+                case Icon.BRAND_LCC:
+                case Icon.BRAND_PROGEN2:
+                case Icon.BRAND_RUNE:
+                case Icon.COUNTRY_USA:
+                case Icon.COUNTRY_UK:
+                case Icon.COUNTRY_SWEDEN:
+                case Icon.COUNTRY_KOREA:
+                case Icon.COUNTRY_JAPAN:
+                case Icon.COUNTRY_ITALY:
+                case Icon.COUNTRY_GERMANY:
+                case Icon.COUNTRY_FRANCE:
                     return 30f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
-
                 case Icon.STAR:
                 case Icon.LOCK_ARENA:
                     return 52f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
                 case Icon.MEDAL_SILVER:
+                case Icon.MP_AMMO_PICKUP:
+                case Icon.MP_AMMO:
+                case Icon.MP_CASH:
+                case Icon.MP_RP:
+                case Icon.GLOBE_WHITE:
+                case Icon.GLOBE_BLUE:
+                case Icon.GLOBE_GREEN:
+                case Icon.GLOBE_ORANGE:
+                case Icon.GLOBE_RED:
+                case Icon.GLOBE_YELLOW:
+                case Icon.INV_ARM_WRESTLING:
+                case Icon.INV_BASEJUMP:
+                case Icon.INV_MISSION:
+                case Icon.INV_DARTS:
+                case Icon.INV_DEATHMATCH:
+                case Icon.INV_DRUG:
+                case Icon.INV_CASTLE:
+                case Icon.INV_GOLF:
+                case Icon.INV_BIKE:
+                case Icon.INV_BOAT:
+                case Icon.INV_ANCHOR:
+                case Icon.INV_CAR:
+                case Icon.INV_DOLLAR:
+                case Icon.INV_COKE:
+                case Icon.INV_KEY:
+                case Icon.INV_DATA:
+                case Icon.INV_HELI:
+                case Icon.INV_HEORIN:
+                case Icon.INV_KEYCARD:
+                case Icon.INV_METH:
+                case Icon.INV_BRIEFCASE:
+                case Icon.INV_LINK:
+                case Icon.INV_PERSON:
+                case Icon.INV_PLANE:
+                case Icon.INV_PLANE2:
+                case Icon.INV_QUESTIONMARK:
+                case Icon.INV_REMOTE:
+                case Icon.INV_SAFE:
+                case Icon.INV_STEER_WHEEL:
+                case Icon.INV_WEAPON:
+                case Icon.INV_WEED:
+                case Icon.INV_RACE_FLAG_PLANE:
+                case Icon.INV_RACE_FLAG_BICYCLE:
+                case Icon.INV_RACE_FLAG_BOAT_ANCHOR:
+                case Icon.INV_RACE_FLAG_PERSON:
+                case Icon.INV_RACE_FLAG_CAR:
+                case Icon.INV_RACE_FLAG_HELMET:
+                case Icon.INV_SHOOTING_RANGE:
+                case Icon.INV_SURVIVAL:
+                case Icon.INV_TEAM_DEATHMATCH:
+                case Icon.INV_TENNIS:
+                case Icon.INV_VEHICLE_DEATHMATCH:
                     return 22f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
                 default:
                     return 38f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
             }
         }
 
-        protected int GetSpriteColour(Icon icon, bool selected)
+        protected int[] GetSpriteColour(Icon icon, bool selected)
         {
             switch (icon)
             {
@@ -250,8 +766,6 @@ namespace MenuAPI
                 case Icon.MISSION_STAR:
                 case Icon.DEATHMATCH:
                 case Icon.CASTLE:
-                case Icon.CROWN2:
-                case Icon.THREE_CROWNS:
                 case Icon.TROPHY:
                 case Icon.RACE_FLAG:
                 case Icon.RACE_FLAG_PLANE:
@@ -266,135 +780,101 @@ namespace MenuAPI
                 case Icon.SHIELD:
                 case Icon.TEAM_DEATHMATCH:
                 case Icon.VEHICLE_DEATHMATCH:
-                    return selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
+                case Icon.MP_SPECTATING:
+                case Icon.GLOBE_WHITE:
+                case Icon.AUDIO_MUTE:
+                case Icon.AUDIO_INACTIVE:
+                case Icon.AUDIO_VOL1:
+                case Icon.AUDIO_VOL2:
+                case Icon.AUDIO_VOL3:
+                case Icon.BRAND_ALBANY:
+                case Icon.BRAND_ANNIS:
+                case Icon.BRAND_BANSHEE:
+                case Icon.BRAND_BENEFACTOR:
+                case Icon.BRAND_BF:
+                case Icon.BRAND_BOLLOKAN:
+                case Icon.BRAND_BRAVADO:
+                case Icon.BRAND_BRUTE:
+                case Icon.BRAND_BUCKINGHAM:
+                case Icon.BRAND_CANIS:
+                case Icon.BRAND_CHARIOT:
+                case Icon.BRAND_CHEVAL:
+                case Icon.BRAND_CLASSIQUE:
+                case Icon.BRAND_COIL:
+                case Icon.BRAND_DECLASSE:
+                case Icon.BRAND_DEWBAUCHEE:
+                case Icon.BRAND_DILETTANTE:
+                case Icon.BRAND_DINKA:
+                case Icon.BRAND_DUNDREARY:
+                case Icon.BRAND_EMPORER:
+                case Icon.BRAND_ENUS:
+                case Icon.BRAND_FATHOM:
+                case Icon.BRAND_GALIVANTER:
+                case Icon.BRAND_GROTTI:
+                case Icon.BRAND_HIJAK:
+                case Icon.BRAND_HVY:
+                case Icon.BRAND_IMPONTE:
+                case Icon.BRAND_INVETERO:
+                case Icon.BRAND_JACKSHEEPE:
+                case Icon.BRAND_JOBUILT:
+                case Icon.BRAND_KARIN:
+                case Icon.BRAND_LAMPADATI:
+                case Icon.BRAND_MAIBATSU:
+                case Icon.BRAND_MAMMOTH:
+                case Icon.BRAND_MTL:
+                case Icon.BRAND_NAGASAKI:
+                case Icon.BRAND_OBEY:
+                case Icon.BRAND_OCELOT:
+                case Icon.BRAND_OVERFLOD:
+                case Icon.BRAND_PED:
+                case Icon.BRAND_PEGASSI:
+                case Icon.BRAND_PFISTER:
+                case Icon.BRAND_PRINCIPE:
+                case Icon.BRAND_PROGEN:
+                case Icon.BRAND_SCHYSTER:
+                case Icon.BRAND_SHITZU:
+                case Icon.BRAND_SPEEDOPHILE:
+                case Icon.BRAND_STANLEY:
+                case Icon.BRAND_TRUFFADE:
+                case Icon.BRAND_UBERMACHT:
+                case Icon.BRAND_VAPID:
+                case Icon.BRAND_VULCAR:
+                case Icon.BRAND_WEENY:
+                case Icon.BRAND_WESTERN:
+                case Icon.BRAND_WESTERNMOTORCYCLE:
+                case Icon.BRAND_WILLARD:
+                case Icon.BRAND_ZIRCONIUM:
+                case Icon.BRAND_GROTTI2:
+                case Icon.BRAND_LCC:
+                case Icon.BRAND_PROGEN2:
+                case Icon.BRAND_RUNE:
+                    return selected ? (Enabled ? new int[3] { 0, 0, 0 } : new int[3] { 50, 50, 50 }) : (Enabled ? new int[3] { 255, 255, 255 } : new int[3] { 109, 109, 109 });
+                case Icon.GLOBE_BLUE:
+                    return Enabled ? new int[3] { 10, 103, 166 } : new int[3] { 11, 62, 117 };
+                case Icon.GLOBE_GREEN:
+                    return Enabled ? new int[3] { 10, 166, 85 } : new int[3] { 5, 71, 22 };
+                case Icon.GLOBE_ORANGE:
+                    return Enabled ? new int[3] { 232, 145, 14 } : new int[3] { 133, 77, 12 };
+                case Icon.GLOBE_RED:
+                    return Enabled ? new int[3] { 207, 43, 31 } : new int[3] { 110, 7, 7 };
+                case Icon.GLOBE_YELLOW:
+                    return Enabled ? new int[3] { 232, 207, 14 } : new int[3] { 131, 133, 12 };
                 default:
-                    return 255;
+                    return Enabled ? new int[3] { 255, 255, 255 } : new int[3] { 109, 109, 109 };
             }
         }
 
         protected float GetSpriteX(Icon icon, bool leftAligned, bool leftSide)
         {
-            switch (icon)
+            if (icon == Icon.NONE)
             {
-                case Icon.AMMO:
-                case Icon.ARMOR:
-                case Icon.BARBER:
-                case Icon.BIKE:
-                case Icon.CAR:
-                case Icon.CASH:
-                case Icon.CLOTHING:
-                case Icon.COKE:
-                case Icon.CROWN:
-                case Icon.FRANKLIN:
-                case Icon.GUN:
-                case Icon.HEALTH_HEART:
-                case Icon.HEROIN:
-                case Icon.LOCK:
-                case Icon.MAKEUP_BRUSH:
-                case Icon.MASK:
-                case Icon.MEDAL_BRONZE:
-                case Icon.MEDAL_GOLD:
-                case Icon.MEDAL_SILVER:
-                case Icon.METH:
-                case Icon.MICHAEL:
-                case Icon.STAR:
-                case Icon.TATTOO:
-                case Icon.TICK:
-                case Icon.TREVOR:
-                case Icon.WARNING:
-                case Icon.WEED:
-                case Icon.FEMALE:
-                case Icon.MALE:
-                case Icon.LOCK_ARENA:
-                case Icon.ADVERSARY:
-                case Icon.BASE_JUMPING:
-                case Icon.BRIEFCASE:
-                case Icon.MISSION_STAR:
-                case Icon.DEATHMATCH:
-                case Icon.CASTLE:
-                case Icon.CROWN2:
-                case Icon.THREE_CROWNS:
-                case Icon.TROPHY:
-                case Icon.RACE_FLAG:
-                case Icon.RACE_FLAG_PLANE:
-                case Icon.RACE_FLAG_BICYCLE:
-                case Icon.RACE_FLAG_PERSON:
-                case Icon.RACE_FLAG_CAR:
-                case Icon.RACE_FLAG_BOAT_ANCHOR:
-                case Icon.ROCKSTAR:
-                case Icon.STUNT:
-                case Icon.STUNT_PREMIUM:
-                case Icon.RACE_FLAG_STUNT_JUMP:
-                case Icon.SHIELD:
-                case Icon.TEAM_DEATHMATCH:
-                case Icon.VEHICLE_DEATHMATCH:
-                    return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (Width - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
-                default:
-                    break;
+                return 0f;
             }
-            return 0f;
+            return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (Width - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
         }
 
         protected float GetSpriteY(Icon icon)
         {
-            switch (icon)
-            {
-                case Icon.AMMO:
-                case Icon.ARMOR:
-                case Icon.BARBER:
-                case Icon.BIKE:
-                case Icon.CAR:
-                case Icon.CASH:
-                case Icon.CLOTHING:
-                case Icon.COKE:
-                case Icon.CROWN:
-                case Icon.FRANKLIN:
-                case Icon.GUN:
-                case Icon.HEALTH_HEART:
-                case Icon.HEROIN:
-                case Icon.LOCK:
-                case Icon.MAKEUP_BRUSH:
-                case Icon.MASK:
-                case Icon.MEDAL_BRONZE:
-                case Icon.MEDAL_GOLD:
-                case Icon.MEDAL_SILVER:
-                case Icon.METH:
-                case Icon.MICHAEL:
-                case Icon.STAR:
-                case Icon.TATTOO:
-                case Icon.TICK:
-                case Icon.TREVOR:
-                case Icon.WARNING:
-                case Icon.WEED:
-                case Icon.MALE:
-                case Icon.FEMALE:
-                case Icon.LOCK_ARENA:
-                case Icon.ADVERSARY:
-                case Icon.BASE_JUMPING:
-                case Icon.BRIEFCASE:
-                case Icon.MISSION_STAR:
-                case Icon.DEATHMATCH:
-                case Icon.CASTLE:
-                case Icon.CROWN2:
-                case Icon.THREE_CROWNS:
-                case Icon.TROPHY:
-                case Icon.RACE_FLAG:
-                case Icon.RACE_FLAG_PLANE:
-                case Icon.RACE_FLAG_BICYCLE:
-                case Icon.RACE_FLAG_PERSON:
-                case Icon.RACE_FLAG_CAR:
-                case Icon.RACE_FLAG_BOAT_ANCHOR:
-                case Icon.ROCKSTAR:
-                case Icon.STUNT:
-                case Icon.STUNT_PREMIUM:
-                case Icon.RACE_FLAG_STUNT_JUMP:
-                case Icon.SHIELD:
-                case Icon.TEAM_DEATHMATCH:
-                case Icon.VEHICLE_DEATHMATCH:
-                    break;
-                default:
-                    break;
-            }
             return 0f;
         }
 
@@ -438,15 +918,10 @@ namespace MenuAPI
                     float spriteX = GetSpriteX(LeftIcon, ParentMenu.LeftAligned, true);
                     float spriteHeight = GetSpriteSize(LeftIcon, false);
                     float spriteWidth = GetSpriteSize(LeftIcon, true);
-                    int spriteColor = GetSpriteColour(LeftIcon, Selected);
+                    int[] spriteColor = GetSpriteColour(LeftIcon, Selected);
                     string textureDictionary = GetSpriteDictionary(LeftIcon);
-                    //string textureDictionary = "commonmenu";
-                    //if (LeftIcon == Icon.MALE || LeftIcon == Icon.FEMALE)
-                    //{
-                    //    textureDictionary = "mpleaderboard";
-                    //}
 
-                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor, spriteColor, spriteColor, 255);
+                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
                     ResetScriptGfxAlign();
                 }
                 #endregion
@@ -465,15 +940,10 @@ namespace MenuAPI
                     float spriteX = GetSpriteX(RightIcon, ParentMenu.LeftAligned, false);
                     float spriteHeight = GetSpriteSize(RightIcon, false);
                     float spriteWidth = GetSpriteSize(RightIcon, true);
-                    int spriteColor = GetSpriteColour(RightIcon, Selected);
+                    int[] spriteColor = GetSpriteColour(RightIcon, Selected);
                     string textureDictionary = GetSpriteDictionary(RightIcon);
-                    //string textureDictionary = "commonmenu";
-                    //if (RightIcon == Icon.MALE || RightIcon == Icon.FEMALE)
-                    //{
-                    //    textureDictionary = "mpleaderboard";
-                    //}
 
-                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor, spriteColor, spriteColor, 255);
+                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
                     ResetScriptGfxAlign();
                 }
                 #endregion
