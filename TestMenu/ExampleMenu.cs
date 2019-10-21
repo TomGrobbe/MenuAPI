@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,8 +18,10 @@ namespace TestMenu
             // To test this, checkout one of the checkbox items in this example menu. Clicking it will toggle the menu alignment.
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
 
+            MenuController.MenuToggleKey = Control.InteractionMenu;
+
             // Creating the first menu.
-            Menu menu = new Menu("Main Menu", "Subtitle") { Visible = true };
+            Menu menu = new Menu("Main Menu", "Subtitle");
             MenuController.AddMenu(menu);
 
             // Adding a new button by directly creating one inline. You could also just store it and then add it but we don't need to do that in this example.
@@ -248,7 +250,7 @@ namespace TestMenu
                 Debug.WriteLine($"OnMenuOpen: [{_menu}]");
             };
 
-            menu.OnDynamicListItemCurrentItemChange += ( _menu, _dynamicListItem, _oldCurrentItem, _newCurrentItem) => 
+            menu.OnDynamicListItemCurrentItemChange += (_menu, _dynamicListItem, _oldCurrentItem, _newCurrentItem) =>
             {
                 // Code in here would get executed whenever the value of the current item of a dynamic list item changes.
                 Debug.WriteLine($"OnDynamicListItemCurrentItemChange: [{_menu}, {_dynamicListItem}, {_oldCurrentItem}, {_newCurrentItem}]");
