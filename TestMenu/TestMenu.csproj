@@ -16,7 +16,7 @@
     <PackageReference
       Include="CitizenFX.Core.Client"
       Version="1.0.1688"
-      Condition="'$(Configuration)' == 'Release FiveM' Or '$(Configuration)' == 'Debug FiveM'" />
+      Condition="'$(Configuration)' == 'Release FiveM' Or '$(Configuration)' == 'Debug FiveM'" ExcludeAssets="runtime" />
 
     <!-- currently hardcoded path as no nuget package for RedM exists yet -->
     <Reference
