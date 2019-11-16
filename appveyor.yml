@@ -1,7 +1,7 @@
 pull_requests:
   do_not_increment_build_number: false
 image: Visual Studio 2017
-configuration: Release FiveM
+configuration: Release RedM
 before_build:
   - nuget restore
 build:
@@ -10,21 +10,21 @@ build:
   include_nuget_references: true
   verbosity: minimal
 after_build:
-  - cmd: copy README.md .\MenuAPI\bin\Release\README.md
+  - cmd: copy README.md '.\MenuAPI\bin\Release RedM\README.md'
   - cmd: if %APPVEYOR_REPO_TAG%==true (appveyor SetVariable -Name VERSION_NAME -Value %APPVEYOR_REPO_TAG_NAME%) else (appveyor SetVariable -Name VERSION_NAME -Value dev)
-  - cmd: 7z a MenuAPI-%VERSION_NAME%.zip -r .\MenuAPI\bin\Release\*
+  - cmd: 7z a MenuAPI-%VERSION_NAME%.zip -r '.\MenuAPI\bin\Release RedM\*'
   - cmd: appveyor PushArtifact MenuAPI-%VERSION_NAME%.zip
 deploy:
   - provider: GitHub
-    release: "[Release] MenuAPI $(VERSION_NAME)"
+    release: "[Release] MenuAPI $(VERSION_NAME) (RedM edition)"
     tag: $(VERSION_NAME)
     artifact: MenuAPI-$(VERSION_NAME).zip
     draft: false
-    prerelease: false
+    prerelease: true
     auth_token: $(github_auth)
     on:
       APPVEYOR_REPO_TAG: true
-    description: "MenuAPI release, version $(VERSION_NAME). For a changelog check the [docs](https://docs.vespura.com/) or checkout the recent commits on GitHub."
+    description: "MenuAPI (RedM edition) release, version $(VERSION_NAME). For a changelog check the [docs](https://docs.vespura.com/) or checkout the recent commits on GitHub."
 # before_build:
 #   - ps: if($env:APPVEYOR_REPO_TAG -eq $True) {Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1; ./send.ps1 start $env:WEBHOOK_URL; rm send.ps1;}
 after_deploy:
