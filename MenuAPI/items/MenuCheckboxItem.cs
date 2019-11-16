@@ -9,6 +9,7 @@ using static CitizenFX.Core.Native.API;
 
 namespace MenuAPI
 {
+#if FIVEM
     public class MenuCheckboxItem : MenuItem
     {
         public bool Checked { get; set; } = false;
@@ -104,7 +105,7 @@ namespace MenuAPI
             float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * MathUtil.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
 
             string name = GetSpriteName();
-            float spriteY = (ParentMenu.Position.Y + ((Index - offset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
+            float spriteY = (ParentMenu.Position.Value + ((Index - offset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
             float spriteX = GetSpriteX();
             float spriteHeight = 45f / MenuController.ScreenHeight;
             float spriteWidth = 45f / MenuController.ScreenWidth;
@@ -115,4 +116,5 @@ namespace MenuAPI
 
         }
     }
+#endif
 }

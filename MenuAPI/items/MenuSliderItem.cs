@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
 
 namespace MenuAPI
 {
+#if FIVEM
     public class MenuSliderItem : MenuItem
     {
         public int Min { get; private set; } = 0;
@@ -19,8 +19,8 @@ namespace MenuAPI
         public Icon SliderLeftIcon { get; set; } = Icon.NONE;
         public Icon SliderRightIcon { get; set; } = Icon.NONE;
 
-        public Color BackgroundColor { get; set; } = Color.FromArgb(255, 24, 93, 151);
-        public Color BarColor { get; set; } = Color.FromArgb(255, 53, 165, 223);
+        public System.Drawing.Color BackgroundColor { get; set; } = System.Drawing.Color.FromArgb(255, 24, 93, 151);
+        public System.Drawing.Color BarColor { get; set; } = System.Drawing.Color.FromArgb(255, 53, 165, 223);
 
         public MenuSliderItem(string name, int min, int max, int startPosition) : this(name, min, max, startPosition, false) { }
         public MenuSliderItem(string name, int min, int max, int startPosition, bool showDivider) : this(name, null, min, max, startPosition, showDivider) { }
@@ -65,8 +65,8 @@ namespace MenuAPI
 
             float width = 150f / MenuController.ScreenWidth;
             float height = 10f / MenuController.ScreenHeight;
-            float y = (ParentMenu.Position.Y + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
-            float x = (ParentMenu.Position.X + (Width)) / MenuController.ScreenWidth - (width / 2f) - (8f / MenuController.ScreenWidth);
+            float y = (ParentMenu.Position.Value + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
+            float x = (ParentMenu.Position.Key + (Width)) / MenuController.ScreenWidth - (width / 2f) - (8f / MenuController.ScreenWidth);
             if (!ParentMenu.LeftAligned)
             {
                 x = (width / 2f) - (8f / MenuController.ScreenWidth);
@@ -133,4 +133,5 @@ namespace MenuAPI
 
         }
     }
+#endif
 }

@@ -5,16 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
+using static CitizenFX.Core.Native.Function;
+using static CitizenFX.Core.Native.Hash;
 
 namespace MenuAPI
 {
     public class MenuController : BaseScript
     {
         public static List<Menu> Menus { get; protected set; } = new List<Menu>();
+#if FIVEM
         public const string _texture_dict = "commonmenu";
         public const string _header_texture = "interaction_bgd";
+#endif
+#if REDM
+        public const string _texture_dict = "menu_textures";
+        public const string _header_texture = "translate_bg_1a";
+#endif
         private static List<string> menuTextureAssets = new List<string>()
         {
+#if FIVEM
             "commonmenu",
             "commonmenutu",
             "mpleaderboard",
@@ -24,13 +33,34 @@ namespace MenuAPI
             "mprankbadge",
             "mpcarhud",
             "mpcarhud2",
+#endif
+#if REDM
+            "menu_textures",
+            "boot_flow",
+            "generic_textures",
+#endif
         };
 
+#if FIVEM
         private static float AspectRatio => GetScreenAspectRatio(false);
+#endif
+#if REDM
+        private static float AspectRatio => 16 / 9;
+#endif
         public static float ScreenWidth => 1080 * AspectRatio;
         public static float ScreenHeight => 1080;
         public static bool DisableMenuButtons { get; set; } = false;
+#if FIVEM
         public static bool AreMenuButtonsEnabled => Menus.Any((m) => m.Visible) && !Game.IsPaused && CitizenFX.Core.UI.Screen.Fading.IsFadedIn && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !Game.Player.IsDead;
+#endif
+#if REDM
+        public static bool AreMenuButtonsEnabled =>
+            Menus.Any((m) => m.Visible) &&
+            !Call<bool>(IS_PAUSE_MENU_ACTIVE) &&
+            Call<bool>(IS_SCREEN_FADED_IN) &&
+            !DisableMenuButtons &&
+            !Call<bool>(IS_ENTITY_DEAD, PlayerPedId());
+#endif
 
         public static bool EnableManualGCs { get; set; } = true;
         public static bool DontOpenAnyMenu { get; set; } = false;
@@ -43,10 +73,13 @@ namespace MenuAPI
 
         public static Menu MainMenu { get; set; } = null;
 
+#if FIVEM
         internal static int _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
+#endif
 
         private static int ManualTimerForGC = GetGameTimer();
 
+#if FIVEM
         private static MenuAlignmentOption _alignment = MenuAlignmentOption.Left;
         public static MenuAlignmentOption MenuAlignment
         {
@@ -75,11 +108,13 @@ namespace MenuAPI
                 }
             }
         }
+
         public enum MenuAlignmentOption
         {
             Left,
             Right
         }
+#endif
 
         /// <summary>
         /// Constructor
@@ -87,7 +122,9 @@ namespace MenuAPI
         public MenuController()
         {
             Tick += ProcessMenus;
+#if FIVEM
             Tick += DrawInstructionalButtons;
+#endif
             Tick += ProcessMainButtons;
             Tick += ProcessDirectionalButtons;
             Tick += ProcessToggleMenuButton;
@@ -149,6 +186,7 @@ namespace MenuAPI
         /// <returns></returns>
         private static async Task LoadAssets()
         {
+#if FIVEM
             menuTextureAssets.ForEach(asset =>
             {
                 if (!HasStreamedTextureDictLoaded(asset))
@@ -160,6 +198,20 @@ namespace MenuAPI
             {
                 await Delay(0);
             }
+#endif
+#if REDM
+            menuTextureAssets.ForEach(asset =>
+            {
+                if (!Call<bool>(HAS_STREAMED_TEXTURE_DICT_LOADED, asset))
+                {
+                    Call(REQUEST_STREAMED_TEXTURE_DICT, asset, false);
+                }
+            });
+            while (menuTextureAssets.Any(asset => { return !Call<bool>(HAS_STREAMED_TEXTURE_DICT_LOADED, asset); }))
+            {
+                await Delay(0);
+            }
+#endif
         }
 
         /// <summary>
@@ -167,7 +219,24 @@ namespace MenuAPI
         /// </summary>
         private static void UnloadAssets()
         {
-            menuTextureAssets.ForEach(asset => { if (HasStreamedTextureDictLoaded(asset)) { SetStreamedTextureDictAsNoLongerNeeded(asset); } });
+#if FIVEM
+            menuTextureAssets.ForEach(asset =>
+            {
+                if (HasStreamedTextureDictLoaded(asset))
+                {
+                    SetStreamedTextureDictAsNoLongerNeeded(asset);
+                }
+            });
+#endif
+#if REDM
+            menuTextureAssets.ForEach(asset =>
+            {
+                if (Call<bool>(HAS_STREAMED_TEXTURE_DICT_LOADED, asset))
+                {
+                    Call(SET_STREAMED_TEXTURE_DICT_AS_NO_LONGER_NEEDED, asset);
+                }
+            });
+#endif
         }
 
         /// <summary>
@@ -202,18 +271,30 @@ namespace MenuAPI
                 {
                     if (PreventExitingMenu)
                     {
+#if FIVEM
                         Game.DisableControlThisFrame(0, Control.FrontendPause);
                         Game.DisableControlThisFrame(0, Control.FrontendPauseAlternate);
+#endif
+#if REDM
+                        Call(DISABLE_CONTROL_ACTION, 0, Control.FrontendPause, true);
+                        Call(DISABLE_CONTROL_ACTION, 0, Control.FrontendPauseAlternate, true);
+#endif
                     }
 
                     if (currentMenu.Visible && AreMenuButtonsEnabled)
                     {
                         // Select / Enter
                         if (
+#if FIVEM
                             Game.IsDisabledControlJustReleased(0, Control.FrontendAccept) ||
                             Game.IsControlJustReleased(0, Control.FrontendAccept) ||
                             Game.IsDisabledControlJustReleased(0, Control.VehicleMouseControlOverride) ||
                             Game.IsControlJustReleased(0, Control.VehicleMouseControlOverride)
+#endif
+#if REDM
+                            Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.FrontendAccept) ||
+                            Call<bool>(IS_CONTROL_JUST_RELEASED, 0, Control.FrontendAccept)
+#endif
                             )
                         {
                             if (currentMenu.Size > 0)
@@ -222,13 +303,27 @@ namespace MenuAPI
                             }
                         }
                         // Cancel / Go Back
-                        else if (Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) && !DisableBackButton)
+                        else if (
+#if FIVEM
+                            Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) 
+#endif
+#if REDM
+                            Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.CellphoneCancel)
+#endif
+                            && !DisableBackButton)
                         {
                             // Wait for the next frame to make sure the "cinematic camera" button doesn't get "re-enabled" before the menu gets closed.
                             await Delay(0);
                             currentMenu.GoBack();
                         }
-                        else if (Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) && PreventExitingMenu && !DisableBackButton)
+                        else if (
+#if FIVEM
+                            Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) 
+#endif
+#if REDM
+                               Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.CellphoneCancel)
+#endif
+                            && PreventExitingMenu && !DisableBackButton)
                         {
                             // if there's a parent menu, allow going back to that, but don't allow a 'top-level' menu to be closed.
                             if (currentMenu.ParentMenu != null)
@@ -239,8 +334,9 @@ namespace MenuAPI
                         }
                     }
                 }
-
+#if FIVEM
                 Game.DisableControlThisFrame(0, Control.MultiplayerInfo);
+#endif
             }
         }
 
@@ -255,7 +351,7 @@ namespace MenuAPI
             {
                 return false;
             }
-
+#if FIVEM
             // when the player is holding TAB, while not in a vehicle, and when the scrollwheel is being used, return false to prevent interferring with weapon selection.
             if (!Game.PlayerPed.IsInVehicle())
             {
@@ -276,7 +372,17 @@ namespace MenuAPI
             {
                 return true;
             }
-
+#endif
+#if REDM
+            if (Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendUp) ||
+                Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendUp) ||
+                Call<bool>(IS_CONTROL_PRESSED, 0, Control.CellphoneScrollBackward) ||
+                Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.CellphoneScrollBackward)
+                )
+            {
+                return true;
+            }
+#endif
             // return false if none of the conditions matched.
             return false;
         }
@@ -292,7 +398,7 @@ namespace MenuAPI
             {
                 return false;
             }
-
+#if FIVEM
             // when the player is holding TAB, while not in a vehicle, and when the scrollwheel is being used, return false to prevent interferring with weapon selection.
             if (!Game.PlayerPed.IsInVehicle())
             {
@@ -313,6 +419,17 @@ namespace MenuAPI
             {
                 return true;
             }
+#endif
+#if REDM
+            if (Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendDown) ||
+                Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendDown) ||
+                Call<bool>(IS_CONTROL_PRESSED, 0, Control.CellphoneScrollForward) ||
+                Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.CellphoneScrollForward)
+                )
+            {
+                return true;
+            }
+#endif
 
             // return false if none of the conditions matched.
             return false;
@@ -324,6 +441,7 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessToggleMenuButton()
         {
+#if FIVEM
             if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.Player.IsDead && !DisableMenuButtons)
             {
                 if (IsAnyMenuOpen())
@@ -387,6 +505,14 @@ namespace MenuAPI
                     }
                 }
             }
+#endif
+#if REDM
+            if (!Call<bool>(IS_PAUSE_MENU_ACTIVE) && Call<bool>(IS_SCREEN_FADED_IN) && !IsAnyMenuOpen() && !DisableMenuButtons && !Call<bool>(IS_ENTITY_DEAD, PlayerPedId()) && Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, MenuToggleKey))
+            {
+                MainMenu.OpenMenu();
+                await Task.FromResult(0);
+            }
+#endif
         }
 
         /// <summary>
@@ -476,12 +602,18 @@ namespace MenuAPI
                     }
 
                     // Check if the Go Left controls are pressed.
+#if FIVEM
                     else if (Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) || Game.IsControlJustPressed(0, Control.PhoneLeft))
+#endif
+#if REDM
+                    else if (Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.CellphoneLeft) || Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.CellphoneLeft))
+#endif
                     {
                         var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
                         if (item.Enabled)
                         {
                             currentMenu.GoLeft();
+#if FIVEM
                             var time = GetGameTimer();
                             var times = 0;
                             var delay = 200;
@@ -500,16 +632,23 @@ namespace MenuAPI
                                 }
                                 await Delay(0);
                             }
+#endif
                         }
                     }
 
                     // Check if the Go Right controls are pressed.
+#if FIVEM
                     else if (Game.IsDisabledControlJustPressed(0, Control.PhoneRight) || Game.IsControlJustPressed(0, Control.PhoneRight))
+#endif
+#if REDM
+                    else if (AreMenuButtonsEnabled && Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.CellphoneRight) || Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.CellphoneRight))
+#endif
                     {
                         var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
                         if (item.Enabled)
                         {
                             currentMenu.GoRight();
+#if FIVEM
                             var time = GetGameTimer();
                             var times = 0;
                             var delay = 200;
@@ -528,6 +667,7 @@ namespace MenuAPI
                                 }
                                 await Delay(0);
                             }
+#endif
                         }
                     }
                 }
@@ -579,19 +719,27 @@ namespace MenuAPI
                     var currentItem = currMenu.GetCurrentMenuItem();
                     if (currentItem != null)
                     {
+#if FIVEM
                         if (currentItem is MenuSliderItem || currentItem is MenuListItem || currentItem is MenuDynamicListItem)
                         {
                             if (Game.CurrentInputMode == InputMode.GamePad)
                                 Game.DisableControlThisFrame(0, Control.SelectWeapon);
                         }
+#endif
                     }
 
                     // Close all menus when the player dies.
+#if FIVEM
                     if (Game.PlayerPed.IsDead)
+#endif
+#if REDM
+                    if (Call<bool>(IS_ENTITY_DEAD, PlayerPedId()))
+#endif
                     {
                         CloseAllMenus();
                     }
 
+#if FIVEM
                     // Disable Gamepad/Controller Specific controls:
                     if (Game.CurrentInputMode == InputMode.GamePad)
                     {
@@ -618,8 +766,16 @@ namespace MenuAPI
                             Game.DisableControlThisFrame(24, Control.SelectPrevWeapon);
                         }
                     }
+#endif
+#if REDM
+                    if (Call<bool>(_IS_INPUT_DISABLED, 2))
+                    {
+                        Call(DISABLE_CONTROL_ACTION, 0, Control.FrontendPauseAlternate, true);
+                    }
+#endif
                     // Disable Shared Controls
 
+#if FIVEM
                     // Radio Inputs
                     Game.DisableControlThisFrame(0, Control.RadioWheelLeftRight);
                     Game.DisableControlThisFrame(0, Control.RadioWheelUpDown);
@@ -656,6 +812,38 @@ namespace MenuAPI
                         Game.DisableControlThisFrame(0, Control.VehicleSelectPrevWeapon);
                         Game.DisableControlThisFrame(0, Control.VehicleCinCam);
                     }
+#endif
+#if REDM
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.Attack, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.Attack2, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.HorseAim, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.HorseAttack, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.HorseAttack2, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.HorseMelee, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeAttack, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeBlock, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrapple, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleAttack, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleBreakout, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleChoke, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleMountSwitch, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleReversal, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleStandSwitch, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeHorseAttackPrimary, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeHorseAttackSecondary, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeModifier, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehAttack, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehAttack2, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehBoatAttack, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehBoatAttack2, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehCarAttack, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehCarAttack2, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehDraftAttack, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehDraftAttack2, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehFlyAttack, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehFlyAttack2, true);
+                    Call(DISABLE_CONTROL_ACTION, 0, Control.VehPassengerAttack, true);
+#endif
                 }
 
             }
@@ -668,7 +856,21 @@ namespace MenuAPI
         /// <returns></returns>
         private static async Task ProcessMenus()
         {
-            if (Menus.Count > 0 && IsAnyMenuOpen() && !Game.IsPaused && !Game.Player.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress())
+
+            if (Menus.Count > 0 &&
+                IsAnyMenuOpen() &&
+#if FIVEM
+                IsScreenFadedIn() &&
+                !Game.IsPaused &&
+                !Game.Player.IsDead &&
+                !IsPlayerSwitchInProgress()
+#endif
+#if REDM
+                Call<bool>(IS_SCREEN_FADED_IN) &&
+                !Call<bool>(IS_PAUSE_MENU_ACTIVE) &&
+                !Call<bool>(IS_ENTITY_DEAD, PlayerPedId())
+#endif
+                )
             {
                 await LoadAssets();
 
@@ -706,6 +908,7 @@ namespace MenuAPI
             }
         }
 
+#if FIVEM
         internal static async Task DrawInstructionalButtons()
         {
             if (!Game.IsPaused && !Game.Player.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !IsWarningMessageActive() && UpdateOnscreenKeyboard() != 0)
@@ -773,5 +976,6 @@ namespace MenuAPI
                 SetScaleformMovieAsNoLongerNeeded(ref _scale);
             }
         }
+#endif
     }
 }

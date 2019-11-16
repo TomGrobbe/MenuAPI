@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
+using static CitizenFX.Core.Native.Function;
+using static CitizenFX.Core.Native.Hash;
 
 namespace MenuAPI
 {
     public class MenuItem
     {
+#if FIVEM
         public enum Icon
         {
             NONE,
@@ -193,11 +195,14 @@ namespace MenuAPI
             BRAND_WILLARD,
             BRAND_ZIRCONIUM,
         }
+#endif
 
         public string Text { get; set; }
+#if FIVEM
         public string Label { get; set; }
         public Icon LeftIcon { get; set; }
         public Icon RightIcon { get; set; }
+#endif
         public bool Enabled { get; set; } = true;
         public string Description { get; set; }
         public int Index { get { if (ParentMenu != null) return ParentMenu.GetMenuItems().IndexOf(this); return -1; } } //{ get; internal set; }
@@ -227,6 +232,7 @@ namespace MenuAPI
             Description = description;
         }
 
+#if FIVEM
         protected string GetSpriteDictionary(Icon icon)
         {
             switch (icon)
@@ -872,11 +878,20 @@ namespace MenuAPI
             }
             return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (Width - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
         }
+#endif
+#if REDM
+        //private float GetSafeZoneSize()
+        //{
+        //    return 0f;
+        //}
+#endif
 
+#if FIVEM
         protected float GetSpriteY(Icon icon)
         {
             return 0f;
         }
+#endif
 
 
         /// <summary>
@@ -889,23 +904,34 @@ namespace MenuAPI
                 float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * MathUtil.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
 
                 #region Background Rect
+#if FIVEM
                 SetScriptGfxAlign(ParentMenu.LeftAligned ? 76 : 82, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+#endif
 
-                float x = (ParentMenu.Position.X + (Width / 2f)) / MenuController.ScreenWidth;
-                float y = (ParentMenu.Position.Y + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
+                float x = (ParentMenu.Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
+                float y = (ParentMenu.Position.Value + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
                 float width = Width / MenuController.ScreenWidth;
                 float height = (RowHeight) / MenuController.ScreenHeight;
 
                 if (Selected)
                 {
+#if FIVEM
                     DrawRect(x, y, width, height, 255, 255, 255, 225);
+#endif
+#if REDM
+                    Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 74, 6, 7, 255);
+                    //Call(DRAW_RECT, x, y, width, height, 74, 6, 7, 200);
+#endif
                 }
+#if FIVEM
                 ResetScriptGfxAlign();
+#endif
                 #endregion
 
                 #region Left Icon
                 float textXOffset = 0f;
+#if FIVEM
                 if (LeftIcon != Icon.NONE)
                 {
                     textXOffset = 25f;
@@ -924,10 +950,12 @@ namespace MenuAPI
                     DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
                     ResetScriptGfxAlign();
                 }
+#endif
                 #endregion
 
-                float rightTextIconOffset = 0f;
                 #region Right Icon
+#if FIVEM
+                float rightTextIconOffset = 0f;
                 if (RightIcon != Icon.NONE)
                 {
                     rightTextIconOffset = 25f;
@@ -946,13 +974,14 @@ namespace MenuAPI
                     DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
                     ResetScriptGfxAlign();
                 }
+#endif
                 #endregion
 
                 #region Text
-                int font = 0;
                 float textSize = (14f * 27f) / MenuController.ScreenHeight;
-                //float textSize = 0.34f;
 
+#if FIVEM
+                int font = 0;
                 SetScriptGfxAlign(76, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
                 SetTextFont(font);
@@ -965,19 +994,6 @@ namespace MenuAPI
                 {
                     SetTextColour(textColor, textColor, textColor, 255);
                 }
-                //selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
-                //if (Selected)
-                //{
-                //    if (Enabled)
-                //        SetTextColour(textColor, textColor, textColor, 255);
-                //    else
-                //        SetTextColour(textColor, textColor, textColor, 255);
-                //}
-                //else
-                //{
-                //    if (!Enabled)
-                //        SetTextColour(textColor, textColor, textColor, 255);
-                //}
                 float textMinX = (textXOffset / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
                 float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
                 //float textHeight = GetTextScaleHeight(textSize, font);
@@ -995,10 +1011,24 @@ namespace MenuAPI
                     EndTextCommandDisplayText(textMinX, textY);
                 }
                 ResetScriptGfxAlign();
+#endif
+#if REDM
+                Call(SET_TEXT_SCALE, textSize, textSize);
 
+                int textColor = Enabled ? 255 : 109;
+                Call((CitizenFX.Core.Native.Hash)0x50A41AD966910F03, textColor, textColor, textColor, 255); // _SET_TEXT_COLOUR / 0x50A41AD966910F03
+                float textMinX = ((8f + textXOffset) / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
+                float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
+                float textY = y - ((30f / 2f) / MenuController.ScreenHeight);
+
+
+                //SetTextWrap(textMinX, textMaxX);
+                Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", Text ?? "N/A"), textMinX, textY);
+#endif
                 #endregion
 
                 #region Label
+#if FIVEM
                 if (!string.IsNullOrEmpty(Label))
                 {
                     SetScriptGfxAlign(76, 84);
@@ -1030,10 +1060,8 @@ namespace MenuAPI
 
                     ResetScriptGfxAlign();
                 }
+#endif
                 #endregion
-
-
-
             }
         }
 
