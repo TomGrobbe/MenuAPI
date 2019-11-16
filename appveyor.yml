@@ -10,9 +10,9 @@ build:
   include_nuget_references: true
   verbosity: minimal
 after_build:
-  - cmd: copy README.md '.\MenuAPI\bin\Release RedM\README.md'
+  - cmd: copy "README.md" ".\MenuAPI\bin\Release RedM\README.md"
   - cmd: if %APPVEYOR_REPO_TAG%==true (appveyor SetVariable -Name VERSION_NAME -Value %APPVEYOR_REPO_TAG_NAME%) else (appveyor SetVariable -Name VERSION_NAME -Value dev)
-  - cmd: 7z a MenuAPI-%VERSION_NAME%.zip -r '.\MenuAPI\bin\Release RedM\*'
+  - cmd: 7z a MenuAPI-%VERSION_NAME%.zip -r ".\MenuAPI\bin\Release RedM\*"
   - cmd: appveyor PushArtifact MenuAPI-%VERSION_NAME%.zip
 deploy:
   - provider: GitHub
