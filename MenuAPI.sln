@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.29509.3
+VisualStudioVersion = 16.0.29319.158
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MenuAPI", "MenuAPI\MenuAPI.csproj", "{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MenuAPI", "MenuAPI\MenuAPI.csproj", "{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMenu", "TestMenu\TestMenu.csproj", "{A91669DA-E3C1-4DC3-A3A6-97476B17214A}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -12,18 +12,28 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMenu", "TestMenu\TestMe
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Debug FiveM|Any CPU = Debug FiveM|Any CPU
+		Debug RedM|Any CPU = Debug RedM|Any CPU
+		Release FiveM|Any CPU = Release FiveM|Any CPU
+		Release RedM|Any CPU = Release RedM|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Debug FiveM|Any CPU.ActiveCfg = Debug FiveM|Any CPU
+		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Debug FiveM|Any CPU.Build.0 = Debug FiveM|Any CPU
+		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Debug RedM|Any CPU.ActiveCfg = Debug RedM|Any CPU
+		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Debug RedM|Any CPU.Build.0 = Debug RedM|Any CPU
+		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Release FiveM|Any CPU.ActiveCfg = Release FiveM|Any CPU
+		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Release FiveM|Any CPU.Build.0 = Release FiveM|Any CPU
+		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Release RedM|Any CPU.ActiveCfg = Release RedM|Any CPU
+		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Release RedM|Any CPU.Build.0 = Release RedM|Any CPU
+		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Debug FiveM|Any CPU.ActiveCfg = Debug FiveM|Any CPU
+		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Debug FiveM|Any CPU.Build.0 = Debug FiveM|Any CPU
+		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Debug RedM|Any CPU.ActiveCfg = Debug RedM|Any CPU
+		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Debug RedM|Any CPU.Build.0 = Debug RedM|Any CPU
+		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Release FiveM|Any CPU.ActiveCfg = Release FiveM|Any CPU
+		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Release FiveM|Any CPU.Build.0 = Release FiveM|Any CPU
+		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Release RedM|Any CPU.ActiveCfg = Release RedM|Any CPU
+		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Release RedM|Any CPU.Build.0 = Release RedM|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
