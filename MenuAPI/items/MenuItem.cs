@@ -630,7 +630,7 @@ namespace MenuAPI
                 case Icon.BRAND_PROGEN2: return "progen";
                 case Icon.BRAND_RUNE: return "rune";
                 default:
-                    break;
+                    return "";
 #endif
             }
 #if REDM
@@ -1032,7 +1032,14 @@ namespace MenuAPI
                 #endregion
 
                 #region Label
+                int font = 0;
+                float textSize = (14f * 27f) / MenuController.ScreenHeight;
 #if FIVEM
+                float textMinX = (textXOffset / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
+                float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
+                //float textHeight = GetTextScaleHeight(textSize, font);
+                float textY = y - ((30f / 2f) / MenuController.ScreenHeight);
+                int textColor = Selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
                 if (!string.IsNullOrEmpty(Label))
                 {
                     SetScriptGfxAlign(76, 84);
@@ -1047,10 +1054,6 @@ namespace MenuAPI
                     {
                         SetTextColour(textColor, textColor, textColor, 255);
                     }
-                    //if (Selected)
-                    //{
-                    //    SetTextColour(0, 0, 0, 255);
-                    //}
                     if (ParentMenu.LeftAligned)
                     {
                         SetTextWrap(0f, ((490f - rightTextIconOffset) / MenuController.ScreenWidth));
@@ -1068,10 +1071,8 @@ namespace MenuAPI
                 #endregion
 
                 #region Text
-                float textSize = (14f * 27f) / MenuController.ScreenHeight;
 
 #if FIVEM
-                int font = 0;
                 SetScriptGfxAlign(76, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
                 SetTextFont(font);
@@ -1079,15 +1080,10 @@ namespace MenuAPI
                 SetTextJustification(1);
                 BeginTextCommandDisplayText("STRING");
                 AddTextComponentSubstringPlayerName(Text ?? "N/A");
-                int textColor = Selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
                 if (Selected || !Enabled)
                 {
                     SetTextColour(textColor, textColor, textColor, 255);
                 }
-                float textMinX = (textXOffset / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
-                float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
-                //float textHeight = GetTextScaleHeight(textSize, font);
-                float textY = y - ((30f / 2f) / MenuController.ScreenHeight);
                 if (ParentMenu.LeftAligned)
                 {
                     SetTextWrap(textMinX, textMaxX);
