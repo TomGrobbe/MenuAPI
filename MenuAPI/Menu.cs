@@ -1284,8 +1284,8 @@ namespace MenuAPI
                     }
 #endif
 
-#if FIVEM
                     #region draw counter + pre-counter text
+#if FIVEM
                     string counterText = $"{CounterPreText ?? ""}{CurrentIndex + 1} / {Size}";
                     if (!string.IsNullOrEmpty(CounterPreText) || MaxItemsOnScreen < Size)
                     {
@@ -1325,9 +1325,26 @@ namespace MenuAPI
                     {
                         MenuItemsYOffset += bgHeight - 1f;
                     }
+#endif
+#if REDM
+                    if (Size > 0)
+                    {
+                        float textSize = (12f * 27f) / MenuController.ScreenHeight;
+                        Call(SET_TEXT_SCALE, textSize, textSize);
+                        Call((CitizenFX.Core.Native.Hash)0x50A41AD966910F03, 135, 135, 135, 255); // _SET_TEXT_COLOUR / 0x50A41AD966910F03
+                        Call(SET_TEXT_CENTRE, true);
+                        float textMinX = (headerSize.Key / 2f) / MenuController.ScreenWidth;
+                        float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
+                        float textY = (MenuItemsYOffset + 38f * (MathUtil.Clamp(Size, 0, MaxItemsOnScreen) + 1) - 11f) / MenuController.ScreenHeight;
+                        int font = 23;
+                        Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
+                        //SetTextWrap(textMinX, textMaxX);
+
+                        Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{CurrentIndex + 1} of {Size}"), textMinX, textY);
+                    }
+#endif
 
                     #endregion
-#endif
                 }
                 #endregion
 
@@ -1338,7 +1355,6 @@ namespace MenuAPI
                     SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 #endif
-
 
                     //DrawSprite(MenuController._texture_dict, "gradient_bgd", x, y, width, height, 0f, 255, 255, 255, 255);
 #if FIVEM
@@ -1351,6 +1367,7 @@ namespace MenuAPI
 
                     ResetScriptGfxAlign();
                     DrawRect(x, y, width, height, 0, 0, 0, 180);
+                    MenuItemsYOffset += bgHeight - 1f;
 #endif
 #if REDM
                     //float x = (Position.Key + ((headerSize.Key) / 2f)) / MenuController.ScreenWidth;
@@ -1358,13 +1375,31 @@ namespace MenuAPI
                     //float width = (headerSize.Key + 16f) / MenuController.ScreenWidth;
                     //float height = (bgHeight + 17f) / MenuController.ScreenHeight;
                     float bgHeight = 38f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
+                    var currentMenuItem = GetCurrentMenuItem();
+                    float descriptionBoxHeight = 0f;
+                    if (currentMenuItem != null && !string.IsNullOrEmpty(currentMenuItem.Description))
+                    {
+                        int count = (currentMenuItem.Description.Count((a => { return a == '\n'; })) - 1);
+                        if (count < 1)
+                        {
+                            descriptionBoxHeight = 42f;
+                        }
+                        else
+                        {
+                            descriptionBoxHeight = (38f * count) + 30f;
+                        }
+
+                        bgHeight += descriptionBoxHeight;
+                    }
+                    float actualBgYLocation = ((38f + (38f / 2f) + (bgHeight / 2f)) / MenuController.ScreenHeight);
                     float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
-                    float y = ((Position.Value + MenuItemsYOffset + ((bgHeight + 1f - (headerSize.Value)) / 2f)) / MenuController.ScreenHeight);
+                    float y = ((Position.Value + MenuItemsYOffset + ((bgHeight + 1f - (headerSize.Value)) / 2f) + 19f) / MenuController.ScreenHeight);
                     float width = headerSize.Key / MenuController.ScreenWidth;
-                    float height = (headerSize.Value + bgHeight + 33f) / MenuController.ScreenHeight;
+                    float height = (headerSize.Value + bgHeight + 33f + 38f) / MenuController.ScreenHeight;
                     Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 0, 0, 0, 240);
+                    Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y + actualBgYLocation - (descriptionBoxHeight / MenuController.ScreenHeight), width, 38f / MenuController.ScreenHeight, 0f, 55, 55, 55, 255);
+                    MenuItemsYOffset += bgHeight - descriptionBoxHeight - 1f;
 #endif
-                    MenuItemsYOffset += bgHeight - 1f;
                 }
                 #endregion
 
@@ -1377,9 +1412,10 @@ namespace MenuAPI
                     }
                 }
                 #endregion
+                float descriptionYOffset = 0f;
+
 #if FIVEM
                 #region Up Down overflow Indicator
-                float descriptionYOffset = 0f;
                 if (Size > 0)
                 {
                     if (Size > MaxItemsOnScreen)
@@ -1450,21 +1486,21 @@ namespace MenuAPI
                 }
 
                 #endregion
-
+#endif
                 #region Draw Description
                 if (Size > 0)
                 {
                     var currentMenuItem = GetCurrentMenuItem();
                     if (currentMenuItem != null && !string.IsNullOrEmpty(currentMenuItem.Description))
                     {
-                #region description text
+                        #region description text
                         int font = 0;
                         float textSize = (14f * 27f) / MenuController.ScreenHeight;
 
+#if FIVEM
                         float textMinX = 0f + (10f / MenuController.ScreenWidth);
                         float textMaxX = Width / MenuController.ScreenWidth - (10f / MenuController.ScreenWidth);
                         float textY = MenuItemsYOffset / MenuController.ScreenHeight + (16f / MenuController.ScreenHeight) + descriptionYOffset;
-
                         SetScriptGfxAlign(76, 84);
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
@@ -1517,11 +1553,25 @@ namespace MenuAPI
                         }
 
                         ResetScriptGfxAlign();
+#endif
+#if REDM
 
-                #endregion
+                        Call(SET_TEXT_SCALE, textSize, textSize);
+                        Call(SET_TEXT_CENTRE, true);
+                        float textMinX = (headerSize.Key / 2f) / MenuController.ScreenWidth;
+                        float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
+                        float textY = MenuItemsYOffset / MenuController.ScreenHeight + (18f / MenuController.ScreenHeight) + (48f / MenuController.ScreenHeight);
+                        font = 23;
+                        Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
+                        Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{currentMenuItem.Description}"), textMinX, textY);
+
+#endif
+
+                        #endregion
 
 
-                #region background
+#if FIVEM
+                        #region background
                         float descWidth = Width / MenuController.ScreenWidth;
                         float descHeight = (textHeight + 0.005f) * lineCount + (8f / MenuController.ScreenHeight) + (2.5f / MenuController.ScreenHeight);
                         float descX = (Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
@@ -1534,9 +1584,10 @@ namespace MenuAPI
                         DrawRect(descX, descY, descWidth, descHeight, 0, 0, 0, 180);
 
                         ResetScriptGfxAlign();
-                #endregion
+                        #endregion
 
                         descriptionYOffset += descY + (descHeight / 2f) - (4f / MenuController.ScreenHeight);
+#endif
                     }
                     else
                     {
@@ -1544,9 +1595,9 @@ namespace MenuAPI
                     }
 
                 }
-
                 #endregion
 
+#if FIVEM
                 #region Draw Weapon Stats
                 {
                     if (Size > 0)

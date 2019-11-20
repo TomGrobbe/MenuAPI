@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -179,7 +179,7 @@ namespace TestMenu
             // you can use AddSubmenu or AddMenu, both will work but if you want to link this menu from another menu,
             // you should use AddSubmenu.
             MenuController.AddSubmenu(menu, menu3);
-            MenuItem thirdSubmenuBtn = new MenuItem("Another submenu", "This is just a submenu without a banner. No big deal.")
+            MenuItem thirdSubmenuBtn = new MenuItem("Another submenu", "This is just a submenu without a banner. No big deal. This also has a very long description to test multiple lines and see if they work properly. Let's find out if it works as intended.")
             {
 #if FIVEM
                 Label = "→→→"

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -206,7 +206,46 @@ namespace MenuAPI
         public Icon LeftIcon { get; set; }
         public Icon RightIcon { get; set; }
         public bool Enabled { get; set; } = true;
-        public string Description { get; set; }
+        public string Description
+        {
+            get
+            {
+                return _description;
+            }
+            set
+            {
+#if FIVEM
+                _description = value;
+#endif
+#if REDM
+                if (value != null)
+                {
+                    string text = value;
+                    int maxLength = 50;
+                    List<string> lines = new List<string>();
+                    while (text.Length > maxLength)
+                    {
+                        var substr = text.Substring(0, Math.Min(text.Length - 1, maxLength));
+                        var lastIndex = substr.LastIndexOf(" ");
+                        if (lastIndex == -1)
+                        {
+                            lastIndex = Math.Min(text.Length - 1, maxLength);
+                        }
+                        lines.Add(text.Substring(0, lastIndex));
+                        text = text.Substring(lastIndex);
+                    }
+                    lines.Add(text);
+                    text = "";
+                    foreach (var str in lines)
+                    {
+                        text += str + "\n";
+                    }
+                    _description = text;
+                }
+#endif
+            }
+        }
+        private string _description;
         public int Index { get { if (ParentMenu != null) return ParentMenu.GetMenuItems().IndexOf(this); return -1; } } //{ get; internal set; }
         public bool Selected { get { if (ParentMenu != null) { return ParentMenu.CurrentIndex == Index; } return false; } }
         public Menu ParentMenu { get; set; }
@@ -918,7 +957,6 @@ namespace MenuAPI
             if (ParentMenu != null)
             {
                 float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * MathUtil.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
-
                 #region Background Rect
 #if FIVEM
                 SetScriptGfxAlign(ParentMenu.LeftAligned ? 76 : 82, 84);
