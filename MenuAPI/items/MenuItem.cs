@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -1106,9 +1106,8 @@ namespace MenuAPI
                 float textMinX = ((8f + textXOffset) / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
                 float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
                 float textY = y - ((30f / 2f) / MenuController.ScreenHeight);
-
-
-                //SetTextWrap(textMinX, textMaxX);
+                font = 23;
+                Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
 
                 Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? "")), textMinX, textY);
                 if (MenuController.MenuButtons.ContainsKey(this))
