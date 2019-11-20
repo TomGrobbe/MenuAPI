@@ -8,7 +8,6 @@ using static CitizenFX.Core.Native.API;
 
 namespace MenuAPI
 {
-#if FIVEM
     public class MenuDynamicListItem : MenuItem
     {
         public bool HideArrowsWhenNotSelected { get; set; } = false;
@@ -40,5 +39,4 @@ namespace MenuAPI
         }
 
     }
-#endif
 }

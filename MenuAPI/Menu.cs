@@ -32,6 +32,7 @@ namespace MenuAPI
         /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuCheckboxItem"/>.</param>
         /// <param name="newCheckedState">The new <see cref="MenuCheckboxItem.Checked"/> state of this <see cref="MenuCheckboxItem"/>.</param>
         public delegate void CheckboxItemChangeEvent(Menu menu, MenuCheckboxItem menuItem, int itemIndex, bool newCheckedState);
+#endif
 
         /// <summary>
         /// Triggered when a <see cref="MenuListItem"/> is selected.
@@ -51,7 +52,6 @@ namespace MenuAPI
         /// <param name="newSelectionIndex">The new <see cref="MenuListItem.ListIndex"/> of the <see cref="MenuListItem"/>.</param>
         /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of the <see cref="MenuListItem"/> in the <see cref="Menu"/>.</param>
         public delegate void ListItemIndexChangedEvent(Menu menu, MenuListItem listItem, int oldSelectionIndex, int newSelectionIndex, int itemIndex);
-#endif
 
         /// <summary>
         /// Triggered when a <see cref="Menu"/> is closed.
@@ -94,6 +94,7 @@ namespace MenuAPI
         /// <param name="sliderPosition">The current position of the slider bar.</param>
         /// <param name="itemIndex">The index of this <see cref="MenuSliderItem"/>.</param>
         public delegate void SliderItemSelectedEvent(Menu menu, MenuSliderItem sliderItem, int sliderPosition, int itemIndex);
+#endif
 
         /// <summary>
         /// Triggered when a <see cref="MenuDynamicListItem"/>'s value was changed.
@@ -111,7 +112,6 @@ namespace MenuAPI
         /// <param name="dynamicListItem">The <see cref="MenuDynamicListItem"/> that was selected.</param>
         /// <param name="currentItem">The <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/> in the <see cref="Menu"/>.</param>
         public delegate void DynamicListItemSelectedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string currentItem);
-#endif
         #endregion
 
         #region events
@@ -127,6 +127,7 @@ namespace MenuAPI
         /// Parameters: <see cref="Menu"/> parentMenu, <see cref="MenuCheckboxItem"/> menuItem, <see cref="int"/> itemIndex, <see cref="bool"/> newCheckedState.
         /// </summary>
         public event CheckboxItemChangeEvent OnCheckboxChange;
+#endif
 
         /// <summary>
         /// Triggered when a <see cref="MenuListItem"/> is selected.
@@ -139,7 +140,6 @@ namespace MenuAPI
         /// Parameters: <see cref="Menu"/> menu, <see cref="MenuListItem"/> listItem, <see cref="MenuListItem.ListIndex"/> oldSelectionIndex, <see cref="int"/> newSelectionIndex, <see cref="int"/> itemIndex.
         /// </summary>
         public event ListItemIndexChangedEvent OnListIndexChange;
-#endif
 
         /// <summary>
         /// Triggered when a <see cref="Menu"/> is closed.
@@ -170,6 +170,7 @@ namespace MenuAPI
         /// Parameters: <see cref="Menu"/> menu, <see cref="MenuSliderItem"/> sliderItem, <see cref="int"/> sliderPosition, <see cref="int"/> itemIndex.
         /// </summary>
         public event SliderItemSelectedEvent OnSliderItemSelect;
+#endif
 
         /// <summary>
         /// Triggered when a <see cref="MenuDynamicListItem"/>'s value was changed.
@@ -182,7 +183,6 @@ namespace MenuAPI
         /// Parameters: <see cref="Menu"/> menu, <see cref="MenuDynamicListItem"/> dynamicListItem, <see cref="MenuDynamicListItem.CurrentItem"/> itemValue.
         /// </summary>
         public event DynamicListItemSelectedEvent OnDynamicListItemSelect;
-#endif
         #endregion
 
         #region virtual voids
@@ -210,6 +210,7 @@ namespace MenuAPI
             OnCheckboxChange?.Invoke(this, menuItem, itemIndex, _checked);
         }
 
+#endif
         /// <summary>
         /// Triggered when a <see cref="MenuListItem"/> is selected.
         /// </summary>
@@ -234,7 +235,6 @@ namespace MenuAPI
         {
             OnListIndexChange?.Invoke(menu, listItem, oldSelectionIndex, newSelectionIndex, itemIndex);
         }
-#endif
 
         /// <summary>
         /// Triggered when a <see cref="Menu"/> is closed.
@@ -292,6 +292,7 @@ namespace MenuAPI
         {
             OnSliderItemSelect?.Invoke(menu, sliderItem, sliderPosition, itemIndex);
         }
+#endif
 
         /// <summary>
         /// Triggered when a <see cref="MenuDynamicListItem"/>'s value was changed.
@@ -315,7 +316,6 @@ namespace MenuAPI
         {
             OnDynamicListItemSelect?.Invoke(menu, dynamicListItem, currentItem);
         }
-#endif
         #endregion
 
         #endregion
@@ -669,7 +669,7 @@ namespace MenuAPI
 #endif
 #if REDM
                 ItemSelectedEvent(item, item.Index);
-                Call(PLAY_SOUND_FRONTEND, "NAV_RIGHT", "Ledger_Sounds", 1);
+                Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "SELECT", "HUD_SHOP_SOUNDSET", 1);
 #endif
                 if (MenuController.MenuButtons.ContainsKey(item))
                 {
@@ -686,7 +686,7 @@ namespace MenuAPI
                 PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
-                Call(PLAY_SOUND_FRONTEND, "UNAFFORDABLE", "Ledger_Sounds", 1);
+                Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_ERROR", "HUD_SHOP_SOUNDSET", 1);
 #endif
             }
         }
@@ -700,7 +700,8 @@ namespace MenuAPI
             PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
-            Call(PLAY_SOUND_FRONTEND, "Back", "Ledger_Sounds", 1);
+
+            Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "Back", "HUD_SHOP_SOUNDSET", 1);
 #endif
             CloseMenu();
             if (ParentMenu != null)
@@ -770,7 +771,7 @@ namespace MenuAPI
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
-                Call(PLAY_SOUND_FRONTEND, "NAV_UP", "Ledger_Sounds", 1);
+                Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_UP", "HUD_SHOP_SOUNDSET", 1);
 #endif
             }
         }
@@ -816,7 +817,7 @@ namespace MenuAPI
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
-                Call(PLAY_SOUND_FRONTEND, "NAV_DOWN", "Ledger_Sounds", 1);
+                Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_DOWN", "HUD_SHOP_SOUNDSET", 1);
 #endif
             }
         }
@@ -829,7 +830,6 @@ namespace MenuAPI
             if (MenuController.AreMenuButtonsEnabled)
             {
                 var item = GetCurrentMenuItem();
-#if FIVEM
                 if (item != null && item.Enabled && item is MenuListItem listItem)
                 {
                     if (listItem.ItemsCount > 0)
@@ -845,10 +845,17 @@ namespace MenuAPI
                             newIndex--;
                         }
                         listItem.ListIndex = newIndex;
+
                         ListItemIndexChangeEvent(this, listItem, oldIndex, newIndex, listItem.Index);
+#if FIVEM
                         PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                        Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_LEFT", "HUD_SHOP_SOUNDSET", 1);
+#endif
                     }
                 }
+#if FIVEM
                 else if (item.Enabled && item is MenuSliderItem slider)
                 {
                     if (slider.Position > slider.Min)
@@ -862,29 +869,32 @@ namespace MenuAPI
                         PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                     }
                 }
+#endif
                 else if (item.Enabled && item is MenuDynamicListItem dynList)
                 {
                     string oldValue = dynList.CurrentItem;
                     string newSelectedItem = dynList.Callback(dynList, true);
                     dynList.CurrentItem = newSelectedItem;
                     DynamicListItemCurrentItemChanged(this, dynList, oldValue, newSelectedItem);
+#if FIVEM
                     PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                    Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
+#endif
                 }
+#if FIVEM
                 // If it's a checkbox, just trigger the box instead.
                 else if (item.Enabled && item is MenuCheckboxItem checkbox)
                 {
                     SelectItem(checkbox);
                 }
+#endif
                 // If the item is enabled and it's not any of the above, just select it.
                 else if (item.Enabled)
                 {
                     SelectItem(item);
                 }
-#endif
-#if REDM
-                if (item.Enabled)
-                    SelectItem(item);
-#endif
             }
         }
 
@@ -896,7 +906,6 @@ namespace MenuAPI
             if (MenuController.AreMenuButtonsEnabled)
             {
                 var item = GetCurrentMenuItem();
-#if FIVEM
                 if (item != null && item.Enabled && item is MenuListItem listItem)
                 {
                     if (listItem.ItemsCount > 0)
@@ -913,9 +922,15 @@ namespace MenuAPI
                         }
                         listItem.ListIndex = newIndex;
                         ListItemIndexChangeEvent(this, listItem, oldIndex, newIndex, listItem.Index);
+#if FIVEM
                         PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                        Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
+#endif
                     }
                 }
+#if FIVEM
                 else if (item.Enabled && item is MenuSliderItem slider)
                 {
                     if (slider.Position < slider.Max)
@@ -929,31 +944,32 @@ namespace MenuAPI
                         PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                     }
                 }
+#endif
                 else if (item.Enabled && item is MenuDynamicListItem dynList)
                 {
                     string oldValue = dynList.CurrentItem;
                     string newSelectedItem = dynList.Callback(dynList, false);
                     dynList.CurrentItem = newSelectedItem;
                     DynamicListItemCurrentItemChanged(this, dynList, oldValue, newSelectedItem);
+#if FIVEM
                     PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                    Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
+#endif
                 }
+#if FIVEM
                 // If it's a checkbox, just trigger the box instead.
                 else if (item.Enabled && item is MenuCheckboxItem checkbox)
                 {
                     SelectItem(checkbox);
                 }
+#endif
                 // If the item is enabled and it's not any of the above, just select it.
                 else if (item.Enabled)
                 {
                     SelectItem(item);
                 }
-#endif
-#if REDM
-                if (item.Enabled)
-                {
-                    SelectItem(item);
-                }
-#endif
             }
         }
 
@@ -1322,10 +1338,6 @@ namespace MenuAPI
                     SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 #endif
-
-
-
-
 
 
                     //DrawSprite(MenuController._texture_dict, "gradient_bgd", x, y, width, height, 0f, 255, 255, 255, 255);

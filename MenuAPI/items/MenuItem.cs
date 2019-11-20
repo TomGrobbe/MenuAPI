@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -993,6 +993,42 @@ namespace MenuAPI
 #endif
                 #endregion
 
+                #region Label
+#if FIVEM
+                if (!string.IsNullOrEmpty(Label))
+                {
+                    SetScriptGfxAlign(76, 84);
+                    SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+
+                    BeginTextCommandDisplayText("STRING");
+                    SetTextFont(font);
+                    SetTextScale(textSize, textSize);
+                    SetTextJustification(2);
+                    AddTextComponentSubstringPlayerName(Label);
+                    if (Selected || !Enabled)
+                    {
+                        SetTextColour(textColor, textColor, textColor, 255);
+                    }
+                    //if (Selected)
+                    //{
+                    //    SetTextColour(0, 0, 0, 255);
+                    //}
+                    if (ParentMenu.LeftAligned)
+                    {
+                        SetTextWrap(0f, ((490f - rightTextIconOffset) / MenuController.ScreenWidth));
+                        EndTextCommandDisplayText((10f + rightTextIconOffset) / MenuController.ScreenWidth, textY);
+                    }
+                    else
+                    {
+                        SetTextWrap(0f, GetSafeZoneSize() - ((10f + rightTextIconOffset) / MenuController.ScreenWidth));
+                        EndTextCommandDisplayText(0f, textY);
+                    }
+
+                    ResetScriptGfxAlign();
+                }
+#endif
+                #endregion
+
                 #region Text
                 float textSize = (14f * 27f) / MenuController.ScreenHeight;
 
@@ -1039,45 +1075,18 @@ namespace MenuAPI
 
 
                 //SetTextWrap(textMinX, textMaxX);
-                Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", Text ?? "N/A"), textMinX, textY);
-#endif
-                #endregion
 
-                #region Label
-#if FIVEM
-                if (!string.IsNullOrEmpty(Label))
+                Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? "")), textMinX, textY);
+                if (MenuController.MenuButtons.ContainsKey(this))
                 {
-                    SetScriptGfxAlign(76, 84);
-                    SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-
-                    BeginTextCommandDisplayText("STRING");
-                    SetTextFont(font);
-                    SetTextScale(textSize, textSize);
-                    SetTextJustification(2);
-                    AddTextComponentSubstringPlayerName(Label);
-                    if (Selected || !Enabled)
-                    {
-                        SetTextColour(textColor, textColor, textColor, 255);
-                    }
-                    //if (Selected)
-                    //{
-                    //    SetTextColour(0, 0, 0, 255);
-                    //}
-                    if (ParentMenu.LeftAligned)
-                    {
-                        SetTextWrap(0f, ((490f - rightTextIconOffset) / MenuController.ScreenWidth));
-                        EndTextCommandDisplayText((10f + rightTextIconOffset) / MenuController.ScreenWidth, textY);
-                    }
-                    else
-                    {
-                        SetTextWrap(0f, GetSafeZoneSize() - ((10f + rightTextIconOffset) / MenuController.ScreenWidth));
-                        EndTextCommandDisplayText(0f, textY);
-                    }
-
-                    ResetScriptGfxAlign();
+                    Call(SET_TEXT_SCALE, textSize, textSize);
+                    Call((CitizenFX.Core.Native.Hash)0x50A41AD966910F03, textColor, textColor, textColor, 255); // _SET_TEXT_COLOUR / 0x50A41AD966910F03
+                    Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", "→→→"), textMinX + (235f / MenuController.ScreenWidth), textY);
                 }
 #endif
                 #endregion
+
+
             }
         }
 
