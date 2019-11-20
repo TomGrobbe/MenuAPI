@@ -274,6 +274,12 @@ namespace MenuAPI
         {
             if (IsAnyMenuOpen())
             {
+#if REDM
+                if (Call<bool>(IS_PAUSE_MENU_ACTIVE))
+                {
+                    return;
+                }
+#endif
                 var currentMenu = GetCurrentMenu();
                 if (currentMenu != null && !DontOpenAnyMenu)
                 {
