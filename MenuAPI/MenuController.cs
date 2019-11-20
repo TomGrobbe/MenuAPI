@@ -322,7 +322,7 @@ namespace MenuAPI
                             Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) 
 #endif
 #if REDM
-                            Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.CellphoneCancel)
+                            Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.FrontendCancel)
 #endif
                             && !DisableBackButton)
                         {
@@ -455,7 +455,9 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessToggleMenuButton()
         {
+
 #if FIVEM
+            Game.DisableControlThisFrame(0, MenuToggleKey);
             if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.Player.IsDead && !DisableMenuButtons)
             {
                 if (IsAnyMenuOpen())
@@ -521,12 +523,13 @@ namespace MenuAPI
             }
 #endif
 #if REDM
+            Call(DISABLE_CONTROL_ACTION, 0, MenuToggleKey, true);
             if (!Call<bool>(IS_PAUSE_MENU_ACTIVE) && Call<bool>(IS_SCREEN_FADED_IN) && !IsAnyMenuOpen() && !DisableMenuButtons && !Call<bool>(IS_ENTITY_DEAD, PlayerPedId()) && Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, MenuToggleKey))
             {
                 MainMenu.OpenMenu();
-                await Task.FromResult(0);
             }
 #endif
+            await Task.FromResult(0);
         }
 
         /// <summary>
@@ -620,18 +623,22 @@ namespace MenuAPI
                     else if (Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) || Game.IsControlJustPressed(0, Control.PhoneLeft))
 #endif
 #if REDM
-                    else if (Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.CellphoneLeft) || Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.CellphoneLeft))
+                    else if (Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.FrontendLeft) || Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.FrontendLeft))
 #endif
                     {
                         var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
                         if (item.Enabled)
                         {
                             currentMenu.GoLeft();
-#if FIVEM
                             var time = GetGameTimer();
                             var times = 0;
                             var delay = 200;
+#if FIVEM
                             while ((Game.IsDisabledControlPressed(0, Control.PhoneLeft) || Game.IsControlPressed(0, Control.PhoneLeft)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+#endif
+#if REDM
+                            while ((Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendLeft) || Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendLeft)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+#endif
                             {
                                 currentMenu = GetCurrentMenu();
                                 if (GetGameTimer() - time > delay)
@@ -646,7 +653,6 @@ namespace MenuAPI
                                 }
                                 await Delay(0);
                             }
-#endif
                         }
                     }
 
@@ -655,18 +661,22 @@ namespace MenuAPI
                     else if (Game.IsDisabledControlJustPressed(0, Control.PhoneRight) || Game.IsControlJustPressed(0, Control.PhoneRight))
 #endif
 #if REDM
-                    else if (AreMenuButtonsEnabled && Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.CellphoneRight) || Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.CellphoneRight))
+                    else if (AreMenuButtonsEnabled && Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.FrontendRight) || Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.FrontendRight))
 #endif
                     {
                         var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
                         if (item.Enabled)
                         {
                             currentMenu.GoRight();
-#if FIVEM
                             var time = GetGameTimer();
                             var times = 0;
                             var delay = 200;
+#if FIVEM
                             while ((Game.IsDisabledControlPressed(0, Control.PhoneRight) || Game.IsControlPressed(0, Control.PhoneRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+#endif
+#if REDM
+                            while ((Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendRight) || Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+#endif
                             {
                                 currentMenu = GetCurrentMenu();
                                 if (GetGameTimer() - time > delay)
@@ -681,7 +691,6 @@ namespace MenuAPI
                                 }
                                 await Delay(0);
                             }
-#endif
                         }
                     }
                 }
