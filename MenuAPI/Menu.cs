@@ -1174,11 +1174,19 @@ namespace MenuAPI
 
                     SetScriptGfxDrawOrder(3);
                     //SetTextWrap(textMinX, textMaxX);
+                    int font = 10;
+                    Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
                     Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuTitle ?? "N/A"), ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (45f / MenuController.ScreenHeight));
                     SetScriptGfxDrawOrder(1);
                     MenuItemsYOffset = headerSize.Value;
 #endif
                     #endregion
+                }
+                else
+                {
+#if REDM
+                    MenuItemsYOffset = 40f;
+#endif
                 }
                 #endregion
 
