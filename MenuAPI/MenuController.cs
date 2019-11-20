@@ -579,6 +579,18 @@ namespace MenuAPI
                                 {
                                     delay = 150;
                                 }
+                                if (times > 5)
+                                {
+                                    delay = 100;
+                                }
+                                if (times > 25)
+                                {
+                                    delay = 50;
+                                }
+                                if (times > 60)
+                                {
+                                    delay = 25;
+                                }
 
                                 // Update the currently selected item to the new one.
                                 currentMenu.GoUp();
@@ -610,6 +622,19 @@ namespace MenuAPI
                                 {
                                     delay = 150;
                                 }
+                                if (times > 5)
+                                {
+                                    delay = 100;
+                                }
+                                if (times > 25)
+                                {
+                                    delay = 50;
+                                }
+                                if (times > 60)
+                                {
+                                    delay = 25;
+                                }
+
                                 currentMenu.GoDown();
 
                                 time = GetGameTimer();
@@ -648,6 +673,18 @@ namespace MenuAPI
                                     {
                                         delay = 150;
                                     }
+                                    if (times > 5)
+                                    {
+                                        delay = 100;
+                                    }
+                                    if (times > 25)
+                                    {
+                                        delay = 50;
+                                    }
+                                    if (times > 60)
+                                    {
+                                        delay = 25;
+                                    }
                                     currentMenu.GoLeft();
                                     time = GetGameTimer();
                                 }
@@ -685,6 +722,18 @@ namespace MenuAPI
                                     if (times > 2)
                                     {
                                         delay = 150;
+                                    }
+                                    if (times > 5)
+                                    {
+                                        delay = 100;
+                                    }
+                                    if (times > 25)
+                                    {
+                                        delay = 50;
+                                    }
+                                    if (times > 60)
+                                    {
+                                        delay = 25;
                                     }
                                     currentMenu.GoRight();
                                     time = GetGameTimer();
