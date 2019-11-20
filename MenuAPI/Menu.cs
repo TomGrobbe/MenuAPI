@@ -1279,7 +1279,9 @@ namespace MenuAPI
                         float size = (14f * 27f) / MenuController.ScreenHeight;
                         Call(SET_TEXT_SCALE, size, size);
                         Call(SET_TEXT_CENTRE, true);
-                        Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuSubtitle ?? "N/A"), x, y - (55f / MenuController.ScreenHeight));
+                        int font = 9;
+                        Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
+                        Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuSubtitle ?? "N/A"), x, y - (52f / MenuController.ScreenHeight));
                         SetScriptGfxDrawOrder(1);
                     }
 #endif
