@@ -66,7 +66,15 @@ namespace MenuAPI
         public static bool DontOpenAnyMenu { get; set; } = false;
         public static bool PreventExitingMenu { get; set; } = false;
         public static bool DisableBackButton { get; set; } = false;
-        public static Control MenuToggleKey { get; set; } = Control.InteractionMenu;
+        public static Control MenuToggleKey { get; set; }
+#if FIVEM
+            = Control.InteractionMenu
+#endif
+#if REDM
+            = Control.Map
+#endif
+            ;
+
         public static bool EnableMenuToggleKeyOnController { get; set; } = true;
 
         internal static Dictionary<MenuItem, Menu> MenuButtons { get; private set; } = new Dictionary<MenuItem, Menu>();
