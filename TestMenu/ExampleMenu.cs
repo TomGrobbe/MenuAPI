@@ -25,11 +25,7 @@ namespace TestMenu
             MenuController.AddMenu(menu);
 
             // Adding a new button by directly creating one inline. You could also just store it and then add it but we don't need to do that in this example.
-            menu.AddMenuItem(new MenuItem("Normal Button", "This is a simple button with a simple description. Scroll down for more button types!"));
-            for (var i = 0; i < 10; i++)
-            {
-                menu.AddMenuItem(new MenuItem($"Item #{i + 1}.", "With an invisible description."));
-            }
+            menu.AddMenuItem(new MenuItem("Normal Button", "This is a simple button with a simple description. Scroll down for more button types!") { Enabled = false });
 
 #if FIVEM
             // Creating 3 sliders, showing off the 3 possible variations and custom colors.
@@ -75,7 +71,8 @@ namespace TestMenu
             menu.AddMenuItem(box);
             menu.AddMenuItem(box2);
             menu.AddMenuItem(box3);
-
+            
+#endif
             // Dynamic list item
             string ChangeCallback(MenuDynamicListItem item, bool left)
             {
@@ -85,7 +82,7 @@ namespace TestMenu
             }
             MenuDynamicListItem dynList = new MenuDynamicListItem("Dynamic list item.", "0", new MenuDynamicListItem.ChangeItemCallback(ChangeCallback), "Description for this dynamic item. Pressing left will make the value smaller, pressing right will make the value bigger.");
             menu.AddMenuItem(dynList);
-
+#if FIVEM
             // List items (first the 3 special variants, then a normal one)
             List<string> colorList = new List<string>();
             for (var i = 0; i < 64; i++)
@@ -120,16 +117,16 @@ namespace TestMenu
                 ShowOpacityPanel = true
             };
 
+            menu.AddMenuItem(hairColors);
+            menu.AddMenuItem(makeupColors);
+            menu.AddMenuItem(opacity);
+#endif
             // Normal
             List<string> normalList = new List<string>() { "Item #1", "Item #2", "Item #3" };
             MenuListItem normalListItem = new MenuListItem("Normal List Item", normalList, 0, "And another simple description for yet another simple (list) item. Nothing special about this one.");
 
             // Adding the lists to the menu.
-            menu.AddMenuItem(hairColors);
-            menu.AddMenuItem(makeupColors);
-            menu.AddMenuItem(opacity);
             menu.AddMenuItem(normalListItem);
-#endif
 
             // Creating a submenu, adding it to the menus list, and creating and binding a button for it.
             Menu submenu = new Menu("Submenu", "Secondary Menu");
@@ -137,9 +134,7 @@ namespace TestMenu
 
             MenuItem menuButton = new MenuItem("Submenu", "This button is bound to a submenu. Clicking it will take you to the submenu.")
             {
-#if FIVEM
                 Label = "→→→"
-#endif
             };
             menu.AddMenuItem(menuButton);
             MenuController.BindMenuItem(menu, submenu, menuButton);
@@ -197,6 +192,10 @@ namespace TestMenu
             menu3.AddMenuItem(new MenuItem("Nothing here!"));
             menu3.AddMenuItem(new MenuItem("Nothing here!"));
 
+            for (var i = 0; i < 10; i++)
+            {
+                menu.AddMenuItem(new MenuItem($"Item #{i + 1}.", "With an invisible description."));
+            }
 
             /*
 ########################################################
