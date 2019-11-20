@@ -1135,7 +1135,7 @@ namespace MenuAPI
                     float y = (Position.Value + (headerSize.Value / 2f)) / MenuController.ScreenHeight;
                     float width = headerSize.Key / MenuController.ScreenWidth;
                     float height = headerSize.Value / MenuController.ScreenHeight;
-                    Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 74, 6, 7, 255);
+                    Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 181, 17, 18, 255);
                     SetScriptGfxDrawOrder(1);
 #endif
                     #endregion
