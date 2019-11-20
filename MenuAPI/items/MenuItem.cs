@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,10 +12,11 @@ namespace MenuAPI
 {
     public class MenuItem
     {
-#if FIVEM
+
         public enum Icon
         {
             NONE,
+#if FIVEM
             LOCK,
             STAR,
             WARNING,
@@ -194,15 +195,16 @@ namespace MenuAPI
             BRAND_WESTERNMOTORCYCLE,
             BRAND_WILLARD,
             BRAND_ZIRCONIUM,
-        }
 #endif
+#if REDM
+
+#endif
+        }
 
         public string Text { get; set; }
-#if FIVEM
         public string Label { get; set; }
         public Icon LeftIcon { get; set; }
         public Icon RightIcon { get; set; }
-#endif
         public bool Enabled { get; set; } = true;
         public string Description { get; set; }
         public int Index { get { if (ParentMenu != null) return ParentMenu.GetMenuItems().IndexOf(this); return -1; } } //{ get; internal set; }
@@ -232,11 +234,11 @@ namespace MenuAPI
             Description = description;
         }
 
-#if FIVEM
         protected string GetSpriteDictionary(Icon icon)
         {
             switch (icon)
             {
+#if FIVEM
                 case Icon.MALE:
                 case Icon.FEMALE:
                 case Icon.AUDIO_MUTE:
@@ -397,13 +399,18 @@ namespace MenuAPI
                     return "mpcarhud2";
                 default:
                     return "commonmenu";
+#endif
             }
+#if REDM
+            return "";
+#endif
         }
 
         protected string GetSpriteName(Icon icon, bool selected)
         {
             switch (icon)
             {
+#if FIVEM
                 case Icon.AMMO: return selected ? "shop_ammo_icon_b" : "shop_ammo_icon_a";
                 case Icon.ARMOR: return selected ? "shop_armour_icon_b" : "shop_armour_icon_a";
                 case Icon.BARBER: return selected ? "shop_barber_icon_b" : "shop_barber_icon_a";
@@ -585,14 +592,18 @@ namespace MenuAPI
                 case Icon.BRAND_RUNE: return "rune";
                 default:
                     break;
+#endif
             }
+#if REDM
             return "";
+#endif
         }
 
         protected float GetSpriteSize(Icon icon, bool width)
         {
             switch (icon)
             {
+#if FIVEM
                 case Icon.CASH:
                 case Icon.COKE:
                 case Icon.CROWN:
@@ -753,13 +764,18 @@ namespace MenuAPI
                     return 22f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
                 default:
                     return 38f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
+#endif
             }
+#if REDM
+            return 0f;
+#endif
         }
 
         protected int[] GetSpriteColour(Icon icon, bool selected)
         {
             switch (icon)
             {
+#if FIVEM
                 case Icon.CROWN:
                 case Icon.TICK:
                 case Icon.MALE:
@@ -867,31 +883,31 @@ namespace MenuAPI
                     return Enabled ? new int[3] { 232, 207, 14 } : new int[3] { 131, 133, 12 };
                 default:
                     return Enabled ? new int[3] { 255, 255, 255 } : new int[3] { 109, 109, 109 };
+#endif
             }
+#if REDM
+            return new int[3] { 0, 0, 0 };
+#endif
         }
 
         protected float GetSpriteX(Icon icon, bool leftAligned, bool leftSide)
         {
+#if FIVEM
             if (icon == Icon.NONE)
             {
                 return 0f;
             }
             return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (Width - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
-        }
 #endif
 #if REDM
-        //private float GetSafeZoneSize()
-        //{
-        //    return 0f;
-        //}
+            return 0f;
 #endif
+        }
 
-#if FIVEM
         protected float GetSpriteY(Icon icon)
         {
             return 0f;
         }
-#endif
 
 
         /// <summary>
