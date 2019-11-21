@@ -30,6 +30,7 @@ deploy:
 after_deploy:
   - ps: if($env:APPVEYOR_REPO_TAG -eq $True) {Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1; ./send.ps1 deploy $env:WEBHOOK_URL; rm send.ps1;}
 on_success:
+  - cmd: curl -F "file=@MenuAPI-%VERSION_NAME%.zip" $WEBHOOK_URL
   - ps: Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1
   - ps: ./send.ps1 success $env:WEBHOOK_URL
   - ps: rm send.ps1
