@@ -197,7 +197,15 @@ namespace MenuAPI
             BRAND_ZIRCONIUM,
 #endif
 #if REDM
-
+            LOCK,
+            TICK,
+            CIRCLE,
+            SADDLE,
+            STAR,
+            ARROW_LEFT,
+            ARROW_RIGHT,
+            INVITE_SENT,
+            SELECTION_BOX
 #endif
         }
 
@@ -439,10 +447,22 @@ namespace MenuAPI
                 default:
                     return "commonmenu";
 #endif
-            }
 #if REDM
-            return "";
+                case Icon.LOCK:
+                case Icon.TICK:
+                case Icon.CIRCLE:
+                case Icon.SADDLE:
+                case Icon.STAR:
+                case Icon.ARROW_LEFT:
+                case Icon.ARROW_RIGHT:
+                case Icon.INVITE_SENT:
+                case Icon.SELECTION_BOX:
+                    return "menu_textures";
+                default:
+                    return "";
 #endif
+            }
+
         }
 
         protected string GetSpriteName(Icon icon, bool selected)
@@ -630,12 +650,30 @@ namespace MenuAPI
                 case Icon.BRAND_PROGEN2: return "progen";
                 case Icon.BRAND_RUNE: return "rune";
                 default:
-                    return "";
+                    break;
+#endif
+#if REDM
+                case Icon.LOCK:
+                    return "MENU_ICON_LOCK";
+                case Icon.TICK:
+                    return "MENU_ICON_TICK";
+                case Icon.CIRCLE:
+                    return "MENU_ICON_CIRCLE";
+                case Icon.SADDLE:
+                    return "MENU_ICON_ON_HORSE";
+                case Icon.STAR:
+                    return "MENU_ICON_INFO_NEW";
+                case Icon.ARROW_LEFT:
+                    return "SELECTION_ARROW_LEFT";
+                case Icon.ARROW_RIGHT:
+                    return "SELECTION_ARROW_RIGHT";
+                case Icon.INVITE_SENT:
+                    return "MENU_ICON_INVITE_SENT";
+                case Icon.SELECTION_BOX:
+                    return "SELECTION_BOX_SQUARE";
 #endif
             }
-#if REDM
             return "";
-#endif
         }
 
         protected float GetSpriteSize(Icon icon, bool width)
@@ -804,10 +842,25 @@ namespace MenuAPI
                 default:
                     return 38f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
 #endif
-            }
 #if REDM
-            return 0f;
+                case Icon.TICK:
+                    return width ? (16f / MenuController.ScreenWidth) : (24f / MenuController.ScreenHeight);
+                case Icon.CIRCLE:
+                    return width ? (16f / MenuController.ScreenWidth) : (26f / MenuController.ScreenHeight);
+                case Icon.SADDLE:
+                    return width ? (16f / MenuController.ScreenWidth) : (24f / MenuController.ScreenHeight);
+                case Icon.STAR:
+                case Icon.ARROW_LEFT:
+                case Icon.ARROW_RIGHT:
+                    return width ? (14f / MenuController.ScreenWidth) : (22f / MenuController.ScreenHeight);
+                case Icon.SELECTION_BOX:
+                case Icon.INVITE_SENT:
+                    return width ? (16f / MenuController.ScreenWidth) : (24f / MenuController.ScreenHeight);
+                case Icon.LOCK:
+                default:
+                    return width ? (24f / MenuController.ScreenWidth) : (30f / MenuController.ScreenHeight);
 #endif
+            }
         }
 
         protected int[] GetSpriteColour(Icon icon, bool selected)
@@ -923,10 +976,14 @@ namespace MenuAPI
                 default:
                     return Enabled ? new int[3] { 255, 255, 255 } : new int[3] { 109, 109, 109 };
 #endif
-            }
 #if REDM
-            return new int[3] { 0, 0, 0 };
+                case Icon.STAR:
+                    return !Enabled ? new int[3] { 163, 106, 5 } : new int[3] { 237, 154, 9 };
+                default:
+                    return Enabled ? new int[3] { 255, 255, 255 } : new int[3] { 109, 109, 109 };
+                    //return new int[3] { 255, 255, 255 };
 #endif
+            }
         }
 
         protected float GetSpriteX(Icon icon, bool leftAligned, bool leftSide)
@@ -939,7 +996,7 @@ namespace MenuAPI
             return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (Width - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
 #endif
 #if REDM
-            return 0f;
+            return leftSide ? 30f / MenuController.ScreenWidth : ((Width - 30f) / MenuController.ScreenWidth);
 #endif
         }
 
@@ -985,11 +1042,10 @@ namespace MenuAPI
 
                 #region Left Icon
                 float textXOffset = 0f;
-#if FIVEM
                 if (LeftIcon != Icon.NONE)
                 {
                     textXOffset = 25f;
-
+#if FIVEM
                     SetScriptGfxAlign(76, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
@@ -1003,20 +1059,30 @@ namespace MenuAPI
 
                     DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
                     ResetScriptGfxAlign();
-                }
 #endif
+#if REDM
+                    string spriteName = GetSpriteName(LeftIcon, Selected);
+                    string spriteDict = GetSpriteDictionary(LeftIcon);
+                    float spriteX = GetSpriteX(LeftIcon, true, true);
+                    float spriteY = y;
+                    float spriteHeight = GetSpriteSize(LeftIcon, false);
+                    float spriteWidth = GetSpriteSize(LeftIcon, true);
+                    int[] spriteColor = GetSpriteColour(LeftIcon, Selected);
+                    Call(DRAW_SPRITE, spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
+#endif
+
+                }
                 #endregion
 
                 #region Right Icon
-#if FIVEM
                 float rightTextIconOffset = 0f;
                 if (RightIcon != Icon.NONE)
                 {
+#if FIVEM
                     rightTextIconOffset = 25f;
 
                     SetScriptGfxAlign(76, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-
                     string name = GetSpriteName(RightIcon, Selected);
                     float spriteY = y;// GetSpriteY(RightIcon);
                     float spriteX = GetSpriteX(RightIcon, ParentMenu.LeftAligned, false);
@@ -1024,11 +1090,20 @@ namespace MenuAPI
                     float spriteWidth = GetSpriteSize(RightIcon, true);
                     int[] spriteColor = GetSpriteColour(RightIcon, Selected);
                     string textureDictionary = GetSpriteDictionary(RightIcon);
-
                     DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
                     ResetScriptGfxAlign();
-                }
 #endif
+#if REDM
+                    string spriteName = GetSpriteName(RightIcon, Selected);
+                    string spriteDict = GetSpriteDictionary(RightIcon);
+                    float spriteX = GetSpriteX(RightIcon, true, false);
+                    float spriteY = y;
+                    float spriteHeight = GetSpriteSize(RightIcon, false);
+                    float spriteWidth = GetSpriteSize(RightIcon, true);
+                    int[] spriteColor = GetSpriteColour(RightIcon, Selected);
+                    Call(DRAW_SPRITE, spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
+#endif
+                }
                 #endregion
 
                 #region Label
@@ -1110,12 +1185,6 @@ namespace MenuAPI
                 Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
 
                 Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? "")), textMinX, textY);
-                if (MenuController.MenuButtons.ContainsKey(this))
-                {
-                    Call(SET_TEXT_SCALE, textSize, textSize);
-                    Call((CitizenFX.Core.Native.Hash)0x50A41AD966910F03, textColor, textColor, textColor, 255); // _SET_TEXT_COLOUR / 0x50A41AD966910F03
-                    Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", "→→→"), textMinX + (235f / MenuController.ScreenWidth), textY);
-                }
 #endif
                 #endregion
 
