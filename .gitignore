@@ -262,3 +262,7 @@ __pycache__/
 dependencies/MenuAPI\.net\.dll
 
 postbuild\.cmd
+
+postbuild-fivem.cmd
+
+postbuild-redm.cmd

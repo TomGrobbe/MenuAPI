@@ -31,4 +31,8 @@
     </Reference>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if &quot;$(ConfigurationName)&quot; == &quot;Release RedM&quot; (&#xD;&#xA;  if exist &quot;$(SolutionDir)postbuild-redm.cmd&quot; (&#xD;&#xA;    &quot;$(SolutionDir)postbuild-redm.cmd&quot;&#xD;&#xA;  )&#xD;&#xA;) else if &quot;$(ConfigurationName)&quot; == &quot;Release FiveM&quot; (&#xD;&#xA;  if exist &quot;$(SolutionDir)\postbuild-fivem.cmd&quot; (&#xD;&#xA;    &quot;$(SolutionDir)\postbuild-fivem.cmd&quot;&#xD;&#xA;  )&#xD;&#xA;)&#xD;&#xA;" />
+  </Target>
+
 </Project>
