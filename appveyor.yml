@@ -13,7 +13,7 @@ build:
   verbosity: minimal
 after_build:
   - cmd: if %APPVEYOR_REPO_TAG%==true (appveyor SetVariable -Name VERSION_NAME -Value %APPVEYOR_REPO_TAG_NAME%) else (appveyor SetVariable -Name VERSION_NAME -Value dev)
-  - cmd: if %CONFIGURATION%=="Release FiveM" (appveyor SetVariable -Name GAME -Value "FiveM") else if %CONFIGURATION%=="Release RedM" (appveyor SetVariable -Name GAME -Value "RedM")
+  - cmd: if "%CONFIGURATION%"=="Release FiveM" (appveyor SetVariable -Name GAME -Value "FiveM") else if "%CONFIGURATION%"=="Release RedM" (appveyor SetVariable -Name GAME -Value "RedM")
   - cmd: copy "README.md" ".\MenuAPI\bin\README.md"
   - cmd: 7z a MenuAPI-%VERSION_NAME%-%GAME%.zip -r ".\MenuAPI\bin\*"
   - cmd: appveyor PushArtifact MenuAPI-%VERSION_NAME%-%GAME%.zip
