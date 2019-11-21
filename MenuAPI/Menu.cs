@@ -637,7 +637,6 @@ namespace MenuAPI
         {
             if (item != null && item.Enabled)
             {
-#if FIVEM
                 if (item is MenuCheckboxItem checkbox)
                 {
                     checkbox.Checked = !checkbox.Checked;
@@ -647,13 +646,14 @@ namespace MenuAPI
                 {
                     ListItemSelectEvent(this, listItem, listItem.ListIndex, listItem.Index);
                 }
-                else if (item is MenuSliderItem slider)
-                {
-                    SliderSelectedEvent(this, slider, slider.Position, slider.Index);
-                }
                 else if (item is MenuDynamicListItem dynamicListItem)
                 {
                     DynamicListItemSelectEvent(this, dynamicListItem, dynamicListItem.CurrentItem);
+                }
+#if FIVEM
+                else if (item is MenuSliderItem slider)
+                {
+                    SliderSelectedEvent(this, slider, slider.Position, slider.Index);
                 }
                 else
                 {
@@ -662,8 +662,11 @@ namespace MenuAPI
                 PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
-                ItemSelectedEvent(item, item.Index);
-                Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "SELECT", "HUD_SHOP_SOUNDSET", 1);
+                else
+                {
+                    ItemSelectedEvent(item, item.Index);
+                    Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "SELECT", "HUD_SHOP_SOUNDSET", 1);
+                }
 #endif
                 if (MenuController.MenuButtons.ContainsKey(item))
                 {
