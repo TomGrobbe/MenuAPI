@@ -1,40 +1,37 @@
 pull_requests:
   do_not_increment_build_number: false
-image: Visual Studio 2017
-configuration: Release RedM
+image: Visual Studio 2019
+configuration:
+  - Release RedM
+  - Release FiveM
 before_build:
   - nuget restore
 build:
-  parallel: true
+  parallel: false
   project: MenuAPI.sln
   include_nuget_references: true
   verbosity: minimal
 after_build:
-  - cmd: copy "README.md" ".\MenuAPI\bin\Release RedM\README.md"
   - cmd: if %APPVEYOR_REPO_TAG%==true (appveyor SetVariable -Name VERSION_NAME -Value %APPVEYOR_REPO_TAG_NAME%) else (appveyor SetVariable -Name VERSION_NAME -Value dev)
-  - cmd: 7z a MenuAPI-%VERSION_NAME%.zip -r ".\MenuAPI\bin\Release RedM\*"
+  - cmd: copy "README.md" ".\MenuAPI\bin\README.md"
+  - cmd: 7z a MenuAPI-%VERSION_NAME%.zip -r ".\MenuAPI\bin\*"
   - cmd: appveyor PushArtifact MenuAPI-%VERSION_NAME%.zip
 deploy:
   - provider: GitHub
-    release: "[Release] MenuAPI $(VERSION_NAME) (RedM edition)"
+    release: "[Release] MenuAPI $(VERSION_NAME)"
     tag: $(VERSION_NAME)
     artifact: MenuAPI-$(VERSION_NAME).zip
     draft: false
-    prerelease: true
+    prerelease: false
     auth_token: $(github_auth)
     on:
       APPVEYOR_REPO_TAG: true
-    description: "MenuAPI (RedM edition) release, version $(VERSION_NAME). For a changelog check the [docs](https://docs.vespura.com/) or checkout the recent commits on GitHub."
-# before_build:
-#   - ps: if($env:APPVEYOR_REPO_TAG -eq $True) {Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1; ./send.ps1 start $env:WEBHOOK_URL; rm send.ps1;}
+    description: "MenuAPI release, version $(VERSION_NAME). For info check the [docs](https://docs.vespura.com/mapi) or checkout the recent commits on GitHub (the latter is your best bet if you want updated info about this version)."
 after_deploy:
-  - ps: if($env:APPVEYOR_REPO_TAG -eq $True) {Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1; ./send.ps1 deploy $env:WEBHOOK_URL; rm send.ps1;}
+  - cmd: curl -H "Content-Type: application/json" -X POST -d "{\"content\": \"^<^@^&540562517806809109^> A new version (**%VERSION_NAME%**) of **%APPVEYOR_PROJECT_NAME%** is now available! :tada:\nAppveyor build: **%APPVEYOR_URL%/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%** \nGitHub release: **https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/releases/** \"}" %WEBHOOK_URL_TMP%
+  - cmd: if %APPVEYOR_REPO_TAG% == True (curl -F "file=@MenuAPI-%VERSION_NAME%.zip" %WEBHOOK_URL_TMP%)
 on_success:
-  - cmd: curl -F "file=@MenuAPI-%VERSION_NAME%.zip" %WEBHOOK_URL%
-  - ps: Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1
-  - ps: ./send.ps1 success $env:WEBHOOK_URL
-  - ps: rm send.ps1
+  - cmd: curl -H "Content-Type: application/json" -X POST -d "{\"content\": \":white_check_mark: Successfully built **%APPVEYOR_PROJECT_NAME%** (**%VERSION_NAME%**)!\nAppVeyor build url: **%APPVEYOR_URL%/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%** \nGitHub: **https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/** \"}" %WEBHOOK_URL_TMP%
+  - cmd: if %APPVEYOR_REPO_TAG% == True (curl -F "file=@MenuAPI-%VERSION_NAME%.zip" %WEBHOOK_URL_TMP%)
 on_failure:
-  - ps: Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1
-  - ps: ./send.ps1 failure $env:WEBHOOK_URL
-  - ps: rm send.ps1
+  - cmd: curl -H "Content-Type: application/json" -X POST -d "{\"content\": \":broken_heart: :cry: Failed to build **%APPVEYOR_PROJECT_NAME%** (**%VERSION_NAME%**)!\nAppVeyor build url: **%APPVEYOR_URL%/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%** \nGitHub: **https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/** \"}" %WEBHOOK_URL_TMP%
