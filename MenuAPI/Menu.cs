@@ -23,7 +23,6 @@ namespace MenuAPI
         /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuItem"/>.</param>
         public delegate void ItemSelectEvent(Menu menu, MenuItem menuItem, int itemIndex);
 
-#if FIVEM
         /// <summary>
         /// Triggered when a <see cref="MenuCheckboxItem"/> was toggled.
         /// </summary>
@@ -32,7 +31,6 @@ namespace MenuAPI
         /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuCheckboxItem"/>.</param>
         /// <param name="newCheckedState">The new <see cref="MenuCheckboxItem.Checked"/> state of this <see cref="MenuCheckboxItem"/>.</param>
         public delegate void CheckboxItemChangeEvent(Menu menu, MenuCheckboxItem menuItem, int itemIndex, bool newCheckedState);
-#endif
 
         /// <summary>
         /// Triggered when a <see cref="MenuListItem"/> is selected.
@@ -121,13 +119,11 @@ namespace MenuAPI
         /// </summary>
         public event ItemSelectEvent OnItemSelect;
 
-#if FIVEM
         /// <summary>
         /// Triggered when a <see cref="MenuCheckboxItem"/> was toggled.
         /// Parameters: <see cref="Menu"/> parentMenu, <see cref="MenuCheckboxItem"/> menuItem, <see cref="int"/> itemIndex, <see cref="bool"/> newCheckedState.
         /// </summary>
         public event CheckboxItemChangeEvent OnCheckboxChange;
-#endif
 
         /// <summary>
         /// Triggered when a <see cref="MenuListItem"/> is selected.
@@ -197,7 +193,6 @@ namespace MenuAPI
             OnItemSelect?.Invoke(this, menuItem, itemIndex);
         }
 
-#if FIVEM
         /// <summary>
         /// Triggered when a <see cref="MenuCheckboxItem"/> was toggled.
         /// </summary>
@@ -210,7 +205,6 @@ namespace MenuAPI
             OnCheckboxChange?.Invoke(this, menuItem, itemIndex, _checked);
         }
 
-#endif
         /// <summary>
         /// Triggered when a <see cref="MenuListItem"/> is selected.
         /// </summary>
