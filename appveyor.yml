@@ -7,31 +7,32 @@ configuration:
 before_build:
   - nuget restore
 build:
-  parallel: false
+  parallel: true
   project: MenuAPI.sln
   include_nuget_references: true
   verbosity: minimal
 after_build:
   - cmd: if %APPVEYOR_REPO_TAG%==true (appveyor SetVariable -Name VERSION_NAME -Value %APPVEYOR_REPO_TAG_NAME%) else (appveyor SetVariable -Name VERSION_NAME -Value dev)
+  - cmd: if %CONFIGURATION%=="Release FiveM" (appveyor SetVariable -Name GAME -Value "FiveM") else if %CONFIGURATION%=="Release RedM" (appveyor SetVariable -Name GAME -Value "RedM")
   - cmd: copy "README.md" ".\MenuAPI\bin\README.md"
-  - cmd: 7z a MenuAPI-%VERSION_NAME%.zip -r ".\MenuAPI\bin\*"
-  - cmd: appveyor PushArtifact MenuAPI-%VERSION_NAME%.zip
+  - cmd: 7z a MenuAPI-%VERSION_NAME%-%GAME%.zip -r ".\MenuAPI\bin\*"
+  - cmd: appveyor PushArtifact MenuAPI-%VERSION_NAME%-%GAME%.zip
 deploy:
   - provider: GitHub
     release: "[Release] MenuAPI $(VERSION_NAME)"
     tag: $(VERSION_NAME)
-    artifact: MenuAPI-$(VERSION_NAME).zip
-    draft: false
+    artifact: MenuAPI-$(VERSION_NAME)-$(GAME).zip
+    draft: true
     prerelease: false
     auth_token: $(github_auth)
     on:
       APPVEYOR_REPO_TAG: true
     description: "MenuAPI release, version $(VERSION_NAME). For info check the [docs](https://docs.vespura.com/mapi) or checkout the recent commits on GitHub (the latter is your best bet if you want updated info about this version)."
 after_deploy:
-  - cmd: curl -H "Content-Type:application/json" -X POST -d "{\"content\":\"^<^@^&540562517806809109^> A new version (**%VERSION_NAME%**) of **%APPVEYOR_PROJECT_NAME%** is now available! :tada:\nAppveyor build:\n**%APPVEYOR_URL%/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%** \nGitHub release:\n**https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/releases/** \"}" %WEBHOOK_URL_TMP%
-  - cmd: if %APPVEYOR_REPO_TAG% == True (curl -F "file=@MenuAPI-%VERSION_NAME%.zip" %WEBHOOK_URL_TMP%)
+  - cmd: curl -H "Content-Type:application/json" -X POST -d "{\"content\":\"^<^@^&540562517806809109^> A new version (**%VERSION_NAME%-%GAME%**) of **%APPVEYOR_PROJECT_NAME%** is now available! :tada:\nAppveyor build:\n**%APPVEYOR_URL%/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%** \nGitHub release:\n**https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/releases/** \"}" %WEBHOOK_URL_TMP%
+  - cmd: if %APPVEYOR_REPO_TAG% == True (curl -F "file=@MenuAPI-%VERSION_NAME%-%GAME%.zip" %WEBHOOK_URL_TMP%)
 on_success:
-  - cmd: curl -H "Content-Type:application/json" -X POST -d "{\"content\":\"✅ Successfully built **%APPVEYOR_PROJECT_NAME%** (**%VERSION_NAME%**)!\nAppVeyor build url:\n**%APPVEYOR_URL%/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%** \nGitHub:\n**https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/** \"}" %WEBHOOK_URL_TMP%
-  - cmd: if %APPVEYOR_REPO_TAG% == True (curl -F "file=@MenuAPI-%VERSION_NAME%.zip" %WEBHOOK_URL_TMP%)
+  - cmd: curl -H "Content-Type:application/json" -X POST -d "{\"content\":\"✅ Successfully built **%APPVEYOR_PROJECT_NAME%** (**%VERSION_NAME%-%GAME%**)!\nAppVeyor build url:\n**%APPVEYOR_URL%/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%** \nGitHub:\n**https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/** \"}" %WEBHOOK_URL_TMP%
+  - cmd: if %APPVEYOR_REPO_TAG% == True (curl -F "file=@MenuAPI-%VERSION_NAME%-%GAME%.zip" %WEBHOOK_URL_TMP%)
 on_failure:
-  - cmd: curl -H "Content-Type:application/json" -X POST -d "{\"content\":\"💔 😢 Failed to build **%APPVEYOR_PROJECT_NAME%** (**%VERSION_NAME%**)!\nAppVeyor build url:\n**%APPVEYOR_URL%/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%** \nGitHub:\n**https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/** \"}" %WEBHOOK_URL_TMP%
+  - cmd: curl -H "Content-Type:application/json" -X POST -d "{\"content\":\"💔 😢 Failed to build **%APPVEYOR_PROJECT_NAME%** (**%VERSION_NAME%-%GAME%**)!\nAppVeyor build url:\n**%APPVEYOR_URL%/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%** \nGitHub:\n**https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/** \"}" %WEBHOOK_URL_TMP%
