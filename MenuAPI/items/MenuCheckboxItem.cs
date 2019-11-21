@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
+using static CitizenFX.Core.Native.Function;
+using static CitizenFX.Core.Native.Hash;
 
 
 namespace MenuAPI
@@ -15,7 +17,9 @@ namespace MenuAPI
         public CheckboxStyle Style { get; set; } = CheckboxStyle.Tick;
         public enum CheckboxStyle
         {
+#if FIVEM
             Cross,
+#endif
             Tick
         }
 
@@ -50,9 +54,10 @@ namespace MenuAPI
 
         int GetSpriteColour()
         {
-            return 255;
+            return Enabled ? 255 : 109;
         }
 
+#if FIVEM
         string GetSpriteName()
         {
             if (Checked)
@@ -83,12 +88,18 @@ namespace MenuAPI
                 return "shop_box_blank";
             }
         }
+#endif
 
         float GetSpriteX()
         {
+#if FIVEM
             bool leftSide = false;
             bool leftAligned = ParentMenu.LeftAligned;
             return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (Width - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
+#endif
+#if REDM
+            return (Width - 30f) / MenuController.ScreenWidth;
+#endif
         }
 
         internal override void Draw(int offset)
@@ -98,21 +109,39 @@ namespace MenuAPI
 
             base.Draw(offset);
 
+#if FIVEM
             SetScriptGfxAlign(76, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+#endif
 
             float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * MathUtil.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
-
+#if FIVEM
             string name = GetSpriteName();
-            float spriteY = (ParentMenu.Position.Y + ((Index - offset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
+#endif
+
+            float spriteY = (ParentMenu.Position.Value + ((Index - offset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
             float spriteX = GetSpriteX();
+#if FIVEM
             float spriteHeight = 45f / MenuController.ScreenHeight;
             float spriteWidth = 45f / MenuController.ScreenWidth;
+#endif
             int color = GetSpriteColour();
 
+#if FIVEM
             DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
             ResetScriptGfxAlign();
+#endif
 
+#if REDM
+            float spriteHeight = 24f / MenuController.ScreenHeight;
+            float spriteWidth = 16f / MenuController.ScreenWidth;
+            Call(DRAW_SPRITE, "menu_textures", "SELECTION_BOX_SQUARE", spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
+            if (Checked)
+            {
+                int[] sc = Enabled ? (Selected ? new int[3] { 255, 255, 255 } : new int[3] { 181, 17, 18 }) : (Selected ? new int[3] { 109, 109, 109 } : new int[3] { 110, 10, 10 });
+                Call(DRAW_SPRITE, "generic_textures", "TICK", spriteX, spriteY, spriteWidth, spriteHeight, 0f, sc[0], sc[1], sc[2], 255);
+            }
+#endif
         }
     }
 }

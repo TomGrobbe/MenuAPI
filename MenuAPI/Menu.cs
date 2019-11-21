@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
+using static CitizenFX.Core.Native.Function;
+using static CitizenFX.Core.Native.Hash;
 
 namespace MenuAPI
 {
@@ -72,6 +73,7 @@ namespace MenuAPI
         /// <param name="newIndex">The new <see cref="MenuItem.Index"/> of this item.</param>
         public delegate void IndexChangedEvent(Menu menu, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex);
 
+#if FIVEM
         /// <summary>
         /// Triggered when the <see cref="MenuSliderItem.Position"/> changes.
         /// </summary>
@@ -90,6 +92,7 @@ namespace MenuAPI
         /// <param name="sliderPosition">The current position of the slider bar.</param>
         /// <param name="itemIndex">The index of this <see cref="MenuSliderItem"/>.</param>
         public delegate void SliderItemSelectedEvent(Menu menu, MenuSliderItem sliderItem, int sliderPosition, int itemIndex);
+#endif
 
         /// <summary>
         /// Triggered when a <see cref="MenuDynamicListItem"/>'s value was changed.
@@ -151,7 +154,7 @@ namespace MenuAPI
         /// Parameters: <see cref="Menu"/> menu, <see cref="MenuItem"/> oldSelectedItem, <see cref="MenuItem"/> newSelectedItem, <see cref="int"/> oldIndex, <see cref="int"/> newIndex.
         /// </summary>
         public event IndexChangedEvent OnIndexChange;
-
+#if FIVEM
         /// <summary>
         /// Triggered when the <see cref="MenuSliderItem.Position"/> changes.
         /// Parameters: <see cref="Menu"/> menu, <see cref="MenuSliderItem"/> sliderItem, <see cref="int"/> oldPosition, <see cref="int"/> newPosition, <see cref="int"/> itemIndex
@@ -163,6 +166,7 @@ namespace MenuAPI
         /// Parameters: <see cref="Menu"/> menu, <see cref="MenuSliderItem"/> sliderItem, <see cref="int"/> sliderPosition, <see cref="int"/> itemIndex.
         /// </summary>
         public event SliderItemSelectedEvent OnSliderItemSelect;
+#endif
 
         /// <summary>
         /// Triggered when a <see cref="MenuDynamicListItem"/>'s value was changed.
@@ -257,6 +261,7 @@ namespace MenuAPI
             OnIndexChange?.Invoke(menu, oldItem, newItem, oldIndex, newIndex);
         }
 
+#if FIVEM
         /// <summary>
         /// Triggered when the <see cref="MenuSliderItem.Position"/> changes.
         /// </summary>
@@ -281,6 +286,7 @@ namespace MenuAPI
         {
             OnSliderItemSelect?.Invoke(menu, sliderItem, sliderPosition, itemIndex);
         }
+#endif
 
         /// <summary>
         /// Triggered when a <see cref="MenuDynamicListItem"/>'s value was changed.
@@ -304,18 +310,24 @@ namespace MenuAPI
         {
             OnDynamicListItemSelect?.Invoke(menu, dynamicListItem, currentItem);
         }
-
         #endregion
 
         #endregion
 
         #region constants or readonlys
+#if FIVEM
         public const float Width = 500f;
+#endif
+#if REDM
+        public const float Width = 300F;
+#endif
         #endregion
 
         #region private variables
-        private static SizeF headerSize = new SizeF(Width, 110f);
+        private static KeyValuePair<float, float> headerSize = new KeyValuePair<float, float>(Width, 110f);
+
         private int index = 0;
+
         public int ViewIndexOffset { get; private set; } = 0;
 
         private List<MenuItem> VisibleMenuItems
@@ -340,8 +352,10 @@ namespace MenuAPI
         private List<MenuItem> FilterItems { get; set; } = new List<MenuItem>();
         private List<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
 
+#if FIVEM
         private readonly int ColorPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_02"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
         private readonly int OpacityPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_01"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
+#endif
         #endregion
 
         #region Public Variables
@@ -359,9 +373,13 @@ namespace MenuAPI
 
         public bool Visible { get; set; } = false;
 
+#if FIVEM
         public bool LeftAligned => MenuController.MenuAlignment == MenuController.MenuAlignmentOption.Left;
-
-        public PointF Position { get; private set; } = new PointF(0f, 0f);
+        public KeyValuePair<float, float> Position { get; private set; } = new KeyValuePair<float, float>(0f, 0f);
+#endif
+#if REDM
+        public KeyValuePair<float, float> Position { get; private set; } = new KeyValuePair<float, float>(0f, 20f);
+#endif
 
         public float MenuItemsYOffset { get; private set; } = 0f;
 
@@ -379,6 +397,7 @@ namespace MenuAPI
 
         private bool filterActive = false;
 
+#if FIVEM
         public Dictionary<Control, string> InstructionalButtons = new Dictionary<Control, string>() { { Control.FrontendAccept, GetLabelText("HUD_INPUT28") }, { Control.FrontendCancel, GetLabelText("HUD_INPUT53") } };
 
         public List<InstructionalButton> CustomInstructionalButtons = new List<InstructionalButton>();
@@ -394,6 +413,7 @@ namespace MenuAPI
                 this.instructionText = instructionText;
             }
         }
+#endif
 
         public enum ControlPressCheckType
         {
@@ -442,8 +462,10 @@ namespace MenuAPI
         {
             MenuTitle = name;
             MenuSubtitle = subtitle;
+#if FIVEM
             this.SetWeaponStats(0f, 0f, 0f, 0f);
             this.SetWeaponComponentStats(0f, 0f, 0f, 0f);
+#endif
         }
         #endregion
 
@@ -624,19 +646,28 @@ namespace MenuAPI
                 {
                     ListItemSelectEvent(this, listItem, listItem.ListIndex, listItem.Index);
                 }
-                else if (item is MenuSliderItem slider)
-                {
-                    SliderSelectedEvent(this, slider, slider.Position, slider.Index);
-                }
                 else if (item is MenuDynamicListItem dynamicListItem)
                 {
                     DynamicListItemSelectEvent(this, dynamicListItem, dynamicListItem.CurrentItem);
+                }
+#if FIVEM
+                else if (item is MenuSliderItem slider)
+                {
+                    SliderSelectedEvent(this, slider, slider.Position, slider.Index);
                 }
                 else
                 {
                     ItemSelectedEvent(item, item.Index);
                 }
                 PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                else
+                {
+                    ItemSelectedEvent(item, item.Index);
+                    Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "SELECT", "HUD_SHOP_SOUNDSET", 1);
+                }
+#endif
                 if (MenuController.MenuButtons.ContainsKey(item))
                 {
                     // this updates the parent menu.
@@ -647,7 +678,14 @@ namespace MenuAPI
                 }
             }
             else if (item != null && !item.Enabled)
+            {
+#if FIVEM
                 PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_ERROR", "HUD_SHOP_SOUNDSET", 1);
+#endif
+            }
         }
 
         /// <summary>
@@ -655,7 +693,13 @@ namespace MenuAPI
         /// </summary>
         public void GoBack()
         {
+#if FIVEM
             PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+
+            Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "Back", "HUD_SHOP_SOUNDSET", 1);
+#endif
             CloseMenu();
             if (ParentMenu != null)
             {
@@ -720,7 +764,12 @@ namespace MenuAPI
                 }
 
                 IndexChangeEvent(this, oldItem, currItem, oldItem.Index, CurrentIndex);
+#if FIVEM
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_UP", "HUD_SHOP_SOUNDSET", 1);
+#endif
             }
         }
 
@@ -761,7 +810,12 @@ namespace MenuAPI
                     }
                 }
                 IndexChangeEvent(this, oldItem, currItem, oldItem.Index, CurrentIndex);
+#if FIVEM
                 PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_DOWN", "HUD_SHOP_SOUNDSET", 1);
+#endif
             }
         }
 
@@ -788,10 +842,17 @@ namespace MenuAPI
                             newIndex--;
                         }
                         listItem.ListIndex = newIndex;
+
                         ListItemIndexChangeEvent(this, listItem, oldIndex, newIndex, listItem.Index);
+#if FIVEM
                         PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                        Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_LEFT", "HUD_SHOP_SOUNDSET", 1);
+#endif
                     }
                 }
+#if FIVEM
                 else if (item.Enabled && item is MenuSliderItem slider)
                 {
                     if (slider.Position > slider.Min)
@@ -805,19 +866,27 @@ namespace MenuAPI
                         PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                     }
                 }
+#endif
                 else if (item.Enabled && item is MenuDynamicListItem dynList)
                 {
                     string oldValue = dynList.CurrentItem;
                     string newSelectedItem = dynList.Callback(dynList, true);
                     dynList.CurrentItem = newSelectedItem;
                     DynamicListItemCurrentItemChanged(this, dynList, oldValue, newSelectedItem);
+#if FIVEM
                     PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                    Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
+#endif
                 }
+#if FIVEM
                 // If it's a checkbox, just trigger the box instead.
                 else if (item.Enabled && item is MenuCheckboxItem checkbox)
                 {
                     SelectItem(checkbox);
                 }
+#endif
                 // If the item is enabled and it's not any of the above, just select it.
                 else if (item.Enabled)
                 {
@@ -850,9 +919,15 @@ namespace MenuAPI
                         }
                         listItem.ListIndex = newIndex;
                         ListItemIndexChangeEvent(this, listItem, oldIndex, newIndex, listItem.Index);
+#if FIVEM
                         PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                        Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
+#endif
                     }
                 }
+#if FIVEM
                 else if (item.Enabled && item is MenuSliderItem slider)
                 {
                     if (slider.Position < slider.Max)
@@ -866,19 +941,27 @@ namespace MenuAPI
                         PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
                     }
                 }
+#endif
                 else if (item.Enabled && item is MenuDynamicListItem dynList)
                 {
                     string oldValue = dynList.CurrentItem;
                     string newSelectedItem = dynList.Callback(dynList, false);
                     dynList.CurrentItem = newSelectedItem;
                     DynamicListItemCurrentItemChanged(this, dynList, oldValue, newSelectedItem);
+#if FIVEM
                     PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+#endif
+#if REDM
+                    Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
+#endif
                 }
+#if FIVEM
                 // If it's a checkbox, just trigger the box instead.
                 else if (item.Enabled && item is MenuCheckboxItem checkbox)
                 {
                     SelectItem(checkbox);
                 }
+#endif
                 // If the item is enabled and it's not any of the above, just select it.
                 else if (item.Enabled)
                 {
@@ -919,7 +1002,7 @@ namespace MenuAPI
             filterActive = false;
             FilterItems.Clear();
         }
-
+#if FIVEM
         public void SetWeaponStats(float damage, float fireRate, float accuracy, float range)
         {
             WeaponStats = new float[4]
@@ -941,6 +1024,7 @@ namespace MenuAPI
                 MathUtil.Clamp(WeaponStats[3] + range, 0f, 1f)
             };
         }
+#endif
 
         #endregion
 
@@ -951,7 +1035,14 @@ namespace MenuAPI
         /// <returns></returns>
         internal async void Draw()
         {
+#if FIVEM
             if (!Game.IsPaused && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.PlayerPed.IsDead)
+#endif
+#if REDM
+            if (!Call<bool>(IS_PAUSE_MENU_ACTIVE) &&
+                Call<bool>(IS_SCREEN_FADED_IN) &&
+                !Call<bool>(IS_ENTITY_DEAD, PlayerPedId()))
+#endif
             {
                 #region Listen for custom key presses.
                 if (ButtonPressHandlers.Count > 0)
@@ -962,11 +1053,17 @@ namespace MenuAPI
                         {
                             if (handler.disableControl)
                             {
+#if FIVEM
                                 Game.DisableControlThisFrame(0, handler.control);
+#endif
+#if REDM
+                                Call(DISABLE_CONTROL_ACTION, 0, handler.control, true);
+#endif
                             }
 
                             switch (handler.pressType)
                             {
+#if FIVEM
                                 case ControlPressCheckType.JUST_PRESSED:
                                     if (Game.IsControlJustPressed(0, handler.control) || Game.IsDisabledControlJustPressed(0, handler.control))
                                         handler.function.Invoke(this, handler.control);
@@ -983,6 +1080,25 @@ namespace MenuAPI
                                     if (!Game.IsControlPressed(0, handler.control) && !Game.IsDisabledControlPressed(0, handler.control))
                                         handler.function.Invoke(this, handler.control);
                                     break;
+#endif
+#if REDM
+                                case ControlPressCheckType.JUST_PRESSED:
+                                    if (Call<bool>(IS_CONTROL_JUST_PRESSED, 0, handler.control) || Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, handler.control))
+                                        handler.function.Invoke(this, handler.control);
+                                    break;
+                                case ControlPressCheckType.JUST_RELEASED:
+                                    if (Call<bool>(IS_CONTROL_JUST_RELEASED, 0, handler.control) || Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, handler.control))
+                                        handler.function.Invoke(this, handler.control);
+                                    break;
+                                case ControlPressCheckType.PRESSED:
+                                    if (Call<bool>(IS_CONTROL_PRESSED, 0, handler.control) || Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, handler.control))
+                                        handler.function.Invoke(this, handler.control);
+                                    break;
+                                case ControlPressCheckType.RELEASED:
+                                    if (!Call<bool>(IS_CONTROL_PRESSED, 0, handler.control) && !Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, handler.control))
+                                        handler.function.Invoke(this, handler.control);
+                                    break;
+#endif
                                 default:
                                     break;
                             }
@@ -997,13 +1113,14 @@ namespace MenuAPI
                 if (!string.IsNullOrEmpty(MenuTitle))
                 {
                     #region Draw Header Background
+#if FIVEM
                     SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-                    float x = (Position.X + (headerSize.Width / 2f)) / MenuController.ScreenWidth;
-                    float y = (Position.Y + (headerSize.Height / 2f)) / MenuController.ScreenHeight;
-                    float width = headerSize.Width / MenuController.ScreenWidth;
-                    float height = headerSize.Height / MenuController.ScreenHeight;
+                    float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
+                    float y = (Position.Value + (headerSize.Value/ 2f)) / MenuController.ScreenHeight;
+                    float width = headerSize.Key / MenuController.ScreenWidth;
+                    float height = headerSize.Value / MenuController.ScreenHeight;
 
                     if (!string.IsNullOrEmpty(HeaderTexture.Key) && !string.IsNullOrEmpty(HeaderTexture.Value))
                     {
@@ -1024,12 +1141,22 @@ namespace MenuAPI
 
 
                     ResetScriptGfxAlign();
+#endif
+#if REDM
+                    SetScriptGfxDrawOrder(2);
+                    float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
+                    float y = (Position.Value + (headerSize.Value / 2f)) / MenuController.ScreenHeight;
+                    float width = headerSize.Key / MenuController.ScreenWidth;
+                    float height = headerSize.Value / MenuController.ScreenHeight;
+                    Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 181, 17, 18, 255);
+                    SetScriptGfxDrawOrder(1);
+#endif
                     #endregion
 
                     #region Draw Header Menu Title
+#if FIVEM
                     int font = 1;
                     float size = (45f * 27f) / MenuController.ScreenHeight;
-
                     SetScriptGfxAlign(76, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
@@ -1041,38 +1168,70 @@ namespace MenuAPI
                     AddTextComponentSubstringPlayerName(MenuTitle);
                     if (LeftAligned)
                     {
-                        EndTextCommandDisplayText(((headerSize.Width / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f));
+                        EndTextCommandDisplayText(((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f));
                     }
                     else
                     {
-                        EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Width / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f));
+                        EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f));
                     }
 
                     ResetScriptGfxAlign();
 
-                    MenuItemsYOffset = headerSize.Height;
+                    MenuItemsYOffset = headerSize.Value;
+#endif
+
+#if REDM
+                    Call(SET_TEXT_CENTRE, true);
+                    float size = (45f * 27f) / MenuController.ScreenHeight;
+                    Call(SET_TEXT_SCALE, size, size);
+
+                    SetScriptGfxDrawOrder(3);
+                    //SetTextWrap(textMinX, textMaxX);
+                    int font = 10;
+                    Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
+                    Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuTitle ?? "N/A"), ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (45f / MenuController.ScreenHeight));
+                    SetScriptGfxDrawOrder(1);
+                    MenuItemsYOffset = headerSize.Value;
+#endif
                     #endregion
+                }
+                else
+                {
+#if REDM
+                    MenuItemsYOffset = 40f;
+#endif
                 }
                 #endregion
 
                 #region Draw Subtitle
                 {
+#if FIVEM
                     #region draw subtitle background
                     SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
                     float bgHeight = 38f;
 
-
-                    float x = (Position.X + (headerSize.Width / 2f)) / MenuController.ScreenWidth;
-                    float y = ((Position.Y + MenuItemsYOffset + (bgHeight / 2f)) / MenuController.ScreenHeight);
-                    float width = headerSize.Width / MenuController.ScreenWidth;
+                    float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
+                    float y = ((Position.Value + MenuItemsYOffset + (bgHeight / 2f)) / MenuController.ScreenHeight);
+                    float width = headerSize.Key / MenuController.ScreenWidth;
                     float height = bgHeight / MenuController.ScreenHeight;
 
                     DrawRect(x, y, width, height, 0, 0, 0, 250);
                     ResetScriptGfxAlign();
                     #endregion
+#endif
 
+#if REDM
+                    float bgHeight = 38f;
+                    float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
+                    float y = ((Position.Value + MenuItemsYOffset + (bgHeight / 2f)) / MenuController.ScreenHeight);
+                    float width = headerSize.Key / MenuController.ScreenWidth;
+                    float height = bgHeight / MenuController.ScreenHeight;
+
+#endif
+
+#if FIVEM
                     #region draw subtitle text
                     if (!string.IsNullOrEmpty(MenuSubtitle))
                     {
@@ -1103,14 +1262,29 @@ namespace MenuAPI
                         }
                         else
                         {
-                            EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Width - 10f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)));
+                            EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Key - 10f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)));
                         }
-
                         ResetScriptGfxAlign();
                     }
                     #endregion
+#endif
+
+#if REDM
+                    if (!string.IsNullOrEmpty(MenuSubtitle))
+                    {
+                        SetScriptGfxDrawOrder(3);
+                        float size = (14f * 27f) / MenuController.ScreenHeight;
+                        Call(SET_TEXT_SCALE, size, size);
+                        Call(SET_TEXT_CENTRE, true);
+                        int font = 9;
+                        Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
+                        Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuSubtitle ?? "N/A"), x, y - (52f / MenuController.ScreenHeight));
+                        SetScriptGfxDrawOrder(1);
+                    }
+#endif
 
                     #region draw counter + pre-counter text
+#if FIVEM
                     string counterText = $"{CounterPreText ?? ""}{CurrentIndex + 1} / {Size}";
                     if (!string.IsNullOrEmpty(CounterPreText) || MaxItemsOnScreen < Size)
                     {
@@ -1150,6 +1324,24 @@ namespace MenuAPI
                     {
                         MenuItemsYOffset += bgHeight - 1f;
                     }
+#endif
+#if REDM
+                    if (Size > 0)
+                    {
+                        float textSize = (12f * 27f) / MenuController.ScreenHeight;
+                        Call(SET_TEXT_SCALE, textSize, textSize);
+                        Call((CitizenFX.Core.Native.Hash)0x50A41AD966910F03, 135, 135, 135, 255); // _SET_TEXT_COLOUR / 0x50A41AD966910F03
+                        Call(SET_TEXT_CENTRE, true);
+                        float textMinX = (headerSize.Key / 2f) / MenuController.ScreenWidth;
+                        float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
+                        float textY = (MenuItemsYOffset + 38f * (MathUtil.Clamp(Size, 0, MaxItemsOnScreen) + 1) - 11f) / MenuController.ScreenHeight;
+                        int font = 23;
+                        Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
+                        //SetTextWrap(textMinX, textMaxX);
+
+                        Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{CurrentIndex + 1} of {Size}"), textMinX, textY);
+                    }
+#endif
 
                     #endregion
                 }
@@ -1158,21 +1350,55 @@ namespace MenuAPI
                 #region Draw menu items background gradient
                 if (Size > 0)
                 {
+#if FIVEM
                     SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-
-                    float bgHeight = 38f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
-
-
-                    float x = (Position.X + (headerSize.Width / 2f)) / MenuController.ScreenWidth;
-                    float y = ((Position.Y + MenuItemsYOffset + ((bgHeight + 1f) / 2f)) / MenuController.ScreenHeight);
-                    float width = headerSize.Width / MenuController.ScreenWidth;
-                    float height = (bgHeight + 1f) / MenuController.ScreenHeight;
+#endif
 
                     //DrawSprite(MenuController._texture_dict, "gradient_bgd", x, y, width, height, 0f, 255, 255, 255, 255);
-                    DrawRect(x, y, width, height, 0, 0, 0, 180);
+#if FIVEM
+                    float bgHeight = 38f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
+
+                    float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
+                    float y = ((Position.Value + MenuItemsYOffset + ((bgHeight + 1f) / 2f)) / MenuController.ScreenHeight);
+                    float width = headerSize.Key / MenuController.ScreenWidth;
+                    float height = (bgHeight + 1f) / MenuController.ScreenHeight;
+
                     ResetScriptGfxAlign();
+                    DrawRect(x, y, width, height, 0, 0, 0, 180);
                     MenuItemsYOffset += bgHeight - 1f;
+#endif
+#if REDM
+                    //float x = (Position.Key + ((headerSize.Key) / 2f)) / MenuController.ScreenWidth;
+                    //float y = ((Position.Value + MenuItemsYOffset + ((bgHeight + 1f) / 2f) /) / MenuController.ScreenHeight);
+                    //float width = (headerSize.Key + 16f) / MenuController.ScreenWidth;
+                    //float height = (bgHeight + 17f) / MenuController.ScreenHeight;
+                    float bgHeight = 38f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
+                    var currentMenuItem = GetCurrentMenuItem();
+                    float descriptionBoxHeight = 0f;
+                    if (currentMenuItem != null && !string.IsNullOrEmpty(currentMenuItem.Description))
+                    {
+                        int count = (currentMenuItem.Description.Count((a => { return a == '\n'; })) - 1);
+                        if (count < 1)
+                        {
+                            descriptionBoxHeight = 42f;
+                        }
+                        else
+                        {
+                            descriptionBoxHeight = (38f * count) + 30f;
+                        }
+
+                        bgHeight += descriptionBoxHeight;
+                    }
+                    float actualBgYLocation = ((38f + (38f / 2f) + (bgHeight / 2f)) / MenuController.ScreenHeight);
+                    float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
+                    float y = ((Position.Value + MenuItemsYOffset + ((bgHeight + 1f - (headerSize.Value)) / 2f) + 19f) / MenuController.ScreenHeight);
+                    float width = headerSize.Key / MenuController.ScreenWidth;
+                    float height = (headerSize.Value + bgHeight + 33f + 38f) / MenuController.ScreenHeight;
+                    Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 0, 0, 0, 240);
+                    Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y + actualBgYLocation - (descriptionBoxHeight / MenuController.ScreenHeight), width, 38f / MenuController.ScreenHeight, 0f, 55, 55, 55, 255);
+                    MenuItemsYOffset += bgHeight - descriptionBoxHeight - 1f;
+#endif
                 }
                 #endregion
 
@@ -1185,17 +1411,18 @@ namespace MenuAPI
                     }
                 }
                 #endregion
-
-                #region Up Down overflow Indicator
                 float descriptionYOffset = 0f;
+
+#if FIVEM
+                #region Up Down overflow Indicator
                 if (Size > 0)
                 {
                     if (Size > MaxItemsOnScreen)
                     {
-                        #region background
+                #region background
                         float width = Width / MenuController.ScreenWidth;
                         float height = 60f / MenuController.ScreenWidth;
-                        float x = (Position.X + (Width / 2f)) / MenuController.ScreenWidth;
+                        float x = (Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
                         float y = MenuItemsYOffset / MenuController.ScreenHeight + (height / 2f) + (6f / MenuController.ScreenHeight);
 
                         SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
@@ -1204,9 +1431,9 @@ namespace MenuAPI
                         DrawRect(x, y, width, height, 0, 0, 0, 180);
                         descriptionYOffset = height;
                         ResetScriptGfxAlign();
-                        #endregion
+                #endregion
 
-                        #region up/down icons
+                #region up/down icons
                         SetScriptGfxAlign(76, 84);
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
                         float xMin = 0f;
@@ -1253,12 +1480,12 @@ namespace MenuAPI
                         }
 
                         ResetScriptGfxAlign();
-                        #endregion
+                #endregion
                     }
                 }
 
                 #endregion
-
+#endif
                 #region Draw Description
                 if (Size > 0)
                 {
@@ -1269,10 +1496,10 @@ namespace MenuAPI
                         int font = 0;
                         float textSize = (14f * 27f) / MenuController.ScreenHeight;
 
+#if FIVEM
                         float textMinX = 0f + (10f / MenuController.ScreenWidth);
                         float textMaxX = Width / MenuController.ScreenWidth - (10f / MenuController.ScreenWidth);
                         float textY = MenuItemsYOffset / MenuController.ScreenHeight + (16f / MenuController.ScreenHeight) + descriptionYOffset;
-
                         SetScriptGfxAlign(76, 84);
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
@@ -1325,13 +1552,28 @@ namespace MenuAPI
                         }
 
                         ResetScriptGfxAlign();
+#endif
+#if REDM
+
+                        Call(SET_TEXT_SCALE, textSize, textSize);
+                        Call(SET_TEXT_CENTRE, true);
+                        float textMinX = (headerSize.Key / 2f) / MenuController.ScreenWidth;
+                        float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
+                        float textY = MenuItemsYOffset / MenuController.ScreenHeight + (18f / MenuController.ScreenHeight) + (48f / MenuController.ScreenHeight);
+                        font = 23;
+                        Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
+                        Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{currentMenuItem.Description}"), textMinX, textY);
+
+#endif
 
                         #endregion
 
+
+#if FIVEM
                         #region background
                         float descWidth = Width / MenuController.ScreenWidth;
                         float descHeight = (textHeight + 0.005f) * lineCount + (8f / MenuController.ScreenHeight) + (2.5f / MenuController.ScreenHeight);
-                        float descX = (Position.X + (Width / 2f)) / MenuController.ScreenWidth;
+                        float descX = (Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
                         float descY = textY - (6f / MenuController.ScreenHeight) + (descHeight / 2f);
 
                         SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
@@ -1344,6 +1586,7 @@ namespace MenuAPI
                         #endregion
 
                         descriptionYOffset += descY + (descHeight / 2f) - (4f / MenuController.ScreenHeight);
+#endif
                     }
                     else
                     {
@@ -1351,9 +1594,9 @@ namespace MenuAPI
                     }
 
                 }
-
                 #endregion
 
+#if FIVEM
                 #region Draw Weapon Stats
                 {
                     if (Size > 0)
@@ -1388,12 +1631,12 @@ namespace MenuAPI
                         }
 
 
-                        #region background
+                #region background
                         SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
                         DrawRect(x, y, width, height, 0, 0, 0, 180);
                         ResetScriptGfxAlign();
-                        #endregion
+                #endregion
 
                         float bgStatBarWidth = (Width / 2f) / MenuController.ScreenWidth;
                         float bgStatBarX = x + (bgStatBarWidth / 2f) - (10f / MenuController.ScreenWidth);
@@ -1408,7 +1651,7 @@ namespace MenuAPI
                         float bgStatBarHeight = 10f / MenuController.ScreenHeight;
                         float barX;
                         float componentBarX;
-                        #region damage bar
+                #region damage bar
                         barWidth = bgStatBarWidth * WeaponStats[0];
                         componentBarWidth = bgStatBarWidth * WeaponComponentStats[0];
                         if (LeftAligned)
@@ -1430,9 +1673,9 @@ namespace MenuAPI
                         // real bar
                         DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
                         ResetScriptGfxAlign();
-                        #endregion
+                #endregion
 
-                        #region fire rate bar
+                #region fire rate bar
                         barWidth = bgStatBarWidth * WeaponStats[1];
                         componentBarWidth = bgStatBarWidth * WeaponComponentStats[1];
                         barY += 30f / MenuController.ScreenHeight;
@@ -1455,9 +1698,9 @@ namespace MenuAPI
                         // real bar
                         DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
                         ResetScriptGfxAlign();
-                        #endregion
+                #endregion
 
-                        #region accuracy bar
+                #region accuracy bar
                         barWidth = bgStatBarWidth * WeaponStats[2];
                         componentBarWidth = bgStatBarWidth * WeaponComponentStats[2];
                         barY += 30f / MenuController.ScreenHeight;
@@ -1480,9 +1723,9 @@ namespace MenuAPI
                         // real bar
                         DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
                         ResetScriptGfxAlign();
-                        #endregion
+                #endregion
 
-                        #region range bar
+                #region range bar
                         barWidth = bgStatBarWidth * WeaponStats[3];
                         componentBarWidth = bgStatBarWidth * WeaponComponentStats[3];
                         barY += 30f / MenuController.ScreenHeight;
@@ -1505,9 +1748,9 @@ namespace MenuAPI
                         // real bar
                         DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
                         ResetScriptGfxAlign();
-                        #endregion
+                #endregion
 
-                        #region weapon stats text
+                #region weapon stats text
                         float textX = LeftAligned ? x - (width / 2f) + (10f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 10f) / MenuController.ScreenWidth);
                         float textY = y - (height / 2f) + (10f / MenuController.ScreenHeight);
 
@@ -1546,7 +1789,7 @@ namespace MenuAPI
                         textY += 30f / MenuController.ScreenHeight;
                         EndTextCommandDisplayText(textX, textY);
                         ResetScriptGfxAlign();
-                        #endregion
+                #endregion
 
                     }
                 }
@@ -1654,8 +1897,10 @@ namespace MenuAPI
                 }
 
                 #endregion
+#endif
                 SetScriptGfxDrawOrder(0);
             }
+            await Task.FromResult(0);
         }
         #endregion
     }

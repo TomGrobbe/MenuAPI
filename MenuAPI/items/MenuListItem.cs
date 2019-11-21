@@ -8,6 +8,7 @@ using static CitizenFX.Core.Native.API;
 
 namespace MenuAPI
 {
+
     public class MenuListItem : MenuItem
     {
         public int ListIndex { get; set; } = 0;
@@ -68,6 +69,6 @@ namespace MenuAPI
 
             base.Draw(indexOffset);
         }
-
     }
+
 }

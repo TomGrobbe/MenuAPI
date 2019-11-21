@@ -1,7 +1,9 @@
 pull_requests:
   do_not_increment_build_number: false
-image: Visual Studio 2017
-configuration: Release FiveM
+image: Visual Studio 2019
+configuration:
+  - Release RedM
+  - Release FiveM
 before_build:
   - nuget restore
 build:
@@ -10,30 +12,25 @@ build:
   include_nuget_references: true
   verbosity: minimal
 after_build:
-  - cmd: copy README.md .\MenuAPI\bin\Release\README.md
   - cmd: if %APPVEYOR_REPO_TAG%==true (appveyor SetVariable -Name VERSION_NAME -Value %APPVEYOR_REPO_TAG_NAME%) else (appveyor SetVariable -Name VERSION_NAME -Value dev)
-  - cmd: 7z a MenuAPI-%VERSION_NAME%.zip -r .\MenuAPI\bin\Release\*
-  - cmd: appveyor PushArtifact MenuAPI-%VERSION_NAME%.zip
+  - cmd: if "%CONFIGURATION%"=="Release FiveM" (appveyor SetVariable -Name GAME -Value "FiveM") else if "%CONFIGURATION%"=="Release RedM" (appveyor SetVariable -Name GAME -Value "RedM")
+  - cmd: copy "README.md" ".\MenuAPI\bin\README.md"
+  - cmd: 7z a MenuAPI-%VERSION_NAME%-%GAME%.zip -r ".\MenuAPI\bin\*"
+  - cmd: appveyor PushArtifact MenuAPI-%VERSION_NAME%-%GAME%.zip
 deploy:
   - provider: GitHub
     release: "[Release] MenuAPI $(VERSION_NAME)"
     tag: $(VERSION_NAME)
-    artifact: MenuAPI-$(VERSION_NAME).zip
-    draft: false
+    artifact: MenuAPI-$(VERSION_NAME)-$(GAME).zip
+    draft: true
     prerelease: false
     auth_token: $(github_auth)
     on:
       APPVEYOR_REPO_TAG: true
-    description: "MenuAPI release, version $(VERSION_NAME). For a changelog check the [docs](https://docs.vespura.com/) or checkout the recent commits on GitHub."
-# before_build:
-#   - ps: if($env:APPVEYOR_REPO_TAG -eq $True) {Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1; ./send.ps1 start $env:WEBHOOK_URL; rm send.ps1;}
+    description: "MenuAPI release, version $(VERSION_NAME). For info check the [docs](https://docs.vespura.com/mapi) or checkout the recent commits on GitHub (the latter is your best bet if you want updated info about this version)."
 after_deploy:
-  - ps: if($env:APPVEYOR_REPO_TAG -eq $True) {Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1; ./send.ps1 deploy $env:WEBHOOK_URL; rm send.ps1;}
+  - cmd: curl -H "Content-Type:application/json" -X POST -d "{\"content\":\"^<^@^&540562517806809109^>\",\"embeds\":[{\"title\":\"%APPVEYOR_PROJECT_NAME% (%VERSION_NAME%-%GAME%)\",\"description\":\"A new version of %APPVEYOR_PROJECT_NAME% (**%VERSION_NAME%** for _%GAME%_) is available!\",\"url\":\"https://ci.appveyor.com/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%\",\"color\":3048181,\"author\":{\"name\":\"%APPVEYOR_ACCOUNT_NAME%\",\"url\":\"https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/releases/\"}}]}" -F "file=@MenuAPI-%VERSION_NAME%-%GAME%.zip" %WEBHOOK_URL%
 on_success:
-  - ps: Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1
-  - ps: ./send.ps1 success $env:WEBHOOK_URL
-  - ps: rm send.ps1
+  - cmd: curl -H "Content-Type:application/json" -X POST -d "{\"embeds\":[{\"title\":\"%APPVEYOR_PROJECT_NAME% (%VERSION_NAME%-%GAME%)\",\"description\":\"**Build passed!**\",\"url\":\"https://ci.appveyor.com/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%\",\"color\":4502298,\"author\":{\"name\":\"%APPVEYOR_ACCOUNT_NAME%\",\"url\":\"https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/\"}}]}" %WEBHOOK_URL%
 on_failure:
-  - ps: Invoke-RestMethod https://raw.githubusercontent.com/TomGrobbe/appveyor-discord-webhook/master/send.ps1 -o send.ps1
-  - ps: ./send.ps1 failure $env:WEBHOOK_URL
-  - ps: rm send.ps1
+  - cmd: curl -H "Content-Type:application/json" -X POST -d "{\"embeds\":[{\"title\":\"%APPVEYOR_PROJECT_NAME% (%VERSION_NAME%-%GAME%)\",\"description\":\"**Build failed!**\",\"url\":\"https://ci.appveyor.com/project/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/builds/%APPVEYOR_BUILD_ID%\",\"color\":13632027,\"author\":{\"name\":\"%APPVEYOR_ACCOUNT_NAME%\",\"url\":\"https://github.com/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_NAME%/\"}}]}" %WEBHOOK_URL%

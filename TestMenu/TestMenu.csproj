@@ -7,23 +7,32 @@
     <Configurations>Release RedM;Release FiveM;Debug RedM;Debug FiveM</Configurations>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">
+    <DefineConstants>FIVEM</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">
+    <DefineConstants>REDM</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
 
-    <ProjectReference
-      Include="..\MenuAPI\MenuAPI.csproj" />
+    <ProjectReference Include="..\MenuAPI\MenuAPI.csproj" />
 
-    <PackageReference
-      Include="CitizenFX.Core.Client"
-      Version="1.0.1688"
-      Condition="'$(Configuration)' == 'Release FiveM' Or '$(Configuration)' == 'Debug FiveM'" ExcludeAssets="runtime" />
+    <PackageReference Include="CitizenFX.Core.Client" Version="1.0.1688" Condition="'$(Configuration)' == 'Release FiveM' Or '$(Configuration)' == 'Debug FiveM'">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
 
     <!-- currently hardcoded path as no nuget package for RedM exists yet -->
-    <Reference
-      Include="CitizenFX.Core.Client"
-      Condition="'$(Configuration)' == 'Release RedM' Or '$(Configuration)' == 'Debug RedM'">
-      <HintPath>..\..\..\..\citizen\clr2\lib\mono\4.5\citizenfx.core.dll</HintPath>
+    <Reference Include="CitizenFX.Core.Client" Condition="'$(Configuration)' == 'Release RedM' Or '$(Configuration)' == 'Debug RedM'">
+      <HintPath>..\dependencies\RedM\CitizenFX.Core.dll</HintPath>
+      <Private>false</Private>
     </Reference>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if &quot;$(ConfigurationName)&quot; == &quot;Release RedM&quot; (&#xD;&#xA;  if exist &quot;$(SolutionDir)postbuild-redm.cmd&quot; (&#xD;&#xA;    &quot;$(SolutionDir)postbuild-redm.cmd&quot;&#xD;&#xA;  )&#xD;&#xA;) else if &quot;$(ConfigurationName)&quot; == &quot;Release FiveM&quot; (&#xD;&#xA;  if exist &quot;$(SolutionDir)\postbuild-fivem.cmd&quot; (&#xD;&#xA;    &quot;$(SolutionDir)\postbuild-fivem.cmd&quot;&#xD;&#xA;  )&#xD;&#xA;)&#xD;&#xA;" />
+  </Target>
 
 </Project>
