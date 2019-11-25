@@ -301,19 +301,14 @@ namespace TestMenu
                 Debug.WriteLine($"OnDynamicListItemSelect: [{_menu}, {_dynamicListItem}, {_currentItem}]");
             };
 
-            longershit();
+            DelayedConstructor();
         }
 
-        static async Task longershit()
+        static async void DelayedConstructor()
         {
-            Debug.WriteLine("test");
             await Delay(1000);
-            Debug.WriteLine("test");
             MenuController.MainMenu.OpenMenu();
-            await Delay(10000);
-            Debug.WriteLine(MenuController.MainMenu.Visible.ToString());
         }
-
 
     }
 }
