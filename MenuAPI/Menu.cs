@@ -1364,9 +1364,9 @@ namespace MenuAPI
                     float width = headerSize.Key / MenuController.ScreenWidth;
                     float height = (bgHeight + 1f) / MenuController.ScreenHeight;
 
-                    ResetScriptGfxAlign();
                     DrawRect(x, y, width, height, 0, 0, 0, 180);
                     MenuItemsYOffset += bgHeight - 1f;
+                    ResetScriptGfxAlign();
 #endif
 #if REDM
                     //float x = (Position.Key + ((headerSize.Key) / 2f)) / MenuController.ScreenWidth;
