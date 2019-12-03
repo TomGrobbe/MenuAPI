@@ -1189,7 +1189,7 @@ namespace MenuAPI
                     //SetTextWrap(textMinX, textMaxX);
                     int font = 10;
                     Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
-                    Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuTitle ?? "N/A"), ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (45f / MenuController.ScreenHeight));
+                    Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuTitle ?? "N/A"), ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (45f / MenuController.ScreenHeight));
                     SetScriptGfxDrawOrder(1);
                     MenuItemsYOffset = headerSize.Value;
 #endif
@@ -1278,7 +1278,7 @@ namespace MenuAPI
                         Call(SET_TEXT_CENTRE, true);
                         int font = 9;
                         Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
-                        Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuSubtitle ?? "N/A"), x, y - (52f / MenuController.ScreenHeight));
+                        Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuSubtitle ?? "N/A"), x, y - (52f / MenuController.ScreenHeight));
                         SetScriptGfxDrawOrder(1);
                     }
 #endif
@@ -1339,7 +1339,7 @@ namespace MenuAPI
                         Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
                         //SetTextWrap(textMinX, textMaxX);
 
-                        Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{CurrentIndex + 1} of {Size}"), textMinX, textY);
+                        Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{CurrentIndex + 1} of {Size}"), textMinX, textY);
                     }
 #endif
 
@@ -1562,7 +1562,7 @@ namespace MenuAPI
                         float textY = MenuItemsYOffset / MenuController.ScreenHeight + (18f / MenuController.ScreenHeight) + (48f / MenuController.ScreenHeight);
                         font = 23;
                         Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
-                        Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{currentMenuItem.Description}"), textMinX, textY);
+                        Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{currentMenuItem.Description}"), textMinX, textY);
 
 #endif
 

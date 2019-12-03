@@ -1184,7 +1184,7 @@ namespace MenuAPI
                 font = 23;
                 Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
 
-                Call(_DRAW_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? "")), textMinX, textY);
+                Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? "")), textMinX, textY);
 #endif
                 #endregion
 
