@@ -304,7 +304,7 @@ namespace TestMenu
             DelayedConstructor();
         }
 
-        static async void DelayedConstructor()
+        private async void DelayedConstructor()
         {
             await Delay(1000);
             MenuController.MainMenu.OpenMenu();
