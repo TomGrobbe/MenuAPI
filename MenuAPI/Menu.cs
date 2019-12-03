@@ -1253,7 +1253,7 @@ namespace MenuAPI
                         }
                         else
                         {
-                            AddTextComponentSubstringPlayerName("~HUD_COLOUR_HB_BLUE~" + MenuSubtitle.ToUpper());
+                            AddTextComponentSubstringPlayerName("~HUD_COLOUR_FREEMODE~" + MenuSubtitle.ToUpper());
                         }
 
                         if (LeftAligned)
@@ -1305,7 +1305,7 @@ namespace MenuAPI
                         }
                         else
                         {
-                            AddTextComponentSubstringPlayerName("~HUD_COLOUR_HB_BLUE~" + counterText.ToUpper());
+                            AddTextComponentSubstringPlayerName("~HUD_COLOUR_FREEMODE~" + counterText.ToUpper());
                         }
                         if (LeftAligned)
                         {
