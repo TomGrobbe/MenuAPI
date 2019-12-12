@@ -71,7 +71,7 @@ namespace MenuAPI
             = Control.InteractionMenu
 #endif
 #if REDM
-            = Control.Map
+            = Control.PlayerMenu
 #endif
             ;
 
