@@ -18,7 +18,6 @@ namespace TestMenu
             // To test this, checkout one of the checkbox items in this example menu. Clicking it will toggle the menu alignment.
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
 #endif
-            //MenuController.MenuToggleKey = Control.InteractionMenu;
 
             // Creating the first menu.
             Menu menu = new Menu("Main Menu", "Subtitle");
@@ -301,14 +300,14 @@ namespace TestMenu
                 Debug.WriteLine($"OnDynamicListItemSelect: [{_menu}, {_dynamicListItem}, {_currentItem}]");
             };
 
-            DelayedConstructor();
+            //DelayedConstructor();
         }
 
-        private async void DelayedConstructor()
-        {
-            await Delay(1000);
-            MenuController.MainMenu.OpenMenu();
-        }
+        //private async void DelayedConstructor()
+        //{
+        //    await Delay(1000);
+        //    MenuController.MainMenu.OpenMenu();
+        //}
 
     }
 }
