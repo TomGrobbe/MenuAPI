@@ -401,7 +401,14 @@ namespace MenuAPI
         public Dictionary<Control, string> InstructionalButtons = new Dictionary<Control, string>() { { Control.FrontendAccept, GetLabelText("HUD_INPUT28") }, { Control.FrontendCancel, GetLabelText("HUD_INPUT53") } };
 
         public List<InstructionalButton> CustomInstructionalButtons = new List<InstructionalButton>();
+#endif
+#if REDM
+        public static string GetLocalizedText(string label) => Call<string>((CitizenFX.Core.Native.Hash)0xCFEDCCAD3C5BA90D, label); // GetLabelText
 
+        public List<InstructionalButton> InstructionalButtons = new List<InstructionalButton>() { new InstructionalButton(new Control[1] { Control.FrontendAccept }, GetLocalizedText("INPUT_FRONTEND_SELECT")), new InstructionalButton(new Control[1] { Control.FrontendCancel }, "Back"), new InstructionalButton(new Control[2] { Control.FrontendUp, Control.FrontendDown }, "Up / Down") };
+#endif
+
+#if FIVEM
         public struct InstructionalButton
         {
             public string controlString;
@@ -412,6 +419,91 @@ namespace MenuAPI
                 this.controlString = controlString;
                 this.instructionText = instructionText;
             }
+        }
+#endif
+#if REDM
+        public class InstructionalButton
+        {
+            //private long text;
+            private string textString;
+            private Control[] controls;
+            private int promptHandle;
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="control"></param>
+            /// <param name="text"></param>
+            public InstructionalButton(Control[] controls, string text)
+            {
+                this.controls = controls;
+                //this.text = Call<long>((CitizenFX.Core.Native.Hash)0xFA925AC00EB830B9, 10, "LITERAL_STRING", text); // CreateVarString
+                this.textString = text;
+                this.promptHandle = 0;
+            }
+
+            /// <summary>
+            /// Prepare the instructional button before it is displayed.
+            /// </summary>
+            public void Prepare()
+            {
+                if (this.IsPrepared())
+                {
+                    return;
+                    //this.Dispose();
+                }
+
+                this.promptHandle = Call<int>((CitizenFX.Core.Native.Hash)0x04F97DE45A519419); // UipromptRegisterBegin
+                Call((CitizenFX.Core.Native.Hash)0x5DD02A8318420DD7, this.promptHandle, Call<long>((CitizenFX.Core.Native.Hash)0xFA925AC00EB830B9, 10, "LITERAL_STRING", textString)); // UipromptSetText
+                foreach (var c in this.controls)
+                {
+                    Call((CitizenFX.Core.Native.Hash)0xB5352B7494A08258, this.promptHandle, c); // UipromptSetControlAction
+                }
+                //Call((CitizenFX.Core.Native.Hash)0xEA5CCF4EEB2F82D1, this.promptHandle); // UipromptSetHoldIndefinitelyMode
+                Call((CitizenFX.Core.Native.Hash)0xF7AA2696A22AD8B9, this.promptHandle); // UipromptRegisterEnd
+                this.SetEnabled(false, false);
+            }
+
+            /// <summary>
+            /// Check if it is ready to be displayed.
+            /// </summary>
+            /// <returns></returns>
+            public bool IsPrepared()
+            {
+                if (Call<bool>((CitizenFX.Core.Native.Hash)0x347469FBDD1589A9, this.promptHandle)) // UipromptIsValid
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// Enables or disables the prompt on screen. You must prepare the prompt first using <see cref="InstructionalButton.Prepare"/>.
+            /// </summary>
+            /// <param name="visible"></param>
+            /// <param name="enabled"></param>
+            public void SetEnabled(bool visible, bool enabled)
+            {
+                Call((CitizenFX.Core.Native.Hash)0x71215ACCFDE075EE, this.promptHandle, visible); // UipromptSetVisible
+                Call((CitizenFX.Core.Native.Hash)0x8A0FB4D03A630D21, this.promptHandle, enabled); // UipromptSetEnabled
+            }
+
+            /// <summary>
+            /// Disposes the prompt. Requires you to call <see cref="InstructionalButton.Prepare"/> again before you can use it again.
+            /// </summary>
+            public void Dispose()
+            {
+                if (this.IsPrepared())
+                {
+                    this.SetEnabled(false, false);
+                    Call((CitizenFX.Core.Native.Hash)0x00EDE88D4D13CF59, this.promptHandle); // UipromptDelete
+                }
+                this.promptHandle = 0;
+            }
+
+            //public long GetTextHandle() => text;
+            public string GetTextString() => textString;
+            public Control[] GetControls() => controls;
         }
 #endif
 
@@ -714,6 +806,14 @@ namespace MenuAPI
         {
             Visible = false;
             MenuCloseEvent(this);
+
+#if REDM
+            foreach (var v in InstructionalButtons)
+            {
+                v.SetEnabled(false, false);
+                //v.Dispose();
+            }
+#endif
         }
 
         /// <summary>
@@ -723,6 +823,17 @@ namespace MenuAPI
         {
             Visible = true;
             MenuOpenEvent(this);
+
+#if REDM
+            if (EnableInstructionalButtons)
+            {
+                foreach (var v in InstructionalButtons)
+                {
+                    v.Prepare();
+                    v.SetEnabled(true, true);
+                }
+            }
+#endif
         }
 
         /// <summary>

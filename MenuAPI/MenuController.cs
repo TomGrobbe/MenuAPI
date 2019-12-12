@@ -1040,7 +1040,9 @@ namespace MenuAPI
             }
             DisposeInstructionalButtonsScaleform();
         }
+#endif
 
+#if FIVEM
         private static void DisposeInstructionalButtonsScaleform()
         {
             if (HasScaleformMovieLoaded(_scale))
