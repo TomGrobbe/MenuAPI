@@ -8,6 +8,16 @@ Full safezone scaling supported, both left and right aligned menus supported.
 This has been coded from the ground up. Using GTA V Decompiled scripts to figure out what some undocumented natives were used for.
 
 
+## Installation
+_Note, this is only for resource developers, don't install this on your server manually if you're not making a resource with it._
+
+You have 2 options:
+1. Download the latest release zip and use the correct version (FiveM/RedM) for your resource. Simply include the DLL as a reference in your C# project and add `using MenuAPI;` to each file where you need to use MenuAPI. 
+2. Use the NuGet package, which can be found [here](https://www.nuget.org/packages/MenuAPI.FiveM/) for FiveM, and [here](https://www.nuget.org/packages/MenuAPI.RedM/) for RedM.
+
+After doing either of the above and you're ready to build and publish your resource, add `files {'MenuAPI.dll'}` to your `fxmanifest.lua` or `__resource.lua` file, and make sure that you include the `MenuAPI.dll` file in the folder of your resource.
+
+
 # Copyright
 Copyright © Tom Grobbe 2018.
 
