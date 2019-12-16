@@ -1,10 +1,23 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
     <DebugType>embedded</DebugType>
-    <TargetName>$(AssemblyName)</TargetName>
+    <TargetName>MenuAPI</TargetName>
     <Configurations>Release RedM;Release FiveM;Debug RedM;Debug FiveM</Configurations>
+
+    <AssemblyTitle Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">MenuAPI FiveM</AssemblyTitle>
+    <AssemblyTitle Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">MenuAPI RedM</AssemblyTitle>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Authors>Tom Grobbe</Authors>
+    <Description Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">An advanced Menu API for FiveM C# resources.</Description>
+    <Description Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">An advanced Menu API for RedM C# resources.</Description>
+    <Copyright>Copyright Tom Grobbe 2018-2019</Copyright>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/tomgrobbe/menuapi/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/tomgrobbe/menuapi/</RepositoryUrl>
+    <PackageTags Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">FiveM MenuAPI</PackageTags>
+    <PackageTags Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">RedM MenuAPI</PackageTags>
+    <PackageLicenseFile>license.txt</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <title>$title$</title>
+    <version>1.0.0</version>
+    <authors>Tom Grobbe</authors>
+    <owners>Tom Grobbe</owners>
+    <projectUrl>https://github.com/tomgrobbe/menuapi</projectUrl>
+    <description>$description$</description>
+    <copyright>Copyright Tom Grobbe 2018-2019.</copyright>
+    <tags>$title$</tags>
+  </metadata>
+</package>
