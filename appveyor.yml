@@ -21,6 +21,8 @@ deploy:
   - provider: NuGet
     api_key: $(NUGET_API_KEY)
     skip_symbols: true
+    on:
+      APPVEYOR_REPO_TAG: true
   - provider: GitHub
     release: "[Release] MenuAPI $(VERSION_NAME)"
     tag: $(VERSION_NAME)
