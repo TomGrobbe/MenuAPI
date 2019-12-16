@@ -6,7 +6,7 @@ configuration:
   - Release FiveM
 before_build:
   - nuget restore
-  - cmd: if %APPVEYOR_REPO_TAG%==true (appveyor SetVariable -Name VERSION_NAME -Value %APPVEYOR_REPO_TAG_NAME%) else (appveyor SetVariable -Name VERSION_NAME -Value dev)
+  - cmd: if %APPVEYOR_REPO_TAG%==true (appveyor SetVariable -Name VERSION_NAME -Value %APPVEYOR_REPO_TAG_NAME%) else (appveyor SetVariable -Name VERSION_NAME -Value dev-%APPVEYOR_BUILD_VERSION%)
   - cmd: if "%CONFIGURATION%"=="Release FiveM" (appveyor SetVariable -Name GAME -Value "FiveM") else if "%CONFIGURATION%"=="Release RedM" (appveyor SetVariable -Name GAME -Value "RedM")
 build:
   parallel: false
