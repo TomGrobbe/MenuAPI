@@ -319,7 +319,7 @@ namespace MenuAPI
                         // Cancel / Go Back
                         else if (
 #if FIVEM
-                            Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) 
+                            Game.IsDisabledControlJustReleased(0, Control.PhoneCancel)
 #endif
 #if REDM
                             Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.FrontendCancel)
@@ -332,7 +332,7 @@ namespace MenuAPI
                         }
                         else if (
 #if FIVEM
-                            Game.IsDisabledControlJustReleased(0, Control.PhoneCancel) 
+                            Game.IsDisabledControlJustReleased(0, Control.PhoneCancel)
 #endif
 #if REDM
                                Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.CellphoneCancel)
@@ -1051,5 +1051,19 @@ namespace MenuAPI
             }
         }
 #endif
+
+        /// <summary>
+        /// Prevent the UI prompts getting stuck on screen if this resource is ever to be restarted while someone has any menu's open.
+        /// </summary>
+        /// <param name="name"></param>
+        [EventHandler("onResourceStop")]
+        private static void OnResourceStop(string name)
+        {
+            if (name == GetCurrentResourceName())
+            {
+                Debug.WriteLine($"^3[WARNING] [{name}] Closing all menus because this resource is being stopped, to prevent the UI Prompts getting stuck.^7");
+                CloseAllMenus();
+            }
+        }
     }
 }
