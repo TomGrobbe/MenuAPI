@@ -76,6 +76,7 @@ namespace MenuAPI
             ;
 
         public static bool EnableMenuToggleKeyOnController { get; set; } = true;
+        public static bool EnableMenuToggleKeyOnKeyboard { get; set; } = true;
 
         internal static Dictionary<MenuItem, Menu> MenuButtons { get; private set; } = new Dictionary<MenuItem, Menu>();
 
@@ -504,6 +505,9 @@ namespace MenuAPI
                     }
                     else
                     {
+                        if (!EnableMenuToggleKeyOnKeyboard)
+                            return;
+
                         if ((Game.IsControlJustPressed(0, MenuToggleKey) || Game.IsDisabledControlJustPressed(0, MenuToggleKey)) && !Game.IsPaused && IsScreenFadedIn() && !Game.Player.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
                         {
                             if (Menus.Count > 0)
