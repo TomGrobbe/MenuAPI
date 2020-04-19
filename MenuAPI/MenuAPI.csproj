@@ -35,7 +35,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
 
-    <PackageReference Include="CitizenFX.Core.Client" Version="1.0.1688" Condition="'$(Configuration)' == 'Release FiveM' Or '$(Configuration)' == 'Debug FiveM'">
+    <PackageReference Include="CitizenFX.Core.Client" Version="1.0.2371" Condition="'$(Configuration)' == 'Release FiveM' Or '$(Configuration)' == 'Debug FiveM'">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
 
