@@ -1219,7 +1219,8 @@ namespace MenuAPI
                 #endregion
 
                 MenuItemsYOffset = 0f;
-                SetScriptGfxDrawOrder(1);
+                if (MenuController.SetDrawOrder)
+                    SetScriptGfxDrawOrder(1);
                 #region Draw Header
                 if (!string.IsNullOrEmpty(MenuTitle))
                 {
@@ -1254,13 +1255,15 @@ namespace MenuAPI
                     ResetScriptGfxAlign();
 #endif
 #if REDM
-                    SetScriptGfxDrawOrder(2);
+                    if (MenuController.SetDrawOrder)
+                        SetScriptGfxDrawOrder(2);
                     float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
                     float y = (Position.Value + (headerSize.Value / 2f)) / MenuController.ScreenHeight;
                     float width = headerSize.Key / MenuController.ScreenWidth;
                     float height = headerSize.Value / MenuController.ScreenHeight;
                     Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 181, 17, 18, 255);
-                    SetScriptGfxDrawOrder(1);
+                    if (MenuController.SetDrawOrder)
+                        SetScriptGfxDrawOrder(1);
 #endif
                     #endregion
 
@@ -1296,12 +1299,14 @@ namespace MenuAPI
                     float size = (45f * 27f) / MenuController.ScreenHeight;
                     Call(SET_TEXT_SCALE, size, size);
 
-                    SetScriptGfxDrawOrder(3);
+                    if (MenuController.SetDrawOrder)
+                        SetScriptGfxDrawOrder(3);
                     //SetTextWrap(textMinX, textMaxX);
                     int font = 10;
                     Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
                     Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuTitle ?? "N/A"), ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (45f / MenuController.ScreenHeight));
-                    SetScriptGfxDrawOrder(1);
+                    if (MenuController.SetDrawOrder)
+                        SetScriptGfxDrawOrder(1);
                     MenuItemsYOffset = headerSize.Value;
 #endif
                     #endregion
@@ -1383,14 +1388,16 @@ namespace MenuAPI
 #if REDM
                     if (!string.IsNullOrEmpty(MenuSubtitle))
                     {
-                        SetScriptGfxDrawOrder(3);
+                        if (MenuController.SetDrawOrder)
+                            SetScriptGfxDrawOrder(3);
                         float size = (14f * 27f) / MenuController.ScreenHeight;
                         Call(SET_TEXT_SCALE, size, size);
                         Call(SET_TEXT_CENTRE, true);
                         int font = 9;
                         Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
                         Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuSubtitle ?? "N/A"), x, y - (52f / MenuController.ScreenHeight));
-                        SetScriptGfxDrawOrder(1);
+                        if (MenuController.SetDrawOrder)
+                            SetScriptGfxDrawOrder(1);
                     }
 #endif
 
@@ -2009,7 +2016,8 @@ namespace MenuAPI
 
                 #endregion
 #endif
-                SetScriptGfxDrawOrder(0);
+                if (MenuController.SetDrawOrder)
+                    SetScriptGfxDrawOrder(0);
             }
             await Task.FromResult(0);
         }

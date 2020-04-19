@@ -66,6 +66,7 @@ namespace MenuAPI
         public static bool DontOpenAnyMenu { get; set; } = false;
         public static bool PreventExitingMenu { get; set; } = false;
         public static bool DisableBackButton { get; set; } = false;
+        public static bool SetDrawOrder { get; set; } = true;
         public static Control MenuToggleKey { get; set; }
 #if FIVEM
             = Control.InteractionMenu
