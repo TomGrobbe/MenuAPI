@@ -11,7 +11,7 @@
     <Authors>Tom Grobbe</Authors>
     <Description Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">An advanced Menu API for FiveM C# resources.</Description>
     <Description Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">An advanced Menu API for RedM C# resources.</Description>
-    <Copyright>Copyright Tom Grobbe 2018-2019</Copyright>
+    <Copyright>Copyright Tom Grobbe 2018-2020</Copyright>
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/tomgrobbe/menuapi/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/tomgrobbe/menuapi/</RepositoryUrl>
