@@ -37,7 +37,7 @@ before_deploy:
   - ps: $env:NUGET_VERSION=(($env:VERSION_NAME).Substring(1))
   - cmd: if "%CONFIGURATION%"=="Release FiveM" (cd MenuAPI && nuget pack MenuAPI.csproj -Properties Configuration="Release FiveM";Id="MenuAPI.FiveM" -Version "%NUGET_VERSION%" && appveyor PushArtifact MenuAPI.FiveM.%NUGET_VERSION%.nupkg && cd ..) else (cd MenuAPI && nuget pack MenuAPI.csproj -Properties Configuration="Release RedM";Id="MenuAPI.RedM" -Version "%NUGET_VERSION%" && appveyor PushArtifact MenuAPI.RedM.%NUGET_VERSION%.nupkg && cd ..)
 after_deploy:
-  - cmd: curl -F "file=@MenuAPI-%VERSION_NAME%-%GAME%.zip" %WEBHOOK_URL%
+  - cmd: curl --write-out '%{http_code}' --silent --output /dev/null -F "file=@MenuAPI-%VERSION_NAME%-%GAME%.zip" %WEBHOOK_URL%
   - cmd: appveyor/after_deploy.cmd
 on_success:
   - cmd: appveyor/on_success.cmd
