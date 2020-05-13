@@ -17,7 +17,6 @@ after_build:
   - cmd: copy "README.md" ".\MenuAPI\bin\README.md"
   - cmd: 7z a MenuAPI-%VERSION_NAME%-%GAME%.zip -r ".\MenuAPI\bin\*"
   - cmd: appveyor PushArtifact MenuAPI-%VERSION_NAME%-%GAME%.zip
-  - cmd: dir
 deploy:
   - provider: NuGet
     api_key: $(NUGET_API_KEY)
