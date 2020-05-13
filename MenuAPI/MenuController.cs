@@ -458,11 +458,11 @@ namespace MenuAPI
         {
 
 #if FIVEM
-            Game.DisableControlThisFrame(0, MenuToggleKey);
             if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.Player.IsDead && !DisableMenuButtons)
             {
                 if (IsAnyMenuOpen())
                 {
+                    Game.DisableControlThisFrame(0, MenuToggleKey);
                     if (Game.CurrentInputMode == InputMode.MouseAndKeyboard)
                     {
                         if ((Game.IsControlJustPressed(0, MenuToggleKey) || Game.IsDisabledControlJustPressed(0, MenuToggleKey)) && !PreventExitingMenu)
