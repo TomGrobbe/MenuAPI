@@ -1,3 +1,5 @@
+dir
+
 if not defined WEBHOOK_URL goto end
 curl --silent -F "file=@../MenuAPI-%VERSION_NAME%-%GAME%.zip" %WEBHOOK_URL% > /dev/null/
 
