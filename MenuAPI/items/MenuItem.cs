@@ -195,6 +195,7 @@ namespace MenuAPI
             BRAND_WESTERNMOTORCYCLE,
             BRAND_WILLARD,
             BRAND_ZIRCONIUM,
+            INFO
 #endif
 #if REDM
             LOCK,
@@ -444,6 +445,8 @@ namespace MenuAPI
                 case Icon.BRAND_PROGEN2:
                 case Icon.BRAND_RUNE:
                     return "mpcarhud2";
+                case Icon.INFO:
+                    return "shared";
                 default:
                     return "commonmenu";
 #endif
@@ -649,6 +652,7 @@ namespace MenuAPI
                 case Icon.BRAND_LCC: return "lcc";
                 case Icon.BRAND_PROGEN2: return "progen";
                 case Icon.BRAND_RUNE: return "rune";
+                case Icon.INFO: return "info_icon_32";
                 default:
                     break;
 #endif

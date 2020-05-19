@@ -33,6 +33,7 @@ namespace MenuAPI
             "mprankbadge",
             "mpcarhud",
             "mpcarhud2",
+            "shared"
 #endif
 #if REDM
             "menu_textures",
