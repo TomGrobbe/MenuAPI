@@ -20,12 +20,20 @@
     <PackageLicenseFile>license.txt</PackageLicenseFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release FiveM'">
     <DefineConstants>FIVEM</DefineConstants>
   </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug FiveM'">
+    <DefineConstants>FIVEM;DEBUG</DefineConstants>
+  </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release RedM'">
     <DefineConstants>REDM</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug RedM'">
+    <DefineConstants>REDM;DEBUG</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
