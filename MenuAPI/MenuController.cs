@@ -241,10 +241,22 @@ namespace MenuAPI
 #if REDM
             menuTextureAssets.ForEach(asset =>
             {
-                if (Call<bool>(HAS_STREAMED_TEXTURE_DICT_LOADED, asset))
+                if (!string.IsNullOrEmpty(asset))
                 {
-                    Call(SET_STREAMED_TEXTURE_DICT_AS_NO_LONGER_NEEDED, asset);
+                    if (Call<bool>(HAS_STREAMED_TEXTURE_DICT_LOADED, asset))
+                    {
+#if DEBUG
+                        Debug.WriteLine($"[DEBUG] [{GetCurrentResourceName()}] [MenuAPI] Attempting to set asset as no longer needed: {asset}");
+#endif
+                        Call(SET_STREAMED_TEXTURE_DICT_AS_NO_LONGER_NEEDED, asset);
+                    }
                 }
+#if DEBUG
+                else
+                {
+                    Debug.WriteLine($"[WARNING] [{GetCurrentResourceName()}] [MenuAPI] a menu asset is null somehow, can't set it as no longer needed.");
+                }
+#endif
             });
 #endif
         }
@@ -528,7 +540,15 @@ namespace MenuAPI
             Call(DISABLE_CONTROL_ACTION, 0, MenuToggleKey, true);
             if (!Call<bool>(IS_PAUSE_MENU_ACTIVE) && Call<bool>(IS_SCREEN_FADED_IN) && !IsAnyMenuOpen() && !DisableMenuButtons && !Call<bool>(IS_ENTITY_DEAD, PlayerPedId()) && Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, MenuToggleKey))
             {
-                MainMenu.OpenMenu();
+                if (MainMenu != null)
+                {
+                    MainMenu.OpenMenu();
+                }
+                else
+                {
+                    Debug.WriteLine($"[ERROR] [{GetCurrentResourceName()}] [MenuAPI] MainMenu is null, so we can't open it! Make sure that MenuController.MainMenu is set to a valid Menu which is not null!");
+                }
+
             }
 #endif
             await Task.FromResult(0);
