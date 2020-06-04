@@ -998,10 +998,11 @@ namespace MenuAPI
                     SelectItem(checkbox);
                 }
 #endif
-                // If the item is enabled and it's not any of the above, just select it.
-                else if (item.Enabled)
+                // If the item is not any of the above, return to parent menu.
+                else if (MenuController.NavigateMenuUsingArrows)
                 {
-                    SelectItem(item);
+                    if (!MenuController.DisableBackButton && !(MenuController.PreventExitingMenu && ParentMenu == null))
+                        GoBack();
                 }
             }
         }
@@ -1074,9 +1075,10 @@ namespace MenuAPI
                 }
 #endif
                 // If the item is enabled and it's not any of the above, just select it.
-                else if (item.Enabled)
+                else if (MenuController.NavigateMenuUsingArrows)
                 {
-                    SelectItem(item);
+                    if(item.Enabled)
+                        SelectItem(item);
                 }
             }
         }

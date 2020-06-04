@@ -63,6 +63,7 @@ namespace MenuAPI
             !Call<bool>(IS_ENTITY_DEAD, PlayerPedId());
 #endif
 
+        public static bool NavigateMenuUsingArrows { get; set; } = true;
         public static bool EnableManualGCs { get; set; } = true;
         public static bool DontOpenAnyMenu { get; set; } = false;
         public static bool PreventExitingMenu { get; set; } = false;
