@@ -1499,7 +1499,7 @@ namespace MenuAPI
                     float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
                     float y = ((Position.Value + MenuItemsYOffset + ((bgHeight + 1f) / 2f)) / MenuController.ScreenHeight);
                     float width = headerSize.Key / MenuController.ScreenWidth;
-                    float height = bgHeight / MenuController.ScreenHeight;
+                    float height = (bgHeight + 1f) / MenuController.ScreenHeight;
 
                     DrawRect(x, y, width, height, 0, 0, 0, 180);
                     MenuItemsYOffset += bgHeight - 1f;
