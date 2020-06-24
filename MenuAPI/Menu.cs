@@ -10,8 +10,6 @@ using static CitizenFX.Core.Native.Hash;
 
 namespace MenuAPI
 {
-    //DrawSprite("char_creator_portraits", "female_1", x, y, width, height, 0f, 255, 255, 255, 255);
-
     public class Menu
     {
         #region Setting up events
