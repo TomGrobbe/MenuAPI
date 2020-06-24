@@ -1321,13 +1321,13 @@ namespace MenuAPI
                 #endregion
 
                 #region Draw Subtitle
+                float bgHeight = 38f;
                 {
 #if FIVEM
                     #region draw subtitle background
                     SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-                    float bgHeight = 38f;
 
                     float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
                     float y = ((Position.Value + MenuItemsYOffset + (bgHeight / 2f)) / MenuController.ScreenHeight);
@@ -1476,30 +1476,30 @@ namespace MenuAPI
 
                     //DrawSprite(MenuController._texture_dict, "gradient_bgd", x, y, width, height, 0f, 255, 255, 255, 255);
 #if FIVEM
-                    float bgHeight = 38f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
 
                     if (this is HerritageMenu)
                     {
                         HerritageMenu menu = this as HerritageMenu;
-                        float htexheight = 300f;
+                        float htexheight = 25f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
 
                         float hx = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
-                        float hy = ((Position.Value + MenuItemsYOffset + ((htexheight - 75f) / 2f) + ((bgHeight + 1f) / 2f)) / MenuController.ScreenHeight);
+                        float hy = ((Position.Value + MenuItemsYOffset  + ((htexheight + 1f) / 2f)) / MenuController.ScreenHeight);
                         float hwidth = headerSize.Key / MenuController.ScreenWidth;
-                        float hheight = (bgHeight + (htexheight / 2)) / MenuController.ScreenHeight;
+                        float hheight = (htexheight + 1f) / MenuController.ScreenHeight;
 
                         DrawSprite("pause_menu_pages_char_mom_dad", "mumdadbg", hx, hy, hwidth, hheight, 0f, 255, 255, 255, 255);
-
                         DrawSprite("char_creator_portraits", ((int)menu.CurrentDad < 21) ? $"male_{(int)menu.CurrentDad}" : $"special_male_{(int)(menu.CurrentDad - 21)}", (hx * 1.3f), hy, hwidth / 2, hheight, 0f, 255, 255, 255, 255);
                         DrawSprite("char_creator_portraits", ((int)menu.CurrentMum < 21) ? $"female_{(int)menu.CurrentMum}" : $"special_female_{(int)(menu.CurrentMum - 21)}", (hx / 1.8f), hy, hwidth / 2, hheight, 0f, 255, 255, 255, 255);
 
-                        MenuItemsYOffset += htexheight;
+                        MenuItemsYOffset += htexheight - 1f;
                     }
+
+                    bgHeight = 38f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
 
                     float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
                     float y = ((Position.Value + MenuItemsYOffset + ((bgHeight + 1f) / 2f)) / MenuController.ScreenHeight);
                     float width = headerSize.Key / MenuController.ScreenWidth;
-                    float height = (bgHeight + 1f) / MenuController.ScreenHeight;
+                    float height = bgHeight / MenuController.ScreenHeight;
 
                     DrawRect(x, y, width, height, 0, 0, 0, 180);
                     MenuItemsYOffset += bgHeight - 1f;
