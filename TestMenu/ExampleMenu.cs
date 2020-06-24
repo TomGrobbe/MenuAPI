@@ -149,6 +149,30 @@ namespace TestMenu
             menu.AddMenuItem(menuButton);
             MenuController.BindMenuItem(menu, submenu, menuButton);
 
+#if FIVEM
+            var herritageMenu = new HerritageMenu("Herritage");
+            herritageMenu.AddMenuItem(new MenuListItem("Father", ((Dad[])Enum.GetValues(typeof(Dad))).Select(c => c.ToString()).ToList(), 0, "Choose the father of your character."));
+            herritageMenu.AddMenuItem(new MenuListItem("Mother", ((Mum[])Enum.GetValues(typeof(Mum))).Select(c => c.ToString()).ToList(), 0, "Choose the mother of your character."));
+
+            menu.OnListIndexChange += (_menu, _listItem, _oldIndex, _newIndex, _itemIndex) =>
+            {
+                if (_listItem.Text == "Father")
+                {
+                    (menu as HerritageMenu).CurrentDad = ((Dad)_itemIndex);
+                }
+                else if (_listItem.Text == "Mother")
+                {
+                    (menu as HerritageMenu).CurrentMum = ((Mum)_itemIndex);
+                }
+            };
+
+            var bindmenu = new MenuItem("Héritage");
+            menu.AddMenuItem(bindmenu);
+
+            MenuController.BindMenuItem(menu, herritageMenu, bindmenu);
+#endif
+
+
             // Adding items with sprites left & right to the submenu.
             for (var i = 0; i < Enum.GetValues(typeof(MenuItem.Icon)).Length; i++)
             {

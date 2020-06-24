@@ -10,6 +10,8 @@ using static CitizenFX.Core.Native.Hash;
 
 namespace MenuAPI
 {
+    //DrawSprite("char_creator_portraits", "female_1", x, y, width, height, 0f, 255, 255, 255, 255);
+
     public class Menu
     {
         #region Setting up events
@@ -1292,7 +1294,6 @@ namespace MenuAPI
                     }
 
                     ResetScriptGfxAlign();
-
                     MenuItemsYOffset = headerSize.Value;
 #endif
 
@@ -1479,6 +1480,24 @@ namespace MenuAPI
 #if FIVEM
                     float bgHeight = 38f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
 
+                    if (this is HerritageMenu)
+                    {
+                        HerritageMenu menu = this as HerritageMenu;
+                        float htexheight = 300f;
+
+                        float hx = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
+                        float hy = ((Position.Value + MenuItemsYOffset + ((htexheight - 75f) / 2f) + ((bgHeight + 1f) / 2f)) / MenuController.ScreenHeight);
+                        float hwidth = headerSize.Key / MenuController.ScreenWidth;
+                        float hheight = (bgHeight + (htexheight / 2)) / MenuController.ScreenHeight;
+
+                        DrawSprite("pause_menu_pages_char_mom_dad", "mumdadbg", hx, hy, hwidth, hheight, 0f, 255, 255, 255, 255);
+
+                        DrawSprite("char_creator_portraits", ((int)menu.CurrentDad < 21) ? $"male_{(int)menu.CurrentDad}" : $"special_male_{(int)(menu.CurrentDad - 21)}", (hx * 1.3f), hy, hwidth / 2, hheight, 0f, 255, 255, 255, 255);
+                        DrawSprite("char_creator_portraits", ((int)menu.CurrentMum < 21) ? $"female_{(int)menu.CurrentMum}" : $"special_female_{(int)(menu.CurrentMum - 21)}", (hx / 1.8f), hy, hwidth / 2, hheight, 0f, 255, 255, 255, 255);
+
+                        MenuItemsYOffset += htexheight;
+                    }
+
                     float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
                     float y = ((Position.Value + MenuItemsYOffset + ((bgHeight + 1f) / 2f)) / MenuController.ScreenHeight);
                     float width = headerSize.Key / MenuController.ScreenWidth;
@@ -1487,6 +1506,7 @@ namespace MenuAPI
                     DrawRect(x, y, width, height, 0, 0, 0, 180);
                     MenuItemsYOffset += bgHeight - 1f;
                     ResetScriptGfxAlign();
+
 #endif
 #if REDM
                     //float x = (Position.Key + ((headerSize.Key) / 2f)) / MenuController.ScreenWidth;
