@@ -1480,7 +1480,7 @@ namespace MenuAPI
                     if (this is HerritageMenu)
                     {
                         HerritageMenu menu = this as HerritageMenu;
-                        float htexheight = 25f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
+                        float htexheight = 250f;
 
                         float hx = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
                         float hy = ((Position.Value + MenuItemsYOffset  + ((htexheight + 1f) / 2f)) / MenuController.ScreenHeight);
