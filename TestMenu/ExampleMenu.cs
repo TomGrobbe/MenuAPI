@@ -181,30 +181,10 @@ namespace TestMenu
             submenu.InstructionalButtons.Add(Control.CreatorDelete, "Out!");
             submenu.InstructionalButtons.Add(Control.Cover, "This");
             submenu.InstructionalButtons.Add(Control.Context, "Check");
+#endif
 
             // Create a third menu without a banner.
             Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
-
-            // Create menu with weapon stats panel
-            Menu menu4 = new Menu("Weapon Stats", "Weapon Stats Panel") { ShowWeaponStatsPanel = true };
-            menu4.AddMenuItem(new MenuItem("dummy item", "You should add at least one item when using weapon stat panels"));
-            menu4.SetWeaponStats(0.2f, 0.4f, 0.7f, 0.8f);
-            menu4.SetWeaponComponentStats(0.4f, 0f, -0.05f, 0.1f);
-            MenuController.AddSubmenu(menu, menu4);
-            MenuItem weaponStats = new MenuItem("Weapon stats", "Demo menu for weapon stats components");
-            menu.AddMenuItem(weaponStats);
-            MenuController.BindMenuItem(menu, menu4, weaponStats);
-
-            // Create menu with vehicle stats panel
-            Menu menu5 = new Menu("Vehicle Stats", "Vehicle Stats Panel") { ShowVehicleStatsPanel = true };
-            menu5.AddMenuItem(new MenuItem("dummy item", "You should add at least one item when using vehicle stat panels"));
-            menu5.SetVehicleStats(0.2f, 0.2f, 0.3f, 0.8f);
-            menu5.SetVehicleUpgradeStats(0.4f, -0.025f, 0.05f, 0.1f);
-            MenuController.AddSubmenu(menu, menu5);
-            MenuItem vehicleStats = new MenuItem("Vehicle stats", "Demo menu for vehicle stats components");
-            menu.AddMenuItem(vehicleStats);
-            MenuController.BindMenuItem(menu, menu5, vehicleStats);
-#endif
 
             // you can use AddSubmenu or AddMenu, both will work but if you want to link this menu from another menu,
             // you should use AddSubmenu.
@@ -230,6 +210,29 @@ namespace TestMenu
             {
                 menu.AddMenuItem(new MenuItem($"Item #{i + 1}.", "With an invisible description."));
             }
+
+
+#if FIVEM
+            // Create menu with weapon stats panel
+            Menu menu4 = new Menu("Weapon Stats", "Weapon Stats Panel") { ShowWeaponStatsPanel = true };
+            menu4.AddMenuItem(new MenuItem("dummy item", "You should add at least one item when using weapon stat panels"));
+            menu4.SetWeaponStats(0.2f, 0.4f, 0.7f, 0.8f);
+            menu4.SetWeaponComponentStats(0.4f, 0f, -0.05f, 0.1f);
+            MenuController.AddSubmenu(menu, menu4);
+            MenuItem weaponStats = new MenuItem("Weapon stats", "Demo menu for weapon stats components");
+            menu.AddMenuItem(weaponStats);
+            MenuController.BindMenuItem(menu, menu4, weaponStats);
+
+            // Create menu with vehicle stats panel
+            Menu menu5 = new Menu("Vehicle Stats", "Vehicle Stats Panel") { ShowVehicleStatsPanel = true };
+            menu5.AddMenuItem(new MenuItem("dummy item", "You should add at least one item when using vehicle stat panels"));
+            menu5.SetVehicleStats(0.2f, 0.2f, 0.3f, 0.8f);
+            menu5.SetVehicleUpgradeStats(0.4f, -0.025f, 0.05f, 0.1f);
+            MenuController.AddSubmenu(menu, menu5);
+            MenuItem vehicleStats = new MenuItem("Vehicle stats", "Demo menu for vehicle stats components");
+            menu.AddMenuItem(vehicleStats);
+            MenuController.BindMenuItem(menu, menu5, vehicleStats);
+#endif
 
             /*
 ########################################################
