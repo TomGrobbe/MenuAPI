@@ -181,7 +181,6 @@ namespace TestMenu
             submenu.InstructionalButtons.Add(Control.CreatorDelete, "Out!");
             submenu.InstructionalButtons.Add(Control.Cover, "This");
             submenu.InstructionalButtons.Add(Control.Context, "Check");
-#endif
 
             // Create a third menu without a banner.
             Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
@@ -196,7 +195,6 @@ namespace TestMenu
             menu.AddMenuItem(weaponStats);
             MenuController.BindMenuItem(menu, menu4, weaponStats);
 
-
             // Create menu with vehicle stats panel
             Menu menu5 = new Menu("Vehicle Stats", "Vehicle Stats Panel") { ShowVehicleStatsPanel = true };
             menu5.AddMenuItem(new MenuItem("dummy item", "You should add at least one item when using vehicle stat panels"));
@@ -206,6 +204,7 @@ namespace TestMenu
             MenuItem vehicleStats = new MenuItem("Vehicle stats", "Demo menu for vehicle stats components");
             menu.AddMenuItem(vehicleStats);
             MenuController.BindMenuItem(menu, menu5, vehicleStats);
+#endif
 
             // you can use AddSubmenu or AddMenu, both will work but if you want to link this menu from another menu,
             // you should use AddSubmenu.
