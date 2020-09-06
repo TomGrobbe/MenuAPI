@@ -391,9 +391,29 @@ namespace MenuAPI
 
         public bool EnableInstructionalButtons { get; set; } = true;
 
-        public float[] WeaponStats { get; private set; }
-        public float[] WeaponComponentStats { get; private set; }
+        /// <summary>
+        /// Should contain 4 floats.
+        /// </summary>
+        public float[] WeaponStats { get; private set; } = new float[4] { 0f, 0f, 0f, 0f };
+        /// <summary>
+        /// Should contain 4 floats.
+        /// </summary>
+        public float[] WeaponComponentStats { get; private set; } = new float[4] { 0f, 0f, 0f, 0f };
+        /// <summary>
+        /// Should contain 4 floats.
+        /// </summary>
+        public float[] VehicleStats { get; private set; } = new float[4] { 0f, 0f, 0f, 0f };
+        /// <summary>
+        /// Should contain 4 floats.
+        /// </summary>
+        public float[] VehicleUpgradeStats { get; private set; } = new float[4] { 0f, 0f, 0f, 0f };
+
         public bool ShowWeaponStatsPanel { get; set; } = false;
+        public bool ShowVehicleStatsPanel { get; set; } = false;
+
+        private readonly string[] weaponStatNames = new string[4] { "PM_DAMAGE", "PM_FIRERATE", "PM_ACCURACY", "PM_RANGE" };
+        private readonly string[] vehicleStatNames = new string[4] { "CMOD_STAT_0", "CMOD_STAT_1", "CMOD_STAT_2", "CMOD_STAT_3" };
+
 
         private bool filterActive = false;
 
@@ -1077,7 +1097,7 @@ namespace MenuAPI
                 // If the item is enabled and it's not any of the above, just select it.
                 else if (MenuController.NavigateMenuUsingArrows)
                 {
-                    if(item.Enabled)
+                    if (item.Enabled)
                         SelectItem(item);
                 }
             }
@@ -1116,6 +1136,13 @@ namespace MenuAPI
             FilterItems.Clear();
         }
 #if FIVEM
+        /// <summary>
+        /// Values should be between 0 and 1.
+        /// </summary>
+        /// <param name="damage"></param>
+        /// <param name="fireRate"></param>
+        /// <param name="accuracy"></param>
+        /// <param name="range"></param>
         public void SetWeaponStats(float damage, float fireRate, float accuracy, float range)
         {
             WeaponStats = new float[4]
@@ -1127,6 +1154,13 @@ namespace MenuAPI
             };
         }
 
+        /// <summary>
+        /// Values should be between 0 and 1.
+        /// </summary>
+        /// <param name="damage"></param>
+        /// <param name="fireRate"></param>
+        /// <param name="accuracy"></param>
+        /// <param name="range"></param>
         public void SetWeaponComponentStats(float damage, float fireRate, float accuracy, float range)
         {
             WeaponComponentStats = new float[4]
@@ -1135,6 +1169,45 @@ namespace MenuAPI
                 MathUtil.Clamp(WeaponStats[1] + fireRate, 0f, 1f),
                 MathUtil.Clamp(WeaponStats[2] + accuracy, 0f, 1f),
                 MathUtil.Clamp(WeaponStats[3] + range, 0f, 1f)
+            };
+        }
+
+        /// <summary>
+        /// Values should be between 0 and 1.
+        /// </summary>
+        /// <param name="topSpeed"></param>
+        /// <param name="acceleration"></param>
+        /// <param name="braking"></param>
+        /// <param name="traction"></param>
+        public void SetVehicleStats(float topSpeed, float acceleration, float braking, float traction)
+        {
+            VehicleStats = new float[4]
+            {
+                MathUtil.Clamp(topSpeed, 0f, 1f),
+                MathUtil.Clamp(acceleration, 0f, 1f),
+                MathUtil.Clamp(braking, 0f, 1f),
+                MathUtil.Clamp(traction, 0f, 1f)
+            };
+        }
+
+        /// <summary>
+        /// Each upgrade value gets added on top of the already existing vehicle stats.
+        /// So if the normal topspeed value is set to 0.5, and you provide 0.2 here, the total
+        /// top speed value will be 0.7, where the last section (0.2) will be colored in blue.
+        /// The bar can only show values between 0 and 1, so the total value will be clamped between 0 and 1.
+        /// </summary>
+        /// <param name="topSpeed"></param>
+        /// <param name="acceleration"></param>
+        /// <param name="braking"></param>
+        /// <param name="traction"></param>
+        public void SetVehicleUpgradeStats(float topSpeed, float acceleration, float braking, float traction)
+        {
+            VehicleUpgradeStats = new float[4]
+            {
+                MathUtil.Clamp(VehicleStats[0] + topSpeed, 0f, 1f),
+                MathUtil.Clamp(VehicleStats[1] + acceleration, 0f, 1f),
+                MathUtil.Clamp(VehicleStats[2] + braking, 0f, 1f),
+                MathUtil.Clamp(VehicleStats[3] + traction, 0f, 1f)
             };
         }
 #endif
@@ -1232,7 +1305,7 @@ namespace MenuAPI
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
                     float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
-                    float y = (Position.Value + (headerSize.Value/ 2f)) / MenuController.ScreenHeight;
+                    float y = (Position.Value + (headerSize.Value / 2f)) / MenuController.ScreenHeight;
                     float width = headerSize.Key / MenuController.ScreenWidth;
                     float height = headerSize.Value / MenuController.ScreenHeight;
 
@@ -1539,7 +1612,7 @@ namespace MenuAPI
                 {
                     if (Size > MaxItemsOnScreen)
                     {
-                #region background
+                        #region background
                         float width = Width / MenuController.ScreenWidth;
                         float height = 60f / MenuController.ScreenWidth;
                         float x = (Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
@@ -1551,9 +1624,9 @@ namespace MenuAPI
                         DrawRect(x, y, width, height, 0, 0, 0, 180);
                         descriptionYOffset = height;
                         ResetScriptGfxAlign();
-                #endregion
+                        #endregion
 
-                #region up/down icons
+                        #region up/down icons
                         SetScriptGfxAlign(76, 84);
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
                         float xMin = 0f;
@@ -1600,7 +1673,7 @@ namespace MenuAPI
                         }
 
                         ResetScriptGfxAlign();
-                #endregion
+                        #endregion
                     }
                 }
 
@@ -1728,17 +1801,17 @@ namespace MenuAPI
                             {
                                 if (listItem.ShowColorPanel || listItem.ShowOpacityPanel)
                                 {
-                                    goto SKIP_WEAPON_STATS;
+                                    goto SKIP_STATS_PANELS;
                                 }
                             }
                         }
                         else
                         {
-                            goto SKIP_WEAPON_STATS;
+                            goto SKIP_STATS_PANELS;
                         }
                     }
 
-                    if (ShowWeaponStatsPanel)
+                    if (ShowWeaponStatsPanel || ShowVehicleStatsPanel)
                     {
                         float textSize = (14f * 27f) / MenuController.ScreenHeight;
                         float width = Width / MenuController.ScreenWidth;
@@ -1750,13 +1823,12 @@ namespace MenuAPI
                             y -= (30f / MenuController.ScreenHeight);
                         }
 
-
-                #region background
+                        #region background
                         SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
                         DrawRect(x, y, width, height, 0, 0, 0, 180);
                         ResetScriptGfxAlign();
-                #endregion
+                        #endregion
 
                         float bgStatBarWidth = (Width / 2f) / MenuController.ScreenWidth;
                         float bgStatBarX = x + (bgStatBarWidth / 2f) - (10f / MenuController.ScreenWidth);
@@ -1771,152 +1843,64 @@ namespace MenuAPI
                         float bgStatBarHeight = 10f / MenuController.ScreenHeight;
                         float barX;
                         float componentBarX;
-                #region damage bar
-                        barWidth = bgStatBarWidth * WeaponStats[0];
-                        componentBarWidth = bgStatBarWidth * WeaponComponentStats[0];
-                        if (LeftAligned)
-                        {
-                            barX = bgStatBarX - (bgStatBarWidth / 2f) + (barWidth / 2f);
-                            componentBarX = bgStatBarX - (bgStatBarWidth / 2f) + (componentBarWidth / 2f);
-                        }
-                        else
-                        {
-                            barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
-                            componentBarX = (componentBarWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
-                        }
-                        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                        // bar bg
-                        DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180);
-                        // component stats
-                        DrawRect(componentBarX, barY, componentBarWidth, bgStatBarHeight, 93, 182, 229, 255);
-                        // real bar
-                        DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
-                        ResetScriptGfxAlign();
-                #endregion
+                        
 
-                #region fire rate bar
-                        barWidth = bgStatBarWidth * WeaponStats[1];
-                        componentBarWidth = bgStatBarWidth * WeaponComponentStats[1];
-                        barY += 30f / MenuController.ScreenHeight;
-                        if (LeftAligned)
+                        for (int i = 0; i < 4; i++)
                         {
-                            barX = bgStatBarX - (bgStatBarWidth / 2f) + (barWidth / 2f);
-                            componentBarX = bgStatBarX - (bgStatBarWidth / 2f) + (componentBarWidth / 2f);
+                            int[] color = new int[3] { 93, 182, 229 };
+                            barWidth = bgStatBarWidth * (ShowWeaponStatsPanel ? WeaponStats[i] : VehicleStats[i]);
+                            componentBarWidth = bgStatBarWidth * (ShowWeaponStatsPanel ? WeaponComponentStats[i] : VehicleUpgradeStats[i]);
+                            if (componentBarWidth < barWidth)
+                            {
+                                float diff = barWidth - componentBarWidth;
+                                barWidth -= diff;
+                                componentBarWidth += diff;
+                                color = new int[3] { 224, 50, 50 };
+                            }
+                            if (LeftAligned)
+                            {
+                                barX = bgStatBarX - (bgStatBarWidth / 2f) + (barWidth / 2f);
+                                componentBarX = bgStatBarX - (bgStatBarWidth / 2f) + (componentBarWidth / 2f);
+                            }
+                            else
+                            {
+                                barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
+                                componentBarX = (componentBarWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
+                            }
+                            SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                            // bar bg
+                            DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180);
+                            // component stats
+                            DrawRect(componentBarX, barY, componentBarWidth, bgStatBarHeight, color[0], color[1], color[2], 255);
+                            // real bar
+                            DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
+                            ResetScriptGfxAlign();
+                            barY += 30f / MenuController.ScreenHeight;
                         }
-                        else
-                        {
-                            barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
-                            componentBarX = (componentBarWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
-                        }
-                        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                        // bar bg
-                        DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180);
-                        // component stats
-                        DrawRect(componentBarX, barY, componentBarWidth, bgStatBarHeight, 93, 182, 229, 255);
-                        // real bar
-                        DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
-                        ResetScriptGfxAlign();
-                #endregion
 
-                #region accuracy bar
-                        barWidth = bgStatBarWidth * WeaponStats[2];
-                        componentBarWidth = bgStatBarWidth * WeaponComponentStats[2];
-                        barY += 30f / MenuController.ScreenHeight;
-                        if (LeftAligned)
-                        {
-                            barX = bgStatBarX - (bgStatBarWidth / 2f) + (barWidth / 2f);
-                            componentBarX = bgStatBarX - (bgStatBarWidth / 2f) + (componentBarWidth / 2f);
-                        }
-                        else
-                        {
-                            barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
-                            componentBarX = (componentBarWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
-                        }
-                        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                        // bar bg
-                        DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180);
-                        // component stats
-                        DrawRect(componentBarX, barY, componentBarWidth, bgStatBarHeight, 93, 182, 229, 255);
-                        // real bar
-                        DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
-                        ResetScriptGfxAlign();
-                #endregion
-
-                #region range bar
-                        barWidth = bgStatBarWidth * WeaponStats[3];
-                        componentBarWidth = bgStatBarWidth * WeaponComponentStats[3];
-                        barY += 30f / MenuController.ScreenHeight;
-                        if (LeftAligned)
-                        {
-                            barX = bgStatBarX - (bgStatBarWidth / 2f) + (barWidth / 2f);
-                            componentBarX = bgStatBarX - (bgStatBarWidth / 2f) + (componentBarWidth / 2f);
-                        }
-                        else
-                        {
-                            barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
-                            componentBarX = (componentBarWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
-                        }
-                        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                        // bar bg
-                        DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180);
-                        // component stats
-                        DrawRect(componentBarX, barY, componentBarWidth, bgStatBarHeight, 93, 182, 229, 255);
-                        // real bar
-                        DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
-                        ResetScriptGfxAlign();
-                #endregion
-
-                #region weapon stats text
+                        #region weapon stats text
                         float textX = LeftAligned ? x - (width / 2f) + (10f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 10f) / MenuController.ScreenWidth);
                         float textY = y - (height / 2f) + (10f / MenuController.ScreenHeight);
 
-                        SetScriptGfxAlign(76, 84);
-                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                        BeginTextCommandDisplayText("PM_DAMAGE");
-                        SetTextJustification(1);
-                        SetTextScale(textSize, textSize);
+                        for (int i = 0; i < 4; i++)
+                        {
+                            SetScriptGfxAlign(76, 84);
+                            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                            BeginTextCommandDisplayText(ShowWeaponStatsPanel ? weaponStatNames[i] : vehicleStatNames[i]);
+                            SetTextJustification(1);
+                            SetTextScale(textSize, textSize);
 
-                        EndTextCommandDisplayText(textX, textY);
-                        ResetScriptGfxAlign();
-
-                        SetScriptGfxAlign(76, 84);
-                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                        BeginTextCommandDisplayText("PM_FIRERATE");
-                        SetTextJustification(1);
-                        SetTextScale(textSize, textSize);
-                        textY += 30f / MenuController.ScreenHeight;
-                        EndTextCommandDisplayText(textX, textY);
-                        ResetScriptGfxAlign();
-
-                        SetScriptGfxAlign(76, 84);
-                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                        BeginTextCommandDisplayText("PM_ACCURACY");
-                        SetTextJustification(1);
-                        SetTextScale(textSize, textSize);
-                        textY += 30f / MenuController.ScreenHeight;
-                        EndTextCommandDisplayText(textX, textY);
-                        ResetScriptGfxAlign();
-
-                        SetScriptGfxAlign(76, 84);
-                        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                        BeginTextCommandDisplayText("PM_RANGE");
-                        SetTextJustification(1);
-                        SetTextScale(textSize, textSize);
-                        textY += 30f / MenuController.ScreenHeight;
-                        EndTextCommandDisplayText(textX, textY);
-                        ResetScriptGfxAlign();
-                #endregion
-
+                            EndTextCommandDisplayText(textX, textY);
+                            ResetScriptGfxAlign();
+                            textY += 30f / MenuController.ScreenHeight;
+                        }
+                        #endregion
                     }
                 }
 
-
-            SKIP_WEAPON_STATS:
-                #endregion
+            #endregion
+            SKIP_STATS_PANELS:
 
                 #region Draw Color and opacity palletes
                 if (Size > 0)

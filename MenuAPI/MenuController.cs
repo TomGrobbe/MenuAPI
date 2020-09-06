@@ -1024,8 +1024,6 @@ namespace MenuAPI
                     EndScaleformMovieMethod();
 
 
-
-
                     for (int i = 0; i < menu.InstructionalButtons.Count; i++)
                     {
                         string text = menu.InstructionalButtons.ElementAt(i).Value;
