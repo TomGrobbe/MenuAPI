@@ -328,6 +328,8 @@ namespace MenuAPI
 
         private int index = 0;
 
+        private bool visible = false;
+
         public int ViewIndexOffset { get; private set; } = 0;
 
         private List<MenuItem> VisibleMenuItems
@@ -371,7 +373,26 @@ namespace MenuAPI
 
         public int Size => filterActive ? FilterItems.Count : MenuItems.Count;
 
-        public bool Visible { get; set; } = false;
+        public bool Visible
+        {
+            get
+            {
+                return visible;
+            }
+            set
+            {
+                if (value)
+                {
+                    MenuController.VisibleMenus.Add(this);
+                }
+                else
+                {
+                    MenuController.VisibleMenus.Remove(this);
+                }
+
+                visible = value;
+            }
+        }
 
 #if FIVEM
         public bool LeftAligned => MenuController.MenuAlignment == MenuController.MenuAlignmentOption.Left;
