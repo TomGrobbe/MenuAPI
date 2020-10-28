@@ -13,6 +13,7 @@ namespace MenuAPI
     public class MenuController : BaseScript
     {
         public static List<Menu> Menus { get; protected set; } = new List<Menu>();
+        internal static HashSet<Menu> VisibleMenus { get; } = new HashSet<Menu>();
 #if FIVEM
         public const string _texture_dict = "commonmenu";
         public const string _header_texture = "interaction_bgd";
@@ -52,11 +53,11 @@ namespace MenuAPI
         public static float ScreenHeight => 1080;
         public static bool DisableMenuButtons { get; set; } = false;
 #if FIVEM
-        public static bool AreMenuButtonsEnabled => Menus.Any((m) => m.Visible) && !Game.IsPaused && CitizenFX.Core.UI.Screen.Fading.IsFadedIn && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !Game.Player.IsDead;
+        public static bool AreMenuButtonsEnabled => IsAnyMenuOpen() && !Game.IsPaused && CitizenFX.Core.UI.Screen.Fading.IsFadedIn && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !Game.Player.IsDead;
 #endif
 #if REDM
         public static bool AreMenuButtonsEnabled =>
-            Menus.Any((m) => m.Visible) &&
+            IsAnyMenuOpen() &&
             !Call<bool>(IS_PAUSE_MENU_ACTIVE) &&
             Call<bool>(IS_SCREEN_FADED_IN) &&
             !DisableMenuButtons &&
@@ -268,8 +269,8 @@ namespace MenuAPI
         /// <returns></returns>
         public static Menu GetCurrentMenu()
         {
-            if (Menus.Any((m) => m.Visible))
-                return Menus.Find((m) => m.Visible);
+            if (IsAnyMenuOpen())
+                return VisibleMenus.FirstOrDefault();
             return null;
         }
 
@@ -277,7 +278,7 @@ namespace MenuAPI
         /// Returns true if any menu is currently open.
         /// </summary>
         /// <returns></returns>
-        public static bool IsAnyMenuOpen() => Menus.Any((m) => m.Visible);
+        public static bool IsAnyMenuOpen() => VisibleMenus.Count > 0;
 
 
         #region Process Menu Buttons
