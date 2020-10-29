@@ -433,7 +433,7 @@ namespace MenuAPI
         public bool ShowVehicleStatsPanel { get; set; } = false;
 
         private readonly string[] weaponStatNames = new string[4] { "PM_DAMAGE", "PM_FIRERATE", "PM_ACCURACY", "PM_RANGE" };
-        private readonly string[] vehicleStatNames = new string[4] { "CMOD_STAT_0", "CMOD_STAT_1", "CMOD_STAT_2", "CMOD_STAT_3" };
+        private readonly string[] vehicleStatNames = new string[4] { "FMMC_VEHST_0", "FMMC_VEHST_1", "FMMC_VEHST_2", "FMMC_VEHST_3" };
 
 
         private bool filterActive = false;
