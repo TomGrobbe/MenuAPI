@@ -34,7 +34,9 @@ namespace MenuAPI
             "mprankbadge",
             "mpcarhud",
             "mpcarhud2",
-            "shared"
+            "shared",
+            "char_creator_portraits",
+            "pause_menu_pages_char_mom_dad"
 #endif
 #if REDM
             "menu_textures",
