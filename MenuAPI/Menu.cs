@@ -354,6 +354,14 @@ namespace MenuAPI
         private List<MenuItem> FilterItems { get; set; } = new List<MenuItem>();
         private List<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
 
+        private int? MenuFontTitle = null;
+
+        private int? MenuFontSubtitle = null;
+
+        private int? MenuFontCounter = null;
+
+        private int? MenuFontDescription = null;
+
 #if FIVEM
         private readonly int ColorPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_02"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
         private readonly int OpacityPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_01"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
@@ -819,6 +827,42 @@ namespace MenuAPI
                 Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_ERROR", "HUD_SHOP_SOUNDSET", 1);
 #endif
             }
+        }
+
+        /// <summary>
+        /// Sets title font for <see cref="Menu"/>.
+        /// </summary>
+        /// <param name="fontId"></param>
+        public void SetMenuFontTitle(int fontId)
+        {
+            MenuFontTitle = fontId;
+        }
+
+        /// <summary>
+        /// Sets subtitle font for <see cref="Menu"/>.
+        /// </summary>
+        /// <param name="fontId"></param>
+        public void SetMenuFontSubtitle(int fontId)
+        {
+            MenuFontSubtitle = fontId;
+        }
+
+        /// <summary>
+        /// Sets counter font for <see cref="Menu"/>.
+        /// </summary>
+        /// <param name="fontId"></param>
+        public void SetMenuFontCounter(int fontId)
+        {
+            MenuFontCounter = fontId;
+        }
+
+        /// <summary>
+        /// Sets title font for <see cref="Menu"/>.
+        /// </summary>
+        /// <param name="fontId"></param>
+        public void SetMenuFontDescription(int fontId)
+        {
+            MenuFontDescription = fontId;
         }
 
         /// <summary>
@@ -1365,7 +1409,7 @@ namespace MenuAPI
 
                     #region Draw Header Menu Title
 #if FIVEM
-                    int font = 1;
+                    int font = (MenuFontTitle == null) ? 1 : MenuFontTitle.GetValueOrDefault();
                     float size = (45f * 27f) / MenuController.ScreenHeight;
                     SetScriptGfxAlign(76, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -1398,7 +1442,7 @@ namespace MenuAPI
                     if (MenuController.SetDrawOrder)
                         SetScriptGfxDrawOrder(3);
                     //SetTextWrap(textMinX, textMaxX);
-                    int font = 10;
+                    int font = (MenuFontTitle == null) ? 10 : MenuFontTitle.GetValueOrDefault();
                     Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
                     Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuTitle ?? "N/A"), ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (45f / MenuController.ScreenHeight));
                     if (MenuController.SetDrawOrder)
@@ -1447,7 +1491,7 @@ namespace MenuAPI
                     #region draw subtitle text
                     if (!string.IsNullOrEmpty(MenuSubtitle))
                     {
-                        int font = 0;
+                        int font = (MenuFontSubtitle == null) ? 0 : MenuFontSubtitle.GetValueOrDefault();
                         float size = (14f * 27f) / MenuController.ScreenHeight;
                         //float size = 0.34f;
 
@@ -1489,7 +1533,7 @@ namespace MenuAPI
                         float size = (14f * 27f) / MenuController.ScreenHeight;
                         Call(SET_TEXT_SCALE, size, size);
                         Call(SET_TEXT_CENTRE, true);
-                        int font = 9;
+                        int font = (MenuFontSubtitle == null) ? 9 : MenuFontSubtitle.GetValueOrDefault();
                         Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
                         Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuSubtitle ?? "N/A"), x, y - (52f / MenuController.ScreenHeight));
                         if (MenuController.SetDrawOrder)
@@ -1502,7 +1546,7 @@ namespace MenuAPI
                     string counterText = $"{CounterPreText ?? ""}{CurrentIndex + 1} / {Size}";
                     if (!string.IsNullOrEmpty(CounterPreText) || MaxItemsOnScreen < Size)
                     {
-                        int font = 0;
+                        int font = (MenuFontCounter == null) ? 0 : MenuFontCounter.GetValueOrDefault();
                         float size = (14f * 27f) / MenuController.ScreenHeight;
                         //float size = 0.34f;
 
@@ -1549,7 +1593,7 @@ namespace MenuAPI
                         float textMinX = (headerSize.Key / 2f) / MenuController.ScreenWidth;
                         float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
                         float textY = (MenuItemsYOffset + 38f * (MathUtil.Clamp(Size, 0, MaxItemsOnScreen) + 1) - 11f) / MenuController.ScreenHeight;
-                        int font = 23;
+                        int font = (MenuFontCounter == null) ? 23 : MenuFontCounter.GetValueOrDefault();
                         Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
                         //SetTextWrap(textMinX, textMaxX);
 
@@ -1707,7 +1751,7 @@ namespace MenuAPI
                     if (currentMenuItem != null && !string.IsNullOrEmpty(currentMenuItem.Description))
                     {
                         #region description text
-                        int font = 0;
+                        int font = (MenuFontDescription == null) ? 0 : MenuFontDescription.GetValueOrDefault();
                         float textSize = (14f * 27f) / MenuController.ScreenHeight;
 
 #if FIVEM
@@ -1774,7 +1818,7 @@ namespace MenuAPI
                         float textMinX = (headerSize.Key / 2f) / MenuController.ScreenWidth;
                         float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
                         float textY = MenuItemsYOffset / MenuController.ScreenHeight + (18f / MenuController.ScreenHeight) + (48f / MenuController.ScreenHeight);
-                        font = 23;
+                        font = (MenuFontDescription == null) ? 23 : MenuFontDescription.GetValueOrDefault();
                         Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
                         Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{currentMenuItem.Description}"), textMinX, textY);
 
