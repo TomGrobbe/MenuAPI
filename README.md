@@ -1,14 +1,12 @@
 # MenuAPI
 
-FiveM C# Menu API.
+**FiveM & RedM C# Menu API**
 
-[![CodeFactor](https://www.codefactor.io/repository/github/tomgrobbe/menuapi/badge)](https://www.codefactor.io/repository/github/tomgrobbe/menuapi) [![Build status](https://ci.appveyor.com/api/projects/status/8nqoeyg0e9rn10ih/branch/master?svg=true)](https://ci.appveyor.com/project/TomGrobbe/menuapi/branch/master) [![Discord](https://discordapp.com/api/guilds/285424882534187008/widget.png)](https://vespura.com/discord) [![Patreon](https://img.shields.io/badge/donate-Patreon-orange.svg)](https://www.patreon.com/vespura)
+[![Discord](https://discordapp.com/api/guilds/285424882534187008/widget.png)](https://vespura.com/discord) [![CodeFactor](https://www.codefactor.io/repository/github/tomgrobbe/menuapi/badge)](https://www.codefactor.io/repository/github/tomgrobbe/menuapi) [![Build status](https://ci.appveyor.com/api/projects/status/8nqoeyg0e9rn10ih/branch/master?svg=true)](https://ci.appveyor.com/project/TomGrobbe/menuapi/branch/master) [![Patreon](https://img.shields.io/badge/donate-Patreon-orange.svg)](https://www.patreon.com/vespura)
 
-Designed specifically as a replacement of NativeUI for vMenu with improved performance (somewhat), more features, less bugs, and easier to use functions (somewhat).
+Designed specifically as a replacement of **NativeUI**, MenuAPI features performance improvements, **RedM** _and_ **FiveM** support, improved stability, better features, less bugs, full safezone alignment support for both left and right algined menus (FiveM only) and less (in my opinion) unnecessary features.
 
-Full safezone scaling supported, both left and right aligned menus supported.
-
-This has been coded from the ground up. Using GTA V Decompiled scripts to figure out what some undocumented natives were used for.
+This has been coded from the ground up. Using decompiled scripts from GTA V & RedM to figure out what some undocumented natives were used for.
 
 ## Installation
 
@@ -23,21 +21,38 @@ After doing either of the above and you're ready to build and publish your resou
 
 ## Documentation
 
-Minimal documentation is available [here](https://docs.vespura.com/mapi).
+Limited documentation is available [here](https://docs.vespura.com/mapi).
 
-Documentation contents will be improved/expanded in the (near) future.
+Feel like contributing to the documentation? The repository for the documentation site can be found [here](https://github.com/TomGrobbe/MenuAPI-Docs), thanks!
 
-## Copyright
+## Copyright / License
 
 Copyright © Tom Grobbe 2018-2021.
 
-## License (custom license)
+MenuAPI is a free resource, using a custom license.
+Conditions are listed below.
 
-You can use this API in your own resources, you can edit this API if you want to add features. Feel free to PR them.
+### You are allowed to
 
-You can host re-releases of this API, but ONLY as a FORK created via GitHub. If it's not a forked repo, then the release will be taken down by DMCA request.
+- Include the pre-built files in your projects, for both commercial and non-commercial use
+- Modify this code, feel free to create PR's :)
 
-It's very simple, don't steal my stuff and try to take credit. That's all I ask.
+### You are NOT allowed to
 
-When creating a resource, you are **not** required to mention/link this API, as long as you do not claim it to be your own work.
-If you feel like it you can link it just because you're nice, but there's no need to do this. I'd appreciate it if you just put the link to this repo somewhere in your credits/readme file.:)
+- Sell this code or a modified version of it.
+- If you release a paid resource that uses MenuAPI, you are not allowed to include MenuAPI in the resource. You will need to provide a free way for anyone to download the MenuAPI version of your resource.
+- Re-release this code without using the Fork feature.
+
+### You must
+
+- Provide appropritate credits when including this in your project.
+- State any changes you made if you want to re-release this code.
+- Keep this license when editing the source code or using this code in your own projects.
+
+### In short
+
+It's very simple, don't steal my stuff, try to take credit for code that isn't yours and don't try to make money using my work. That's all I ask.
+
+If you'd like to do something that's not allowed per this license, contact me and we might be able to figure something out.
+
+Nothing is guaranteed to work, I do not take responsibility for any bugs or damages caused by this code. Use at your own risk.

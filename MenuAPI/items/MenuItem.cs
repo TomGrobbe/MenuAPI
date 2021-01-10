@@ -280,6 +280,11 @@ namespace MenuAPI
             Description = description;
         }
 
+        /// <summary>
+        /// Get the sprite dictionary name for the given icon.
+        /// </summary>
+        /// <param name="icon"></param>
+        /// <returns></returns>
         protected string GetSpriteDictionary(Icon icon)
         {
             switch (icon)
@@ -465,6 +470,12 @@ namespace MenuAPI
             }
         }
 
+        /// <summary>
+        /// Get the sprite name for the given icon depending on the selected state of the item.
+        /// </summary>
+        /// <param name="icon"></param>
+        /// <param name="selected"></param>
+        /// <returns></returns>
         protected string GetSpriteName(Icon icon, bool selected)
         {
             switch (icon)
@@ -677,6 +688,12 @@ namespace MenuAPI
             return "";
         }
 
+        /// <summary>
+        /// Get the sprite size for the given icon.
+        /// </summary>
+        /// <param name="icon"></param>
+        /// <param name="width"></param>
+        /// <returns></returns>
         protected float GetSpriteSize(Icon icon, bool width)
         {
             switch (icon)
@@ -864,6 +881,12 @@ namespace MenuAPI
             }
         }
 
+        /// <summary>
+        /// Get the sprite color for the provided icon depending on the current state of the item (Enabled & selected values).
+        /// </summary>
+        /// <param name="icon"></param>
+        /// <param name="selected"></param>
+        /// <returns></returns>
         protected int[] GetSpriteColour(Icon icon, bool selected)
         {
             switch (icon)
@@ -987,6 +1010,13 @@ namespace MenuAPI
             }
         }
 
+        /// <summary>
+        /// Get the sprite x position offset for the provided icon and alignment variables.
+        /// </summary>
+        /// <param name="icon"></param>
+        /// <param name="leftAligned"></param>
+        /// <param name="leftSide"></param>
+        /// <returns></returns>
         protected float GetSpriteX(Icon icon, bool leftAligned, bool leftSide)
         {
 #if FIVEM
@@ -1026,185 +1056,243 @@ namespace MenuAPI
 #endif
         }
 
-
         /// <summary>
         /// Draws the item on the screen.
         /// </summary>
         internal virtual void Draw(int indexOffset)
         {
-            if (ParentMenu != null)
+            if (ParentMenu == null)
             {
-                float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * MathUtil.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
-                #region Background Rect
+                return;
+            }
+
+            int font = 0;
+            float textSize = (14f * 27f) / MenuController.ScreenHeight;
+            int textColor = Selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
+
+            float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * MathUtil.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
+            float textXOffset = 0f;
+            float rightTextIconOffset = 0f;
+
+            DrawBackground(indexOffset, yOffset, out float x, out float y);
+
+            float textMinX = (textXOffset / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
+            float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
+            float textY = y - ((30f / 2f) / MenuController.ScreenHeight);
+
+            textXOffset = DrawLeftIcon(textXOffset, y);
+            rightTextIconOffset = DrawRightIcon(rightTextIconOffset, y);
+#if FIVEM
+            DrawLabelText(textXOffset, rightTextIconOffset, y, font, textSize, textColor, textY);
+#endif
+            DrawItemText(font, textSize, textColor, textMinX, textMaxX, textY, textXOffset, y);
+        }
+
+        /// <summary>
+        /// Drwa the item text
+        /// </summary>
+        /// <param name="font"></param>
+        /// <param name="textSize"></param>
+        /// <param name="textColor"></param>
+        /// <param name="textMinX"></param>
+        /// <param name="textMaxX"></param>
+        /// <param name="textY"></param>
+        /// <param name="textXOffset"></param>
+        /// <param name="y"></param>
+        private void DrawItemText(int font, float textSize, int textColor, float textMinX, float textMaxX, float textY, float textXOffset, float y)
+        {
+#if FIVEM
+            SetScriptGfxAlign(76, 84);
+            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            SetTextFont(font);
+            SetTextScale(textSize, textSize);
+            SetTextJustification(1);
+            BeginTextCommandDisplayText("STRING");
+            AddTextComponentSubstringPlayerName(Text ?? "N/A");
+            if (Selected || !Enabled)
+            {
+                SetTextColour(textColor, textColor, textColor, 255);
+            }
+            if (ParentMenu.LeftAligned)
+            {
+                SetTextWrap(textMinX, textMaxX);
+                EndTextCommandDisplayText(textMinX, textY);
+            }
+            else
+            {
+                textMinX = (textXOffset / MenuController.ScreenWidth) + GetSafeZoneSize() - ((Width - 10f) / MenuController.ScreenWidth);
+                textMaxX = GetSafeZoneSize() - (10f / MenuController.ScreenWidth);
+                SetTextWrap(textMinX, textMaxX);
+                EndTextCommandDisplayText(textMinX, textY);
+            }
+            ResetScriptGfxAlign();
+#endif
+#if REDM
+            Call(SET_TEXT_SCALE, textSize, textSize);
+
+            textColor = Enabled ? 255 : 109;
+            Call((CitizenFX.Core.Native.Hash)0x50A41AD966910F03, textColor, textColor, textColor, 255); // _SET_TEXT_COLOUR / 0x50A41AD966910F03
+            textMinX = ((8f + textXOffset) / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
+            textMaxX = (Width - 10f) / MenuController.ScreenWidth;
+            textY = y - ((30f / 2f) / MenuController.ScreenHeight);
+            font = 23;
+            Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
+            Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? "")), textMinX, textY);
+#endif
+        }
+
+#if FIVEM
+        /// <summary>
+        /// Draw the item label text if it exists.
+        /// </summary>
+        /// <param name="textXOffset"></param>
+        /// <param name="rightTextIconOffset"></param>
+        /// <param name="y"></param>
+        /// <param name="font"></param>
+        /// <param name="textSize"></param>
+        /// <param name="textColor"></param>
+        /// <param name="textY"></param>
+        private void DrawLabelText(float textXOffset, float rightTextIconOffset, float y, int font, float textSize, int textColor, float textY)
+        {
+            if (string.IsNullOrEmpty(Label))
+            {
+                return;
+            }
+            SetScriptGfxAlign(76, 84);
+            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+
+            BeginTextCommandDisplayText("STRING");
+            SetTextFont(font);
+            SetTextScale(textSize, textSize);
+            SetTextJustification(2);
+            AddTextComponentSubstringPlayerName(Label);
+            if (Selected || !Enabled)
+            {
+                SetTextColour(textColor, textColor, textColor, 255);
+            }
+            if (ParentMenu.LeftAligned)
+            {
+                SetTextWrap(0f, ((490f - rightTextIconOffset) / MenuController.ScreenWidth));
+                EndTextCommandDisplayText((10f + rightTextIconOffset) / MenuController.ScreenWidth, textY);
+            }
+            else
+            {
+                SetTextWrap(0f, GetSafeZoneSize() - ((10f + rightTextIconOffset) / MenuController.ScreenWidth));
+                EndTextCommandDisplayText(0f, textY);
+            }
+            ResetScriptGfxAlign();
+        }
+#endif
+
+        /// <summary>
+        /// Draw the right icon if it exists.
+        /// </summary>
+        /// <param name="rightTextIconOffset"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        private float DrawRightIcon(float rightTextIconOffset, float y)
+        {
+            if (RightIcon == Icon.NONE)
+            {
+                return rightTextIconOffset;
+            }
+#if FIVEM
+            rightTextIconOffset = 25f;
+
+            SetScriptGfxAlign(76, 84);
+            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            string name = GetSpriteName(RightIcon, Selected);
+            float spriteY = y;
+            float spriteX = GetSpriteX(RightIcon, ParentMenu.LeftAligned, false);
+            float spriteHeight = GetSpriteSize(RightIcon, false);
+            float spriteWidth = GetSpriteSize(RightIcon, true);
+            int[] spriteColor = GetSpriteColour(RightIcon, Selected);
+            string textureDictionary = GetSpriteDictionary(RightIcon);
+            DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
+            ResetScriptGfxAlign();
+#endif
+#if REDM
+            string spriteName = GetSpriteName(RightIcon, Selected);
+            string spriteDict = GetSpriteDictionary(RightIcon);
+            float spriteX = GetSpriteX(RightIcon, true, false);
+            float spriteY = y;
+            float spriteHeight = GetSpriteSize(RightIcon, false);
+            float spriteWidth = GetSpriteSize(RightIcon, true);
+            int[] spriteColor = GetSpriteColour(RightIcon, Selected);
+            Call(DRAW_SPRITE, spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
+#endif
+            return rightTextIconOffset;
+        }
+
+        /// <summary>
+        /// Draw the left icon if it exists.
+        /// </summary>
+        /// <param name="textXOffset"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        private float DrawLeftIcon(float textXOffset, float y)
+        {
+            if (LeftIcon == Icon.NONE)
+            {
+                return textXOffset;
+            }
+            textXOffset = 25f;
+#if FIVEM
+            SetScriptGfxAlign(76, 84);
+            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+
+            string name = GetSpriteName(LeftIcon, Selected);
+            float spriteY = y;
+            float spriteX = GetSpriteX(LeftIcon, ParentMenu.LeftAligned, true);
+            float spriteHeight = GetSpriteSize(LeftIcon, false);
+            float spriteWidth = GetSpriteSize(LeftIcon, true);
+            int[] spriteColor = GetSpriteColour(LeftIcon, Selected);
+            string textureDictionary = GetSpriteDictionary(LeftIcon);
+
+            DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
+            ResetScriptGfxAlign();
+#endif
+#if REDM
+            string spriteName = GetSpriteName(LeftIcon, Selected);
+            string spriteDict = GetSpriteDictionary(LeftIcon);
+            float spriteX = GetSpriteX(LeftIcon, true, true);
+            float spriteY = y;
+            float spriteHeight = GetSpriteSize(LeftIcon, false);
+            float spriteWidth = GetSpriteSize(LeftIcon, true);
+            int[] spriteColor = GetSpriteColour(LeftIcon, Selected);
+            Call(DRAW_SPRITE, spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
+#endif
+            return textXOffset;
+        }
+
+        /// <summary>
+        /// Draws the background for the menu item if it is selected and output the x/y values for this item.
+        /// </summary>
+        /// <param name="indexOffset"></param>
+        /// <param name="yOffset"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        private void DrawBackground(int indexOffset, float yOffset, out float x, out float y)
+        {
+            x = (ParentMenu.Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
+            y = (ParentMenu.Position.Value + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
+
+            if (Selected)
+            {
+                float width = Width / MenuController.ScreenWidth;
+                float height = (RowHeight) / MenuController.ScreenHeight;
 #if FIVEM
                 SetScriptGfxAlign(ParentMenu.LeftAligned ? 76 : 82, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-#endif
-                float x = (ParentMenu.Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
-                float y = (ParentMenu.Position.Value + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
-                float width = Width / MenuController.ScreenWidth;
-                float height = (RowHeight) / MenuController.ScreenHeight;
-
-                if (Selected)
-                {
-#if FIVEM
-                    DrawRect(x, y, width, height, 255, 255, 255, 225);
-#endif
-#if REDM
-                    Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 181, 17, 18, 255);
-                    //Call(DRAW_RECT, x, y, width, height, 74, 6, 7, 200);
-#endif
-                }
-#if FIVEM
-                ResetScriptGfxAlign();
-#endif
-                #endregion
-
-                #region Left Icon
-                float textXOffset = 0f;
-                if (LeftIcon != Icon.NONE)
-                {
-                    textXOffset = 25f;
-#if FIVEM
-                    SetScriptGfxAlign(76, 84);
-                    SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-
-                    string name = GetSpriteName(LeftIcon, Selected);
-                    float spriteY = y;
-                    float spriteX = GetSpriteX(LeftIcon, ParentMenu.LeftAligned, true);
-                    float spriteHeight = GetSpriteSize(LeftIcon, false);
-                    float spriteWidth = GetSpriteSize(LeftIcon, true);
-                    int[] spriteColor = GetSpriteColour(LeftIcon, Selected);
-                    string textureDictionary = GetSpriteDictionary(LeftIcon);
-
-                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
-                    ResetScriptGfxAlign();
-#endif
-#if REDM
-                    string spriteName = GetSpriteName(LeftIcon, Selected);
-                    string spriteDict = GetSpriteDictionary(LeftIcon);
-                    float spriteX = GetSpriteX(LeftIcon, true, true);
-                    float spriteY = y;
-                    float spriteHeight = GetSpriteSize(LeftIcon, false);
-                    float spriteWidth = GetSpriteSize(LeftIcon, true);
-                    int[] spriteColor = GetSpriteColour(LeftIcon, Selected);
-                    Call(DRAW_SPRITE, spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
-#endif
-                }
-                #endregion
-
-                #region Right Icon
-                float rightTextIconOffset = 0f;
-                if (RightIcon != Icon.NONE)
-                {
-#if FIVEM
-                    rightTextIconOffset = 25f;
-
-                    SetScriptGfxAlign(76, 84);
-                    SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                    string name = GetSpriteName(RightIcon, Selected);
-                    float spriteY = y;
-                    float spriteX = GetSpriteX(RightIcon, ParentMenu.LeftAligned, false);
-                    float spriteHeight = GetSpriteSize(RightIcon, false);
-                    float spriteWidth = GetSpriteSize(RightIcon, true);
-                    int[] spriteColor = GetSpriteColour(RightIcon, Selected);
-                    string textureDictionary = GetSpriteDictionary(RightIcon);
-                    DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
-                    ResetScriptGfxAlign();
-#endif
-#if REDM
-                    string spriteName = GetSpriteName(RightIcon, Selected);
-                    string spriteDict = GetSpriteDictionary(RightIcon);
-                    float spriteX = GetSpriteX(RightIcon, true, false);
-                    float spriteY = y;
-                    float spriteHeight = GetSpriteSize(RightIcon, false);
-                    float spriteWidth = GetSpriteSize(RightIcon, true);
-                    int[] spriteColor = GetSpriteColour(RightIcon, Selected);
-                    Call(DRAW_SPRITE, spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
-#endif
-                }
-                #endregion
-
-                #region Label
-                int font = 0;
-                float textSize = (14f * 27f) / MenuController.ScreenHeight;
-#if FIVEM
-                float textMinX = (textXOffset / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
-                float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
-                //float textHeight = GetTextScaleHeight(textSize, font);
-                float textY = y - ((30f / 2f) / MenuController.ScreenHeight);
-                int textColor = Selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
-                if (!string.IsNullOrEmpty(Label))
-                {
-                    SetScriptGfxAlign(76, 84);
-                    SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-
-                    BeginTextCommandDisplayText("STRING");
-                    SetTextFont(font);
-                    SetTextScale(textSize, textSize);
-                    SetTextJustification(2);
-                    AddTextComponentSubstringPlayerName(Label);
-                    if (Selected || !Enabled)
-                    {
-                        SetTextColour(textColor, textColor, textColor, 255);
-                    }
-                    if (ParentMenu.LeftAligned)
-                    {
-                        SetTextWrap(0f, ((490f - rightTextIconOffset) / MenuController.ScreenWidth));
-                        EndTextCommandDisplayText((10f + rightTextIconOffset) / MenuController.ScreenWidth, textY);
-                    }
-                    else
-                    {
-                        SetTextWrap(0f, GetSafeZoneSize() - ((10f + rightTextIconOffset) / MenuController.ScreenWidth));
-                        EndTextCommandDisplayText(0f, textY);
-                    }
-                    ResetScriptGfxAlign();
-                }
-#endif
-                #endregion
-
-                #region Text
-#if FIVEM
-                SetScriptGfxAlign(76, 84);
-                SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                SetTextFont(font);
-                SetTextScale(textSize, textSize);
-                SetTextJustification(1);
-                BeginTextCommandDisplayText("STRING");
-                AddTextComponentSubstringPlayerName(Text ?? "N/A");
-                if (Selected || !Enabled)
-                {
-                    SetTextColour(textColor, textColor, textColor, 255);
-                }
-                if (ParentMenu.LeftAligned)
-                {
-                    SetTextWrap(textMinX, textMaxX);
-                    EndTextCommandDisplayText(textMinX, textY);
-                }
-                else
-                {
-                    textMinX = (textXOffset / MenuController.ScreenWidth) + GetSafeZoneSize() - ((Width - 10f) / MenuController.ScreenWidth);
-                    textMaxX = GetSafeZoneSize() - (10f / MenuController.ScreenWidth);
-                    SetTextWrap(textMinX, textMaxX);
-                    EndTextCommandDisplayText(textMinX, textY);
-                }
+                DrawRect(x, y, width, height, 255, 255, 255, 225);
                 ResetScriptGfxAlign();
 #endif
 #if REDM
-                Call(SET_TEXT_SCALE, textSize, textSize);
-
-                int textColor = Enabled ? 255 : 109;
-                Call((CitizenFX.Core.Native.Hash)0x50A41AD966910F03, textColor, textColor, textColor, 255); // _SET_TEXT_COLOUR / 0x50A41AD966910F03
-                float textMinX = ((8f + textXOffset) / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
-                float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
-                float textY = y - ((30f / 2f) / MenuController.ScreenHeight);
-                font = 23;
-                Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
-
-                Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? "")), textMinX, textY);
+                Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 181, 17, 18, 255);
 #endif
-                #endregion
             }
+#if FIVEM
+#endif
         }
     }
 }

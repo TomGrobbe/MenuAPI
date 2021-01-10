@@ -8,7 +8,6 @@ using static CitizenFX.Core.Native.API;
 using static CitizenFX.Core.Native.Function;
 using static CitizenFX.Core.Native.Hash;
 
-
 namespace MenuAPI
 {
     public class MenuCheckboxItem : MenuItem
