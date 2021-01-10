@@ -2,6 +2,8 @@
 
 FiveM C# Menu API.
 
+[![CodeFactor](https://www.codefactor.io/repository/github/tomgrobbe/menuapi/badge)](https://www.codefactor.io/repository/github/tomgrobbe/menuapi) [![Build status](https://ci.appveyor.com/api/projects/status/8nqoeyg0e9rn10ih/branch/master?svg=true)](https://ci.appveyor.com/project/TomGrobbe/menuapi/branch/master) [![Discord](https://discordapp.com/api/guilds/285424882534187008/widget.png)](https://vespura.com/discord) [![Patreon](https://img.shields.io/badge/donate-Patreon-orange.svg)](https://www.patreon.com/vespura)
+
 Designed specifically as a replacement of NativeUI for vMenu with improved performance (somewhat), more features, less bugs, and easier to use functions (somewhat).
 
 Full safezone scaling supported, both left and right aligned menus supported.

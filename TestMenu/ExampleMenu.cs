@@ -18,18 +18,22 @@ namespace TestMenu
             // To test this, checkout one of the checkbox items in this example menu. Clicking it will toggle the menu alignment.
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
 #endif
-
             // Creating the first menu.
             Menu menu = new Menu("Main Menu", "Subtitle");
             MenuController.AddMenu(menu);
 
-            // Adding a new button by directly creating one inline. You could also just store it and then add it but we don't need to do that in this example.
-            menu.AddMenuItem(new MenuItem("Normal Button", "This is a simple button with a simple description. Scroll down for more button types!")
-            {
-                Enabled = false,
-                LeftIcon = MenuItem.Icon.TICK
-            });
-
+            // Adding a new button by directly creating one inline.
+            // You could also just store it and then add it but we don't need to do that in this example.
+            menu.AddMenuItem(
+                new MenuItem(
+                    "Normal Button",
+                    "This is a simple button with a simple description. Scroll down for more button types!"
+                )
+                {
+                    Enabled = false,
+                    LeftIcon = MenuItem.Icon.TICK
+                }
+            );
 #if FIVEM
             // Creating 3 sliders, showing off the 3 possible variations and custom colors.
             MenuSliderItem slider = new MenuSliderItem("Slider", 0, 10, 5, false);
@@ -38,34 +42,51 @@ namespace TestMenu
                 BarColor = System.Drawing.Color.FromArgb(255, 73, 233, 111),
                 BackgroundColor = System.Drawing.Color.FromArgb(255, 25, 100, 43)
             };
-            MenuSliderItem slider3 = new MenuSliderItem("Slider + Bar + Icons", "The icons are currently male/female because that's probably the most common use. But any icon can be used!", 0, 10, 5, true)
+            MenuSliderItem slider3 = new MenuSliderItem(
+                "Slider + Bar + Icons",
+                "The icons are currently male/female because that's probably the most common use. But any icon can be used!",
+                0,
+                10,
+                5,
+                true
+            )
             {
                 BarColor = System.Drawing.Color.FromArgb(255, 255, 0, 0),
                 BackgroundColor = System.Drawing.Color.FromArgb(255, 100, 0, 0),
-
                 SliderLeftIcon = MenuItem.Icon.MALE,
                 SliderRightIcon = MenuItem.Icon.FEMALE
             };
+
             // adding the sliders to the menu.
             menu.AddMenuItem(slider);
             menu.AddMenuItem(slider2);
             menu.AddMenuItem(slider3);
-
 #endif
-
 #if FIVEM
             // Creating 3 checkboxs, 2 different styles and one has a locked icon and it's 'not enabled' (not enabled meaning you can't toggle it).
-            MenuCheckboxItem box = new MenuCheckboxItem("Checkbox - Style 1 (click me!)", "This checkbox can toggle the menu position! Try it out.", !menu.LeftAligned)
+            MenuCheckboxItem box = new MenuCheckboxItem(
+                "Checkbox - Style 1 (click me!)",
+                "This checkbox can toggle the menu position! Try it out.",
+                !menu.LeftAligned
+            )
             {
                 Style = MenuCheckboxItem.CheckboxStyle.Cross
             };
 #endif
-            MenuCheckboxItem box2 = new MenuCheckboxItem("Checkbox - Style 2", "This checkbox does nothing right now.", true)
+            MenuCheckboxItem box2 = new MenuCheckboxItem(
+                "Checkbox - Style 2",
+                "This checkbox does nothing right now.",
+                true
+            )
             {
                 Style = MenuCheckboxItem.CheckboxStyle.Tick
             };
 
-            MenuCheckboxItem box3 = new MenuCheckboxItem("Checkbox (unchecked + locked)", "Make this menu right aligned. If you set this to false, then the menu will move to the left.", false)
+            MenuCheckboxItem box3 = new MenuCheckboxItem(
+                "Checkbox (unchecked + locked)",
+                "Make this menu right aligned. If you set this to false, then the menu will move to the left.",
+                false
+            )
             {
                 Enabled = false,
                 LeftIcon = MenuItem.Icon.LOCK
@@ -85,7 +106,12 @@ namespace TestMenu
                     return (int.Parse(item.CurrentItem) - 1).ToString();
                 return (int.Parse(item.CurrentItem) + 1).ToString();
             }
-            MenuDynamicListItem dynList = new MenuDynamicListItem("Dynamic list item.", "0", new MenuDynamicListItem.ChangeItemCallback(ChangeCallback), "Description for this dynamic item. Pressing left will make the value smaller, pressing right will make the value bigger.");
+            MenuDynamicListItem dynList = new MenuDynamicListItem(
+                "Dynamic list item.",
+                "0",
+                new MenuDynamicListItem.ChangeItemCallback(ChangeCallback),
+                "Description for this dynamic item. Pressing left will make the value smaller, pressing right will make the value bigger."
+            );
             menu.AddMenuItem(dynList);
 #if FIVEM
             // List items (first the 3 special variants, then a normal one)
@@ -94,7 +120,12 @@ namespace TestMenu
             {
                 colorList.Add($"Color #{i}");
             }
-            MenuListItem hairColors = new MenuListItem("Hair Color", colorList, 0, "Hair color pallete.")
+            MenuListItem hairColors = new MenuListItem(
+                "Hair Color",
+                colorList,
+                0,
+                "Hair color pallete."
+            )
             {
                 ShowColorPanel = true
             };
@@ -128,7 +159,12 @@ namespace TestMenu
 #endif
             // Normal
             List<string> normalList = new List<string>() { "Item #1", "Item #2", "Item #3" };
-            MenuListItem normalListItem = new MenuListItem("Normal List Item", normalList, 0, "And another simple description for yet another simple (list) item. Nothing special about this one.");
+            MenuListItem normalListItem = new MenuListItem(
+                "Normal List Item",
+                normalList,
+                0,
+                "And another simple description for yet another simple (list) item. Nothing special about this one."
+            );
 
             // Adding the lists to the menu.
             menu.AddMenuItem(normalListItem);
@@ -137,7 +173,10 @@ namespace TestMenu
             Menu submenu = new Menu("Submenu", "Secondary Menu");
             MenuController.AddSubmenu(menu, submenu);
 
-            MenuItem menuButton = new MenuItem("Submenu", "This button is bound to a submenu. Clicking it will take you to the submenu.")
+            MenuItem menuButton = new MenuItem(
+                "Submenu",
+                "This button is bound to a submenu. Clicking it will take you to the submenu."
+            )
             {
 #if FIVEM
                 Label = "→→→"
@@ -152,7 +191,10 @@ namespace TestMenu
             // Adding items with sprites left & right to the submenu.
             for (var i = 0; i < Enum.GetValues(typeof(MenuItem.Icon)).Length; i++)
             {
-                var tmpItem = new MenuItem($"Icon.{Enum.GetName(typeof(MenuItem.Icon), ((MenuItem.Icon)i))}", "This menu item has a left and right sprite. Press ~r~HOME~s~ to toggle the 'enabled' state on these items.")
+                var tmpItem = new MenuItem(
+                    $"Icon.{Enum.GetName(typeof(MenuItem.Icon), ((MenuItem.Icon)i))}",
+                    "This menu item has a left and right sprite. Press ~r~HOME~s~ to toggle the 'enabled' state on these items."
+                )
                 {
                     Label = $"(#{i})",
 #if FIVEM
@@ -161,19 +203,16 @@ namespace TestMenu
                     LeftIcon = (MenuItem.Icon)i
                 };
 
-                //var tmpItem2 = new MenuItem($"Icon.{Enum.GetName(typeof(MenuItem.Icon), ((MenuItem.Icon)i))}", "This menu item has a left and right sprite, and it's ~h~disabled~h~.");
-                //tmpItem2.LeftIcon = (MenuItem.Icon)i;
-                //tmpItem2.RightIcon = (MenuItem.Icon)i;
-                //tmpItem2.Enabled = false;
-
                 submenu.AddMenuItem(tmpItem);
-                //submenu.AddMenuItem(tmpItem2);
             }
-            submenu.ButtonPressHandlers.Add(new Menu.ButtonPressHandler(Control.FrontendSocialClubSecondary, Menu.ControlPressCheckType.JUST_RELEASED, new Action<Menu, Control>((m, c) =>
-            {
-                m.GetMenuItems().ForEach(a => a.Enabled = !a.Enabled);
-            }), true));
-
+            submenu.ButtonPressHandlers.Add(
+                new Menu.ButtonPressHandler(Control.FrontendSocialClubSecondary,
+                Menu.ControlPressCheckType.JUST_RELEASED,
+                new Action<Menu, Control>((m, c) =>
+                {
+                    m.GetMenuItems().ForEach(a => a.Enabled = !a.Enabled);
+                }), true)
+            );
 #if FIVEM
             // Instructional buttons setup for the second (submenu) menu.
             submenu.InstructionalButtons.Add(Control.CharacterWheel, "Right?!");
@@ -182,19 +221,21 @@ namespace TestMenu
             submenu.InstructionalButtons.Add(Control.Cover, "This");
             submenu.InstructionalButtons.Add(Control.Context, "Check");
 #endif
-
             // Create a third menu without a banner.
             Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
 
             // you can use AddSubmenu or AddMenu, both will work but if you want to link this menu from another menu,
             // you should use AddSubmenu.
             MenuController.AddSubmenu(menu, menu3);
-            MenuItem thirdSubmenuBtn = new MenuItem("Another submenu", "This is just a submenu without a banner. No big deal. This also has a very long description to test multiple lines and see if they work properly. Let's find out if it works as intended.")
+            MenuItem thirdSubmenuBtn = new MenuItem(
+                "Another submenu",
+                "This is just a submenu without a banner. No big deal. This also has a very long description to test multiple " +
+                "lines and see if they work properly. Let's find out if it works as intended."
+            )
             {
 #if FIVEM
                 Label = "→→→"
 #endif
-
 #if REDM
                 RightIcon = MenuItem.Icon.ARROW_RIGHT
 #endif
@@ -210,7 +251,6 @@ namespace TestMenu
             {
                 menu.AddMenuItem(new MenuItem($"Item #{i + 1}.", "With an invisible description."));
             }
-
 
 #if FIVEM
             // Create menu with weapon stats panel
@@ -233,13 +273,9 @@ namespace TestMenu
             menu.AddMenuItem(vehicleStats);
             MenuController.BindMenuItem(menu, menu5, vehicleStats);
 #endif
-
-            /*
-########################################################
-                                 Event handlers
-########################################################
-            */
-
+            /*--------------
+             Event handlers
+            --------------*/
 
             menu.OnCheckboxChange += (_menu, _item, _index, _checked) =>
             {
@@ -322,15 +358,6 @@ namespace TestMenu
                 // Code in here would get executed whenever a dynamic list item is pressed.
                 Debug.WriteLine($"OnDynamicListItemSelect: [{_menu}, {_dynamicListItem}, {_currentItem}]");
             };
-
-            //DelayedConstructor();
         }
-
-        //private async void DelayedConstructor()
-        //{
-        //    await Delay(1000);
-        //    MenuController.MainMenu.OpenMenu();
-        //}
-
     }
 }
