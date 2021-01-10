@@ -441,9 +441,31 @@ namespace MenuAPI
         public List<InstructionalButton> CustomInstructionalButtons = new List<InstructionalButton>();
 #endif
 #if REDM
-        public static string GetLocalizedText(string label) => Call<string>((CitizenFX.Core.Native.Hash)0xCFEDCCAD3C5BA90D, label); // GetLabelText
 
-        public List<InstructionalButton> InstructionalButtons = new List<InstructionalButton>() { new InstructionalButton(new Control[1] { Control.FrontendAccept }, GetLocalizedText("INPUT_FRONTEND_SELECT")), new InstructionalButton(new Control[1] { Control.FrontendCancel }, "Back"), new InstructionalButton(new Control[2] { Control.FrontendUp, Control.FrontendDown }, "Up / Down") };
+        public List<InstructionalButton> InstructionalButtons = new List<InstructionalButton>() {
+            new InstructionalButton(
+                new Control[1]
+                {
+                    Control.FrontendAccept
+                },
+                GetLabelText("INPUT_FRONTEND_SELECT")
+            ),
+            new InstructionalButton(
+                new Control[1]
+                {
+                    Control.FrontendCancel
+                },
+                "Back"
+            ),
+            new InstructionalButton(
+                new Control[2]
+                {
+                    Control.FrontendUp,
+                    Control.FrontendDown
+                },
+                "Up / Down"
+            )
+        };
 #endif
 
 #if FIVEM

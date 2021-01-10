@@ -252,84 +252,96 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessMainButtons()
         {
-            if (IsAnyMenuOpen())
+            if (!IsAnyMenuOpen())
             {
-#if REDM
-                if (Call<bool>(IS_PAUSE_MENU_ACTIVE))
-                {
-                    return;
-                }
-#endif
-                var currentMenu = GetCurrentMenu();
-                if (currentMenu != null && !DontOpenAnyMenu)
-                {
-                    if (PreventExitingMenu)
-                    {
+                return;
+            }
+            if (IsPauseMenuActive())
+            {
+                return;
+            }
+            var currentMenu = GetCurrentMenu();
+            if (currentMenu == null || DontOpenAnyMenu)
+            {
+                return;
+            }
 #if FIVEM
-                        Game.DisableControlThisFrame(0, Control.FrontendPause);
-                        Game.DisableControlThisFrame(0, Control.FrontendPauseAlternate);
+            Game.DisableControlThisFrame(0, Control.MultiplayerInfo);
 #endif
-#if REDM
-                        Call(DISABLE_CONTROL_ACTION, 0, Control.FrontendPause, true);
-                        Call(DISABLE_CONTROL_ACTION, 0, Control.FrontendPauseAlternate, true);
-#endif
-                    }
+            HandlePreventExit();
+            if (!currentMenu.Visible || !AreMenuButtonsEnabled)
+            {
+                return;
+            }
+            await HandleMainNavigationButtons(currentMenu);
+        }
 
-                    if (currentMenu.Visible && AreMenuButtonsEnabled)
-                    {
-                        // Select / Enter
-                        if (
+        private async Task HandleMainNavigationButtons(Menu currentMenu)
+        {
+            // Select / Enter
+            if (
 #if FIVEM
-                            Game.IsDisabledControlJustReleased(0, Control.FrontendAccept) ||
-                            Game.IsControlJustReleased(0, Control.FrontendAccept) ||
-                            Game.IsDisabledControlJustReleased(0, Control.VehicleMouseControlOverride) ||
-                            Game.IsControlJustReleased(0, Control.VehicleMouseControlOverride)
+                Game.IsDisabledControlJustReleased(0, Control.FrontendAccept) ||
+                Game.IsControlJustReleased(0, Control.FrontendAccept) ||
+                Game.IsDisabledControlJustReleased(0, Control.VehicleMouseControlOverride) ||
+                Game.IsControlJustReleased(0, Control.VehicleMouseControlOverride)
 #endif
 #if REDM
-                            Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.FrontendAccept) ||
-                            Call<bool>(IS_CONTROL_JUST_RELEASED, 0, Control.FrontendAccept)
+                IsDisabledControlJustReleased(0, (uint)Control.FrontendAccept) ||
+                IsControlJustReleased(0, (uint)Control.FrontendAccept)
 #endif
-                            )
-                        {
-                            if (currentMenu.Size > 0)
-                            {
-                                currentMenu.SelectItem(currentMenu.CurrentIndex);
-                            }
-                        }
-                        // Cancel / Go Back
-                        else if (
-#if FIVEM
-                            Game.IsDisabledControlJustReleased(0, Control.PhoneCancel)
-#endif
-#if REDM
-                            Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.FrontendCancel)
-#endif
-                            && !DisableBackButton)
-                        {
-                            // Wait for the next frame to make sure the "cinematic camera" button doesn't get "re-enabled" before the menu gets closed.
-                            await Delay(0);
-                            currentMenu.GoBack();
-                        }
-                        else if (
-#if FIVEM
-                            Game.IsDisabledControlJustReleased(0, Control.PhoneCancel)
-#endif
-#if REDM
-                               Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.CellphoneCancel)
-#endif
-                            && PreventExitingMenu && !DisableBackButton)
-                        {
-                            // if there's a parent menu, allow going back to that, but don't allow a 'top-level' menu to be closed.
-                            if (currentMenu.ParentMenu != null)
-                            {
-                                currentMenu.GoBack();
-                            }
-                            await Delay(0);
-                        }
-                    }
+            )
+            {
+                if (currentMenu.Size > 0)
+                {
+                    currentMenu.SelectItem(currentMenu.CurrentIndex);
                 }
+            }
+            // Cancel / Go Back
+            else if (
+                !DisableBackButton &&
 #if FIVEM
-                Game.DisableControlThisFrame(0, Control.MultiplayerInfo);
+                Game.IsDisabledControlJustReleased(0, Control.PhoneCancel)
+#endif
+#if REDM
+                IsDisabledControlJustReleased(0, (uint)Control.FrontendCancel)
+#endif
+            )
+            {
+                // Wait for the next frame to make sure the "cinematic camera" button doesn't get "re-enabled" before the menu gets closed.
+                await Delay(0);
+                currentMenu.GoBack();
+            }
+            else if (
+                PreventExitingMenu && !DisableBackButton &&
+#if FIVEM
+                Game.IsDisabledControlJustReleased(0, Control.PhoneCancel)
+#endif
+#if REDM
+                Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.CellphoneCancel)
+#endif
+            )
+            {
+                // if there's a parent menu, allow going back to that, but don't allow a 'top-level' menu to be closed.
+                if (currentMenu.ParentMenu != null)
+                {
+                    currentMenu.GoBack();
+                }
+                await Delay(0);
+            }
+        }
+
+        private void HandlePreventExit()
+        {
+            if (PreventExitingMenu)
+            {
+#if FIVEM
+                Game.DisableControlThisFrame(0, Control.FrontendPause);
+                Game.DisableControlThisFrame(0, Control.FrontendPauseAlternate);
+#endif
+#if REDM
+                DisableControlAction(0, (uint)Control.FrontendPause, true);
+                DisableControlAction(0, (uint)Control.FrontendPauseAlternate, true);
 #endif
             }
         }
@@ -433,6 +445,40 @@ namespace MenuAPI
         private async Task ProcessToggleMenuButton()
         {
 #if FIVEM
+            await ProcessToggleMenuButtonFiveM();
+#endif
+#if REDM
+            ProcessToggleMenuButtonRedM();
+            await Task.FromResult(0);
+#endif
+        }
+#if REDM
+        private void ProcessToggleMenuButtonRedM()
+        {
+            DisableControlAction(0, (uint)MenuToggleKey, true);
+            if (
+                !IsPauseMenuActive() &&
+                IsScreenFadedIn() &&
+                !IsAnyMenuOpen() &&
+                !DisableMenuButtons &&
+                !IsEntityDead(PlayerPedId()) &&
+                IsDisabledControlJustReleased(0, (uint)MenuToggleKey)
+            )
+            {
+                if (MainMenu != null)
+                {
+                    MainMenu.OpenMenu();
+                }
+                else
+                {
+                    Debug.WriteLine($"[ERROR] [{GetCurrentResourceName()}] [MenuAPI] MainMenu is null, so we can't open it! Make sure that MenuController.MainMenu is set to a valid Menu which is not null!");
+                }
+            }
+        }
+#endif
+#if FIVEM
+        private async Task ProcessToggleMenuButtonFiveM()
+        {
             if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.Player.IsDead && !DisableMenuButtons)
             {
                 if (IsAnyMenuOpen())
@@ -454,23 +500,8 @@ namespace MenuAPI
                     }
                 }
             }
-#endif
-#if REDM
-            Call(DISABLE_CONTROL_ACTION, 0, MenuToggleKey, true);
-            if (!Call<bool>(IS_PAUSE_MENU_ACTIVE) && Call<bool>(IS_SCREEN_FADED_IN) && !IsAnyMenuOpen() && !DisableMenuButtons && !Call<bool>(IS_ENTITY_DEAD, PlayerPedId()) && Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, MenuToggleKey))
-            {
-                if (MainMenu != null)
-                {
-                    MainMenu.OpenMenu();
-                }
-                else
-                {
-                    Debug.WriteLine($"[ERROR] [{GetCurrentResourceName()}] [MenuAPI] MainMenu is null, so we can't open it! Make sure that MenuController.MainMenu is set to a valid Menu which is not null!");
-                }
-            }
-#endif
-            await Task.FromResult(0);
         }
+#endif
 
         /// <summary>
         /// Process left/right/up/down buttons (also holding down buttons will speed up after 3 iterations)
@@ -938,6 +969,9 @@ namespace MenuAPI
             }
         }
 
+        /// <summary>
+        /// Disable conflicting Attack related game controls when the menu is open.
+        /// </summary>
         private static void DisableAttackControls()
         {
             Game.DisableControlThisFrame(0, Control.Attack);
@@ -956,6 +990,9 @@ namespace MenuAPI
             Game.DisableControlThisFrame(0, Control.VehicleAim);
         }
 
+        /// <summary>
+        /// Disable conflicting Phone/Navigation related game controls when the menu is open.
+        /// </summary>
         private static void DisablePhoneAndArrowKeysInputs()
         {
             Game.DisableControlThisFrame(0, Control.Phone);
@@ -965,6 +1002,9 @@ namespace MenuAPI
             Game.DisableControlThisFrame(0, Control.PhoneRight);
         }
 
+        /// <summary>
+        /// Disable conflicting Radio related game controls when the menu is open.
+        /// </summary>
         private static void DisableRadioInputs()
         {
             Game.DisableControlThisFrame(0, Control.RadioWheelLeftRight);
@@ -1002,25 +1042,13 @@ namespace MenuAPI
                 return;
             }
             await LoadAssets();
-
             DisableControls();
+            await DrawMenus();
+            PerformGC();
+        }
 
-            Menu menu = GetCurrentMenu();
-            if (menu != null)
-            {
-                if (DontOpenAnyMenu)
-                {
-                    if (menu.Visible && !menu.IgnoreDontOpenMenus)
-                    {
-                        menu.CloseMenu();
-                    }
-                }
-                else if (menu.Visible)
-                {
-                    await menu.Draw();
-                }
-            }
-
+        private static void PerformGC()
+        {
             if (EnableManualGCs)
             {
                 // once a minute
@@ -1029,6 +1057,26 @@ namespace MenuAPI
                     GC.Collect();
                     ManualTimerForGC = GetGameTimer();
                 }
+            }
+        }
+
+        private static async Task DrawMenus()
+        {
+            Menu menu = GetCurrentMenu();
+            if (menu == null)
+            {
+                return;
+            }
+            if (DontOpenAnyMenu)
+            {
+                if (menu.Visible && !menu.IgnoreDontOpenMenus)
+                {
+                    menu.CloseMenu();
+                }
+            }
+            else if (menu.Visible)
+            {
+                await menu.Draw();
             }
         }
 
