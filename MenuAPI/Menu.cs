@@ -596,8 +596,10 @@ namespace MenuAPI
             MenuTitle = name;
             MenuSubtitle = subtitle;
 #if FIVEM
-            this.SetWeaponStats(0f, 0f, 0f, 0f);
-            this.SetWeaponComponentStats(0f, 0f, 0f, 0f);
+            SetWeaponStats(0f, 0f, 0f, 0f);
+            SetWeaponComponentStats(0f, 0f, 0f, 0f);
+            SetVehicleStats(0f, 0f, 0f, 0f);
+            SetVehicleUpgradeStats(0f, 0f, 0f, 0f);
 #endif
         }
         #endregion
