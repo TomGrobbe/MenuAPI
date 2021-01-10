@@ -347,7 +347,6 @@ namespace MenuAPI
                     var items = GetMenuItems().ToList().GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
                     return items;
                 }
-
             }
         }
 
@@ -389,7 +388,6 @@ namespace MenuAPI
                 {
                     MenuController.VisibleMenus.Remove(this);
                 }
-
                 visible = value;
             }
         }
@@ -434,7 +432,6 @@ namespace MenuAPI
 
         private readonly string[] weaponStatNames = new string[4] { "PM_DAMAGE", "PM_FIRERATE", "PM_ACCURACY", "PM_RANGE" };
         private readonly string[] vehicleStatNames = new string[4] { "FMMC_VEHST_0", "FMMC_VEHST_1", "FMMC_VEHST_2", "FMMC_VEHST_3" };
-
 
         private bool filterActive = false;
 
@@ -833,7 +830,6 @@ namespace MenuAPI
         {
             Visible = false;
             MenuCloseEvent(this);
-
 #if REDM
             foreach (var v in InstructionalButtons)
             {
@@ -850,7 +846,6 @@ namespace MenuAPI
         {
             Visible = true;
             MenuOpenEvent(this);
-
 #if REDM
             if (EnableInstructionalButtons)
             {
@@ -1375,12 +1370,9 @@ namespace MenuAPI
                 {
                     EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f));
                 }
-
                 ResetScriptGfxAlign();
-
                 menuItemsOffset = headerSize.Value;
 #endif
-
 #if REDM
                 Call(SET_TEXT_CENTRE, true);
                 float size = (45f * 27f) / MenuController.ScreenHeight;
@@ -1638,7 +1630,7 @@ namespace MenuAPI
             {
                 return descriptionYOffset;
             }
-        #region background
+            #region background
             float width = Width / MenuController.ScreenWidth;
             float height = 60f / MenuController.ScreenWidth;
             float x = (Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
@@ -1650,9 +1642,9 @@ namespace MenuAPI
             DrawRect(x, y, width, height, 0, 0, 0, 180);
             descriptionYOffset = height;
             ResetScriptGfxAlign();
-        #endregion
+            #endregion
 
-        #region up/down icons
+            #region up/down icons
             SetScriptGfxAlign(76, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
             float xMin = 0f;
@@ -1699,7 +1691,7 @@ namespace MenuAPI
             }
 
             ResetScriptGfxAlign();
-        #endregion
+            #endregion
             return descriptionYOffset;
         }
 #endif
@@ -1814,7 +1806,6 @@ namespace MenuAPI
             {
                 descriptionYOffset += menuItemsOffset / MenuController.ScreenHeight + (2f / MenuController.ScreenHeight) + descriptionYOffset;
             }
-
             return descriptionYOffset;
         }
 
@@ -1856,12 +1847,12 @@ namespace MenuAPI
                 y -= (30f / MenuController.ScreenHeight);
             }
 
-        #region background
+            #region background
             SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
             DrawRect(x, y, width, height, 0, 0, 0, 180);
             ResetScriptGfxAlign();
-        #endregion
+            #endregion
 
             float bgStatBarWidth = (Width / 2f) / MenuController.ScreenWidth;
             float bgStatBarX = x + (bgStatBarWidth / 2f) - (10f / MenuController.ScreenWidth);
@@ -1911,7 +1902,7 @@ namespace MenuAPI
                 barY += 30f / MenuController.ScreenHeight;
             }
 
-        #region weapon stats text
+            #region weapon stats text
             float textX = LeftAligned ? x - (width / 2f) + (10f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 10f) / MenuController.ScreenWidth);
             float textY = y - (height / 2f) + (10f / MenuController.ScreenHeight);
 
@@ -1927,7 +1918,7 @@ namespace MenuAPI
                 ResetScriptGfxAlign();
                 textY += 30f / MenuController.ScreenHeight;
             }
-        #endregion
+            #endregion
         }
 
         /// <summary>

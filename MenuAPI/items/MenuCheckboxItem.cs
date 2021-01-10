@@ -51,14 +51,13 @@ namespace MenuAPI
             Checked = _checked;
         }
 
-
-        int GetSpriteColour()
+        private int GetSpriteColour()
         {
             return Enabled ? 255 : 109;
         }
 
 #if FIVEM
-        string GetSpriteName()
+        private string GetSpriteName()
         {
             if (Checked)
             {
@@ -81,7 +80,7 @@ namespace MenuAPI
             }
             else
             {
-                if (base.Selected)
+                if (Selected)
                 {
                     return "shop_box_blankb";
                 }
@@ -90,12 +89,33 @@ namespace MenuAPI
         }
 #endif
 
-        float GetSpriteX()
+        private float GetSpriteX()
         {
 #if FIVEM
             bool leftSide = false;
             bool leftAligned = ParentMenu.LeftAligned;
-            return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (Width - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
+            if (leftSide)
+            {
+                if (leftAligned)
+                {
+                    return 20f / MenuController.ScreenWidth;
+                }
+                else
+                {
+                    return GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth);
+                }
+            }
+            else
+            {
+                if (leftAligned)
+                {
+                    return (Width - 20f) / MenuController.ScreenWidth;
+                }
+                else
+                {
+                    return GetSafeZoneSize() - (20f / MenuController.ScreenWidth);
+                }
+            }
 #endif
 #if REDM
             return (Width - 30f) / MenuController.ScreenWidth;
@@ -106,9 +126,7 @@ namespace MenuAPI
         {
             RightIcon = Icon.NONE;
             Label = null;
-
             base.Draw(offset);
-
 #if FIVEM
             SetScriptGfxAlign(76, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -126,12 +144,10 @@ namespace MenuAPI
             float spriteWidth = 45f / MenuController.ScreenWidth;
 #endif
             int color = GetSpriteColour();
-
 #if FIVEM
             DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
             ResetScriptGfxAlign();
 #endif
-
 #if REDM
             float spriteHeight = 24f / MenuController.ScreenHeight;
             float spriteWidth = 16f / MenuController.ScreenWidth;

@@ -12,7 +12,6 @@ namespace MenuAPI
 {
     public class MenuItem
     {
-
         public enum Icon
         {
             NONE,
@@ -209,7 +208,6 @@ namespace MenuAPI
             SELECTION_BOX
 #endif
         }
-
         public string Text { get; set; }
         public string Label { get; set; }
         public Icon LeftIcon { get; set; }
@@ -465,7 +463,6 @@ namespace MenuAPI
                     return "";
 #endif
             }
-
         }
 
         protected string GetSpriteName(Icon icon, bool selected)
@@ -997,16 +994,36 @@ namespace MenuAPI
             {
                 return 0f;
             }
-            return leftSide ? (leftAligned ? (20f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth)) : (leftAligned ? (Width - 20f) / MenuController.ScreenWidth : (GetSafeZoneSize() - (20f / MenuController.ScreenWidth)));
+            if (leftSide)
+            {
+                if (leftAligned)
+                {
+                    return 20f / MenuController.ScreenWidth;
+                }
+                else
+                {
+                    return GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth);
+                }
+            }
+            else
+            {
+                if (leftAligned)
+                {
+                    return (Width - 20f) / MenuController.ScreenWidth;
+                }
+                else
+                {
+                    return GetSafeZoneSize() - (20f / MenuController.ScreenWidth);
+                }
+            }
 #endif
 #if REDM
-            return leftSide ? 30f / MenuController.ScreenWidth : ((Width - 30f) / MenuController.ScreenWidth);
+            if (leftSide)
+            {
+                return 30f / MenuController.ScreenWidth;
+            }
+            return (Width - 30f) / MenuController.ScreenWidth;
 #endif
-        }
-
-        protected float GetSpriteY(Icon icon)
-        {
-            return 0f;
         }
 
 
@@ -1023,7 +1040,6 @@ namespace MenuAPI
                 SetScriptGfxAlign(ParentMenu.LeftAligned ? 76 : 82, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 #endif
-
                 float x = (ParentMenu.Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
                 float y = (ParentMenu.Position.Value + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
                 float width = Width / MenuController.ScreenWidth;
@@ -1054,7 +1070,7 @@ namespace MenuAPI
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
                     string name = GetSpriteName(LeftIcon, Selected);
-                    float spriteY = y;// GetSpriteY(LeftIcon);
+                    float spriteY = y;
                     float spriteX = GetSpriteX(LeftIcon, ParentMenu.LeftAligned, true);
                     float spriteHeight = GetSpriteSize(LeftIcon, false);
                     float spriteWidth = GetSpriteSize(LeftIcon, true);
@@ -1074,7 +1090,6 @@ namespace MenuAPI
                     int[] spriteColor = GetSpriteColour(LeftIcon, Selected);
                     Call(DRAW_SPRITE, spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
 #endif
-
                 }
                 #endregion
 
@@ -1088,7 +1103,7 @@ namespace MenuAPI
                     SetScriptGfxAlign(76, 84);
                     SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
                     string name = GetSpriteName(RightIcon, Selected);
-                    float spriteY = y;// GetSpriteY(RightIcon);
+                    float spriteY = y;
                     float spriteX = GetSpriteX(RightIcon, ParentMenu.LeftAligned, false);
                     float spriteHeight = GetSpriteSize(RightIcon, false);
                     float spriteWidth = GetSpriteSize(RightIcon, true);
@@ -1143,14 +1158,12 @@ namespace MenuAPI
                         SetTextWrap(0f, GetSafeZoneSize() - ((10f + rightTextIconOffset) / MenuController.ScreenWidth));
                         EndTextCommandDisplayText(0f, textY);
                     }
-
                     ResetScriptGfxAlign();
                 }
 #endif
                 #endregion
 
                 #region Text
-
 #if FIVEM
                 SetScriptGfxAlign(76, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -1191,10 +1204,7 @@ namespace MenuAPI
                 Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? "")), textMinX, textY);
 #endif
                 #endregion
-
-
             }
         }
-
     }
 }

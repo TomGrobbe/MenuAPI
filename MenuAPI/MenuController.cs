@@ -72,12 +72,11 @@ namespace MenuAPI
         public static bool SetDrawOrder { get; set; } = true;
         public static Control MenuToggleKey { get; set; }
 #if FIVEM
-            = Control.InteractionMenu
+            = Control.InteractionMenu;
 #endif
 #if REDM
-            = Control.PlayerMenu
+            = Control.PlayerMenu;
 #endif
-            ;
 
         public static bool EnableMenuToggleKeyOnController { get; set; } = true;
 
@@ -95,7 +94,6 @@ namespace MenuAPI
         private static MenuAlignmentOption _alignment = MenuAlignmentOption.Left;
         public static MenuAlignmentOption MenuAlignment
         {
-
             get
             {
                 return _alignment;
@@ -377,7 +375,6 @@ namespace MenuAPI
         /// <returns></returns>
         private bool IsUpPressed()
         {
-            // Return false if the buttons are not currently enabled.
             if (!AreMenuButtonsEnabled)
             {
                 return false;
@@ -414,7 +411,6 @@ namespace MenuAPI
                 return true;
             }
 #endif
-            // return false if none of the conditions matched.
             return false;
         }
 
@@ -424,7 +420,6 @@ namespace MenuAPI
         /// <returns></returns>
         private bool IsDownPressed()
         {
-            // Return false if the buttons are not currently enabled.
             if (!AreMenuButtonsEnabled)
             {
                 return false;
@@ -461,8 +456,6 @@ namespace MenuAPI
                 return true;
             }
 #endif
-
-            // return false if none of the conditions matched.
             return false;
         }
 
@@ -472,7 +465,6 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessToggleMenuButton()
         {
-
 #if FIVEM
             if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.Player.IsDead && !DisableMenuButtons)
             {
@@ -551,7 +543,6 @@ namespace MenuAPI
                 {
                     Debug.WriteLine($"[ERROR] [{GetCurrentResourceName()}] [MenuAPI] MainMenu is null, so we can't open it! Make sure that MenuController.MainMenu is set to a valid Menu which is not null!");
                 }
-
             }
 #endif
             await Task.FromResult(0);
@@ -669,22 +660,29 @@ namespace MenuAPI
                     }
 
                     // Check if the Go Left controls are pressed.
+                    else if (
 #if FIVEM
-                    else if (Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) || Game.IsControlJustPressed(0, Control.PhoneLeft))
+                        Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) ||
+                        Game.IsControlJustPressed(0, Control.PhoneLeft)
 #endif
 #if REDM
-                    else if (Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.FrontendLeft) || Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.FrontendLeft))
+                        Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.FrontendLeft) ||
+                        Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.FrontendLeft)
 #endif
+                    )
                     {
-                        var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
-                        if (item.Enabled)
+                        if (currentMenu.GetCurrentMenuItem() is MenuItem item && item.Enabled)
                         {
                             currentMenu.GoLeft();
                             var time = GetGameTimer();
                             var times = 0;
                             var delay = 200;
 #if FIVEM
-                            while ((Game.IsDisabledControlPressed(0, Control.PhoneLeft) || Game.IsControlPressed(0, Control.PhoneLeft)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+                            while (
+                                (Game.IsDisabledControlPressed(0, Control.PhoneLeft) || Game.IsControlPressed(0, Control.PhoneLeft)) &&
+                                GetCurrentMenu() != null &&
+                                AreMenuButtonsEnabled
+                            )
 #endif
 #if REDM
                             while ((Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendLeft) || Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendLeft)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
@@ -813,18 +811,19 @@ namespace MenuAPI
                 var currMenu = GetCurrentMenu();
                 if (currMenu != null)
                 {
+#if FIVEM
                     var currentItem = currMenu.GetCurrentMenuItem();
                     if (currentItem != null)
                     {
-#if FIVEM
                         if (currentItem is MenuSliderItem || currentItem is MenuListItem || currentItem is MenuDynamicListItem)
                         {
                             if (Game.CurrentInputMode == InputMode.GamePad)
+                            {
                                 Game.DisableControlThisFrame(0, Control.SelectWeapon);
+                            }
                         }
-#endif
                     }
-
+#endif
                     // Close all menus when the player dies.
 #if FIVEM
                     if (Game.PlayerPed.IsDead)
@@ -835,7 +834,6 @@ namespace MenuAPI
                     {
                         CloseAllMenus();
                     }
-
 #if FIVEM
                     // Disable Gamepad/Controller Specific controls:
                     if (Game.CurrentInputMode == InputMode.GamePad)
@@ -871,7 +869,6 @@ namespace MenuAPI
                     }
 #endif
                     // Disable Shared Controls
-
 #if FIVEM
                     // Radio Inputs
                     Game.DisableControlThisFrame(0, Control.RadioWheelLeftRight);
@@ -942,7 +939,6 @@ namespace MenuAPI
                     Call(DISABLE_CONTROL_ACTION, 0, Control.VehPassengerAttack, true);
 #endif
                 }
-
             }
             #endregion
         }
@@ -953,7 +949,6 @@ namespace MenuAPI
         /// <returns></returns>
         private static async Task ProcessMenus()
         {
-
             if (!(
                 Menus.Any() &&
                 IsAnyMenuOpen() &&
@@ -1008,60 +1003,69 @@ namespace MenuAPI
 #if FIVEM
         internal static async Task DrawInstructionalButtons()
         {
-            if (!Game.IsPaused && !Game.Player.IsDead && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !IsWarningMessageActive() && UpdateOnscreenKeyboard() != 0)
+            if (
+                Game.IsPaused ||
+                Game.Player.IsDead ||
+                IsScreenFadedIn() ||
+                IsPlayerSwitchInProgress() ||
+                IsWarningMessageActive() ||
+                UpdateOnscreenKeyboard() == 0
+            )
             {
-                Menu menu = GetCurrentMenu();
-                if (menu != null && menu.Visible && menu.EnableInstructionalButtons)
+                DisposeInstructionalButtonsScaleform();
+                return;
+            }
+            Menu menu = GetCurrentMenu();
+            if (menu == null || !menu.Visible || !menu.EnableInstructionalButtons)
+            {
+                DisposeInstructionalButtonsScaleform();
+                return;
+            }
+            if (!HasScaleformMovieLoaded(_scale))
+            {
+                _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
+            }
+            while (!HasScaleformMovieLoaded(_scale))
+            {
+                await Delay(0);
+            }
+
+            BeginScaleformMovieMethod(_scale, "CLEAR_ALL");
+            EndScaleformMovieMethod();
+
+
+            for (int i = 0; i < menu.InstructionalButtons.Count; i++)
+            {
+                string text = menu.InstructionalButtons.ElementAt(i).Value;
+                Control control = menu.InstructionalButtons.ElementAt(i).Key;
+
+                BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
+                ScaleformMovieMethodAddParamInt(i);
+                string buttonName = GetControlInstructionalButton(0, (int)control, 1);
+                PushScaleformMovieMethodParameterString(buttonName);
+                PushScaleformMovieMethodParameterString(text);
+                EndScaleformMovieMethod();
+            }
+
+            // Use custom instructional buttons FIRST if they're present.
+            if (menu.CustomInstructionalButtons.Count > 0)
+            {
+                for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)
                 {
-                    if (!HasScaleformMovieLoaded(_scale))
-                    {
-                        _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
-                    }
-                    while (!HasScaleformMovieLoaded(_scale))
-                    {
-                        await Delay(0);
-                    }
-
-                    BeginScaleformMovieMethod(_scale, "CLEAR_ALL");
+                    Menu.InstructionalButton button = menu.CustomInstructionalButtons[i];
+                    BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
+                    ScaleformMovieMethodAddParamInt(i + menu.InstructionalButtons.Count);
+                    PushScaleformMovieMethodParameterString(button.controlString);
+                    PushScaleformMovieMethodParameterString(button.instructionText);
                     EndScaleformMovieMethod();
-
-
-                    for (int i = 0; i < menu.InstructionalButtons.Count; i++)
-                    {
-                        string text = menu.InstructionalButtons.ElementAt(i).Value;
-                        Control control = menu.InstructionalButtons.ElementAt(i).Key;
-
-                        BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
-                        ScaleformMovieMethodAddParamInt(i);
-                        string buttonName = GetControlInstructionalButton(0, (int)control, 1);
-                        PushScaleformMovieMethodParameterString(buttonName);
-                        PushScaleformMovieMethodParameterString(text);
-                        EndScaleformMovieMethod();
-                    }
-
-                    // Use custom instructional buttons FIRST if they're present.
-                    if (menu.CustomInstructionalButtons.Count > 0)
-                    {
-                        for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)
-                        {
-                            Menu.InstructionalButton button = menu.CustomInstructionalButtons[i];
-                            BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
-                            ScaleformMovieMethodAddParamInt(i + menu.InstructionalButtons.Count);
-                            PushScaleformMovieMethodParameterString(button.controlString);
-                            PushScaleformMovieMethodParameterString(button.instructionText);
-                            EndScaleformMovieMethod();
-                        }
-                    }
-
-                    BeginScaleformMovieMethod(_scale, "DRAW_INSTRUCTIONAL_BUTTONS");
-                    ScaleformMovieMethodAddParamInt(0);
-                    EndScaleformMovieMethod();
-
-                    DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
-                    return;
                 }
             }
-            DisposeInstructionalButtonsScaleform();
+
+            BeginScaleformMovieMethod(_scale, "DRAW_INSTRUCTIONAL_BUTTONS");
+            ScaleformMovieMethodAddParamInt(0);
+            EndScaleformMovieMethod();
+
+            DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
         }
 
         private static void DisposeInstructionalButtonsScaleform()
@@ -1072,7 +1076,6 @@ namespace MenuAPI
             }
         }
 #endif
-
 #if REDM
         /// <summary>
         /// Prevent the UI prompts getting stuck on screen if this resource is ever to be restarted while someone has any menu's open.

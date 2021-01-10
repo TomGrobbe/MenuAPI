@@ -17,7 +17,7 @@ You have 2 options:
 1. Download the latest release zip and use the correct version (FiveM/RedM) for your resource. Simply include the DLL as a reference in your C# project and add `using MenuAPI;` to each file where you need to use MenuAPI.
 2. Use the NuGet package, which can be found [here](https://www.nuget.org/packages/MenuAPI.FiveM/) for FiveM, and [here](https://www.nuget.org/packages/MenuAPI.RedM/) for RedM.
 
-After doing either of the above and you're ready to build and publish your resource, add `files {'MenuAPI.dll'}` to your `fxmanifest.lua` or `__resource.lua` file, and make sure that you include the `MenuAPI.dll` file in the folder of your resource.
+After doing either of the above and you're ready to build and publish your resource, add `files {'MenuAPI.dll'}` to your `fxmanifest.lua` file, and make sure that you include the `MenuAPI.dll` file in the folder of your resource.
 
 ## Documentation
 
@@ -27,7 +27,7 @@ Documentation contents will be improved/expanded in the (near) future.
 
 ## Copyright
 
-Copyright © Tom Grobbe 2018-2020.
+Copyright © Tom Grobbe 2018-2021.
 
 ## License (custom license)
 

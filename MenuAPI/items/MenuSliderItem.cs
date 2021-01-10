@@ -49,7 +49,6 @@ namespace MenuAPI
 
         internal override void Draw(int indexOffset)
         {
-
             RightIcon = SliderRightIcon;
             Label = null;
 
@@ -59,7 +58,6 @@ namespace MenuAPI
             {
                 Position = (Max - Min) / 2;
             }
-
 
             float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * MathUtil.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
 
@@ -108,13 +106,24 @@ namespace MenuAPI
             // background
             DrawRect(x, y, width, height, BackgroundColor.R, BackgroundColor.G, BackgroundColor.B, BackgroundColor.A);
 
-            float xOffset = Map((float)Position, (float)Min, (float)Max, -((width / 4f) * MenuController.ScreenWidth), ((width / 4f) * MenuController.ScreenWidth)) / MenuController.ScreenWidth;
+            float xOffset = Map(
+                (float)Position,
+                (float)Min,
+                (float)Max,
+                -((width / 4f) * MenuController.ScreenWidth),
+                (width / 4f) * MenuController.ScreenWidth
+            );
+            xOffset /= MenuController.ScreenWidth;
 
             // bar (foreground)
             if (!ParentMenu.LeftAligned)
+            {
                 DrawRect(x - (width / 2f) + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A);
+            }
             else
+            {
                 DrawRect(x + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A);
+            }
 
             #endregion
 
@@ -122,15 +131,16 @@ namespace MenuAPI
             if (ShowDivider)
             {
                 if (!ParentMenu.LeftAligned)
+                {
                     DrawRect(x - width + (4f / MenuController.ScreenWidth), y, 4f / MenuController.ScreenWidth, RowHeight / MenuController.ScreenHeight / 2f, 255, 255, 255, 255);
+                }
                 else
+                {
                     DrawRect(x + (2f / MenuController.ScreenWidth), y, 4f / MenuController.ScreenWidth, RowHeight / MenuController.ScreenHeight / 2f, 255, 255, 255, 255);
+                }
             }
             #endregion
             ResetScriptGfxAlign();
-
-
-
         }
     }
 #endif

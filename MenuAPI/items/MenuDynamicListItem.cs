@@ -34,9 +34,7 @@ namespace MenuAPI
             {
                 Label = $"~s~← {CurrentItem ?? "~r~N/A~s~"} ~s~→";
             }
-
             base.Draw(indexOffset);
         }
-
     }
 }
