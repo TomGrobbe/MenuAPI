@@ -318,7 +318,7 @@ namespace MenuAPI
                 Game.IsDisabledControlJustReleased(0, Control.PhoneCancel)
 #endif
 #if REDM
-                Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, Control.CellphoneCancel)
+                IsDisabledControlJustReleased(0, (uint)Control.CellphoneCancel)
 #endif
             )
             {
@@ -533,14 +533,16 @@ namespace MenuAPI
 
             // Check if the Go Left controls are pressed.
             else if (
+                AreMenuButtonsEnabled && (
 #if FIVEM
-                Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) ||
-                Game.IsControlJustPressed(0, Control.PhoneLeft)
+                    Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) ||
+                    Game.IsControlJustPressed(0, Control.PhoneLeft)
 #endif
 #if REDM
-                IsDisabledControlJustPressed(0, (uint)Control.FrontendLeft) ||
-                IsControlJustPressed(0, (uint)Control.FrontendLeft)
+                    IsDisabledControlJustPressed(0, (uint)Control.FrontendLeft) ||
+                    IsControlJustPressed(0, (uint)Control.FrontendLeft)
 #endif
+                )
             )
             {
                 await HandleLeftNavigation(currentMenu);
@@ -548,15 +550,16 @@ namespace MenuAPI
 
             // Check if the Go Right controls are pressed.
             else if (
+                AreMenuButtonsEnabled && (
 #if FIVEM
-                Game.IsDisabledControlJustPressed(0, Control.PhoneRight) ||
-                Game.IsControlJustPressed(0, Control.PhoneRight)
+                    Game.IsDisabledControlJustPressed(0, Control.PhoneRight) ||
+                    Game.IsControlJustPressed(0, Control.PhoneRight)
 #endif
 #if REDM
-                AreMenuButtonsEnabled &&
-                Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.FrontendRight) ||
-                Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.FrontendRight)
+                    IsDisabledControlJustPressed(0, (uint)Control.FrontendRight) ||
+                    IsControlJustPressed(0, (uint)Control.FrontendRight)
 #endif
+                )
             )
             {
                 await HandleRightNavigation(currentMenu);
@@ -576,7 +579,13 @@ namespace MenuAPI
                 while ((Game.IsDisabledControlPressed(0, Control.PhoneRight) || Game.IsControlPressed(0, Control.PhoneRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
 #endif
 #if REDM
-                while ((Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendRight) || Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+                while (
+                    GetCurrentMenu() != null &&
+                    AreMenuButtonsEnabled && (
+                        IsDisabledControlPressed(0, (uint)Control.FrontendRight) ||
+                        IsControlPressed(0, (uint)Control.FrontendRight)
+                    )
+                )
 #endif
                 {
                     currentMenu = GetCurrentMenu();
@@ -616,16 +625,17 @@ namespace MenuAPI
                 var times = 0;
                 var delay = 200;
                 while (
-#if FIVEM
-                    (Game.IsDisabledControlPressed(0, Control.PhoneLeft) || Game.IsControlPressed(0, Control.PhoneLeft)) &&
                     GetCurrentMenu() != null &&
-                    AreMenuButtonsEnabled
+                    AreMenuButtonsEnabled && (
+#if FIVEM
+                        Game.IsDisabledControlPressed(0, Control.PhoneLeft) ||
+                        Game.IsControlPressed(0, Control.PhoneLeft)
 #endif
 #if REDM
-                    (Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendLeft) || Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendLeft)) &&
-                    GetCurrentMenu() != null &&
-                    AreMenuButtonsEnabled
+                        IsDisabledControlPressed(0, (uint)Control.FrontendLeft) ||
+                        IsControlPressed(0, (uint)Control.FrontendLeft)
 #endif
+                    )
                 )
                 {
                     currentMenu = GetCurrentMenu();
@@ -856,10 +866,10 @@ namespace MenuAPI
                 return;
             if (
 #if FIVEM
-                Game.PlayerPed.IsDead
+                    Game.PlayerPed.IsDead
 #endif
 #if REDM
-                Call<bool>(IS_ENTITY_DEAD, PlayerPedId())
+                    IsEntityDead(PlayerPedId())
 #endif
                 )
             {
@@ -888,38 +898,38 @@ namespace MenuAPI
 #if REDM
         private static void DisableControlsRedM()
         {
-            Call(DISABLE_CONTROL_ACTION, 0, Control.Attack, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.Attack2, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.HorseAim, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.HorseAttack, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.HorseAttack2, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.HorseMelee, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeAttack, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeBlock, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrapple, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleAttack, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleBreakout, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleChoke, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleMountSwitch, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleReversal, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeGrappleStandSwitch, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeHorseAttackPrimary, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeHorseAttackSecondary, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.MeleeModifier, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehAttack, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehAttack2, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehBoatAttack, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehBoatAttack2, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehCarAttack, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehCarAttack2, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehDraftAttack, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehDraftAttack2, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehFlyAttack, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehFlyAttack2, true);
-            Call(DISABLE_CONTROL_ACTION, 0, Control.VehPassengerAttack, true);
-            if (Call<bool>(_IS_INPUT_DISABLED, 2))
+            DisableControlAction(0, (uint)Control.Attack, true);
+            DisableControlAction(0, (uint)Control.Attack2, true);
+            DisableControlAction(0, (uint)Control.HorseAim, true);
+            DisableControlAction(0, (uint)Control.HorseAttack, true);
+            DisableControlAction(0, (uint)Control.HorseAttack2, true);
+            DisableControlAction(0, (uint)Control.HorseMelee, true);
+            DisableControlAction(0, (uint)Control.MeleeAttack, true);
+            DisableControlAction(0, (uint)Control.MeleeBlock, true);
+            DisableControlAction(0, (uint)Control.MeleeGrapple, true);
+            DisableControlAction(0, (uint)Control.MeleeGrappleAttack, true);
+            DisableControlAction(0, (uint)Control.MeleeGrappleBreakout, true);
+            DisableControlAction(0, (uint)Control.MeleeGrappleChoke, true);
+            DisableControlAction(0, (uint)Control.MeleeGrappleMountSwitch, true);
+            DisableControlAction(0, (uint)Control.MeleeGrappleReversal, true);
+            DisableControlAction(0, (uint)Control.MeleeGrappleStandSwitch, true);
+            DisableControlAction(0, (uint)Control.MeleeHorseAttackPrimary, true);
+            DisableControlAction(0, (uint)Control.MeleeHorseAttackSecondary, true);
+            DisableControlAction(0, (uint)Control.MeleeModifier, true);
+            DisableControlAction(0, (uint)Control.VehAttack, true);
+            DisableControlAction(0, (uint)Control.VehAttack2, true);
+            DisableControlAction(0, (uint)Control.VehBoatAttack, true);
+            DisableControlAction(0, (uint)Control.VehBoatAttack2, true);
+            DisableControlAction(0, (uint)Control.VehCarAttack, true);
+            DisableControlAction(0, (uint)Control.VehCarAttack2, true);
+            DisableControlAction(0, (uint)Control.VehDraftAttack, true);
+            DisableControlAction(0, (uint)Control.VehDraftAttack2, true);
+            DisableControlAction(0, (uint)Control.VehFlyAttack, true);
+            DisableControlAction(0, (uint)Control.VehFlyAttack2, true);
+            DisableControlAction(0, (uint)Control.VehPassengerAttack, true);
+            if (IsInputDisabled(2))
             {
-                Call(DISABLE_CONTROL_ACTION, 0, Control.FrontendPauseAlternate, true);
+                DisableControlAction(0, (uint)Control.FrontendPauseAlternate, true);
             }
         }
 #endif
@@ -1024,20 +1034,15 @@ namespace MenuAPI
             if (!(
                 Menus.Any() &&
                 IsAnyMenuOpen() &&
-#if FIVEM
                 IsScreenFadedIn() &&
-                !Game.IsPaused &&
-                !Game.Player.IsDead &&
-                !IsPlayerSwitchInProgress()
+                !IsPauseMenuActive() &&
+                !IsEntityDead(PlayerPedId())
+#if FIVEM
+                && !IsPlayerSwitchInProgress()
 #endif
-#if REDM
-                Call<bool>(IS_SCREEN_FADED_IN) &&
-                !Call<bool>(IS_PAUSE_MENU_ACTIVE) &&
-                !Call<bool>(IS_ENTITY_DEAD, PlayerPedId())
-#endif
-                ))
+                )
+            )
             {
-
                 UnloadAssets();
                 return;
             }
