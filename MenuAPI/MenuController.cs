@@ -58,10 +58,10 @@ namespace MenuAPI
 #if REDM
         public static bool AreMenuButtonsEnabled =>
             IsAnyMenuOpen() &&
-            !Call<bool>(IS_PAUSE_MENU_ACTIVE) &&
-            Call<bool>(IS_SCREEN_FADED_IN) &&
+            IsScreenFadedIn() &&
+            !IsPauseMenuActive() &&
             !DisableMenuButtons &&
-            !Call<bool>(IS_ENTITY_DEAD, PlayerPedId());
+            !IsEntityDead(PlayerPedId());
 #endif
 
         public static bool NavigateMenuUsingArrows { get; set; } = true;
@@ -195,7 +195,6 @@ namespace MenuAPI
         /// <returns></returns>
         private static async Task LoadAssets()
         {
-#if FIVEM
             menuTextureAssets.ForEach(asset =>
             {
                 if (!HasStreamedTextureDictLoaded(asset))
@@ -207,20 +206,6 @@ namespace MenuAPI
             {
                 await Delay(0);
             }
-#endif
-#if REDM
-            menuTextureAssets.ForEach(asset =>
-            {
-                if (!Call<bool>(HAS_STREAMED_TEXTURE_DICT_LOADED, asset))
-                {
-                    Call(REQUEST_STREAMED_TEXTURE_DICT, asset, false);
-                }
-            });
-            while (menuTextureAssets.Any(asset => { return !Call<bool>(HAS_STREAMED_TEXTURE_DICT_LOADED, asset); }))
-            {
-                await Delay(0);
-            }
-#endif
         }
 
         /// <summary>
@@ -228,36 +213,16 @@ namespace MenuAPI
         /// </summary>
         private static void UnloadAssets()
         {
-#if FIVEM
-            menuTextureAssets.ForEach(asset =>
-            {
-                if (HasStreamedTextureDictLoaded(asset))
-                {
-                    SetStreamedTextureDictAsNoLongerNeeded(asset);
-                }
-            });
-#endif
-#if REDM
             menuTextureAssets.ForEach(asset =>
             {
                 if (!string.IsNullOrEmpty(asset))
                 {
-                    if (Call<bool>(HAS_STREAMED_TEXTURE_DICT_LOADED, asset))
+                    if (HasStreamedTextureDictLoaded(asset))
                     {
-#if DEBUG
-                        Debug.WriteLine($"[DEBUG] [{GetCurrentResourceName()}] [MenuAPI] Attempting to set asset as no longer needed: {asset}");
-#endif
-                        Call(SET_STREAMED_TEXTURE_DICT_AS_NO_LONGER_NEEDED, asset);
+                        SetStreamedTextureDictAsNoLongerNeeded(asset);
                     }
                 }
-#if DEBUG
-                else
-                {
-                    Debug.WriteLine($"[WARNING] [{GetCurrentResourceName()}] [MenuAPI] a menu asset is null somehow, can't set it as no longer needed.");
-                }
-#endif
             });
-#endif
         }
 
         /// <summary>
@@ -402,11 +367,12 @@ namespace MenuAPI
             }
 #endif
 #if REDM
-            if (Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendUp) ||
-                Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendUp) ||
-                Call<bool>(IS_CONTROL_PRESSED, 0, Control.CellphoneScrollBackward) ||
-                Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.CellphoneScrollBackward)
-                )
+            if (
+                IsControlPressed(0, (uint)Control.FrontendUp) ||
+                IsDisabledControlPressed(0, (uint)Control.FrontendUp) ||
+                IsControlPressed(0, (uint)Control.CellphoneScrollBackward) ||
+                IsDisabledControlPressed(0, (uint)Control.CellphoneScrollBackward)
+            )
             {
                 return true;
             }
@@ -447,11 +413,12 @@ namespace MenuAPI
             }
 #endif
 #if REDM
-            if (Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendDown) ||
-                Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendDown) ||
-                Call<bool>(IS_CONTROL_PRESSED, 0, Control.CellphoneScrollForward) ||
-                Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.CellphoneScrollForward)
-                )
+            if (
+                IsControlPressed(0, (uint)Control.FrontendDown) ||
+                IsDisabledControlPressed(0, (uint)Control.FrontendDown) ||
+                IsControlPressed(0, (uint)Control.CellphoneScrollForward) ||
+                IsDisabledControlPressed(0, (uint)Control.CellphoneScrollForward)
+            )
             {
                 return true;
             }
@@ -540,8 +507,8 @@ namespace MenuAPI
                 Game.IsControlJustPressed(0, Control.PhoneLeft)
 #endif
 #if REDM
-                Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.FrontendLeft) ||
-                Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.FrontendLeft)
+                IsDisabledControlJustPressed(0, (uint)Control.FrontendLeft) ||
+                IsControlJustPressed(0, (uint)Control.FrontendLeft)
 #endif
             )
             {
@@ -555,8 +522,8 @@ namespace MenuAPI
                 Game.IsControlJustPressed(0, Control.PhoneRight)
 #endif
 #if REDM
-                AreMenuButtonsEnabled && 
-                Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.FrontendRight) || 
+                AreMenuButtonsEnabled &&
+                Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, Control.FrontendRight) ||
                 Call<bool>(IS_CONTROL_JUST_PRESSED, 0, Control.FrontendRight)
 #endif
             )
@@ -578,7 +545,7 @@ namespace MenuAPI
                 while ((Game.IsDisabledControlPressed(0, Control.PhoneRight) || Game.IsControlPressed(0, Control.PhoneRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
 #endif
 #if REDM
-                            while ((Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendRight) || Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+                while ((Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, Control.FrontendRight) || Call<bool>(IS_CONTROL_PRESSED, 0, Control.FrontendRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
 #endif
                 {
                     currentMenu = GetCurrentMenu();
@@ -836,7 +803,7 @@ namespace MenuAPI
                 DisableMenuButtons = buttonsState;
             }
         }
-#endregion
+        #endregion
 
         /// <summary>
         /// Closes all menus.
@@ -926,6 +893,10 @@ namespace MenuAPI
         }
 #endif
 #if FIVEM
+        /// <summary>
+        /// Disable required game controls when the menu is open.
+        /// </summary>
+        /// <param name="currMenu"></param>
         private static void DisableGenericControls(Menu currMenu)
         {
             // Disable Gamepad/Controller Specific controls:

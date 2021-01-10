@@ -150,11 +150,11 @@ namespace MenuAPI
 #if REDM
             float spriteHeight = 24f / MenuController.ScreenHeight;
             float spriteWidth = 16f / MenuController.ScreenWidth;
-            Call(DRAW_SPRITE, "menu_textures", "SELECTION_BOX_SQUARE", spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
+            DrawSprite("menu_textures", "SELECTION_BOX_SQUARE", spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255, false);
             if (Checked)
             {
                 int[] sc = Enabled ? (Selected ? new int[3] { 255, 255, 255 } : new int[3] { 181, 17, 18 }) : (Selected ? new int[3] { 109, 109, 109 } : new int[3] { 110, 10, 10 });
-                Call(DRAW_SPRITE, "generic_textures", "TICK", spriteX, spriteY, spriteWidth, spriteHeight, 0f, sc[0], sc[1], sc[2], 255);
+                DrawSprite("generic_textures", "TICK", spriteX, spriteY, spriteWidth, spriteHeight, 0f, sc[0], sc[1], sc[2], 255, false);
             }
 #endif
         }

@@ -475,9 +475,8 @@ namespace MenuAPI
             public InstructionalButton(Control[] controls, string text)
             {
                 this.controls = controls;
-                //this.text = Call<long>((CitizenFX.Core.Native.Hash)0xFA925AC00EB830B9, 10, "LITERAL_STRING", text); // CreateVarString
-                this.textString = text;
-                this.promptHandle = 0;
+                textString = text;
+                promptHandle = 0;
             }
 
             /// <summary>
@@ -485,35 +484,33 @@ namespace MenuAPI
             /// </summary>
             public void Prepare()
             {
-                if (this.IsPrepared())
+                if (IsPrepared)
                 {
                     return;
-                    //this.Dispose();
                 }
 
-                this.promptHandle = Call<int>((CitizenFX.Core.Native.Hash)0x04F97DE45A519419); // UipromptRegisterBegin
-                Call((CitizenFX.Core.Native.Hash)0x5DD02A8318420DD7, this.promptHandle, Call<long>((CitizenFX.Core.Native.Hash)0xFA925AC00EB830B9, 10, "LITERAL_STRING", textString)); // UipromptSetText
-                foreach (var c in this.controls)
+                // 0x04F97DE45A519419 / UipromptRegisterBegin (new name, not yet in API)
+                promptHandle = PromptRegisterBegin();
+
+                // 0xFA925AC00EB830B9 / CreateVarString (Has incorrect parameter types in API)
+                long _text = Call<long>((CitizenFX.Core.Native.Hash)0xFA925AC00EB830B9, 10, "LITERAL_STRING", textString);
+
+                // 0x5DD02A8318420DD7 / UipromptSetText (Has incorrect parameter types in API)
+                Call<long>((CitizenFX.Core.Native.Hash)0x5DD02A8318420DD7, promptHandle, _text);
+                foreach (var c in controls)
                 {
-                    Call((CitizenFX.Core.Native.Hash)0xB5352B7494A08258, this.promptHandle, c); // UipromptSetControlAction
+                    // 0xB5352B7494A08258 / UipromptSetControlAction (Has incorrect parameter types in API)
+                    Call((CitizenFX.Core.Native.Hash)0xB5352B7494A08258, this.promptHandle, c);
                 }
-                //Call((CitizenFX.Core.Native.Hash)0xEA5CCF4EEB2F82D1, this.promptHandle); // UipromptSetHoldIndefinitelyMode
-                Call((CitizenFX.Core.Native.Hash)0xF7AA2696A22AD8B9, this.promptHandle); // UipromptRegisterEnd
-                this.SetEnabled(false, false);
+                PromptRegisterEnd(promptHandle); // UipromptRegisterEnd (new name, not yet in API)
+                SetEnabled(false, false);
             }
 
             /// <summary>
             /// Check if it is ready to be displayed.
             /// </summary>
             /// <returns></returns>
-            public bool IsPrepared()
-            {
-                if (Call<bool>((CitizenFX.Core.Native.Hash)0x347469FBDD1589A9, this.promptHandle)) // UipromptIsValid
-                {
-                    return true;
-                }
-                return false;
-            }
+            public bool IsPrepared => PromptIsValid(promptHandle);
 
             /// <summary>
             /// Enables or disables the prompt on screen. You must prepare the prompt first using <see cref="InstructionalButton.Prepare"/>.
@@ -522,8 +519,8 @@ namespace MenuAPI
             /// <param name="enabled"></param>
             public void SetEnabled(bool visible, bool enabled)
             {
-                Call((CitizenFX.Core.Native.Hash)0x71215ACCFDE075EE, this.promptHandle, visible); // UipromptSetVisible
-                Call((CitizenFX.Core.Native.Hash)0x8A0FB4D03A630D21, this.promptHandle, enabled); // UipromptSetEnabled
+                PromptSetVisible(promptHandle, visible ? 1 : 0);
+                PromptSetEnabled(promptHandle, enabled ? 1 : 0);
             }
 
             /// <summary>
@@ -531,12 +528,12 @@ namespace MenuAPI
             /// </summary>
             public void Dispose()
             {
-                if (this.IsPrepared())
+                if (IsPrepared)
                 {
-                    this.SetEnabled(false, false);
-                    Call((CitizenFX.Core.Native.Hash)0x00EDE88D4D13CF59, this.promptHandle); // UipromptDelete
+                    SetEnabled(false, false);
+                    PromptDelete(promptHandle);
                 }
-                this.promptHandle = 0;
+                promptHandle = 0;
             }
 
             //public long GetTextHandle() => text;
@@ -758,6 +755,7 @@ namespace MenuAPI
                 PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
+                // Has invalid parameter types in API
                 Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_ERROR", "HUD_SHOP_SOUNDSET", 1);
 #endif
                 return;
@@ -791,6 +789,7 @@ namespace MenuAPI
             else
             {
                 ItemSelectedEvent(item, item.Index);
+                // Has invalid parameter types in API.
                 Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "SELECT", "HUD_SHOP_SOUNDSET", 1);
             }
 #endif
@@ -813,7 +812,7 @@ namespace MenuAPI
             PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
-
+            // Has invalid parameter types in API
             Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "Back", "HUD_SHOP_SOUNDSET", 1);
 #endif
             CloseMenu();
@@ -903,6 +902,7 @@ namespace MenuAPI
             PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
+            // Has invalid parameter types in API
             Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_UP", "HUD_SHOP_SOUNDSET", 1);
 #endif
         }
@@ -951,6 +951,7 @@ namespace MenuAPI
             PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
+            // Has invalid parameter types in API.
             Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_DOWN", "HUD_SHOP_SOUNDSET", 1);
 #endif
         }
@@ -986,6 +987,7 @@ namespace MenuAPI
                     PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
+                    // Has invalid parameter types in API.
                     Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_LEFT", "HUD_SHOP_SOUNDSET", 1);
 #endif
                 }
@@ -1015,6 +1017,7 @@ namespace MenuAPI
                 PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
+                // Has invalid parameter types in API.
                 Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
 #endif
             }
@@ -1063,6 +1066,7 @@ namespace MenuAPI
                     PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
+                    // Has invalid parameter types in API.
                     Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
 #endif
                 }
@@ -1092,6 +1096,7 @@ namespace MenuAPI
                 PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
+                // Has invalid parameter types in API.
                 Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
 #endif
             }
@@ -1248,7 +1253,7 @@ namespace MenuAPI
                             Game.DisableControlThisFrame(0, handler.control);
 #endif
 #if REDM
-                            Call(DISABLE_CONTROL_ACTION, 0, handler.control, true);
+                            DisableControlAction(0, (uint)handler.control, true);
 #endif
                         }
 
@@ -1274,19 +1279,19 @@ namespace MenuAPI
 #endif
 #if REDM
                             case ControlPressCheckType.JUST_PRESSED:
-                                if (Call<bool>(IS_CONTROL_JUST_PRESSED, 0, handler.control) || Call<bool>(IS_DISABLED_CONTROL_JUST_PRESSED, 0, handler.control))
+                                if (IsControlJustPressed(0, (uint)handler.control) || IsDisabledControlJustPressed(0, (uint)handler.control))
                                     handler.function.Invoke(this, handler.control);
                                 break;
                             case ControlPressCheckType.JUST_RELEASED:
-                                if (Call<bool>(IS_CONTROL_JUST_RELEASED, 0, handler.control) || Call<bool>(IS_DISABLED_CONTROL_JUST_RELEASED, 0, handler.control))
+                                if (IsControlJustReleased(0, (uint)handler.control) || IsDisabledControlJustReleased(0, (uint)handler.control))
                                     handler.function.Invoke(this, handler.control);
                                 break;
                             case ControlPressCheckType.PRESSED:
-                                if (Call<bool>(IS_CONTROL_PRESSED, 0, handler.control) || Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, handler.control))
+                                if (IsControlPressed(0, (uint)handler.control) || IsDisabledControlPressed(0, (uint)handler.control))
                                     handler.function.Invoke(this, handler.control);
                                 break;
                             case ControlPressCheckType.RELEASED:
-                                if (!Call<bool>(IS_CONTROL_PRESSED, 0, handler.control) && !Call<bool>(IS_DISABLED_CONTROL_PRESSED, 0, handler.control))
+                                if (!IsControlPressed(0, (uint)handler.control) && !IsDisabledControlPressed(0, (uint)handler.control))
                                     handler.function.Invoke(this, handler.control);
                                 break;
 #endif
@@ -1343,7 +1348,7 @@ namespace MenuAPI
                 float y = (Position.Value + (headerSize.Value / 2f)) / MenuController.ScreenHeight;
                 float width = headerSize.Key / MenuController.ScreenWidth;
                 float height = headerSize.Value / MenuController.ScreenHeight;
-                Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 181, 17, 18, 255);
+                DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 181, 17, 18, 255, false);
                 if (MenuController.SetDrawOrder)
                     SetScriptGfxDrawOrder(1);
 #endif
@@ -1374,16 +1379,18 @@ namespace MenuAPI
                 menuItemsOffset = headerSize.Value;
 #endif
 #if REDM
-                Call(SET_TEXT_CENTRE, true);
+                SetTextCentre(true);
                 float size = (45f * 27f) / MenuController.ScreenHeight;
-                Call(SET_TEXT_SCALE, size, size);
+                SetTextScale(size, size);
 
                 if (MenuController.SetDrawOrder)
                     SetScriptGfxDrawOrder(3);
-                //SetTextWrap(textMinX, textMaxX);
                 int font = 10;
                 Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
-                Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuTitle ?? "N/A"), ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (45f / MenuController.ScreenHeight));
+                long _text = Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuTitle ?? "N/A");
+                float textX = (headerSize.Key / 2f) / MenuController.ScreenWidth;
+                float textY = y - (45f / MenuController.ScreenHeight);
+                DisplayText(_text, textX, textY);
                 if (MenuController.SetDrawOrder)
                     SetScriptGfxDrawOrder(1);
                 menuItemsOffset = headerSize.Value;
@@ -1472,11 +1479,12 @@ namespace MenuAPI
                 if (MenuController.SetDrawOrder)
                     SetScriptGfxDrawOrder(3);
                 float size = (14f * 27f) / MenuController.ScreenHeight;
-                Call(SET_TEXT_SCALE, size, size);
-                Call(SET_TEXT_CENTRE, true);
+                SetTextScale(size, size);
+                SetTextCentre(true);
                 int font = 9;
                 Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
-                Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuSubtitle ?? "N/A"), x, y - (52f / MenuController.ScreenHeight));
+                long _text = Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", MenuSubtitle ?? "N/A");
+                DisplayText(_text, x, y - (52f / MenuController.ScreenHeight));
                 if (MenuController.SetDrawOrder)
                     SetScriptGfxDrawOrder(1);
             }
@@ -1526,17 +1534,16 @@ namespace MenuAPI
             if (Size > 0)
             {
                 float textSize = (12f * 27f) / MenuController.ScreenHeight;
-                Call(SET_TEXT_SCALE, textSize, textSize);
-                Call((CitizenFX.Core.Native.Hash)0x50A41AD966910F03, 135, 135, 135, 255); // _SET_TEXT_COLOUR / 0x50A41AD966910F03
-                Call(SET_TEXT_CENTRE, true);
+                SetTextScale(textSize, textSize);
+                SetTextColor(135, 135, 135, 255);
+                SetTextCentre(true);
                 float textMinX = (headerSize.Key / 2f) / MenuController.ScreenWidth;
                 float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
                 float textY = (menuItemsOffset + 38f * (MathUtil.Clamp(Size, 0, MaxItemsOnScreen) + 1) - 11f) / MenuController.ScreenHeight;
                 int font = 23;
                 Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
-                //SetTextWrap(textMinX, textMaxX);
-
-                Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{CurrentIndex + 1} of {Size}"), textMinX, textY);
+                long _text = Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{CurrentIndex + 1} of {Size}");
+                DisplayText(_text, textMinX, textY);
             }
 #endif
             #endregion
@@ -1596,8 +1603,8 @@ namespace MenuAPI
             float y = ((Position.Value + menuItemsOffset + ((bgHeight + 1f - (headerSize.Value)) / 2f) + 19f) / MenuController.ScreenHeight);
             float width = headerSize.Key / MenuController.ScreenWidth;
             float height = (headerSize.Value + bgHeight + 33f + 38f) / MenuController.ScreenHeight;
-            Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 0, 0, 0, 240);
-            Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y + actualBgYLocation - (descriptionBoxHeight / MenuController.ScreenHeight), width, 38f / MenuController.ScreenHeight, 0f, 55, 55, 55, 255);
+            DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 0, 0, 0, 240, false);
+            DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y + actualBgYLocation - (descriptionBoxHeight / MenuController.ScreenHeight), width, 38f / MenuController.ScreenHeight, 0f, 55, 55, 55, 255, false);
             menuItemsOffset += bgHeight - descriptionBoxHeight - 1f;
 #endif
             return menuItemsOffset;
@@ -1772,14 +1779,15 @@ namespace MenuAPI
                 ResetScriptGfxAlign();
 #endif
 #if REDM
-                Call(SET_TEXT_SCALE, textSize, textSize);
-                Call(SET_TEXT_CENTRE, true);
+                SetTextScale(textSize, textSize);
+                SetTextCentre(true);
                 float textMinX = (headerSize.Key / 2f) / MenuController.ScreenWidth;
                 float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
                 float textY = menuItemsOffset / MenuController.ScreenHeight + (18f / MenuController.ScreenHeight) + (48f / MenuController.ScreenHeight);
                 font = 23;
                 Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
-                Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{currentMenuItem.Description}"), textMinX, textY);
+                long _text = Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", $"{currentMenuItem.Description}");
+                DisplayText(_text, textMinX, textY);
 
 #endif
                 #endregion
@@ -2036,16 +2044,15 @@ namespace MenuAPI
         internal async Task Draw()
         {
             if (!(
+                IsScreenFadedIn() &&
 #if FIVEM
                 !Game.IsPaused &&
                 !Game.PlayerPed.IsDead &&
-                !IsPlayerSwitchInProgress() &&
-                IsScreenFadedIn()
+                !IsPlayerSwitchInProgress()
 #endif
 #if REDM
-                !Call<bool>(IS_PAUSE_MENU_ACTIVE) &&
-                !Call<bool>(IS_ENTITY_DEAD, PlayerPedId()) &&
-                Call<bool>(IS_SCREEN_FADED_IN)
+                !IsPauseMenuActive() &&
+                !IsEntityDead(PlayerPedId())
 #endif
             ))
             {

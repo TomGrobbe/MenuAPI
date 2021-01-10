@@ -1128,16 +1128,18 @@ namespace MenuAPI
             ResetScriptGfxAlign();
 #endif
 #if REDM
-            Call(SET_TEXT_SCALE, textSize, textSize);
-
+            SetTextScale(textSize, textSize);
             textColor = Enabled ? 255 : 109;
-            Call((CitizenFX.Core.Native.Hash)0x50A41AD966910F03, textColor, textColor, textColor, 255); // _SET_TEXT_COLOUR / 0x50A41AD966910F03
+            SetTextColor(textColor, textColor, textColor, 255);
             textMinX = ((8f + textXOffset) / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
             textMaxX = (Width - 10f) / MenuController.ScreenWidth;
             textY = y - ((30f / 2f) / MenuController.ScreenHeight);
             font = 23;
+            // Cfx native, undocumented.
             Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
-            Call(_DISPLAY_TEXT, Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? "")), textMinX, textY);
+            // API version has incorrect parameter types.
+            long _text = Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? ""));
+            DisplayText(_text, textMinX, textY);
 #endif
         }
 
@@ -1219,7 +1221,7 @@ namespace MenuAPI
             float spriteHeight = GetSpriteSize(RightIcon, false);
             float spriteWidth = GetSpriteSize(RightIcon, true);
             int[] spriteColor = GetSpriteColour(RightIcon, Selected);
-            Call(DRAW_SPRITE, spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
+            DrawSprite(spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255, false);
 #endif
             return rightTextIconOffset;
         }
@@ -1260,7 +1262,7 @@ namespace MenuAPI
             float spriteHeight = GetSpriteSize(LeftIcon, false);
             float spriteWidth = GetSpriteSize(LeftIcon, true);
             int[] spriteColor = GetSpriteColour(LeftIcon, Selected);
-            Call(DRAW_SPRITE, spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255);
+            DrawSprite(spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255, false);
 #endif
             return textXOffset;
         }
@@ -1288,7 +1290,7 @@ namespace MenuAPI
                 ResetScriptGfxAlign();
 #endif
 #if REDM
-                Call(DRAW_SPRITE, MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 181, 17, 18, 255);
+                DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 181, 17, 18, 255, false);
 #endif
             }
 #if FIVEM
