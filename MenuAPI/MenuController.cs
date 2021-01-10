@@ -191,7 +191,6 @@ namespace MenuAPI
             child.ParentMenu = parent;
         }
 
-
         /// <summary>
         /// Loads the texture dict for the common menu sprites.
         /// </summary>
@@ -270,7 +269,9 @@ namespace MenuAPI
         public static Menu GetCurrentMenu()
         {
             if (IsAnyMenuOpen())
+            {
                 return VisibleMenus.FirstOrDefault();
+            }
             return null;
         }
 
@@ -278,7 +279,7 @@ namespace MenuAPI
         /// Returns true if any menu is currently open.
         /// </summary>
         /// <returns></returns>
-        public static bool IsAnyMenuOpen() => VisibleMenus.Count > 0;
+        public static bool IsAnyMenuOpen() => VisibleMenus.Any();
 
 
         #region Process Menu Buttons
@@ -953,7 +954,8 @@ namespace MenuAPI
         private static async Task ProcessMenus()
         {
 
-            if (Menus.Count > 0 &&
+            if (!(
+                Menus.Any() &&
                 IsAnyMenuOpen() &&
 #if FIVEM
                 IsScreenFadedIn() &&
@@ -966,41 +968,40 @@ namespace MenuAPI
                 !Call<bool>(IS_PAUSE_MENU_ACTIVE) &&
                 !Call<bool>(IS_ENTITY_DEAD, PlayerPedId())
 #endif
-                )
+                ))
             {
-                await LoadAssets();
 
-                DisableControls();
+                UnloadAssets();
+                return;
+            }
+            await LoadAssets();
 
-                Menu menu = GetCurrentMenu();
-                if (menu != null)
+            DisableControls();
+
+            Menu menu = GetCurrentMenu();
+            if (menu != null)
+            {
+                if (DontOpenAnyMenu)
                 {
-                    if (DontOpenAnyMenu)
+                    if (menu.Visible && !menu.IgnoreDontOpenMenus)
                     {
-                        if (menu.Visible && !menu.IgnoreDontOpenMenus)
-                        {
-                            menu.CloseMenu();
-                        }
-                    }
-                    else if (menu.Visible)
-                    {
-                        menu.Draw();
+                        menu.CloseMenu();
                     }
                 }
-
-                if (EnableManualGCs)
+                else if (menu.Visible)
                 {
-                    // once a minute
-                    if (GetGameTimer() - ManualTimerForGC > 60000)
-                    {
-                        GC.Collect();
-                        ManualTimerForGC = GetGameTimer();
-                    }
+                    await menu.Draw();
                 }
             }
-            else
+
+            if (EnableManualGCs)
             {
-                UnloadAssets();
+                // once a minute
+                if (GetGameTimer() - ManualTimerForGC > 60000)
+                {
+                    GC.Collect();
+                    ManualTimerForGC = GetGameTimer();
+                }
             }
         }
 
@@ -1062,9 +1063,7 @@ namespace MenuAPI
             }
             DisposeInstructionalButtonsScaleform();
         }
-#endif
 
-#if FIVEM
         private static void DisposeInstructionalButtonsScaleform()
         {
             if (HasScaleformMovieLoaded(_scale))
@@ -1074,12 +1073,13 @@ namespace MenuAPI
         }
 #endif
 
+#if REDM
         /// <summary>
         /// Prevent the UI prompts getting stuck on screen if this resource is ever to be restarted while someone has any menu's open.
         /// </summary>
         /// <param name="name"></param>
         [EventHandler("onResourceStop")]
-        private static void OnResourceStop(string name)
+        internal static void OnResourceStop(string name)
         {
             if (name == GetCurrentResourceName())
             {
@@ -1087,5 +1087,6 @@ namespace MenuAPI
                 CloseAllMenus();
             }
         }
+#endif
     }
 }
