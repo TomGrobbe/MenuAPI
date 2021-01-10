@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if FIVEM
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,6 @@ using static CitizenFX.Core.Native.API;
 
 namespace MenuAPI
 {
-#if FIVEM
     public class MenuSliderItem : MenuItem
     {
         public int Min { get; private set; } = 0;
@@ -142,6 +142,39 @@ namespace MenuAPI
             #endregion
             ResetScriptGfxAlign();
         }
+
+        internal override void GoRight()
+        {
+            if (Position < Max)
+            {
+                Position++;
+                ParentMenu.SliderItemChangedEvent(ParentMenu, this, Position - 1, Position, Index);
+                PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            }
+            else
+            {
+                PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            }
+        }
+
+        internal override void GoLeft()
+        {
+            if (Position > Min)
+            {
+                Position--;
+                ParentMenu.SliderItemChangedEvent(ParentMenu, this, Position + 1, Position, Index);
+                PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            }
+            else
+            {
+                PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            }
+        }
+
+        internal override void Select()
+        {
+            ParentMenu.SliderSelectedEvent(ParentMenu, this, Position, Index);
+        }
     }
-#endif
 }
+#endif

@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CitizenFX.Core;
+﻿using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
-using static CitizenFX.Core.Native.Function;
-using static CitizenFX.Core.Native.Hash;
 
 namespace MenuAPI
 {
@@ -157,6 +150,17 @@ namespace MenuAPI
                 DrawSprite("generic_textures", "TICK", spriteX, spriteY, spriteWidth, spriteHeight, 0f, sc[0], sc[1], sc[2], 255, false);
             }
 #endif
+        }
+
+        internal override void GoRight()
+        {
+            ParentMenu.SelectItem(this);
+        }
+
+        internal override void Select()
+        {
+            Checked = !Checked;
+            ParentMenu.CheckboxChangedEvent(this, Index, Checked);
         }
     }
 }

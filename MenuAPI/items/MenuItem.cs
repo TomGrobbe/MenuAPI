@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
 using static CitizenFX.Core.Native.Function;
@@ -1054,6 +1051,36 @@ namespace MenuAPI
             }
             return (Width - 30f) / MenuController.ScreenWidth;
 #endif
+        }
+
+        /// <summary>
+        /// Handles menu navigation to the right for items that support it, otherwise the item will be selected.
+        /// </summary>
+        internal virtual void GoRight()
+        {
+            if (Enabled)
+            {
+                ParentMenu.SelectItem(this);
+            }
+        }
+
+        /// <summary>
+        /// Handles menu navigation to the left for items that support it, otherwise the menu will navigate to the parent menu.
+        /// </summary>
+        internal virtual void GoLeft()
+        {
+            if (MenuController.NavigateMenuUsingArrows && !MenuController.DisableBackButton && !(MenuController.PreventExitingMenu && ParentMenu == null))
+            {
+                ParentMenu.GoBack();
+            }
+        }
+
+        /// <summary>
+        /// Handles item selection.
+        /// </summary>
+        internal virtual void Select()
+        {
+            ParentMenu.ItemSelectedEvent(this, Index);
         }
 
         /// <summary>
