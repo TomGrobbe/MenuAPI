@@ -20,7 +20,7 @@
 
     <ProjectReference Include="..\MenuAPI\MenuAPI.csproj" />
 
-    <PackageReference Include="CitizenFX.Core.Client" Version="1.0.3114" Condition="'$(Configuration)' == 'Release FiveM' Or '$(Configuration)' == 'Debug FiveM'">
+    <PackageReference Include="CitizenFX.Core.Client" Version="1.0.3394" Condition="'$(Configuration)' == 'Release FiveM' Or '$(Configuration)' == 'Debug FiveM'">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
 

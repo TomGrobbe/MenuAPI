@@ -6465,7 +6465,17 @@
             Loads a minimap overlay from a GFx file in the current resource.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.ADD_NAVMESH_BLOCKING_OBJECT">
+            <summary>
+            Loads a minimap overlay from a GFx file in the current resource.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.ADD_REPLACE_TEXTURE">
+            <summary>
+            Experimental natives, please do not use in a live environment.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.ADD_ROPE">
             <summary>
             Experimental natives, please do not use in a live environment.
             </summary>
@@ -6497,6 +6507,14 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.CANCEL_EVENT">
             <summary>
+            This is similar to the PushScaleformMovieFunction natives, except it calls in the `TIMELINE` of a minimap overlay.
+            </summary>
+            <summary>
+            Cancels the currently executing event.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.CANCEL_MUSIC_EVENT">
+            <summary>
             Cancels the currently executing event.
             </summary>
         </member>
@@ -6505,7 +6523,17 @@
             Commits the backing pixels to the specified runtime texture.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.COMPARE_STRINGS">
+            <summary>
+            Commits the backing pixels to the specified runtime texture.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.CREATE_DUI">
+            <summary>
+            Creates a DUI browser. This can be used to draw on a runtime texture using CREATE_RUNTIME_TEXTURE_FROM_DUI_HANDLE.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.CREATE_FAKE_MP_GAMER_TAG">
             <summary>
             Creates a DUI browser. This can be used to draw on a runtime texture using CREATE_RUNTIME_TEXTURE_FROM_DUI_HANDLE.
             </summary>
@@ -6517,15 +6545,34 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.CREATE_RUNTIME_TEXTURE_FROM_DUI_HANDLE">
             <summary>
+            Creates a blank runtime texture.
+            </summary>
+            <summary>
             Creates a runtime texture from a DUI handle.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.CREATE_RUNTIME_TEXTURE_FROM_IMAGE">
             <summary>
+            Creates a runtime texture from a DUI handle.
+            </summary>
+            <summary>
             Creates a runtime texture from the specified file in the current resource.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.CREATE_RUNTIME_TXD">
+            <summary>
+            Creates a runtime texture from the specified file in the current resource.
+            </summary>
+            <summary>
+            Creates a runtime texture dictionary with the specified name.
+            Example:
+            
+            ```lua
+            local txd = CreateRuntimeTxd('meow')
+            ```
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.CREATE_TRACKED_POINT">
             <summary>
             Creates a runtime texture dictionary with the specified name.
             Example:
@@ -6540,6 +6587,22 @@
             Destroys a DUI browser.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.DESTROY_ITEMSET">
+            <summary>
+            Destroys a DUI browser.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.DOOR_SYSTEM_GET_ACTIVE">
+            <summary>
+            Returns a list of door system entries: a door system hash (see [ADD_DOOR_TO_SYSTEM](#_0x6F8838D03D1DC226)) and its object handle.
+            
+            The data returned adheres to the following layout:
+            
+            ```
+            [{doorHash1, doorHandle1}, ..., {doorHashN, doorHandleN}]
+            ```
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.EXPERIMENTAL_LOAD_CLONE_CREATE">
             <summary>
             This native is not implemented.
@@ -6549,8 +6612,14 @@
             <summary>
             This native is not implemented.
             </summary>
+            <summary>
+            This native is not implemented.
+            </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.EXPERIMENTAL_SAVE_CLONE_CREATE">
+            <summary>
+            This native is not implemented.
+            </summary>
             <summary>
             This native is not implemented.
             </summary>
@@ -6558,6 +6627,19 @@
         <member name="F:CitizenFX.Core.Native.Hash.EXPERIMENTAL_SAVE_CLONE_SYNC">
             <summary>
             This native is not implemented.
+            </summary>
+            <summary>
+            This native is not implemented.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.EXPLODE_PED_HEAD">
+            <summary>
+            This native is not implemented.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.FORCE_SNOW_PASS">
+            <summary>
+            Forces the game snow pass to render.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_ACTIVE_PLAYERS">
@@ -6570,7 +6652,32 @@
             ```
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_ACTIVE_VEHICLE_MISSION_TYPE">
+            <summary>
+            Returns all player indices for 'active' physical players known to the client.
+            The data returned adheres to the following layout:
+            
+            ```
+            [127, 42, 13, 37]
+            ```
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_AMBIENT_PED_RANGE_MULTIPLIER">
+            <summary>
+            A getter for [SET_AMBIENT_PED_RANGE_MULTIPLIER_THIS_FRAME](#_0x0B919E1FB47CC4E0).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_AMBIENT_VEHICLE_RANGE_MULTIPLIER">
+            <summary>
+            A getter for [SET_AMBIENT_VEHICLE_RANGE_MULTIPLIER_THIS_FRAME](#_0x90B6DA738A9A25DA).
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_CAM_MATRIX">
+            <summary>
+            Returns the world matrix of the specified camera. To turn this into a view matrix, calculate the inverse.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_CAM_ROT">
             <summary>
             Returns the world matrix of the specified camera. To turn this into a view matrix, calculate the inverse.
             </summary>
@@ -6580,7 +6687,17 @@
             Returns the name of the currently executing resource.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_CURRENT_SCRIPTED_CONVERSATION_LINE">
+            <summary>
+            Returns the name of the currently executing resource.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_CURRENT_SERVER_ENDPOINT">
+            <summary>
+            Returns the peer address of the remote game server that the user is currently connected to.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_DEAD_PED_PICKUP_COORDS">
             <summary>
             Returns the peer address of the remote game server that the user is currently connected to.
             </summary>
@@ -6590,7 +6707,33 @@
             Returns the NUI window handle for a specified DUI browser object.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_ENTITY_ALPHA">
+            <summary>
+            Returns the NUI window handle for a specified DUI browser object.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_GAME_POOL">
+            <summary>
+            Returns all pool handles for the given pool name; the data returned adheres to the following layout:
+            
+            ```
+            [ 770, 1026, 1282, 1538, 1794, 2050, 2306, 2562, 2818, 3074, 3330, 3586, 3842, 4098, 4354, 4610, ...]
+            ```
+            
+            ### Supported Pools
+            
+            **1**: CPed  
+            **2**: CObject  
+            **3**: CVehicle  
+            **4**: CPickup
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_MAP_ZOOM_DATA_LEVEL">
+            <summary>
+            Returns the zoom level data by index from mapzoomdata.meta file.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_MAX_AMMO">
             <summary>
             Returns the zoom level data by index from mapzoomdata.meta file.
             </summary>
@@ -6601,12 +6744,36 @@
             See also: [Resource manifest](https://docs.fivem.net/resources/manifest/)
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_OBJECT_FRAGMENT_DAMAGE_HEALTH">
+            <summary>
+            Gets the amount of metadata values with the specified key existing in the specified resource's manifest.
+            See also: [Resource manifest](https://docs.fivem.net/resources/manifest/)
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PARKED_VEHICLE_DENSITY_MULTIPLIER">
+            <summary>
+            A getter for [SET_PARKED_VEHICLE_DENSITY_MULTIPLIER_THIS_FRAME](#_0xEAE6DCC7EEE3DB1D).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PED_DENSITY_MULTIPLIER">
+            <summary>
+            A getter for [SET_PED_DENSITY_MULTIPLIER_THIS_FRAME](#_0x95E3D6257B166CF2).
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_PED_EYE_COLOR">
             <summary>
             A getter for [\_SET_PED_EYE_COLOR](#_0x50B56988B170AFDF). Returns -1 if fails to get.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_PED_FACE_FEATURE">
+            <summary>
+            A getter for [\_SET_PED_EYE_COLOR](#_0x50B56988B170AFDF). Returns -1 if fails to get.
+            </summary>
+            <summary>
+            A getter for [\_SET_PED_FACE_FEATURE](#_0x71A5C1DBA060049E). Returns 0.0 if fails to get.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PED_GROUP_INDEX">
             <summary>
             A getter for [\_SET_PED_FACE_FEATURE](#_0x71A5C1DBA060049E). Returns 0.0 if fails to get.
             </summary>
@@ -6620,13 +6787,82 @@
             <summary>
             A getter for [\_SET_PED_HAIR_COLOR](#_0x4CFFC65454C93A49). Returns -1 if fails to get.
             </summary>
+            <summary>
+            A getter for [\_SET_PED_HAIR_COLOR](#_0x4CFFC65454C93A49). Returns -1 if fails to get.
+            </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_PED_HEAD_OVERLAY_DATA">
+            <summary>
+            A getter for [\_SET_PED_HAIR_COLOR](#_0x4CFFC65454C93A49). Returns -1 if fails to get.
+            </summary>
             <summary>
             A getter for [SET_PED_HEAD_OVERLAY](#_0x48F44967FA05CC1E) and [\_SET_PED_HEAD_OVERLAY_COLOR](#_0x497BF74A7B9CB952) natives.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PED_INDEX_FROM_ENTITY_INDEX">
+            <summary>
+            A getter for [SET_PED_HEAD_OVERLAY](#_0x48F44967FA05CC1E) and [\_SET_PED_HEAD_OVERLAY_COLOR](#_0x497BF74A7B9CB952) natives.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PLAYER_MELEE_WEAPON_DAMAGE_MODIFIER">
+            <summary>
+            A getter for [SET_PLAYER_MELEE_WEAPON_DAMAGE_MODIFIER](#_0x4A3DC7ECCC321032).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PLAYER_MELEE_WEAPON_DEFENSE_MODIFIER">
+            <summary>
+            A getter for [SET_PLAYER_MELEE_WEAPON_DEFENSE_MODIFIER](#_0xAE540335B4ABC4E2).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PLAYER_VEHICLE_DAMAGE_MODIFIER">
+            <summary>
+            A getter for [SET_PLAYER_VEHICLE_DAMAGE_MODIFIER](#_0xA50E117CDDF82F0C).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PLAYER_VEHICLE_DEFENSE_MODIFIER">
+            <summary>
+            A getter for [SET_PLAYER_VEHICLE_DEFENSE_MODIFIER](#_0x4C60E6EFDAFF2462).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PLAYER_WEAPON_DAMAGE_MODIFIER">
+            <summary>
+            A getter for [SET_PLAYER_WEAPON_DAMAGE_MODIFIER](#_0xCE07B9F7817AADA3).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PLAYER_WEAPON_DEFENSE_MODIFIER">
+            <summary>
+            A getter for [SET_PLAYER_WEAPON_DEFENSE_MODIFIER](#_0x2D83BC011CA14A3C).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_PLAYER_WEAPON_DEFENSE_MODIFIER_2">
+            <summary>
+            A getter for [\_SET_PLAYER_WEAPON_DEFENSE_MODIFIER_2](#_0xBCFDE9EDE4CF27DC).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_RANDOM_VEHICLE_DENSITY_MULTIPLIER">
+            <summary>
+            A getter for [SET_RANDOM_VEHICLE_DENSITY_MULTIPLIER_THIS_FRAME](#_0xB3B3359379FE77D3).
+            Same as vehicle density multiplier.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_REGISTERED_COMMANDS">
+            <summary>
+            Returns all commands that are registered in the command system.
+            The data returned adheres to the following layout:
+            
+            ```
+            [
+            {
+            "name": "cmdlist"
+            },
+            {
+            "name": "command1"
+            }
+            ]
+            ```
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_RELATIONSHIP_BETWEEN_GROUPS">
             <summary>
             Returns all commands that are registered in the command system.
             The data returned adheres to the following layout:
@@ -6651,6 +6887,15 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_RESOURCE_STATE">
             <summary>
+            Gets the metadata value at a specified key/index from a resource's manifest.
+            See also: [Resource manifest](https://docs.fivem.net/resources/manifest/)
+            </summary>
+            <summary>
+            Returns the current state of the specified resource.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_ROOM_KEY_FROM_ENTITY">
+            <summary>
             Returns the current state of the specified resource.
             </summary>
         </member>
@@ -6661,12 +6906,48 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_RUNTIME_TEXTURE_PITCH">
             <summary>
+            Gets the height of the specified runtime texture.
+            </summary>
+            <summary>
             Gets the row pitch of the specified runtime texture, for use when creating data for `SET_RUNTIME_TEXTURE_ARGB_DATA`.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_RUNTIME_TEXTURE_WIDTH">
             <summary>
+            Gets the row pitch of the specified runtime texture, for use when creating data for `SET_RUNTIME_TEXTURE_ARGB_DATA`.
+            </summary>
+            <summary>
             Gets the width of the specified runtime texture.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_SAFE_COORD_FOR_PED">
+            <summary>
+            Gets the width of the specified runtime texture.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_SCENARIO_PED_DENSITY_MULTIPLIER">
+            <summary>
+            A getter for [SET_SCENARIO_PED_DENSITY_MULTIPLIER_THIS_FRAME](#_0x7A556143A1C03898).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_STATE_BAG_VALUE">
+            <summary>
+            Returns the value of a state bag key.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_CHEAT_POWER_INCREASE">
+            <summary>
+            A getter for [SET_VEHICLE_CHEAT_POWER_INCREASE](#_0xB59E4BD37AE292DB).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_DENSITY_MULTIPLIER">
+            <summary>
+            A getter for [SET_VEHICLE_DENSITY_MULTIPLIER_THIS_FRAME](#_0x245A6883D966D537).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_DRAWN_WHEEL_ANGLE_MULT">
+            <summary>
+            Gets a vehicle's multiplier used with a wheel's GET_VEHICLE_WHEEL_STEERING_ANGLE to determine the angle the wheel is rendered.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_HANDLING_FLOAT">
@@ -6677,11 +6958,25 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_HANDLING_INT">
             <summary>
+            Returns the effective handling data of a vehicle as a floating-point value.
+            Example: `local fSteeringLock = GetVehicleHandlingFloat(vehicle, 'CHandlingData', 'fSteeringLock')`
+            </summary>
+            <summary>
             Returns the effective handling data of a vehicle as an integer value.
             Example: `local modelFlags = GetVehicleHandlingInt(vehicle, 'CHandlingData', 'strModelFlags')`
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_HANDLING_VECTOR">
+            <summary>
+            Returns the effective handling data of a vehicle as an integer value.
+            Example: `local modelFlags = GetVehicleHandlingInt(vehicle, 'CHandlingData', 'strModelFlags')`
+            </summary>
+            <summary>
+            Returns the effective handling data of a vehicle as a vector value.
+            Example: `local inertiaMultiplier = GetVehicleHandlingVector(vehicle, 'CHandlingData', 'vecInertiaMultiplier')`
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_HIGH_GEAR">
             <summary>
             Returns the effective handling data of a vehicle as a vector value.
             Example: `local inertiaMultiplier = GetVehicleHandlingVector(vehicle, 'CHandlingData', 'vecInertiaMultiplier')`
@@ -6690,6 +6985,16 @@
         <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_INDICATOR_LIGHTS">
             <summary>
             Gets the vehicle indicator light state. 0 = off, 1 = left, 2 = right, 3 = both
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS">
+            <summary>
+            Gets the vehicle indicator light state. 0 = off, 1 = left, 2 = right, 3 = both
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_TOP_SPEED_MODIFIER">
+            <summary>
+            A getter for [MODIFY_VEHICLE_TOP_SPEED](#_0x93A3996368C94158). Returns -1.0 if a modifier is not set.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_WHEELIE_STATE">
@@ -6703,10 +7008,47 @@
             ```
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_WHEEL_BRAKE_PRESSURE">
+            <summary>
+            List of known states:
+            
+            ```
+            1: Not wheeling.
+            65: Vehicle is ready to do wheelie (burnouting).
+            129: Vehicle is doing wheelie.
+            ```
+            </summary>
+            <summary>
+            Gets brake pressure of a wheel.
+            Max number of wheels can be retrieved with the native GET_VEHICLE_NUMBER_OF_WHEELS.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_WHEEL_SIZE">
+            <summary>
+            Returns vehicle's wheels' size (size is the same for all the wheels, cannot get/set specific wheel of vehicle).
+            Only works on non-default wheels (returns 0 in case of default wheels).
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_WHEEL_SPEED">
             <summary>
             Gets speed of a wheel at the tyre.
             Max number of wheels can be retrieved with the native GET_VEHICLE_NUMBER_OF_WHEELS.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_WHEEL_STEERING_ANGLE">
+            <summary>
+            Gets speed of a wheel at the tyre.
+            Max number of wheels can be retrieved with the native GET_VEHICLE_NUMBER_OF_WHEELS.
+            </summary>
+            <summary>
+            Gets steering angle of a wheel.
+            Max number of wheels can be retrieved with the native GET_VEHICLE_NUMBER_OF_WHEELS.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_WHEEL_WIDTH">
+            <summary>
+            Returns vehicle's wheels' width (width is the same for all the wheels, cannot get/set specific wheel of vehicle).
+            Only works on non-default wheels (returns 0 in case of default wheels).
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_WHEEL_X_OFFSET">
@@ -6714,7 +7056,22 @@
             Returns the offset of the specified wheel relative to the wheel's axle center.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_WHEEL_Y_ROTATION">
+            <summary>
+            Returns the offset of the specified wheel relative to the wheel's axle center.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_WEAPON_DAMAGE_MODIFIER">
+            <summary>
+            A getter for [\_SET_WEAPON_DAMAGE_MODIFIER](#_0x4757F00BC6323CFE).
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.HAS_MINIMAP_OVERLAY_LOADED">
+            <summary>
+            Returns whether or not the specific minimap overlay has loaded.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.HAS_MODEL_LOADED">
             <summary>
             Returns whether or not the specific minimap overlay has loaded.
             </summary>
@@ -6729,6 +7086,20 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.IS_BIGMAP_FULL">
             <summary>
+            &lt;!-- Native implemented by Disquse. 0xFFF65C63 --&gt;
+            
+            Returns true if the minimap is currently expanded. False if it's the normal minimap state.
+            Use [`IsBigmapFull`](#_0x66EE14B2) to check if the full map is currently revealed on the minimap.
+            </summary>
+            <summary>
+            &lt;!-- Native implemented by Disquse. 0x66EE14B2 --&gt;
+            
+            Returns true if the full map is currently revealed on the minimap. 
+            Use [`IsBigmapActive`](#_0xFFF65C63) to check if the minimap is currently expanded or in it's normal state.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.IS_BIT_SET">
+            <summary>
             &lt;!-- Native implemented by Disquse. 0x66EE14B2 --&gt;
             
             Returns true if the full map is currently revealed on the minimap. 
@@ -6742,10 +7113,25 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.IS_DUPLICITY_VERSION">
             <summary>
+            Returns whether or not a browser is created for a specified DUI browser object.
+            </summary>
+            <summary>
+            Gets whether or not this is the CitizenFX server.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.IS_DURANGO_VERSION">
+            <summary>
             Gets whether or not this is the CitizenFX server.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.IS_STREAMING_FILE_READY">
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            
+            Returns whether an asynchronous streaming file registration completed.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.IS_STREAM_PLAYING">
             <summary>
             **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
             
@@ -6759,7 +7145,92 @@
             Example: `local data = LoadResourceFile("devtools", "data.json")`
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.LOAD_STREAM">
+            <summary>
+            Reads the contents of a text file in a specified resource.
+            If executed on the client, this file has to be included in `files` in the resource manifest.
+            Example: `local data = LoadResourceFile("devtools", "data.json")`
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_ADD_VOICE_CHANNEL_LISTEN">
+            <summary>
+            Starts listening to the specified channel, when available.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_ADD_VOICE_TARGET_CHANNEL">
+            <summary>
+            Adds the specified channel to the target list for the specified Mumble voice target ID.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_ADD_VOICE_TARGET_PLAYER">
+            <summary>
+            Adds the specified player to the target list for the specified Mumble voice target ID.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_ADD_VOICE_TARGET_PLAYER_BY_SERVER_ID">
+            <summary>
+            Adds the specified player to the target list for the specified Mumble voice target ID.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_CLEAR_VOICE_TARGET">
+            <summary>
+            Clears the target list for the specified Mumble voice target ID.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_CLEAR_VOICE_TARGET_CHANNELS">
+            <summary>
+            Clears channels from the target list for the specified Mumble voice target ID.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_CLEAR_VOICE_TARGET_PLAYERS">
+            <summary>
+            Clears players from the target list for the specified Mumble voice target ID.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_GET_VOICE_CHANNEL_FROM_SERVER_ID">
+            <summary>
+            Returns the mumble voice channel from a player's server id.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_IS_CONNECTED">
+            <summary>
+            This native will return true if the user succesfully connected to the voice server.
+            If the user disabled the voice-chat setting it will return false.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_REMOVE_VOICE_CHANNEL_LISTEN">
+            <summary>
+            Stops listening to the specified channel.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_SET_SERVER_ADDRESS">
+            <summary>
+            Changes the Mumble server address to connect to, and reconnects to the new address.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_SET_VOICE_TARGET">
+            <summary>
+            Sets the current Mumble voice target ID to broadcast voice to.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_SET_VOLUME_OVERRIDE">
+            <summary>
+            Overrides the output volume for a particular player on Mumble. This will also bypass 3D audio and distance calculations. -1.0 to reset the override.
+            
+            Set to -1.0 to reset the Volume override.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.MUMBLE_SET_VOLUME_OVERRIDE_BY_SERVER_ID">
+            <summary>
+            Overrides the output volume for a particular player with the specified server id and player name on Mumble. This will also bypass 3D audio and distance calculations. -1.0 to reset the override.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.NETWORK_GET_ENTITY_OWNER">
+            <summary>
+            Returns the owner ID of the specified entity.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.NETWORK_GET_GAMERTAG_FROM_HANDLE">
             <summary>
             Returns the owner ID of the specified entity.
             </summary>
@@ -6771,15 +7242,24 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.PROFILER_EXIT_SCOPE">
             <summary>
+            Scope entry for profiler.
+            </summary>
+            <summary>
             Scope exit for profiler.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.PROFILER_IS_RECORDING">
             <summary>
+            Scope exit for profiler.
+            </summary>
+            <summary>
             Returns true if the profiler is active.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.REGISTER_ARCHETYPES">
+            <summary>
+            Returns true if the profiler is active.
+            </summary>
             <summary>
             **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
             
@@ -6787,6 +7267,11 @@
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.REGISTER_COMMAND">
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            
+            Registers a set of archetypes with the game engine. These should match `CBaseArchetypeDef` class information from the game.
+            </summary>
             <summary>
             Registered commands can be executed by entering them in the client console (this works for client side and server side registered commands). Or by entering them in the server console/through an RCON client (only works for server side registered commands). Or if you use a supported chat resource, like the default one provided in the cfx-server-data repository, then you can enter the command in chat by prefixing it with a `/`.
             
@@ -6801,6 +7286,17 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.REGISTER_ENTITIES">
             <summary>
+            Registered commands can be executed by entering them in the client console (this works for client side and server side registered commands). Or by entering them in the server console/through an RCON client (only works for server side registered commands). Or if you use a supported chat resource, like the default one provided in the cfx-server-data repository, then you can enter the command in chat by prefixing it with a `/`.
+            
+            Commands registered using this function can also be executed by resources, using the [`ExecuteCommand` native](#_0x561C060B).
+            
+            The restricted bool is not used on the client side. Permissions can only be checked on the server side, so if you want to limit your command with an ace permission automatically, make it a server command (by registering it in a server script).
+            
+            **Example result**:
+            
+            ![](https://i.imgur.com/TaCnG09.png)
+            </summary>
+            <summary>
             **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
             
             Registers a set of entities with the game engine. These should match `CEntityDef` class information from the game.
@@ -6809,16 +7305,43 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.REGISTER_FONT_FILE">
             <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            
+            Registers a set of entities with the game engine. These should match `CEntityDef` class information from the game.
+            At this time, this function **should not be used in a live environment**.
+            </summary>
+            <summary>
             Registers a specified .gfx file as GFx font library.
             The .gfx file has to be registered with the streamer already.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.REGISTER_FONT_ID">
             <summary>
+            Registers a specified .gfx file as GFx font library.
+            The .gfx file has to be registered with the streamer already.
+            </summary>
+            <summary>
             Registers a specified font name for use with text draw commands.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.REGISTER_HATED_TARGETS_AROUND_PED">
+            <summary>
+            Registers a specified font name for use with text draw commands.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.REGISTER_KEY_MAPPING">
+            <summary>
+            Registers a key mapping for the current resource.
+            
+            See the related [cookbook post](https://cookbook.fivem.net/2020/01/06/using-the-new-console-key-bindings/) for more information.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.REGISTER_RESOURCE_AS_EVENT_HANDLER">
+            <summary>
+            An internal function which allows the current resource's HLL script runtimes to receive state for the specified event.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.REGISTER_SCRIPT_WITH_AUDIO">
             <summary>
             An internal function which allows the current resource's HLL script runtimes to receive state for the specified event.
             </summary>
@@ -6834,10 +7357,29 @@
             <summary>
             **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
             
+            Registers a dynamic streaming asset from the server with the GTA streaming module system.
+            </summary>
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            
             Registers a KVP value as an asset with the GTA streaming module system. This function currently won't work.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.REGISTER_STREAMING_FILE_FROM_URL">
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            
+            Registers a KVP value as an asset with the GTA streaming module system. This function currently won't work.
+            </summary>
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            
+            Registers a file from an URL as a streaming asset in the GTA streaming subsystem. This will asynchronously register the asset, and caching is done based on the URL itself - cache headers are ignored.
+            
+            Use `IS_STREAMING_FILE_READY` to check if the asset has been registered successfully.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.REGISTER_TARGET">
             <summary>
             **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
             
@@ -6851,7 +7393,17 @@
             Experimental natives, please do not use in a live environment.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.REMOVE_SCENARIO_BLOCKING_AREA">
+            <summary>
+            Experimental natives, please do not use in a live environment.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.RESET_MAP_ZOOM_DATA_LEVEL">
+            <summary>
+            Resets values from the zoom level data by index to defaults from mapzoomdata.meta.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.RESET_PARTICLE_FX_OVERRIDE">
             <summary>
             Resets values from the zoom level data by index to defaults from mapzoomdata.meta.
             </summary>
@@ -6863,25 +7415,45 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SEND_DUI_MOUSE_DOWN">
             <summary>
+            Sends a message to the specific DUI root page. This is similar to SEND_NUI_MESSAGE.
+            </summary>
+            <summary>
             Injects a 'mouse down' event for a DUI object. Coordinates are expected to be set using SEND_DUI_MOUSE_MOVE.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SEND_DUI_MOUSE_MOVE">
+            <summary>
+            Injects a 'mouse down' event for a DUI object. Coordinates are expected to be set using SEND_DUI_MOUSE_MOVE.
+            </summary>
             <summary>
             Injects a 'mouse move' event for a DUI object. Coordinates are in browser space.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SEND_DUI_MOUSE_UP">
             <summary>
+            Injects a 'mouse move' event for a DUI object. Coordinates are in browser space.
+            </summary>
+            <summary>
             Injects a 'mouse up' event for a DUI object. Coordinates are expected to be set using SEND_DUI_MOUSE_MOVE.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SEND_DUI_MOUSE_WHEEL">
             <summary>
+            Injects a 'mouse up' event for a DUI object. Coordinates are expected to be set using SEND_DUI_MOUSE_MOVE.
+            </summary>
+            <summary>
             Injects a 'mouse wheel' event for a DUI object.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SEND_LOADING_SCREEN_MESSAGE">
+            <summary>
+            Injects a 'mouse wheel' event for a DUI object.
+            </summary>
+            <summary>
+            Sends a message to the `loadingScreen` NUI frame, which contains the HTML page referenced in `loadscreen` resources.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SEND_NUI_MESSAGE">
             <summary>
             Sends a message to the `loadingScreen` NUI frame, which contains the HTML page referenced in `loadscreen` resources.
             </summary>
@@ -6893,25 +7465,47 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_DISCORD_RICH_PRESENCE_ASSET">
             <summary>
+            This native sets the app id for the discord rich presence implementation.
+            </summary>
+            <summary>
             This native sets the image asset for the discord rich presence implementation.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_DISCORD_RICH_PRESENCE_ASSET_SMALL">
+            <summary>
+            This native sets the image asset for the discord rich presence implementation.
+            </summary>
             <summary>
             This native sets the small image asset for the discord rich presence implementation.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_DISCORD_RICH_PRESENCE_ASSET_SMALL_TEXT">
             <summary>
+            This native sets the small image asset for the discord rich presence implementation.
+            </summary>
+            <summary>
             This native sets the hover text of the small image asset for the discord rich presence implementation.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_DISCORD_RICH_PRESENCE_ASSET_TEXT">
             <summary>
+            This native sets the hover text of the small image asset for the discord rich presence implementation.
+            </summary>
+            <summary>
+            This native sets the hover text of the image asset for the discord rich presence implementation.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_DISPATCH_IDEAL_SPAWN_DISTANCE">
+            <summary>
             This native sets the hover text of the image asset for the discord rich presence implementation.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_DUI_URL">
+            <summary>
+            Navigates the specified DUI browser to a different URL.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_ENABLE_BOUND_ANKLES">
             <summary>
             Navigates the specified DUI browser to a different URL.
             </summary>
@@ -6925,15 +7519,32 @@
         <member name="F:CitizenFX.Core.Native.Hash.SET_HANDLING_FLOAT">
             <summary>
             Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
+            Example: `SetHandlingField('AIRTUG', 'CHandlingData', 'fSteeringLock', 360.0)`
+            </summary>
+            <summary>
+            Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
             Example: `SetHandlingFloat('AIRTUG', 'CHandlingData', 'fSteeringLock', 360.0)`
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_HANDLING_INT">
             <summary>
             Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
+            Example: `SetHandlingFloat('AIRTUG', 'CHandlingData', 'fSteeringLock', 360.0)`
+            </summary>
+            <summary>
+            Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_HANDLING_VECTOR">
+            <summary>
+            Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
+            </summary>
+            <summary>
+            Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
+            Example: `SetHandlingVector('AIRTUG', 'CHandlingData', 'vecCentreOfMassOffset', vector3(0.0, 0.0, -5.0))`
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_HD_AREA">
             <summary>
             Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
             Example: `SetHandlingVector('AIRTUG', 'CHandlingData', 'vecCentreOfMassOffset', vector3(0.0, 0.0, -5.0))`
@@ -6945,7 +7556,18 @@
             you will have to manually invoke `SHUTDOWN_LOADING_SCREEN_NUI` whenever you want to hide the NUI loading screen.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_MAPDATACULLBOX_ENABLED">
+            <summary>
+            Sets whether or not `SHUTDOWN_LOADING_SCREEN` automatically shuts down the NUI frame for the loading screen. If this is enabled,
+            you will have to manually invoke `SHUTDOWN_LOADING_SCREEN_NUI` whenever you want to hide the NUI loading screen.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_MAP_ZOOM_DATA_LEVEL">
+            <summary>
+            Sets values to the zoom level data by index.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_MAX_WANTED_LEVEL">
             <summary>
             Sets values to the zoom level data by index.
             </summary>
@@ -6954,6 +7576,20 @@
             <summary>
             Overrides how many real ms are equal to one game minute.
             A setter for [`GetMillisecondsPerGameMinute`](#_0x2F8B4D1C595B11DB).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_MINIMAP_CLIP_TYPE">
+            <summary>
+            Overrides how many real ms are equal to one game minute.
+            A setter for [`GetMillisecondsPerGameMinute`](#_0x2F8B4D1C595B11DB).
+            </summary>
+            <summary>
+            Sets the type for the minimap blip clipping object to be either rectangular or rounded.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_MINIMAP_COMPONENT_POSITION">
+            <summary>
+            Overrides the minimap component data (from `common:/data/ui/frontend.xml`) for a specified component.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_MINIMAP_HIDE_FOW">
@@ -6966,7 +7602,18 @@
             Sets the display info for a minimap overlay.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_MISSION_FLAG">
+            <summary>
+            Sets the display info for a minimap overlay.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_PLAYER_TALKING_OVERRIDE">
+            <summary>
+            the status of default voip system. It affects on `NETWORK_IS_PLAYER_TALKING` and `mp_facial` animation.
+            This function doesn't need to be called every frame, it works like a switcher.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_PLAYER_TARGETING_MODE">
             <summary>
             the status of default voip system. It affects on `NETWORK_IS_PLAYER_TALKING` and `mp_facial` animation.
             This function doesn't need to be called every frame, it works like a switcher.
@@ -6977,12 +7624,32 @@
             Sets the player's rich presence detail state for social platform providers to a specified string.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_ROADS_BACK_TO_ORIGINAL">
+            <summary>
+            Sets the player's rich presence detail state for social platform providers to a specified string.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_RUNTIME_TEXTURE_PIXEL">
             <summary>
             Sets a pixel in the specified runtime texture. This will have to be committed using `COMMIT_RUNTIME_TEXTURE` to have any effect.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_SCENARIO_GROUP_ENABLED">
+            <summary>
+            Sets a pixel in the specified runtime texture. This will have to be committed using `COMMIT_RUNTIME_TEXTURE` to have any effect.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_STATE_BAG_VALUE">
+            <summary>
+            Internal function for setting a state bag value.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_AUTO_REPAIR_DISABLED">
+            <summary>
+            Disables the vehicle from being repaired when a vehicle extra is enabled.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_BODY_HEALTH">
             <summary>
             Disables the vehicle from being repaired when a vehicle extra is enabled.
             </summary>
@@ -6995,16 +7662,32 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_HANDLING_FLOAT">
             <summary>
+            Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_FIELD`, this might require some experimentation.
+            Example: `SetVehicleHandlingField(vehicle, 'CHandlingData', 'fSteeringLock', 360.0)`
+            </summary>
+            <summary>
             Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_FLOAT`, this might require some experimentation.
             Example: `SetVehicleHandlingFloat(vehicle, 'CHandlingData', 'fSteeringLock', 360.0)`
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_HANDLING_INT">
             <summary>
+            Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_FLOAT`, this might require some experimentation.
+            Example: `SetVehicleHandlingFloat(vehicle, 'CHandlingData', 'fSteeringLock', 360.0)`
+            </summary>
+            <summary>
             Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_INT`, this might require some experimentation.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_HANDLING_VECTOR">
+            <summary>
+            Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_INT`, this might require some experimentation.
+            </summary>
+            <summary>
+            Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_VECTOR`, this might require some experimentation.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_HAS_BEEN_OWNED_BY_PLAYER">
             <summary>
             Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_VECTOR`, this might require some experimentation.
             </summary>
@@ -7022,7 +7705,63 @@
             ```
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_WHEELS_CAN_BREAK">
+            <summary>
+            Example script: &lt;https://pastebin.com/J6XGbkCW&gt;
+            
+            List of known states:
+            
+            ```
+            1: Not wheeling.
+            65: Vehicle is ready to do wheelie (burnouting).
+            129: Vehicle is doing wheelie.
+            ```
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_WHEEL_RIM_COLLIDER_SIZE">
+            <summary>
+            Not sure what this changes, probably determines physical rim size in case the tire is blown.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_WHEEL_SIZE">
+            <summary>
+            Sets vehicle's wheels' size (size is the same for all the wheels, cannot get/set specific wheel of vehicle).
+            Only works on non-default wheels.
+            Returns whether change was successful (can be false if trying to set size for non-default wheels).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_WHEEL_TIRE_COLLIDER_SIZE">
+            <summary>
+            Use along with SetVehicleWheelSize to resize the wheels (this native sets the collider size affecting physics while SetVehicleWheelSize will change visual size).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_WHEEL_TIRE_COLLIDER_WIDTH">
+            <summary>
+            Use along with SetVehicleWheelWidth to resize the wheels (this native sets the collider width affecting physics while SetVehicleWheelWidth will change visual width).
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_WHEEL_WIDTH">
+            <summary>
+            Sets vehicle's wheels' width (width is the same for all the wheels, cannot get/set specific wheel of vehicle).
+            Only works on non-default wheels.
+            Returns whether change was successful (can be false if trying to set width for non-default wheels).
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_WHEEL_X_OFFSET">
+            <summary>
+            Adjusts the offset of the specified wheel relative to the wheel's axle center.
+            Needs to be called every frame in order to function properly, as GTA will reset the offset otherwise.
+            This function can be especially useful to set the track width of a vehicle, for example:
+            
+            ```
+            function SetVehicleFrontTrackWidth(vehicle, width)
+            SetVehicleWheelXOffset(vehicle, 0, -width/2)
+            SetVehicleWheelXOffset(vehicle, 1, width/2)
+            end
+            ```
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_WHEEL_Y_ROTATION">
             <summary>
             Adjusts the offset of the specified wheel relative to the wheel's axle center.
             Needs to be called every frame in order to function properly, as GTA will reset the offset otherwise.
@@ -7041,7 +7780,17 @@
             Overrides a floating point value from `visualsettings.dat` temporarily.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_WANTED_LEVEL_MULTIPLIER">
+            <summary>
+            Overrides a floating point value from `visualsettings.dat` temporarily.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.SHUTDOWN_LOADING_SCREEN_NUI">
+            <summary>
+            Shuts down the `loadingScreen` NUI frame, similarly to `SHUTDOWN_LOADING_SCREEN`.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SIMULATED_ROUTE_GET_ETA">
             <summary>
             Shuts down the `loadingScreen` NUI frame, similarly to `SHUTDOWN_LOADING_SCREEN`.
             </summary>
@@ -7113,6 +7862,14 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.TRIGGER_LATENT_SERVER_EVENT_INTERNAL">
             <summary>
+            The backing function for TriggerEvent.
+            </summary>
+            <summary>
+            The backing function for TriggerLatentServerEvent.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.TRIGGER_MUSIC_EVENT">
+            <summary>
             The backing function for TriggerLatentServerEvent.
             </summary>
         </member>
@@ -7121,7 +7878,17 @@
             The backing function for TriggerServerEvent.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.TRIGGER_SONAR_BLIP">
+            <summary>
+            The backing function for TriggerServerEvent.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.WAS_EVENT_CANCELED">
+            <summary>
+            Returns whether or not the currently executing event was canceled.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.WAS_PED_SKELETON_UPDATED">
             <summary>
             Returns whether or not the currently executing event was canceled.
             </summary>
@@ -7255,7 +8022,23 @@
             A minimap overlay ID.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.AddMinimapOverlay2(System.String)">
+            <summary>
+            Loads a minimap overlay from a GFx file in the current resource.
+            </summary>
+            <param name="name">
+            The path to a `.gfx` file in the current resource. It has to be specified as a `file`.
+            </param>
+            <returns>
+            A minimap overlay ID.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.AddReplaceTexture(System.String,System.String,System.String,System.String)">
+            <summary>
+            Experimental natives, please do not use in a live environment.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.AddReplaceTexture2(System.String,System.String,System.String,System.String)">
             <summary>
             Experimental natives, please do not use in a live environment.
             </summary>
@@ -7307,12 +8090,36 @@
             A function in the overlay's TIMELINE.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.CallMinimapScaleformFunction2(System.Int32,System.String)">
+            <summary>
+            This is similar to the PushScaleformMovieFunction natives, except it calls in the `TIMELINE` of a minimap overlay.
+            </summary>
+            <param name="miniMap">
+            The minimap overlay ID.
+            </param>
+            <param name="fnName">
+            A function in the overlay's TIMELINE.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.CancelEvent">
             <summary>
             Cancels the currently executing event.
             </summary>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.CancelEvent2">
+            <summary>
+            Cancels the currently executing event.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.CommitRuntimeTexture(System.Int64)">
+            <summary>
+            Commits the backing pixels to the specified runtime texture.
+            </summary>
+            <param name="tex">
+            The runtime texture handle.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.CommitRuntimeTexture2(System.Int64)">
             <summary>
             Commits the backing pixels to the specified runtime texture.
             </summary>
@@ -7329,6 +8136,23 @@
             </param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.CreateDui(System.String,System.Int32,System.Int32)">
+            <summary>
+            Creates a DUI browser. This can be used to draw on a runtime texture using CREATE_RUNTIME_TEXTURE_FROM_DUI_HANDLE.
+            </summary>
+            <param name="url">
+            The initial URL to load in the browser.
+            </param>
+            <param name="width">
+            The width of the backing surface.
+            </param>
+            <param name="height">
+            The height of the backing surface.
+            </param>
+            <returns>
+            A DUI object.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.CreateDui2(System.String,System.Int32,System.Int32)">
             <summary>
             Creates a DUI browser. This can be used to draw on a runtime texture using CREATE_RUNTIME_TEXTURE_FROM_DUI_HANDLE.
             </summary>
@@ -7365,7 +8189,44 @@
             A runtime texture handle.
             </returns>
         </member>
-        <member name="M:CitizenFX.Core.Native.API.CreateRuntimeTextureFromDuiHandle(System.Int64,System.Int64,System.String)">
+        <member name="M:CitizenFX.Core.Native.API.CreateRuntimeTexture2(System.Int64,System.String,System.Int32,System.Int32)">
+            <summary>
+            Creates a blank runtime texture.
+            </summary>
+            <param name="txd">
+            A handle to the runtime TXD to create the runtime texture in.
+            </param>
+            <param name="txn">
+            The name for the texture in the runtime texture dictionary.
+            </param>
+            <param name="width">
+            The width of the new texture.
+            </param>
+            <param name="height">
+            The height of the new texture.
+            </param>
+            <returns>
+            A runtime texture handle.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.CreateRuntimeTextureFromDuiHandle(System.Int64,System.String,System.String)">
+            <summary>
+            Creates a runtime texture from a DUI handle.
+            </summary>
+            <param name="txd">
+            A handle to the runtime TXD to create the runtime texture in.
+            </param>
+            <param name="txn">
+            The name for the texture in the runtime texture dictionary.
+            </param>
+            <param name="duiHandle">
+            The DUI handle returned from GET_DUI_HANDLE.
+            </param>
+            <returns>
+            The runtime texture handle.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.CreateRuntimeTextureFromDuiHandle2(System.Int64,System.Int64,System.String)">
             <summary>
             Creates a runtime texture from a DUI handle.
             </summary>
@@ -7399,7 +8260,39 @@
             A runtime texture handle.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.CreateRuntimeTextureFromImage2(System.Int64,System.String,System.String)">
+            <summary>
+            Creates a runtime texture from the specified file in the current resource.
+            </summary>
+            <param name="txd">
+            A handle to the runtime TXD to create the runtime texture in.
+            </param>
+            <param name="txn">
+            The name for the texture in the runtime texture dictionary.
+            </param>
+            <param name="fileName">
+            The file name of an image to load. This should preferably be a PNG, and has to be specified as a `file` in the resource manifest.
+            </param>
+            <returns>
+            A runtime texture handle.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.CreateRuntimeTxd(System.String)">
+            <summary>
+            Creates a runtime texture dictionary with the specified name.
+            Example:
+            ```lua
+            local txd = CreateRuntimeTxd('meow')
+            ```
+            </summary>
+            <param name="name">
+            The name for the runtime TXD.
+            </param>
+            <returns>
+            A handle to the runtime TXD.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.CreateRuntimeTxd2(System.String)">
             <summary>
             Creates a runtime texture dictionary with the specified name.
             Example:
@@ -7422,6 +8315,14 @@
             The DUI browser handle.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.DestroyDui2(System.Int64)">
+            <summary>
+            Destroys a DUI browser.
+            </summary>
+            <param name="duiObject">
+            The DUI browser handle.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.DisplayText(System.Int64,System.Single,System.Single)">
             <summary>
             Note: you must use _CREATE_VAR_STRING
@@ -7436,6 +8337,18 @@
             :
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.DoorSystemGetActive">
+            <summary>
+            Returns a list of door system entries: a door system hash (see [ADD_DOOR_TO_SYSTEM](#_0x6F8838D03D1DC226)) and its object handle.
+            The data returned adheres to the following layout:
+            ```
+            [{doorHash1, doorHandle1}, ..., {doorHashN, doorHandleN}]
+            ```
+            </summary>
+            <returns>
+            An object containing a list of door system entries.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.ExperimentalLoadCloneCreate(System.String,System.Int32,System.String)">
             <summary>
             This native is not implemented.
@@ -7444,6 +8357,11 @@
             <param name="objectId" />
             <param name="tree" />
         </member>
+        <member name="M:CitizenFX.Core.Native.API.ExperimentalLoadCloneCreate2(System.String,System.Int32,System.String)">
+            <summary>
+            This native is not implemented.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.ExperimentalLoadCloneSync(System.Int32,System.String)">
             <summary>
             This native is not implemented.
@@ -7451,7 +8369,17 @@
             <param name="entity" />
             <param name="data" />
         </member>
+        <member name="M:CitizenFX.Core.Native.API.ExperimentalLoadCloneSync2(System.Int32,System.String)">
+            <summary>
+            This native is not implemented.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.ExperimentalSaveCloneCreate(System.Int32)">
+            <summary>
+            This native is not implemented.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.ExperimentalSaveCloneCreate2(System.Int32)">
             <summary>
             This native is not implemented.
             </summary>
@@ -7461,7 +8389,20 @@
             <summary>
             This native is not implemented.
             </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.ExperimentalSaveCloneSync2(System.Int32)">
+            <summary>
+            This native is not implemented.
+            </summary>
             <param name="entity" />
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.ForceSnowPass(System.Boolean)">
+            <summary>
+            Forces the game snow pass to render.
+            </summary>
+            <param name="enabled">
+            Whether or not to force rendering to use a snow pass.
+            </param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.GetActivePlayers">
             <summary>
@@ -7473,6 +8414,34 @@
             </summary>
             <returns>
             An object containing a list of player indices.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetActivePlayers2">
+            <summary>
+            Returns all player indices for 'active' physical players known to the client.
+            The data returned adheres to the following layout:
+            ```
+            [127, 42, 13, 37]
+            ```
+            </summary>
+            <returns>
+            An object containing a list of player indices.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetAmbientPedRangeMultiplier">
+            <summary>
+            A getter for [SET_AMBIENT_PED_RANGE_MULTIPLIER_THIS_FRAME](#_0x0B919E1FB47CC4E0).
+            </summary>
+            <returns>
+            Returns ambient ped range multiplier value.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetAmbientVehicleRangeMultiplier">
+            <summary>
+            A getter for [SET_AMBIENT_VEHICLE_RANGE_MULTIPLIER_THIS_FRAME](#_0x90B6DA738A9A25DA).
+            </summary>
+            <returns>
+            Returns ambient vehicle range multiplier value.
             </returns>
         </member>
         <member name="M:CitizenFX.Core.Native.API.GetAttributeCoreValue(System.Int32,System.Int32)">
@@ -7493,6 +8462,11 @@
             <summary>
             Returns the world matrix of the specified camera. To turn this into a view matrix, calculate the inverse.
             </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetCamMatrix2(System.Int32,CitizenFX.Core.Vector3@,CitizenFX.Core.Vector3@,CitizenFX.Core.Vector3@,CitizenFX.Core.Vector3@)">
+            <summary>
+            Returns the world matrix of the specified camera. To turn this into a view matrix, calculate the inverse.
+            </summary>
             <param name="camera" />
             <param name="rightVector" />
             <param name="forwardVector" />
@@ -7507,7 +8481,23 @@
             The name of the resource.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetCurrentResourceName2">
+            <summary>
+            Returns the name of the currently executing resource.
+            </summary>
+            <returns>
+            The name of the resource.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetCurrentServerEndpoint">
+            <summary>
+            Returns the peer address of the remote game server that the user is currently connected to.
+            </summary>
+            <returns>
+            The peer address of the game server (e.g. `127.0.0.1:30120`), or NULL if not available.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetCurrentServerEndpoint2">
             <summary>
             Returns the peer address of the remote game server that the user is currently connected to.
             </summary>
@@ -7526,10 +8516,37 @@
             The NUI window handle, for use in e.g. CREATE_RUNTIME_TEXTURE_FROM_DUI_HANDLE.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetDuiHandle2(System.Int64)">
+            <summary>
+            Returns the NUI window handle for a specified DUI browser object.
+            </summary>
+            <param name="duiObject">
+            The DUI browser handle.
+            </param>
+            <returns>
+            The NUI window handle, for use in e.g. CREATE_RUNTIME_TEXTURE_FROM_DUI_HANDLE.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetGameBuildString">
             <summary>
             Return example: 1207.69_dev_pc
             </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetGamePool(System.String)">
+            <summary>
+            Returns all pool handles for the given pool name; the data returned adheres to the following layout:
+            ```
+            [ 770, 1026, 1282, 1538, 1794, 2050, 2306, 2562, 2818, 3074, 3330, 3586, 3842, 4098, 4354, 4610, ...]
+            ```
+            ### Supported Pools
+            **1**: CPed
+            **2**: CObject
+            **3**: CVehicle
+            **4**: CPickup
+            </summary>
+            <returns>
+            An object containing a list of all pool handles
+            </returns>
         </member>
         <member name="M:CitizenFX.Core.Native.API.GetLabelTextByHash(System.UInt32)">
             <summary>
@@ -7540,6 +8557,32 @@
             </param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.GetMapZoomDataLevel(System.Int32,System.Single@,System.Single@,System.Single@,System.Single@,System.Single@)">
+            <summary>
+            Returns the zoom level data by index from mapzoomdata.meta file.
+            </summary>
+            <param name="index">
+            Zoom level index.
+            </param>
+            <param name="zoomScale">
+            fZoomScale value.
+            </param>
+            <param name="zoomSpeed">
+            fZoomSpeed value.
+            </param>
+            <param name="scrollSpeed">
+            fScrollSpeed value.
+            </param>
+            <param name="tilesX">
+            vTiles X.
+            </param>
+            <param name="tilesY">
+            vTiles Y.
+            </param>
+            <returns>
+            A boolean indicating TRUE if the data was received successfully.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetMapZoomDataLevel2(System.Int32,System.Single@,System.Single@,System.Single@,System.Single@,System.Single@)">
             <summary>
             Returns the zoom level data by index from mapzoomdata.meta file.
             </summary>
@@ -7577,7 +8620,46 @@
             The key to look up in the resource manifest.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetNumResourceMetadata2(System.String,System.String)">
+            <summary>
+            Gets the amount of metadata values with the specified key existing in the specified resource's manifest.
+            See also: [Resource manifest](https://docs.fivem.net/resources/manifest/)
+            </summary>
+            <param name="resourceName">
+            The resource name.
+            </param>
+            <param name="metadataKey">
+            The key to look up in the resource manifest.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetParkedVehicleDensityMultiplier">
+            <summary>
+            A getter for [SET_PARKED_VEHICLE_DENSITY_MULTIPLIER_THIS_FRAME](#_0xEAE6DCC7EEE3DB1D).
+            </summary>
+            <returns>
+            Returns parked vehicle density multiplier value.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPedDensityMultiplier">
+            <summary>
+            A getter for [SET_PED_DENSITY_MULTIPLIER_THIS_FRAME](#_0x95E3D6257B166CF2).
+            </summary>
+            <returns>
+            Returns ped density multiplier value.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetPedEyeColor(System.Int32)">
+            <summary>
+            A getter for [\_SET_PED_EYE_COLOR](#_0x50B56988B170AFDF). Returns -1 if fails to get.
+            </summary>
+            <param name="ped">
+            The target ped
+            </param>
+            <returns>
+            Returns ped's eye colour, or -1 if fails to get.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPedEyeColor2(System.Int32)">
             <summary>
             A getter for [\_SET_PED_EYE_COLOR](#_0x50B56988B170AFDF). Returns -1 if fails to get.
             </summary>
@@ -7602,6 +8684,20 @@
             Returns ped's face feature value, or 0.0 if fails to get.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPedFaceFeature2(System.Int32,System.Int32)">
+            <summary>
+            A getter for [\_SET_PED_FACE_FEATURE](#_0x71A5C1DBA060049E). Returns 0.0 if fails to get.
+            </summary>
+            <param name="ped">
+            The target ped
+            </param>
+            <param name="index">
+            Face feature index
+            </param>
+            <returns>
+            Returns ped's face feature value, or 0.0 if fails to get.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetPedHairColor(System.Int32)">
             <summary>
             A getter for [\_SET_PED_HAIR_COLOR](#_0x4CFFC65454C93A49). Returns -1 if fails to get.
@@ -7613,7 +8709,29 @@
             Returns ped's primary hair colour.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPedHairColor2(System.Int32)">
+            <summary>
+            A getter for [\_SET_PED_HAIR_COLOR](#_0x4CFFC65454C93A49). Returns -1 if fails to get.
+            </summary>
+            <param name="ped">
+            The target ped
+            </param>
+            <returns>
+            Returns ped's primary hair colour.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetPedHairHighlightColor(System.Int32)">
+            <summary>
+            A getter for [\_SET_PED_HAIR_COLOR](#_0x4CFFC65454C93A49). Returns -1 if fails to get.
+            </summary>
+            <param name="ped">
+            The target ped
+            </param>
+            <returns>
+            Returns ped's secondary hair colour.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPedHairHighlightColor2(System.Int32)">
             <summary>
             A getter for [\_SET_PED_HAIR_COLOR](#_0x4CFFC65454C93A49). Returns -1 if fails to get.
             </summary>
@@ -7653,7 +8771,138 @@
             Returns ped's head overlay data.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPedHeadOverlayData2(System.Int32,System.Int32,System.Int32@,System.Int32@,System.Int32@,System.Int32@,System.Single@)">
+            <summary>
+            A getter for [SET_PED_HEAD_OVERLAY](#_0x48F44967FA05CC1E) and [\_SET_PED_HEAD_OVERLAY_COLOR](#_0x497BF74A7B9CB952) natives.
+            </summary>
+            <param name="ped">
+            The target ped
+            </param>
+            <param name="index">
+            Overlay index
+            </param>
+            <param name="overlayValue">
+            Overlay value pointer
+            </param>
+            <param name="colourType">
+            Colour type pointer
+            </param>
+            <param name="firstColour">
+            First colour pointer
+            </param>
+            <param name="secondColour">
+            Second colour pointer
+            </param>
+            <param name="overlayOpacity">
+            Opacity pointer
+            </param>
+            <returns>
+            Returns ped's head overlay data.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPlayerMeleeWeaponDamageModifier">
+            <summary>
+            A getter for [SET_PLAYER_MELEE_WEAPON_DAMAGE_MODIFIER](#_0x4A3DC7ECCC321032).
+            </summary>
+            <returns>
+            Returns player melee weapon damage modifier value.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPlayerMeleeWeaponDefenseModifier(System.Int32)">
+            <summary>
+            A getter for [SET_PLAYER_MELEE_WEAPON_DEFENSE_MODIFIER](#_0xAE540335B4ABC4E2).
+            </summary>
+            <param name="playerId">
+            The player index.
+            </param>
+            <returns>
+            The value of player melee weapon defense modifier.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPlayerVehicleDamageModifier(System.Int32)">
+            <summary>
+            A getter for [SET_PLAYER_VEHICLE_DAMAGE_MODIFIER](#_0xA50E117CDDF82F0C).
+            </summary>
+            <param name="playerId">
+            The player index.
+            </param>
+            <returns>
+            The value of player vehicle damage modifier.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPlayerVehicleDefenseModifier(System.Int32)">
+            <summary>
+            A getter for [SET_PLAYER_VEHICLE_DEFENSE_MODIFIER](#_0x4C60E6EFDAFF2462).
+            </summary>
+            <param name="playerId">
+            The player index.
+            </param>
+            <returns>
+            The value of player vehicle defense modifier.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPlayerWeaponDamageModifier(System.Int32)">
+            <summary>
+            A getter for [SET_PLAYER_WEAPON_DAMAGE_MODIFIER](#_0xCE07B9F7817AADA3).
+            </summary>
+            <param name="playerId">
+            The player index.
+            </param>
+            <returns>
+            The value of player weapon damage modifier.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPlayerWeaponDefenseModifier(System.Int32)">
+            <summary>
+            A getter for [SET_PLAYER_WEAPON_DEFENSE_MODIFIER](#_0x2D83BC011CA14A3C).
+            </summary>
+            <param name="playerId">
+            The player index.
+            </param>
+            <returns>
+            The value of player weapon defense modifier.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetPlayerWeaponDefenseModifier_2(System.Int32)">
+            <summary>
+            A getter for [\_SET_PLAYER_WEAPON_DEFENSE_MODIFIER_2](#_0xBCFDE9EDE4CF27DC).
+            </summary>
+            <param name="playerId">
+            The player index.
+            </param>
+            <returns>
+            The value of player weapon defense modifier 2.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetRandomVehicleDensityMultiplier">
+            <summary>
+            A getter for [SET_RANDOM_VEHICLE_DENSITY_MULTIPLIER_THIS_FRAME](#_0xB3B3359379FE77D3).
+            Same as vehicle density multiplier.
+            </summary>
+            <returns>
+            Returns random vehicle density multiplier value.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetRegisteredCommands">
+            <summary>
+            Returns all commands that are registered in the command system.
+            The data returned adheres to the following layout:
+            ```
+            [
+            {
+            "name": "cmdlist"
+            },
+            {
+            "name": "command1"
+            }
+            ]
+            ```
+            </summary>
+            <returns>
+            An object containing registered commands.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetRegisteredCommands2">
             <summary>
             Returns all commands that are registered in the command system.
             The data returned adheres to the following layout:
@@ -7687,7 +8936,33 @@
             The value index, in a range from [0..GET_NUM_RESOURCE_METDATA-1].
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetResourceMetadata2(System.String,System.String,System.Int32)">
+            <summary>
+            Gets the metadata value at a specified key/index from a resource's manifest.
+            See also: [Resource manifest](https://docs.fivem.net/resources/manifest/)
+            </summary>
+            <param name="resourceName">
+            The resource name.
+            </param>
+            <param name="metadataKey">
+            The key in the resource manifest.
+            </param>
+            <param name="index">
+            The value index, in a range from [0..GET_NUM_RESOURCE_METDATA-1].
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetResourceState(System.String)">
+            <summary>
+            Returns the current state of the specified resource.
+            </summary>
+            <param name="resourceName">
+            The name of the resource.
+            </param>
+            <returns>
+            The resource state. One of `"missing", "started", "starting", "stopped", "stopping", "uninitialized" or "unknown"`.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetResourceState2(System.String)">
             <summary>
             Returns the current state of the specified resource.
             </summary>
@@ -7709,7 +8984,29 @@
             The height in pixels.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetRuntimeTextureHeight2(System.Int64)">
+            <summary>
+            Gets the height of the specified runtime texture.
+            </summary>
+            <param name="tex">
+            A handle to the runtime texture.
+            </param>
+            <returns>
+            The height in pixels.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetRuntimeTexturePitch(System.Int64)">
+            <summary>
+            Gets the row pitch of the specified runtime texture, for use when creating data for `SET_RUNTIME_TEXTURE_ARGB_DATA`.
+            </summary>
+            <param name="tex">
+            A handle to the runtime texture.
+            </param>
+            <returns>
+            The row pitch in bytes.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetRuntimeTexturePitch2(System.Int64)">
             <summary>
             Gets the row pitch of the specified runtime texture, for use when creating data for `SET_RUNTIME_TEXTURE_ARGB_DATA`.
             </summary>
@@ -7729,6 +9026,25 @@
             </param>
             <returns>
             The width in pixels.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetRuntimeTextureWidth2(System.Int64)">
+            <summary>
+            Gets the width of the specified runtime texture.
+            </summary>
+            <param name="tex">
+            A handle to the runtime texture.
+            </param>
+            <returns>
+            The width in pixels.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetScenarioPedDensityMultiplier">
+            <summary>
+            A getter for [SET_SCENARIO_PED_DENSITY_MULTIPLIER_THIS_FRAME](#_0x7A556143A1C03898).
+            </summary>
+            <returns>
+            Returns scenario ped density multiplier value.
             </returns>
         </member>
         <member name="M:CitizenFX.Core.Native.API.GetScriptHandleType(System.Int32)">
@@ -7752,7 +9068,60 @@
             :
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetStateBagValue(System.String,System.String)">
+            <summary>
+            Returns the value of a state bag key.
+            </summary>
+            <returns>
+            Value.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleCheatPowerIncrease(System.Int32)">
+            <summary>
+            A getter for [SET_VEHICLE_CHEAT_POWER_INCREASE](#_0xB59E4BD37AE292DB).
+            </summary>
+            <param name="vehicle">
+            The target vehicle.
+            </param>
+            <returns>
+            Returns vehicle's cheat power increase modifier value.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleDensityMultiplier">
+            <summary>
+            A getter for [SET_VEHICLE_DENSITY_MULTIPLIER_THIS_FRAME](#_0x245A6883D966D537).
+            </summary>
+            <returns>
+            Returns vehicle density multiplier value.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleDrawnWheelAngleMult(System.Int32)">
+            <summary>
+            Gets a vehicle's multiplier used with a wheel's GET_VEHICLE_WHEEL_STEERING_ANGLE to determine the angle the wheel is rendered.
+            </summary>
+            <param name="vehicle">
+            :
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetVehicleHandlingFloat(System.Int32,System.String,System.String)">
+            <summary>
+            Returns the effective handling data of a vehicle as a floating-point value.
+            Example: `local fSteeringLock = GetVehicleHandlingFloat(vehicle, 'CHandlingData', 'fSteeringLock')`
+            </summary>
+            <param name="vehicle">
+            The vehicle to obtain data for.
+            </param>
+            <param name="class_">
+            The handling class to get. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to get. These match the keys in `handling.meta`.
+            </param>
+            <returns>
+            A floating-point value.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleHandlingFloat2(System.Int32,System.String,System.String)">
             <summary>
             Returns the effective handling data of a vehicle as a floating-point value.
             Example: `local fSteeringLock = GetVehicleHandlingFloat(vehicle, 'CHandlingData', 'fSteeringLock')`
@@ -7788,7 +9157,43 @@
             An integer.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleHandlingInt2(System.Int32,System.String,System.String)">
+            <summary>
+            Returns the effective handling data of a vehicle as an integer value.
+            Example: `local modelFlags = GetVehicleHandlingInt(vehicle, 'CHandlingData', 'strModelFlags')`
+            </summary>
+            <param name="vehicle">
+            The vehicle to obtain data for.
+            </param>
+            <param name="class_">
+            The handling class to get. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to get. These match the keys in `handling.meta`.
+            </param>
+            <returns>
+            An integer.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetVehicleHandlingVector(System.Int32,System.String,System.String)">
+            <summary>
+            Returns the effective handling data of a vehicle as a vector value.
+            Example: `local inertiaMultiplier = GetVehicleHandlingVector(vehicle, 'CHandlingData', 'vecInertiaMultiplier')`
+            </summary>
+            <param name="vehicle">
+            The vehicle to obtain data for.
+            </param>
+            <param name="class_">
+            The handling class to get. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to get. These match the keys in `handling.meta`.
+            </param>
+            <returns>
+            An integer.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleHandlingVector2(System.Int32,System.String,System.String)">
             <summary>
             Returns the effective handling data of a vehicle as a vector value.
             Example: `local inertiaMultiplier = GetVehicleHandlingVector(vehicle, 'CHandlingData', 'vecInertiaMultiplier')`
@@ -7815,6 +9220,49 @@
             An integer.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleIndicatorLights2(System.Int32)">
+            <summary>
+            Gets the vehicle indicator light state. 0 = off, 1 = left, 2 = right, 3 = both
+            </summary>
+            <returns>
+            An integer.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleTopSpeedModifier(System.Int32)">
+            <summary>
+            A getter for [MODIFY_VEHICLE_TOP_SPEED](#_0x93A3996368C94158). Returns -1.0 if a modifier is not set.
+            </summary>
+            <param name="vehicle">
+            The target vehicle.
+            </param>
+            <returns>
+            Returns vehicle's modified top speed.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleWheelBrakePressure(System.Int32,System.Int32)">
+            <summary>
+            Gets brake pressure of a wheel.
+            Max number of wheels can be retrieved with the native GET_VEHICLE_NUMBER_OF_WHEELS.
+            </summary>
+            <param name="vehicle">
+            :
+            </param>
+            <param name="wheelIndex">
+            :
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleWheelSize(System.Int32)">
+            <summary>
+            Returns vehicle's wheels' size (size is the same for all the wheels, cannot get/set specific wheel of vehicle).
+            Only works on non-default wheels (returns 0 in case of default wheels).
+            </summary>
+            <param name="vehicle">
+            The vehicle to obtain data for.
+            </param>
+            <returns>
+            Float representing size of the wheel (usually between 0.5 and 1.5)
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetVehicleWheelSpeed(System.Int32,System.Int32)">
             <summary>
             Gets speed of a wheel at the tyre.
@@ -7826,7 +9274,48 @@
             An integer.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleWheelSpeed2(System.Int32,System.Int32)">
+            <summary>
+            Gets speed of a wheel at the tyre.
+            Max number of wheels can be retrieved with the native GET_VEHICLE_NUMBER_OF_WHEELS.
+            </summary>
+            <returns>
+            An integer.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleWheelSteeringAngle(System.Int32,System.Int32)">
+            <summary>
+            Gets steering angle of a wheel.
+            Max number of wheels can be retrieved with the native GET_VEHICLE_NUMBER_OF_WHEELS.
+            </summary>
+            <param name="vehicle">
+            :
+            </param>
+            <param name="wheelIndex">
+            :
+            </param>
+            <returns>
+            The steering angle of the wheel, with 0 being straight.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleWheelWidth(System.Int32)">
+            <summary>
+            Returns vehicle's wheels' width (width is the same for all the wheels, cannot get/set specific wheel of vehicle).
+            Only works on non-default wheels (returns 0 in case of default wheels).
+            </summary>
+            <param name="vehicle">
+            The vehicle to obtain data for.
+            </param>
+            <returns>
+            Float representing width of the wheel (usually between 0.1 and 1.5)
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetVehicleWheelXOffset(System.Int32,System.Int32)">
+            <summary>
+            Returns the offset of the specified wheel relative to the wheel's axle center.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleWheelXOffset2(System.Int32,System.Int32)">
             <summary>
             Returns the offset of the specified wheel relative to the wheel's axle center.
             </summary>
@@ -7847,6 +9336,33 @@
             </param>
             <returns>
             Vehicle's current wheelie state.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetVehicleWheelieState2(System.Int32)">
+            <summary>
+            List of known states:
+            ```
+            1: Not wheeling.
+            65: Vehicle is ready to do wheelie (burnouting).
+            129: Vehicle is doing wheelie.
+            ```
+            </summary>
+            <param name="vehicle">
+            Vehicle
+            </param>
+            <returns>
+            Vehicle's current wheelie state.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetWeaponDamageModifier(System.UInt32)">
+            <summary>
+            A getter for [\_SET_WEAPON_DAMAGE_MODIFIER](#_0x4757F00BC6323CFE).
+            </summary>
+            <param name="weaponHash">
+            Weapon name hash.
+            </param>
+            <returns>
+            A weapon damage modifier.
             </returns>
         </member>
         <member name="M:CitizenFX.Core.Native.API.GetWeapontypeModel(System.UInt32)">
@@ -7913,6 +9429,17 @@
             A boolean indicating load status.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.HasMinimapOverlayLoaded2(System.Int32)">
+            <summary>
+            Returns whether or not the specific minimap overlay has loaded.
+            </summary>
+            <param name="id">
+            A minimap overlay ID.
+            </param>
+            <returns>
+            A boolean indicating load status.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.IntToString(System.Int32,System.String,System.String)">
             <summary>
             Note: the buffer should be exactly 32 bytes long
@@ -7937,7 +9464,27 @@
             A bool indicating if the minimap is currently expanded or normal state.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.IsBigmapActive2">
+            <summary>
+            &lt;!-- Native implemented by Disquse. 0xFFF65C63 --&gt;
+            Returns true if the minimap is currently expanded. False if it's the normal minimap state.
+            Use [`IsBigmapFull`](#_0x66EE14B2) to check if the full map is currently revealed on the minimap.
+            </summary>
+            <returns>
+            A bool indicating if the minimap is currently expanded or normal state.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.IsBigmapFull">
+            <summary>
+            &lt;!-- Native implemented by Disquse. 0x66EE14B2 --&gt;
+            Returns true if the full map is currently revealed on the minimap.
+            Use [`IsBigmapActive`](#_0xFFF65C63) to check if the minimap is currently expanded or in it's normal state.
+            </summary>
+            <returns>
+            Returns true if the full map is currently revealed on the minimap.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.IsBigmapFull2">
             <summary>
             &lt;!-- Native implemented by Disquse. 0x66EE14B2 --&gt;
             Returns true if the full map is currently revealed on the minimap.
@@ -7958,7 +9505,26 @@
             A boolean indicating TRUE if the browser is created.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.IsDuiAvailable2(System.Int64)">
+            <summary>
+            Returns whether or not a browser is created for a specified DUI browser object.
+            </summary>
+            <param name="duiObject">
+            The DUI browser handle.
+            </param>
+            <returns>
+            A boolean indicating TRUE if the browser is created.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.IsDuplicityVersion">
+            <summary>
+            Gets whether or not this is the CitizenFX server.
+            </summary>
+            <returns>
+            A boolean value.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.IsDuplicityVersion2">
             <summary>
             Gets whether or not this is the CitizenFX server.
             </summary>
@@ -7972,6 +9538,18 @@
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.IsStreamingFileReady(System.String)">
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            Returns whether an asynchronous streaming file registration completed.
+            </summary>
+            <param name="registerAs">
+            The file name to check, for example `asset.ydr`.
+            </param>
+            <returns>
+            Whether or not the streaming file has been registered.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.IsStreamingFileReady2(System.String)">
             <summary>
             **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
             Returns whether an asynchronous streaming file registration completed.
@@ -7998,6 +9576,157 @@
             <returns>
             The file contents
             </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.LoadResourceFile2(System.String,System.String)">
+            <summary>
+            Reads the contents of a text file in a specified resource.
+            If executed on the client, this file has to be included in `files` in the resource manifest.
+            Example: `local data = LoadResourceFile("devtools", "data.json")`
+            </summary>
+            <param name="resourceName">
+            The resource name.
+            </param>
+            <param name="fileName">
+            The file in the resource.
+            </param>
+            <returns>
+            The file contents
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleAddVoiceChannelListen(System.Int32)">
+            <summary>
+            Starts listening to the specified channel, when available.
+            </summary>
+            <param name="channel">
+            A game voice channel ID.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleAddVoiceTargetChannel(System.Int32,System.Int32)">
+            <summary>
+            Adds the specified channel to the target list for the specified Mumble voice target ID.
+            </summary>
+            <param name="targetId">
+            A Mumble voice target ID, ranging from 1..30 (inclusive).
+            </param>
+            <param name="channel">
+            A game voice channel ID.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleAddVoiceTargetPlayer(System.Int32,System.Int32)">
+            <summary>
+            Adds the specified player to the target list for the specified Mumble voice target ID.
+            </summary>
+            <param name="targetId">
+            A Mumble voice target ID, ranging from 1..30 (inclusive).
+            </param>
+            <param name="player">
+            A game player index.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleAddVoiceTargetPlayerByServerId(System.Int32,System.Int32)">
+            <summary>
+            Adds the specified player to the target list for the specified Mumble voice target ID.
+            </summary>
+            <param name="targetId">
+            A Mumble voice target ID, ranging from 1..30 (inclusive).
+            </param>
+            <param name="serverId">
+            The player's server id.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleClearVoiceTarget(System.Int32)">
+            <summary>
+            Clears the target list for the specified Mumble voice target ID.
+            </summary>
+            <param name="targetId">
+            A Mumble voice target ID, ranging from 1..30 (inclusive).
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleClearVoiceTargetChannels(System.Int32)">
+            <summary>
+            Clears channels from the target list for the specified Mumble voice target ID.
+            </summary>
+            <param name="targetId">
+            A Mumble voice target ID, ranging from 1..30 (inclusive).
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleClearVoiceTargetPlayers(System.Int32)">
+            <summary>
+            Clears players from the target list for the specified Mumble voice target ID.
+            </summary>
+            <param name="targetId">
+            A Mumble voice target ID, ranging from 1..30 (inclusive).
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleGetVoiceChannelFromServerId(System.Int32)">
+            <summary>
+            Returns the mumble voice channel from a player's server id.
+            </summary>
+            <param name="serverId">
+            The player's server id.
+            </param>
+            <returns>
+            Int representing the identifier of the voice channel.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleIsConnected">
+            <summary>
+            This native will return true if the user succesfully connected to the voice server.
+            If the user disabled the voice-chat setting it will return false.
+            </summary>
+            <returns>
+            True if the player is connected to a mumble server.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleRemoveVoiceChannelListen(System.Int32)">
+            <summary>
+            Stops listening to the specified channel.
+            </summary>
+            <param name="channel">
+            A game voice channel ID.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleSetServerAddress(System.String,System.Int32)">
+            <summary>
+            Changes the Mumble server address to connect to, and reconnects to the new address.
+            </summary>
+            <param name="address">
+            The address of the mumble server.
+            </param>
+            <param name="port">
+            The port of the mumble server.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleSetVoiceTarget(System.Int32)">
+            <summary>
+            Sets the current Mumble voice target ID to broadcast voice to.
+            </summary>
+            <param name="targetId">
+            A Mumble voice target ID, ranging from 1..30 (inclusive). 0 disables voice targets, and 31 is server loopback.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleSetVolumeOverride(System.Int32,System.Single)">
+            <summary>
+            Overrides the output volume for a particular player on Mumble. This will also bypass 3D audio and distance calculations. -1.0 to reset the override.
+            Set to -1.0 to reset the Volume override.
+            </summary>
+            <param name="player">
+            A game player index.
+            </param>
+            <param name="volume">
+            The volume, ranging from 0.0 to 1.0 (or above).
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.MumbleSetVolumeOverrideByServerId(System.Int32,System.Single)">
+            <summary>
+            Overrides the output volume for a particular player with the specified server id and player name on Mumble. This will also bypass 3D audio and distance calculations. -1.0 to reset the override.
+            </summary>
+            <param name="serverId">
+            The player's server id.
+            </param>
+            <param name="volume">
+            The volume, ranging from 0.0 to 1.0 (or above).
+            </param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.N_0x2238ec3ec631ab1f">
             <summary>
@@ -8140,7 +9869,26 @@
             On the server, the server ID of the entity owner. On the client, returns the player/slot ID of the entity owner.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.NetworkGetEntityOwner2(System.Int32)">
+            <summary>
+            Returns the owner ID of the specified entity.
+            </summary>
+            <param name="entity">
+            The entity to get the owner for.
+            </param>
+            <returns>
+            On the server, the server ID of the entity owner. On the client, returns the player/slot ID of the entity owner.
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.ProfilerEnterScope(System.String)">
+            <summary>
+            Scope entry for profiler.
+            </summary>
+            <param name="scopeName">
+            Scope name.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.ProfilerEnterScope2(System.String)">
             <summary>
             Scope entry for profiler.
             </summary>
@@ -8153,7 +9901,20 @@
             Scope exit for profiler.
             </summary>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.ProfilerExitScope2">
+            <summary>
+            Scope exit for profiler.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.ProfilerIsRecording">
+            <summary>
+            Returns true if the profiler is active.
+            </summary>
+            <returns>
+            True or false.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.ProfilerIsRecording2">
             <summary>
             Returns true if the profiler is active.
             </summary>
@@ -8170,7 +9931,34 @@
             A function returning a list of archetypes.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.RegisterArchetypes2(CitizenFX.Core.Native.InputArgument)">
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            Registers a set of archetypes with the game engine. These should match `CBaseArchetypeDef` class information from the game.
+            </summary>
+            <param name="factory">
+            A function returning a list of archetypes.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.RegisterCommand(System.String,CitizenFX.Core.Native.InputArgument,System.Boolean)">
+            <summary>
+            Registered commands can be executed by entering them in the client console (this works for client side and server side registered commands). Or by entering them in the server console/through an RCON client (only works for server side registered commands). Or if you use a supported chat resource, like the default one provided in the cfx-server-data repository, then you can enter the command in chat by prefixing it with a `/`.
+            Commands registered using this function can also be executed by resources, using the [`ExecuteCommand` native](#_0x561C060B).
+            The restricted bool is not used on the client side. Permissions can only be checked on the server side, so if you want to limit your command with an ace permission automatically, make it a server command (by registering it in a server script).
+            **Example result**:
+            ![](https://i.imgur.com/TaCnG09.png)
+            </summary>
+            <param name="commandName">
+            The command you want to register.
+            </param>
+            <param name="handler">
+            A handler function that gets called whenever the command is executed.
+            </param>
+            <param name="restricted">
+            If this is a server command and you set this to true, then players will need the command.yourCommandName ace permission to execute this command.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.RegisterCommand2(System.String,CitizenFX.Core.Native.InputArgument,System.Boolean)">
             <summary>
             Registered commands can be executed by entering them in the client console (this works for client side and server side registered commands). Or by entering them in the server console/through an RCON client (only works for server side registered commands). Or if you use a supported chat resource, like the default one provided in the cfx-server-data repository, then you can enter the command in chat by prefixing it with a `/`.
             Commands registered using this function can also be executed by resources, using the [`ExecuteCommand` native](#_0x561C060B).
@@ -8198,7 +9986,26 @@
             A function returning a list of entities.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.RegisterEntities2(CitizenFX.Core.Native.InputArgument)">
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            Registers a set of entities with the game engine. These should match `CEntityDef` class information from the game.
+            At this time, this function **should not be used in a live environment**.
+            </summary>
+            <param name="factory">
+            A function returning a list of entities.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.RegisterFontFile(System.String)">
+            <summary>
+            Registers a specified .gfx file as GFx font library.
+            The .gfx file has to be registered with the streamer already.
+            </summary>
+            <param name="fileName">
+            The name of the .gfx file, without extension.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.RegisterFontFile2(System.String)">
             <summary>
             Registers a specified .gfx file as GFx font library.
             The .gfx file has to be registered with the streamer already.
@@ -8218,6 +10025,35 @@
             An index to use with [SET_TEXT_FONT](#_0x66E0276CC5F6B9DA) and similar natives.
             </returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.RegisterFontId2(System.String)">
+            <summary>
+            Registers a specified font name for use with text draw commands.
+            </summary>
+            <param name="fontName">
+            The name of the font in the GFx font library.
+            </param>
+            <returns>
+            An index to use with [SET_TEXT_FONT](#_0x66E0276CC5F6B9DA) and similar natives.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.RegisterKeyMapping(System.String,System.String,System.String,System.String)">
+            <summary>
+            Registers a key mapping for the current resource.
+            See the related [cookbook post](https://cookbook.fivem.net/2020/01/06/using-the-new-console-key-bindings/) for more information.
+            </summary>
+            <param name="commandString">
+            The command to execute, and the identifier of the binding.
+            </param>
+            <param name="description">
+            A description for in the settings menu.
+            </param>
+            <param name="defaultMapper">
+            The mapper ID to use for the default binding, e.g. `keyboard`.
+            </param>
+            <param name="defaultParameter">
+            The IO parameter ID to use for the default binding, e.g. `f3`.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.RegisterResourceAsEventHandler(System.String)">
             <summary>
             An internal function which allows the current resource's HLL script runtimes to receive state for the specified event.
@@ -8226,7 +10062,30 @@
             An event name, or "\*" to disable HLL event filtering for this resource.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.RegisterResourceAsEventHandler2(System.String)">
+            <summary>
+            An internal function which allows the current resource's HLL script runtimes to receive state for the specified event.
+            </summary>
+            <param name="eventName">
+            An event name, or "\*" to disable HLL event filtering for this resource.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.RegisterStreamingFileFromCache(System.String,System.String,System.String)">
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            Registers a dynamic streaming asset from the server with the GTA streaming module system.
+            </summary>
+            <param name="resourceName">
+            The resource to add the asset to.
+            </param>
+            <param name="fileName">
+            A file name in the resource.
+            </param>
+            <param name="cacheString">
+            The string returned from `REGISTER_RESOURCE_ASSET` on the server.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.RegisterStreamingFileFromCache2(System.String,System.String,System.String)">
             <summary>
             **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
             Registers a dynamic streaming asset from the server with the GTA streaming module system.
@@ -8250,7 +10109,29 @@
             The KVP key in the current resource to register as an asset.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.RegisterStreamingFileFromKvs2(System.String)">
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            Registers a KVP value as an asset with the GTA streaming module system. This function currently won't work.
+            </summary>
+            <param name="kvsKey">
+            The KVP key in the current resource to register as an asset.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.RegisterStreamingFileFromUrl(System.String,System.String)">
+            <summary>
+            **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
+            Registers a file from an URL as a streaming asset in the GTA streaming subsystem. This will asynchronously register the asset, and caching is done based on the URL itself - cache headers are ignored.
+            Use `IS_STREAMING_FILE_READY` to check if the asset has been registered successfully.
+            </summary>
+            <param name="registerAs">
+            The file name to register as, for example `asset.ydr`.
+            </param>
+            <param name="url">
+            The URL to fetch the asset from.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.RegisterStreamingFileFromUrl2(System.String,System.String)">
             <summary>
             **Experimental**: This native may be altered or removed in future versions of CitizenFX without warning.
             Registers a file from an URL as a streaming asset in the GTA streaming subsystem. This will asynchronously register the asset, and caching is done based on the URL itself - cache headers are ignored.
@@ -8270,7 +10151,20 @@
             <param name="origTxd" />
             <param name="origTxn" />
         </member>
+        <member name="M:CitizenFX.Core.Native.API.RemoveReplaceTexture2(System.String,System.String)">
+            <summary>
+            Experimental natives, please do not use in a live environment.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.ResetMapZoomDataLevel(System.Int32)">
+            <summary>
+            Resets values from the zoom level data by index to defaults from mapzoomdata.meta.
+            </summary>
+            <param name="index">
+            Zoom level index.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.ResetMapZoomDataLevel2(System.Int32)">
             <summary>
             Resets values from the zoom level data by index to defaults from mapzoomdata.meta.
             </summary>
@@ -8289,7 +10183,29 @@
             The message, encoded as JSON.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SendDuiMessage2(System.Int64,System.String)">
+            <summary>
+            Sends a message to the specific DUI root page. This is similar to SEND_NUI_MESSAGE.
+            </summary>
+            <param name="duiObject">
+            The DUI browser handle.
+            </param>
+            <param name="jsonString">
+            The message, encoded as JSON.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SendDuiMouseDown(System.Int64,System.String)">
+            <summary>
+            Injects a 'mouse down' event for a DUI object. Coordinates are expected to be set using SEND_DUI_MOUSE_MOVE.
+            </summary>
+            <param name="duiObject">
+            The DUI browser handle.
+            </param>
+            <param name="button">
+            Either `'left'`, `'middle'` or `'right'`.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SendDuiMouseDown2(System.Int64,System.String)">
             <summary>
             Injects a 'mouse down' event for a DUI object. Coordinates are expected to be set using SEND_DUI_MOUSE_MOVE.
             </summary>
@@ -8314,7 +10230,32 @@
             The mouse Y position.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SendDuiMouseMove2(System.Int64,System.Int32,System.Int32)">
+            <summary>
+            Injects a 'mouse move' event for a DUI object. Coordinates are in browser space.
+            </summary>
+            <param name="duiObject">
+            The DUI browser handle.
+            </param>
+            <param name="x">
+            The mouse X position.
+            </param>
+            <param name="y">
+            The mouse Y position.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SendDuiMouseUp(System.Int64,System.String)">
+            <summary>
+            Injects a 'mouse up' event for a DUI object. Coordinates are expected to be set using SEND_DUI_MOUSE_MOVE.
+            </summary>
+            <param name="duiObject">
+            The DUI browser handle.
+            </param>
+            <param name="button">
+            Either `'left'`, `'middle'` or `'right'`.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SendDuiMouseUp2(System.Int64,System.String)">
             <summary>
             Injects a 'mouse up' event for a DUI object. Coordinates are expected to be set using SEND_DUI_MOUSE_MOVE.
             </summary>
@@ -8339,7 +10280,32 @@
             The wheel X delta.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SendDuiMouseWheel2(System.Int64,System.Int32,System.Int32)">
+            <summary>
+            Injects a 'mouse wheel' event for a DUI object.
+            </summary>
+            <param name="duiObject">
+            The DUI browser handle.
+            </param>
+            <param name="deltaY">
+            The wheel Y delta.
+            </param>
+            <param name="deltaX">
+            The wheel X delta.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SendLoadingScreenMessage(System.String)">
+            <summary>
+            Sends a message to the `loadingScreen` NUI frame, which contains the HTML page referenced in `loadscreen` resources.
+            </summary>
+            <param name="jsonString">
+            The JSON-encoded message.
+            </param>
+            <returns>
+            A success value.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SendLoadingScreenMessage2(System.String)">
             <summary>
             Sends a message to the `loadingScreen` NUI frame, which contains the HTML page referenced in `loadscreen` resources.
             </summary>
@@ -8355,7 +10321,20 @@
             This native sets the app id for the discord rich presence implementation.
             </summary>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetDiscordAppId2(System.String)">
+            <summary>
+            This native sets the app id for the discord rich presence implementation.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetDiscordRichPresenceAsset(System.String)">
+            <summary>
+            This native sets the image asset for the discord rich presence implementation.
+            </summary>
+            <param name="assetName">
+            The name of a valid asset registered on Discordapp's developer dashboard. note that the asset has to be registered under the same discord API application set using the SET_DISCORD_APP_ID native.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetDiscordRichPresenceAsset2(System.String)">
             <summary>
             This native sets the image asset for the discord rich presence implementation.
             </summary>
@@ -8371,7 +10350,23 @@
             The name of a valid asset registered on Discordapp's developer dashboard. Note that the asset has to be registered under the same discord API application set using the SET_DISCORD_APP_ID native.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetDiscordRichPresenceAssetSmall2(System.String)">
+            <summary>
+            This native sets the small image asset for the discord rich presence implementation.
+            </summary>
+            <param name="assetName">
+            The name of a valid asset registered on Discordapp's developer dashboard. Note that the asset has to be registered under the same discord API application set using the SET_DISCORD_APP_ID native.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetDiscordRichPresenceAssetSmallText(System.String)">
+            <summary>
+            This native sets the hover text of the small image asset for the discord rich presence implementation.
+            </summary>
+            <param name="text">
+            Text to be displayed when hovering over small image asset. Note that you must also set a valid small image asset using the SET_DISCORD_RICH_PRESENCE_ASSET_SMALL native.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetDiscordRichPresenceAssetSmallText2(System.String)">
             <summary>
             This native sets the hover text of the small image asset for the discord rich presence implementation.
             </summary>
@@ -8387,7 +10382,26 @@
             Text to be displayed when hovering over image asset. Note that you must also set a valid image asset using the SET_DISCORD_RICH_PRESENCE_ASSET native.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetDiscordRichPresenceAssetText2(System.String)">
+            <summary>
+            This native sets the hover text of the image asset for the discord rich presence implementation.
+            </summary>
+            <param name="text">
+            Text to be displayed when hovering over image asset. Note that you must also set a valid image asset using the SET_DISCORD_RICH_PRESENCE_ASSET native.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetDuiUrl(System.Int64,System.String)">
+            <summary>
+            Navigates the specified DUI browser to a different URL.
+            </summary>
+            <param name="duiObject">
+            The DUI browser handle.
+            </param>
+            <param name="url">
+            The new URL.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetDuiUrl2(System.Int64,System.String)">
             <summary>
             Navigates the specified DUI browser to a different URL.
             </summary>
@@ -8430,7 +10444,43 @@
             The value to set.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetHandlingField2(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
+            Example: `SetHandlingField('AIRTUG', 'CHandlingData', 'fSteeringLock', 360.0)`
+            </summary>
+            <param name="vehicle">
+            The vehicle class to set data for.
+            </param>
+            <param name="class_">
+            The handling class to set. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to set. These match the keys in `handling.meta`.
+            </param>
+            <param name="_value">
+            The value to set.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetHandlingFloat(System.String,System.String,System.String,System.Single)">
+            <summary>
+            Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
+            Example: `SetHandlingFloat('AIRTUG', 'CHandlingData', 'fSteeringLock', 360.0)`
+            </summary>
+            <param name="vehicle">
+            The vehicle class to set data for.
+            </param>
+            <param name="class_">
+            The handling class to set. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to set. These match the keys in `handling.meta`.
+            </param>
+            <param name="_value">
+            The floating-point value to set.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetHandlingFloat2(System.String,System.String,System.String,System.Single)">
             <summary>
             Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
             Example: `SetHandlingFloat('AIRTUG', 'CHandlingData', 'fSteeringLock', 360.0)`
@@ -8465,6 +10515,23 @@
             The integer value to set.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetHandlingInt2(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
+            </summary>
+            <param name="vehicle">
+            The vehicle class to set data for.
+            </param>
+            <param name="class_">
+            The handling class to set. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to set. These match the keys in `handling.meta`.
+            </param>
+            <param name="_value">
+            The integer value to set.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetHandlingVector(System.String,System.String,System.String,CitizenFX.Core.Vector3)">
             <summary>
             Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
@@ -8483,7 +10550,34 @@
             The Vector3 value to set.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetHandlingVector2(System.String,System.String,System.String,CitizenFX.Core.Vector3)">
+            <summary>
+            Sets a global handling override for a specific vehicle class. The name is supposed to match the `handlingName` field from handling.meta.
+            Example: `SetHandlingVector('AIRTUG', 'CHandlingData', 'vecCentreOfMassOffset', vector3(0.0, 0.0, -5.0))`
+            </summary>
+            <param name="vehicle">
+            The vehicle class to set data for.
+            </param>
+            <param name="class_">
+            The handling class to set. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to set. These match the keys in `handling.meta`.
+            </param>
+            <param name="_value">
+            The Vector3 value to set.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetManualShutdownLoadingScreenNui(System.Boolean)">
+            <summary>
+            Sets whether or not `SHUTDOWN_LOADING_SCREEN` automatically shuts down the NUI frame for the loading screen. If this is enabled,
+            you will have to manually invoke `SHUTDOWN_LOADING_SCREEN_NUI` whenever you want to hide the NUI loading screen.
+            </summary>
+            <param name="manualShutdown">
+            TRUE to manually shut down the loading screen NUI.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetManualShutdownLoadingScreenNui2(System.Boolean)">
             <summary>
             Sets whether or not `SHUTDOWN_LOADING_SCREEN` automatically shuts down the NUI frame for the loading screen. If this is enabled,
             you will have to manually invoke `SHUTDOWN_LOADING_SCREEN_NUI` whenever you want to hide the NUI loading screen.
@@ -8515,13 +10609,79 @@
             vTiles Y.
             </param>
         </member>
-        <member name="M:CitizenFX.Core.Native.API.SetMillisecondsPerGameMinute2(System.Int32)">
+        <member name="M:CitizenFX.Core.Native.API.SetMapZoomDataLevel2(System.Int32,System.Single,System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Sets values to the zoom level data by index.
+            </summary>
+            <param name="index">
+            Zoom level index.
+            </param>
+            <param name="zoomScale">
+            fZoomScale value.
+            </param>
+            <param name="zoomSpeed">
+            fZoomSpeed value.
+            </param>
+            <param name="scrollSpeed">
+            fScrollSpeed value.
+            </param>
+            <param name="tilesX">
+            vTiles X.
+            </param>
+            <param name="tilesY">
+            vTiles Y.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetMillisecondsPerGameMinute(System.Int32)">
             <summary>
             Overrides how many real ms are equal to one game minute.
             A setter for [`GetMillisecondsPerGameMinute`](#_0x2F8B4D1C595B11DB).
             </summary>
             <param name="_value">
             Milliseconds.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetMillisecondsPerGameMinute3(System.Int32)">
+            <summary>
+            Overrides how many real ms are equal to one game minute.
+            A setter for [`GetMillisecondsPerGameMinute`](#_0x2F8B4D1C595B11DB).
+            </summary>
+            <param name="_value">
+            Milliseconds.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetMinimapClipType(System.Int32)">
+            <summary>
+            Sets the type for the minimap blip clipping object to be either rectangular or rounded.
+            </summary>
+            <param name="type">
+            0 for rectangular, 1 for rounded.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetMinimapComponentPosition(System.String,System.String,System.String,System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Overrides the minimap component data (from `common:/data/ui/frontend.xml`) for a specified component.
+            </summary>
+            <param name="name">
+            The name of the minimap component to override.
+            </param>
+            <param name="alignX">
+            Equivalent to the `alignX` field in `frontend.xml`.
+            </param>
+            <param name="alignY">
+            Equivalent to the `alignY` field in `frontend.xml`.
+            </param>
+            <param name="posX">
+            Equivalent to the `posX` field in `frontend.xml`.
+            </param>
+            <param name="posY">
+            Equivalent to the `posY` field in `frontend.xml`.
+            </param>
+            <param name="sizeX">
+            Equivalent to the `sizeX` field in `frontend.xml`.
+            </param>
+            <param name="sizeY">
+            Equivalent to the `sizeY` field in `frontend.xml`.
             </param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.SetMinimapHideFow(System.Boolean)">
@@ -8533,6 +10693,29 @@
             </param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.SetMinimapOverlayDisplay(System.Int32,System.Single,System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Sets the display info for a minimap overlay.
+            </summary>
+            <param name="miniMap">
+            The minimap overlay ID.
+            </param>
+            <param name="x">
+            The X position for the overlay. This is equivalent to a game coordinate X.
+            </param>
+            <param name="y">
+            The Y position for the overlay. This is equivalent to a game coordinate Y, except that it's inverted (gfxY = -gameY).
+            </param>
+            <param name="xScale">
+            The X scale for the overlay. This is equivalent to the Flash \_xscale property, therefore 100 = 100%.
+            </param>
+            <param name="yScale">
+            The Y scale for the overlay. This is equivalent to the Flash \_yscale property.
+            </param>
+            <param name="alpha">
+            The alpha value for the overlay. This is equivalent to the Flash \_alpha property, therefore 100 = 100%.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetMinimapOverlayDisplay2(System.Int32,System.Single,System.Single,System.Single,System.Single,System.Single)">
             <summary>
             Sets the display info for a minimap overlay.
             </summary>
@@ -8581,7 +10764,27 @@
             Overriding state.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetPlayerTalkingOverride2(System.Int32,System.Boolean)">
+            <summary>
+            the status of default voip system. It affects on `NETWORK_IS_PLAYER_TALKING` and `mp_facial` animation.
+            This function doesn't need to be called every frame, it works like a switcher.
+            </summary>
+            <param name="player">
+            The target player.
+            </param>
+            <param name="state">
+            Overriding state.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetRichPresence(System.String)">
+            <summary>
+            Sets the player's rich presence detail state for social platform providers to a specified string.
+            </summary>
+            <param name="presenceState">
+            The rich presence string to set.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetRichPresence2(System.String)">
             <summary>
             Sets the player's rich presence detail state for social platform providers to a specified string.
             </summary>
@@ -8615,6 +10818,40 @@
             The new A value (0-255).
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetRuntimeTexturePixel2(System.Int64,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Sets a pixel in the specified runtime texture. This will have to be committed using `COMMIT_RUNTIME_TEXTURE` to have any effect.
+            </summary>
+            <param name="tex">
+            A handle to the runtime texture.
+            </param>
+            <param name="x">
+            The X position of the pixel to change.
+            </param>
+            <param name="y">
+            The Y position of the pixel to change.
+            </param>
+            <param name="r">
+            The new R value (0-255).
+            </param>
+            <param name="g">
+            The new G value (0-255).
+            </param>
+            <param name="b">
+            The new B value (0-255).
+            </param>
+            <param name="a">
+            The new A value (0-255).
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetStateBagValue(System.String,System.String,System.String,System.Int32,System.Boolean)">
+            <summary>
+            Internal function for setting a state bag value.
+            </summary>
+            <param name="replicated">
+            :
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetThreadPriority(System.Int32)">
             <summary>
             0 = high
@@ -8636,7 +10873,36 @@
             Setting the value to  true prevents the vehicle from being repaired when a extra is enabled. Setting the value to false allows the vehicle from being repaired when a extra is enabled.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleAutoRepairDisabled2(System.Int32,System.Boolean)">
+            <summary>
+            Disables the vehicle from being repaired when a vehicle extra is enabled.
+            </summary>
+            <param name="vehicle">
+            The vehicle to set disable auto vehicle repair.
+            </param>
+            <param name="_value">
+            Setting the value to  true prevents the vehicle from being repaired when a extra is enabled. Setting the value to false allows the vehicle from being repaired when a extra is enabled.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetVehicleHandlingField(System.Int32,System.String,System.String,System.Int32)">
+            <summary>
+            Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_FIELD`, this might require some experimentation.
+            Example: `SetVehicleHandlingField(vehicle, 'CHandlingData', 'fSteeringLock', 360.0)`
+            </summary>
+            <param name="vehicle">
+            The vehicle to set data for.
+            </param>
+            <param name="class_">
+            The handling class to set. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to set. These match the keys in `handling.meta`.
+            </param>
+            <param name="_value">
+            The value to set.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleHandlingField2(System.Int32,System.String,System.String,System.Int32)">
             <summary>
             Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_FIELD`, this might require some experimentation.
             Example: `SetVehicleHandlingField(vehicle, 'CHandlingData', 'fSteeringLock', 360.0)`
@@ -8672,7 +10938,42 @@
             The floating-point value to set.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleHandlingFloat2(System.Int32,System.String,System.String,System.Single)">
+            <summary>
+            Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_FLOAT`, this might require some experimentation.
+            Example: `SetVehicleHandlingFloat(vehicle, 'CHandlingData', 'fSteeringLock', 360.0)`
+            </summary>
+            <param name="vehicle">
+            The vehicle to set data for.
+            </param>
+            <param name="class_">
+            The handling class to set. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to set. These match the keys in `handling.meta`.
+            </param>
+            <param name="_value">
+            The floating-point value to set.
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetVehicleHandlingInt(System.Int32,System.String,System.String,System.Int32)">
+            <summary>
+            Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_INT`, this might require some experimentation.
+            </summary>
+            <param name="vehicle">
+            The vehicle to set data for.
+            </param>
+            <param name="class_">
+            The handling class to set. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to set. These match the keys in `handling.meta`.
+            </param>
+            <param name="_value">
+            The integer value to set.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleHandlingInt2(System.Int32,System.String,System.String,System.Int32)">
             <summary>
             Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_INT`, this might require some experimentation.
             </summary>
@@ -8706,7 +11007,111 @@
             The Vector3 value to set.
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleHandlingVector2(System.Int32,System.String,System.String,CitizenFX.Core.Vector3)">
+            <summary>
+            Sets a handling override for a specific vehicle. Certain handling flags can only be set globally using `SET_HANDLING_VECTOR`, this might require some experimentation.
+            </summary>
+            <param name="vehicle">
+            The vehicle to set data for.
+            </param>
+            <param name="class_">
+            The handling class to set. Only "CHandlingData" is supported at this time.
+            </param>
+            <param name="fieldName">
+            The field name to set. These match the keys in `handling.meta`.
+            </param>
+            <param name="_value">
+            The Vector3 value to set.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleWheelRimColliderSize(System.Int32,System.Int32,System.Single)">
+            <summary>
+            Not sure what this changes, probably determines physical rim size in case the tire is blown.
+            </summary>
+            <param name="vehicle">
+            The vehicle to obtain data for.
+            </param>
+            <param name="wheelIndex">
+            Index of wheel, 0-3.
+            </param>
+            <param name="_value">
+            Size of rim collider.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleWheelSize(System.Int32,System.Single)">
+            <summary>
+            Sets vehicle's wheels' size (size is the same for all the wheels, cannot get/set specific wheel of vehicle).
+            Only works on non-default wheels.
+            Returns whether change was successful (can be false if trying to set size for non-default wheels).
+            </summary>
+            <param name="vehicle">
+            The vehicle to set data for.
+            </param>
+            <param name="size">
+            Size of the wheels (usually between 0.5 and 1.5 is reasonable).
+            </param>
+            <returns>
+            Bool - whether change was successful or not
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleWheelTireColliderSize(System.Int32,System.Int32,System.Single)">
+            <summary>
+            Use along with SetVehicleWheelSize to resize the wheels (this native sets the collider size affecting physics while SetVehicleWheelSize will change visual size).
+            </summary>
+            <param name="vehicle">
+            The vehicle to obtain data for.
+            </param>
+            <param name="wheelIndex">
+            Index of wheel, 0-3.
+            </param>
+            <param name="_value">
+            Radius of tire collider.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleWheelTireColliderWidth(System.Int32,System.Int32,System.Single)">
+            <summary>
+            Use along with SetVehicleWheelWidth to resize the wheels (this native sets the collider width affecting physics while SetVehicleWheelWidth will change visual width).
+            </summary>
+            <param name="vehicle">
+            The vehicle to obtain data for.
+            </param>
+            <param name="wheelIndex">
+            Index of wheel, 0-3.
+            </param>
+            <param name="_value">
+            Width of tire collider.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleWheelWidth(System.Int32,System.Single)">
+            <summary>
+            Sets vehicle's wheels' width (width is the same for all the wheels, cannot get/set specific wheel of vehicle).
+            Only works on non-default wheels.
+            Returns whether change was successful (can be false if trying to set width for non-default wheels).
+            </summary>
+            <param name="vehicle">
+            The vehicle to set data for.
+            </param>
+            <param name="width">
+            Width of the wheels (usually between 0.1 and 1.5 is reasonable).
+            </param>
+            <returns>
+            Bool - whether change was successful or not
+            </returns>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetVehicleWheelXOffset(System.Int32,System.Int32,System.Single)">
+            <summary>
+            Adjusts the offset of the specified wheel relative to the wheel's axle center.
+            Needs to be called every frame in order to function properly, as GTA will reset the offset otherwise.
+            This function can be especially useful to set the track width of a vehicle, for example:
+            ```
+            function SetVehicleFrontTrackWidth(vehicle, width)
+            SetVehicleWheelXOffset(vehicle, 0, -width/2)
+            SetVehicleWheelXOffset(vehicle, 1, width/2)
+            end
+            ```
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleWheelXOffset2(System.Int32,System.Int32,System.Single)">
             <summary>
             Adjusts the offset of the specified wheel relative to the wheel's axle center.
             Needs to be called every frame in order to function properly, as GTA will reset the offset otherwise.
@@ -8739,7 +11144,35 @@
             Wheelie state
             </param>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleWheelieState2(System.Int32,System.Int32)">
+            <summary>
+            Example script: &lt;https://pastebin.com/J6XGbkCW&gt;
+            List of known states:
+            ```
+            1: Not wheeling.
+            65: Vehicle is ready to do wheelie (burnouting).
+            129: Vehicle is doing wheelie.
+            ```
+            </summary>
+            <param name="vehicle">
+            Vehicle
+            </param>
+            <param name="state">
+            Wheelie state
+            </param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetVisualSettingFloat(System.String,System.Single)">
+            <summary>
+            Overrides a floating point value from `visualsettings.dat` temporarily.
+            </summary>
+            <param name="name">
+            The name of the value to set, such as `pedLight.color.red`.
+            </param>
+            <param name="_value">
+            The value to write.
+            </param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVisualSettingFloat2(System.String,System.Single)">
             <summary>
             Overrides a floating point value from `visualsettings.dat` temporarily.
             </summary>
@@ -8756,6 +11189,11 @@
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.ShutdownLoadingScreenNui">
+            <summary>
+            Shuts down the `loadingScreen` NUI frame, similarly to `SHUTDOWN_LOADING_SCREEN`.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.ShutdownLoadingScreenNui2">
             <summary>
             Shuts down the `loadingScreen` NUI frame, similarly to `SHUTDOWN_LOADING_SCREEN`.
             </summary>
@@ -8965,7 +11403,17 @@
             <param name="eventPayload" />
             <param name="payloadLength" />
         </member>
+        <member name="M:CitizenFX.Core.Native.API.TriggerEventInternal2(System.String,System.String,System.Int32)">
+            <summary>
+            The backing function for TriggerEvent.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.TriggerLatentServerEventInternal(System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            The backing function for TriggerLatentServerEvent.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.TriggerLatentServerEventInternal2(System.String,System.String,System.Int32,System.Int32)">
             <summary>
             The backing function for TriggerLatentServerEvent.
             </summary>
@@ -8982,7 +11430,20 @@
             <param name="eventPayload" />
             <param name="payloadLength" />
         </member>
+        <member name="M:CitizenFX.Core.Native.API.TriggerServerEventInternal2(System.String,System.String,System.Int32)">
+            <summary>
+            The backing function for TriggerServerEvent.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.WasEventCanceled">
+            <summary>
+            Returns whether or not the currently executing event was canceled.
+            </summary>
+            <returns>
+            A boolean.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.WasEventCanceled2">
             <summary>
             Returns whether or not the currently executing event was canceled.
             </summary>
