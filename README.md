@@ -51,7 +51,7 @@ Conditions are listed below.
 
 ### In short
 
-It's very simple, don't steal my stuff, try to take credit for code that isn't yours and don't try to make money using my work. That's all I ask.
+It's very simple, don't steal my stuff, don't try to take credit for code that isn't yours and don't try to make money using my work. That's all I ask.
 
 If you'd like to do something that's not allowed per this license, contact me and we might be able to figure something out.
 
