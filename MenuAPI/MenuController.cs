@@ -1112,6 +1112,8 @@ namespace MenuAPI
                 await Delay(0);
             }
 
+            DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 0, 0);
+
             BeginScaleformMovieMethod(_scale, "CLEAR_ALL");
             EndScaleformMovieMethod();
 
