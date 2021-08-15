@@ -710,10 +710,6 @@ namespace MenuAPI
                 IsScreenFadedIn()
             )
             {
-                if (!Menus.Any())
-                {
-                    return;
-                }
                 foreach (Menu menu in Menus.Where(menu => !menu.Visible && (Game.IsControlJustPressed(0, menu.MenuToggleKey) || Game.IsDisabledControlJustPressed(0, menu.MenuToggleKey)))) {
                     menu.OpenMenu();
                 }
@@ -754,10 +750,7 @@ namespace MenuAPI
                     Game.DisableControlThisFrame(0, menu.MenuToggleKey);
                     if ((Game.IsControlJustPressed(0, menu.MenuToggleKey) || Game.IsDisabledControlJustPressed(0, menu.MenuToggleKey)) && !PreventExitingMenu)
                     {
-                        if (menu != null)
-                        {
-                            menu.CloseMenu();
-                        }
+                        menu?.CloseMenu();
                     }
                 }
             }
