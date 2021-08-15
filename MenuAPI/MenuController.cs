@@ -1088,7 +1088,7 @@ namespace MenuAPI
             if (
                 Game.IsPaused ||
                 Game.Player.IsDead ||
-                IsScreenFadedIn() ||
+                !IsScreenFadedIn() ||
                 IsPlayerSwitchInProgress() ||
                 IsWarningMessageActive() ||
                 UpdateOnscreenKeyboard() == 0
