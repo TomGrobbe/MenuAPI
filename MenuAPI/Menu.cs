@@ -592,6 +592,8 @@ namespace MenuAPI
         }
         public List<ButtonPressHandler> ButtonPressHandlers = new List<ButtonPressHandler>();
 
+        public Control MenuToggleKey;
+
         #endregion
 
         #region Constructors

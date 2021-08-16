@@ -67,13 +67,6 @@ namespace MenuAPI
         public static bool PreventExitingMenu { get; set; } = false;
         public static bool DisableBackButton { get; set; } = false;
         public static bool SetDrawOrder { get; set; } = true;
-        public static Control MenuToggleKey { get; set; }
-#if FIVEM
-            = Control.InteractionMenu;
-#endif
-#if REDM
-            = Control.PlayerMenu;
-#endif
 
         public static bool EnableMenuToggleKeyOnController { get; set; } = true;
 
@@ -233,6 +226,11 @@ namespace MenuAPI
                 return VisibleMenus.FirstOrDefault();
             }
             return null;
+        }
+
+        public static HashSet<Menu> GetCurrentOpenMenus()
+        {
+            return VisibleMenus;
         }
 
         /// <summary>
@@ -705,7 +703,6 @@ namespace MenuAPI
         private void HandleMenuToggleKeyForKeyboard()
         {
             if (
-                (Game.IsControlJustPressed(0, MenuToggleKey) || Game.IsDisabledControlJustPressed(0, MenuToggleKey)) &&
                 !Game.IsPaused &&
                 !Game.Player.IsDead &&
                 !IsPlayerSwitchInProgress() &&
@@ -713,17 +710,8 @@ namespace MenuAPI
                 IsScreenFadedIn()
             )
             {
-                if (!Menus.Any())
-                {
-                    return;
-                }
-                if (MainMenu != null)
-                {
-                    MainMenu.OpenMenu();
-                }
-                else
-                {
-                    Menus.First().OpenMenu();
+                foreach (Menu menu in Menus.Where(menu => !menu.Visible && (Game.IsControlJustPressed(0, menu.MenuToggleKey) || Game.IsDisabledControlJustPressed(0, menu.MenuToggleKey)))) {
+                    menu.OpenMenu();
                 }
             }
         }
@@ -754,15 +742,15 @@ namespace MenuAPI
 
         private void DisableMenuKeyThisFrame()
         {
-            Game.DisableControlThisFrame(0, MenuToggleKey);
             if (Game.CurrentInputMode == InputMode.MouseAndKeyboard)
             {
-                if ((Game.IsControlJustPressed(0, MenuToggleKey) || Game.IsDisabledControlJustPressed(0, MenuToggleKey)) && !PreventExitingMenu)
+                var menus = new HashSet<Menu>(GetCurrentOpenMenus());
+                foreach (Menu menu in menus)
                 {
-                    var menu = GetCurrentMenu();
-                    if (menu != null)
+                    Game.DisableControlThisFrame(0, menu.MenuToggleKey);
+                    if ((Game.IsControlJustPressed(0, menu.MenuToggleKey) || Game.IsDisabledControlJustPressed(0, menu.MenuToggleKey)) && !PreventExitingMenu)
                     {
-                        menu.CloseMenu();
+                        menu?.CloseMenu();
                     }
                 }
             }
