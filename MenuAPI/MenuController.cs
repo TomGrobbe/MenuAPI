@@ -239,7 +239,7 @@ namespace MenuAPI
         /// Returns true if any menu is currently open.
         /// </summary>
         /// <returns></returns>
-        public static bool IsAnyMenuOpen() => VisibleMenus.Any();
+        public static bool IsAnyMenuOpen() => VisibleMenus.Count > 0;
 
 
         #region Process Menu Buttons
@@ -446,12 +446,15 @@ namespace MenuAPI
 #endif
 #if REDM
             ProcessToggleMenuButtonRedM();
-            await Task.FromResult(0);
 #endif
         }
 #if REDM
         private void ProcessToggleMenuButtonRedM()
         {
+            if (MenuToggleKey == 0)
+            {
+                return;
+            }
             DisableControlAction(0, (uint)MenuToggleKey, true);
             if (
                 !IsPauseMenuActive() &&
