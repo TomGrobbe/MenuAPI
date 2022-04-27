@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CitizenFX.Core;
+using System.Text.RegularExpressions;
 using static CitizenFX.Core.Native.API;
 using static CitizenFX.Core.Native.Function;
 using static CitizenFX.Core.Native.Hash;
@@ -226,23 +227,9 @@ namespace MenuAPI
                 {
                     string text = value;
                     int maxLength = 50;
-                    List<string> lines = new List<string>();
-                    while (text.Length > maxLength)
+                    if (text.Length > maxLength)
                     {
-                        var substr = text.Substring(0, Math.Min(text.Length - 1, maxLength));
-                        var lastIndex = substr.LastIndexOf(" ");
-                        if (lastIndex == -1)
-                        {
-                            lastIndex = Math.Min(text.Length - 1, maxLength);
-                        }
-                        lines.Add(text.Substring(0, lastIndex));
-                        text = text.Substring(lastIndex);
-                    }
-                    lines.Add(text);
-                    text = "";
-                    foreach (var str in lines)
-                    {
-                        text += str + "\n";
+                        text = Regex.Replace(text, @"(.{1," + maxLength + @"})(?:\s|$)", "$1\n");
                     }
                     _description = text;
                 }
