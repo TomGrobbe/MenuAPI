@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using CitizenFX.Core;
+using System.Text.RegularExpressions;
 using static CitizenFX.Core.Native.API;
 using static CitizenFX.Core.Native.Function;
 using static CitizenFX.Core.Native.Hash;
-using System.Text.RegularExpressions;
 
 namespace MenuAPI
 {
