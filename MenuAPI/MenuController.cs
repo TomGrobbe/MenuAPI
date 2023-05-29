@@ -12,8 +12,8 @@ namespace MenuAPI
         public static List<Menu> Menus { get; protected set; } = new List<Menu>();
         internal static HashSet<Menu> VisibleMenus { get; } = new HashSet<Menu>();
 #if FIVEM
-        public const string _texture_dict = "menutextures";
-        public static string _header_texture = "main";
+        public static string _texture_dict = "commonmenu";
+        public static string _header_texture = "interation_bgs";
 #endif
 #if REDM
         public const string _texture_dict = "menu_textures";
@@ -21,10 +21,9 @@ namespace MenuAPI
 #endif
         private static List<string> menuTextureAssets = new List<string>()
         {
-#if FIVEM
+#if FIVEM   
             "commonmenu",
             "commonmenutu",
-            "menutextures",
             "mpleaderboard",
             "mphud",
             "mpshopsale",
@@ -32,7 +31,8 @@ namespace MenuAPI
             "mprankbadge",
             "mpcarhud",
             "mpcarhud2",
-            "shared"
+            "shared",
+            _texture_dict
 #endif
 #if REDM
             "menu_textures",
