@@ -13,7 +13,7 @@ namespace MenuAPI
         internal static HashSet<Menu> VisibleMenus { get; } = new HashSet<Menu>();
 #if FIVEM
         public static string _texture_dict = "commonmenu";
-        public static string _header_texture = "interation_bgs";
+        public static string _header_texture = "interation_bgd";
 #endif
 #if REDM
         public const string _texture_dict = "menu_textures";
