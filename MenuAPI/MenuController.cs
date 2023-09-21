@@ -139,6 +139,7 @@ namespace MenuAPI
             Tick += ProcessMainButtons;
             Tick += ProcessDirectionalButtons;
             Tick += ProcessToggleMenuButton;
+            Tick += AllowNextCamera;
             Tick += MenuButtonsDisableChecks;
         }
 
@@ -464,6 +465,20 @@ namespace MenuAPI
             return false;
         }
 
+        bool openingMenu = false;
+
+        private async Task AllowNextCamera()
+        {
+            if (!openingMenu) return;
+
+            Game.DisableControlThisFrame(0, Control.NextCamera);
+            Game.DisableControlThisFrame(0, Control.SelectWeapon);
+            Game.DisableControlThisFrame(0, Control.SelectWeapon);
+
+            if (Game.IsControlJustReleased(0, Control.NextCamera) && !Game.IsControlPressed(0, Control.SelectWeapon) || Game.IsControlJustReleased(0, Control.SelectWeapon) && !Game.IsControlPressed(0, Control.NextCamera))
+                openingMenu = false;
+        }
+
         /// <summary>
         /// Processes the menu toggle button to check if the menu should open or close.
         /// </summary>
@@ -499,7 +514,8 @@ namespace MenuAPI
                         int tmpTimer = GetGameTimer();
                         while ((Game.IsControlPressed(0, Control.InteractionMenu) || Game.IsDisabledControlPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !Game.Player.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
                         {
-                            if (GetGameTimer() - tmpTimer > 400)
+                            Game.DisableControlThisFrame(0, Control.VehicleAim);
+                            if (GetGameTimer() - tmpTimer > 400 || Game.IsControlJustPressed(0, Control.SelectWeapon))
                             {
                                 if (MainMenu != null)
                                 {
@@ -512,6 +528,7 @@ namespace MenuAPI
                                         Menus[0].OpenMenu();
                                     }
                                 }
+                                openingMenu = true;
                                 break;
                             }
                             await Delay(0);
