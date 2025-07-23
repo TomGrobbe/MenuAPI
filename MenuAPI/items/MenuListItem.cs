@@ -12,11 +12,13 @@ namespace MenuAPI
         public bool ShowOpacityPanel { get; set; } = false;
         public bool ShowColorPanel { get; set; } = false;
         public ColorPanelType ColorPanelColorType = ColorPanelType.Hair;
+
         public enum ColorPanelType
         {
             Hair,
             Makeup
         }
+
         public int ItemsCount => ListItems.Count;
 
         public string GetCurrentSelection()
@@ -29,6 +31,7 @@ namespace MenuAPI
         }
 
         public MenuListItem(string text, List<string> items, int index) : this(text, items, index, null) { }
+
         public MenuListItem(string text, List<string> items, int index, string description) : base(text, description)
         {
             ListItems = items;
@@ -71,6 +74,7 @@ namespace MenuAPI
             {
                 int oldIndex = ListIndex;
                 int newIndex = oldIndex;
+
                 if (ListIndex >= ItemsCount - 1)
                 {
                     newIndex = 0;
@@ -79,13 +83,14 @@ namespace MenuAPI
                 {
                     newIndex++;
                 }
+
                 ListIndex = newIndex;
                 ParentMenu.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, newIndex, Index);
+
 #if FIVEM
                 PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
-                // Has invalid parameter types in API.
                 Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
 #endif
             }
@@ -97,6 +102,7 @@ namespace MenuAPI
             {
                 int oldIndex = ListIndex;
                 int newIndex = oldIndex;
+
                 if (ListIndex < 1)
                 {
                     newIndex = ItemsCount - 1;
@@ -105,16 +111,37 @@ namespace MenuAPI
                 {
                     newIndex--;
                 }
-                ListIndex = newIndex;
 
+                ListIndex = newIndex;
                 ParentMenu.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, newIndex, Index);
+
 #if FIVEM
                 PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
 #endif
 #if REDM
-                // Has invalid parameter types in API.
                 Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_LEFT", "HUD_SHOP_SOUNDSET", 1);
 #endif
+            }
+        }
+
+        public void SetIndex(int index)
+        {
+            if (ItemsCount == 0) return;
+
+            int clampedIndex = index;
+
+            while (clampedIndex < 0)
+                clampedIndex += ItemsCount;
+
+            while (clampedIndex >= ItemsCount)
+                clampedIndex -= ItemsCount;
+
+            if (ListIndex != clampedIndex)
+            {
+                int oldIndex = ListIndex;
+                ListIndex = clampedIndex;
+
+                ParentMenu?.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, ListIndex, Index);
             }
         }
 
