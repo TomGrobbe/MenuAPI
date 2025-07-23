@@ -118,6 +118,27 @@ namespace MenuAPI
             }
         }
 
+        public void SetIndex(int index)
+        {
+            if (ItemsCount == 0) return;
+
+            int clampedIndex = index;
+
+            while (clampedIndex < 0)
+                clampedIndex += ItemsCount;
+
+            while (clampedIndex >= ItemsCount)
+                clampedIndex -= ItemsCount;
+
+            if (ListIndex != clampedIndex)
+            {
+                int oldIndex = ListIndex;
+                ListIndex = clampedIndex;
+
+                ParentMenu?.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, ListIndex, Index);
+            }
+        }
+
         internal override void Select()
         {
             ParentMenu.ListItemSelectEvent(ParentMenu, this, ListIndex, Index);
