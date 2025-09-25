@@ -16,8 +16,8 @@ namespace MenuAPI
         public static string _header_texture = "interaction_bgd";
 #endif
 #if REDM
-        public const string _texture_dict = "menu_textures";
-        public const string _header_texture = "translate_bg_1a";
+        public static string _texture_dict = "menu_textures";
+        public static string _header_texture = "translate_bg_1a";
 #endif
         private static List<string> menuTextureAssets = new List<string>()
         {
@@ -38,6 +38,7 @@ namespace MenuAPI
             "menu_textures",
             "boot_flow",
             "generic_textures",
+            _texture_dict
 #endif
         };
 
