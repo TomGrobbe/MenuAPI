@@ -67,6 +67,14 @@ namespace MenuAPI
         public static bool PreventExitingMenu { get; set; } = false;
         public static bool DisableBackButton { get; set; } = false;
         public static bool SetDrawOrder { get; set; } = true;
+        public static bool MenuToggleKeyIsValid
+        {
+            get
+            {
+                int keyInt = (int)MenuToggleKey;
+                return keyInt >= 0 && keyInt <= 402; // 402 is max control value allowed after TU3788
+            }
+        }
         public static Control MenuToggleKey { get; set; }
 #if FIVEM
             = Control.InteractionMenu;
@@ -441,6 +449,12 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessToggleMenuButton()
         {
+            if (!MenuToggleKeyIsValid)
+            {
+                await Delay(1_500);
+                return;
+            }
+
 #if FIVEM
             await ProcessToggleMenuButtonFiveM();
 #endif
@@ -754,6 +768,11 @@ namespace MenuAPI
 
         private void DisableMenuKeyThisFrame()
         {
+            if (!MenuToggleKeyIsValid)
+            {
+                return;
+            }
+
             Game.DisableControlThisFrame(0, MenuToggleKey);
             if (Game.CurrentInputMode == InputMode.MouseAndKeyboard)
             {
