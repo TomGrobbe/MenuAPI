@@ -1,4 +1,4 @@
-if not defined WEBHOOK_URL goto end
+if not defined WEBHOOK_URL goto :end
 curl -s -o nul -F "file=@MenuAPI-%VERSION_NAME%-%GAME%.zip" %WEBHOOK_URL%
 
 if %APPVEYOR_REPO_TAG%==true goto end
