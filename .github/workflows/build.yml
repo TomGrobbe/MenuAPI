@@ -80,7 +80,8 @@ jobs:
           fetch-depth: 0
 
       - name: Restore NuGet (FiveM only)
-        run: dotnet restore MenuAPI/MenuAPI.csproj -c "Release FiveM"
+        shell: bash
+        run: dotnet restore "MenuAPI/MenuAPI.csproj" "-p:Configuration=Release FiveM"
 
       - name: Build FiveM (versioned)
         if: github.ref == 'refs/heads/master'
@@ -144,7 +145,8 @@ jobs:
           fetch-depth: 0
 
       - name: Restore NuGet (RedM only)
-        run: dotnet restore MenuAPI/MenuAPI.csproj -c "Release RedM"
+        shell: bash
+        run: dotnet restore "MenuAPI/MenuAPI.csproj" "-p:Configuration=Release RedM"
 
       - name: Build RedM (versioned)
         if: github.ref == 'refs/heads/master'
