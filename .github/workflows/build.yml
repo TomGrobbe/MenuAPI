@@ -302,7 +302,7 @@ jobs:
   # ============================================================
   notify:
     name: Discord Notification
-    needs: [build-fivem, build-redm, release]
+    needs: [version, build-fivem, build-redm, release]
     if: always()
     runs-on: ubuntu-latest
 
