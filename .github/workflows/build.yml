@@ -19,23 +19,22 @@ env:
 
 jobs:
   # ============================================================
-  # BUILD — runs on every branch push
+  # VERSION — calculates the shared version number once
   # ============================================================
-  build:
-    name: Build
+  version:
+    name: Calculate Version
     runs-on: windows-latest
 
     outputs:
-      version:    ${{ steps.version.outputs.semver }}
-      zip_prefix: ${{ steps.version.outputs.zip_prefix }}
+      semver:       ${{ steps.version.outputs.semver }}
+      assembly_ver: ${{ steps.version.outputs.assembly_ver }}
+      zip_prefix:   ${{ steps.version.outputs.zip_prefix }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # GitVersion needs full history
-
-      # ── Version calculation (master only) ───────────────────────────────────
+          fetch-depth: 0
 
       - name: Install GitVersion
         if: github.ref == 'refs/heads/master'
@@ -48,7 +47,7 @@ jobs:
         id: gitversion
         uses: gittools/actions/gitversion/execute@v3.0.0
 
-      - name: Set build version
+      - name: Set version outputs
         id: version
         shell: bash
         run: |
@@ -64,70 +63,50 @@ jobs:
           echo "assembly_ver=$ASSEMBLY_VER" >> "$GITHUB_OUTPUT"
           echo "zip_prefix=$ZIP_PREFIX"     >> "$GITHUB_OUTPUT"
 
-      # ── Restore ─────────────────────────────────────────────────────────────
+  # ============================================================
+  # BUILD FIVEM
+  # Restores only the FiveM configuration to avoid CitizenFX
+  # NuGet package conflicting with the RedM local DLL.
+  # ============================================================
+  build-fivem:
+    name: Build FiveM
+    needs: version
+    runs-on: windows-latest
 
-      - name: Restore NuGet packages
-        run: dotnet restore MenuAPI.sln
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # ── Build FiveM ──────────────────────────────────────────────────────────
+      - name: Restore NuGet (FiveM only)
+        run: dotnet restore MenuAPI/MenuAPI.csproj -c "Release FiveM"
 
       - name: Build FiveM (versioned)
         if: github.ref == 'refs/heads/master'
         shell: bash
         run: |
           dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore \
-            -p:Version=${{ steps.version.outputs.semver }} \
-            -p:AssemblyVersion=${{ steps.version.outputs.assembly_ver }} \
-            -p:FileVersion=${{ steps.version.outputs.assembly_ver }}
+            -p:Version=${{ needs.version.outputs.semver }} \
+            -p:AssemblyVersion=${{ needs.version.outputs.assembly_ver }} \
+            -p:FileVersion=${{ needs.version.outputs.assembly_ver }}
 
       - name: Build FiveM
         if: github.ref != 'refs/heads/master'
         run: dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore
-
-      # ── Build RedM ───────────────────────────────────────────────────────────
-
-      - name: Build RedM (versioned)
-        if: github.ref == 'refs/heads/master'
-        shell: bash
-        run: |
-          dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore \
-            -p:Version=${{ steps.version.outputs.semver }} \
-            -p:AssemblyVersion=${{ steps.version.outputs.assembly_ver }} \
-            -p:FileVersion=${{ steps.version.outputs.assembly_ver }}
-
-      - name: Build RedM
-        if: github.ref != 'refs/heads/master'
-        run: dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore
-
-      # ── Package zip artifacts ────────────────────────────────────────────────
 
       - name: Package FiveM zip
         shell: pwsh
         run: |
           $outDir = 'MenuAPI/bin/Release FiveM/net452'
           Copy-Item README.md "$outDir/README.md" -Force
-          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ steps.version.outputs.zip_prefix }}-FiveM.zip" -Force
-
-      - name: Package RedM zip
-        shell: pwsh
-        run: |
-          $outDir = 'MenuAPI/bin/Release RedM/net452'
-          Copy-Item README.md "$outDir/README.md" -Force
-          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ steps.version.outputs.zip_prefix }}-RedM.zip" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version.outputs.zip_prefix }}-FiveM.zip" -Force
 
       - name: Upload FiveM zip
         uses: actions/upload-artifact@v4
         with:
           name: zip-fivem
-          path: ${{ steps.version.outputs.zip_prefix }}-FiveM.zip
-
-      - name: Upload RedM zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: zip-redm
-          path: ${{ steps.version.outputs.zip_prefix }}-RedM.zip
-
-      # ── NuGet packaging (master only) ────────────────────────────────────────
+          path: ${{ needs.version.outputs.zip_prefix }}-FiveM.zip
 
       - name: Pack NuGet FiveM
         if: github.ref == 'refs/heads/master'
@@ -135,10 +114,63 @@ jobs:
           dotnet pack MenuAPI/MenuAPI.csproj
           -c "Release FiveM"
           --no-restore
-          /p:PackageVersion=${{ steps.version.outputs.semver }}
-          /p:DefineConstants=FIVEM
-          /p:PackageId=MenuAPI.FiveM
+          -p:PackageVersion=${{ needs.version.outputs.semver }}
+          -p:DefineConstants=FIVEM
+          -p:PackageId=MenuAPI.FiveM
           -o nupkgs
+
+      - name: Upload NuGet FiveM
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-fivem
+          path: nupkgs/*.nupkg
+
+  # ============================================================
+  # BUILD REDM
+  # Restores only the RedM configuration so the local
+  # dependencies/RedM/CitizenFX.Core.dll is used, not the
+  # FiveM NuGet package.
+  # ============================================================
+  build-redm:
+    name: Build RedM
+    needs: version
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore NuGet (RedM only)
+        run: dotnet restore MenuAPI/MenuAPI.csproj -c "Release RedM"
+
+      - name: Build RedM (versioned)
+        if: github.ref == 'refs/heads/master'
+        shell: bash
+        run: |
+          dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore \
+            -p:Version=${{ needs.version.outputs.semver }} \
+            -p:AssemblyVersion=${{ needs.version.outputs.assembly_ver }} \
+            -p:FileVersion=${{ needs.version.outputs.assembly_ver }}
+
+      - name: Build RedM
+        if: github.ref != 'refs/heads/master'
+        run: dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore
+
+      - name: Package RedM zip
+        shell: pwsh
+        run: |
+          $outDir = 'MenuAPI/bin/Release RedM/net452'
+          Copy-Item README.md "$outDir/README.md" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version.outputs.zip_prefix }}-RedM.zip" -Force
+
+      - name: Upload RedM zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip-redm
+          path: ${{ needs.version.outputs.zip_prefix }}-RedM.zip
 
       - name: Pack NuGet RedM
         if: github.ref == 'refs/heads/master'
@@ -146,24 +178,24 @@ jobs:
           dotnet pack MenuAPI/MenuAPI.csproj
           -c "Release RedM"
           --no-restore
-          /p:PackageVersion=${{ steps.version.outputs.semver }}
-          /p:DefineConstants=REDM
-          /p:PackageId=MenuAPI.RedM
+          -p:PackageVersion=${{ needs.version.outputs.semver }}
+          -p:DefineConstants=REDM
+          -p:PackageId=MenuAPI.RedM
           -o nupkgs
 
-      - name: Upload NuGet packages
+      - name: Upload NuGet RedM
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
-          name: nuget-packages
+          name: nuget-redm
           path: nupkgs/*.nupkg
 
   # ============================================================
-  # RELEASE — master only, after successful build
+  # RELEASE — master only, after both builds succeed
   # ============================================================
   release:
     name: Release
-    needs: build
+    needs: [version, build-fivem, build-redm]
     if: github.ref == 'refs/heads/master'
     runs-on: windows-latest
 
@@ -188,13 +220,19 @@ jobs:
           name: zip-redm
           path: release-assets
 
-      - name: Download NuGet packages
+      - name: Download NuGet FiveM
         uses: actions/download-artifact@v4
         with:
-          name: nuget-packages
+          name: nuget-fivem
           path: release-assets
 
-      # Generate changelog BEFORE tagging so the tag range is correct
+      - name: Download NuGet RedM
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-redm
+          path: release-assets
+
+      # Generate changelog BEFORE tagging so the range is correct
       - name: Generate changelog
         shell: bash
         run: |
@@ -210,7 +248,7 @@ jobs:
       - name: Create and push git tag
         shell: bash
         run: |
-          VERSION="${{ needs.build.outputs.version }}"
+          VERSION="${{ needs.version.outputs.semver }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
@@ -223,7 +261,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ needs.build.outputs.version }}"
+          VERSION="${{ needs.version.outputs.semver }}"
           {
             echo "MenuAPI release v${VERSION}. Download the **FiveM** or **RedM** versions below."
             echo ""
@@ -244,7 +282,7 @@ jobs:
       - name: Publish NuGet — FiveM
         run: >-
           dotnet nuget push
-          "release-assets/MenuAPI.FiveM.${{ needs.build.outputs.version }}.nupkg"
+          "release-assets/MenuAPI.FiveM.${{ needs.version.outputs.semver }}.nupkg"
           --api-key ${{ secrets.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
@@ -252,7 +290,7 @@ jobs:
       - name: Publish NuGet — RedM
         run: >-
           dotnet nuget push
-          "release-assets/MenuAPI.RedM.${{ needs.build.outputs.version }}.nupkg"
+          "release-assets/MenuAPI.RedM.${{ needs.version.outputs.semver }}.nupkg"
           --api-key ${{ secrets.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
@@ -262,7 +300,7 @@ jobs:
   # ============================================================
   notify:
     name: Discord Notification
-    needs: [build, release]
+    needs: [build-fivem, build-redm, release]
     if: always()
     runs-on: ubuntu-latest
 
@@ -277,20 +315,21 @@ jobs:
             exit 0
           fi
 
-          BUILD_RESULT="${{ needs.build.result }}"
+          FIVEM_RESULT="${{ needs.build-fivem.result }}"
+          REDM_RESULT="${{ needs.build-redm.result }}"
           RELEASE_RESULT="${{ needs.release.result }}"
-          VERSION="${{ needs.build.outputs.version }}"
+          VERSION="${{ needs.version.outputs.semver }}"
 
           # ── Status colour & label ──────────────────────────────────────────
-          if [ "$BUILD_RESULT" = "cancelled" ] || [ "$RELEASE_RESULT" = "cancelled" ]; then
-            COLOR=16776960      # yellow
+          if [ "$FIVEM_RESULT" = "cancelled" ] || [ "$REDM_RESULT" = "cancelled" ] || [ "$RELEASE_RESULT" = "cancelled" ]; then
+            COLOR=16776960
             STATUS_TEXT="Build cancelled."
-          elif [ "$BUILD_RESULT" = "success" ] && \
+          elif [ "$FIVEM_RESULT" = "success" ] && [ "$REDM_RESULT" = "success" ] && \
                { [ "$RELEASE_RESULT" = "success" ] || [ "$RELEASE_RESULT" = "skipped" ]; }; then
-            COLOR=4502298       # green
+            COLOR=4502298
             STATUS_TEXT="Build passed!"
           else
-            COLOR=13632027      # red
+            COLOR=13632027
             STATUS_TEXT="Build FAILED!"
           fi
 
@@ -304,12 +343,10 @@ jobs:
             LINK_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           fi
 
-          # ── Version label ──────────────────────────────────────────────────
           DISPLAY_VERSION="${VERSION:-dev-${{ github.run_number }}}"
           SHA="${{ github.sha }}"
           SHORT_SHA="${SHA:0:7}"
 
-          # ── Build JSON safely via jq ───────────────────────────────────────
           PAYLOAD=$(jq -n \
             --arg  title       "MenuAPI (v${DISPLAY_VERSION})" \
             --arg  desc        "$STATUS_TEXT" \
@@ -332,9 +369,9 @@ jobs:
                   url:  $actor_url
                 },
                 fields: [
-                  { name: "Branch",    value: $branch,                                       inline: true  },
-                  { name: $link_name,  value: ("[Link](" + $link_url + ")"),                 inline: true  },
-                  { name: "Commit",    value: ("[`" + $short_sha + "`](" + $commit_url + ") — " + $commit_msg), inline: false }
+                  { name: "Branch",   value: $branch,                                        inline: true  },
+                  { name: $link_name, value: ("[Link](" + $link_url + ")"),                  inline: true  },
+                  { name: "Commit",   value: ("[`" + $short_sha + "`](" + $commit_url + ") — " + $commit_msg), inline: false }
                 ]
               }]
             }')
