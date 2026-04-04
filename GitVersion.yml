@@ -1,0 +1,18 @@
+# GitVersion configuration
+# Docs: https://gitversion.net/docs/reference/configuration
+#
+# Mode: Mainline — every commit to master auto-increments the patch version.
+# Override the increment for a specific commit by including one of these
+# anywhere in the commit message:
+#   +semver: major   →  bumps major (e.g. 1.2.3 → 2.0.0)
+#   +semver: minor   →  bumps minor (e.g. 1.2.3 → 1.3.0)
+#   +semver: patch   →  bumps patch (e.g. 1.2.3 → 1.2.4)  ← default
+#   +semver: none    →  no bump on this commit
+
+assembly-versioning-scheme: MajorMinorPatch
+assembly-file-versioning-scheme: MajorMinorPatch
+mode: Mainline
+
+# Starting version — update this if you already have tagged releases and want
+# GitVersion to resume from a specific baseline instead.
+next-version: 1.0.0

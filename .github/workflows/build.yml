@@ -1,0 +1,342 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: write
+
+# Cancel any in-progress run on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  # ============================================================
+  # BUILD — runs on every branch push
+  # ============================================================
+  build:
+    name: Build
+    runs-on: windows-latest
+
+    outputs:
+      version:    ${{ steps.version.outputs.semver }}
+      zip_prefix: ${{ steps.version.outputs.zip_prefix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # GitVersion needs full history
+
+      # ── Version calculation (master only) ───────────────────────────────────
+
+      - name: Install GitVersion
+        if: github.ref == 'refs/heads/master'
+        uses: gittools/actions/gitversion/setup@v3.0.0
+        with:
+          versionSpec: '5.x'
+
+      - name: Execute GitVersion
+        if: github.ref == 'refs/heads/master'
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.0.0
+
+      - name: Set build version
+        id: version
+        shell: bash
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/master" ]; then
+            SEMVER="${{ steps.gitversion.outputs.semVer }}"
+            ASSEMBLY_VER="${{ steps.gitversion.outputs.assemblySemVer }}"
+          else
+            SEMVER=""
+            ASSEMBLY_VER=""
+          fi
+          ZIP_PREFIX="MenuAPI-${SEMVER:-dev-${{ github.run_number }}}"
+          echo "semver=$SEMVER"             >> "$GITHUB_OUTPUT"
+          echo "assembly_ver=$ASSEMBLY_VER" >> "$GITHUB_OUTPUT"
+          echo "zip_prefix=$ZIP_PREFIX"     >> "$GITHUB_OUTPUT"
+
+      # ── Restore ─────────────────────────────────────────────────────────────
+
+      - name: Restore NuGet packages
+        run: dotnet restore MenuAPI.sln
+
+      # ── Build FiveM ──────────────────────────────────────────────────────────
+
+      - name: Build FiveM (versioned)
+        if: github.ref == 'refs/heads/master'
+        shell: bash
+        run: |
+          dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore \
+            /p:Version=${{ steps.version.outputs.semver }} \
+            /p:AssemblyVersion=${{ steps.version.outputs.assembly_ver }} \
+            /p:FileVersion=${{ steps.version.outputs.assembly_ver }}
+
+      - name: Build FiveM
+        if: github.ref != 'refs/heads/master'
+        run: dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore
+
+      # ── Build RedM ───────────────────────────────────────────────────────────
+
+      - name: Build RedM (versioned)
+        if: github.ref == 'refs/heads/master'
+        shell: bash
+        run: |
+          dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore \
+            /p:Version=${{ steps.version.outputs.semver }} \
+            /p:AssemblyVersion=${{ steps.version.outputs.assembly_ver }} \
+            /p:FileVersion=${{ steps.version.outputs.assembly_ver }}
+
+      - name: Build RedM
+        if: github.ref != 'refs/heads/master'
+        run: dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore
+
+      # ── Package zip artifacts ────────────────────────────────────────────────
+
+      - name: Package FiveM zip
+        shell: pwsh
+        run: |
+          $outDir = 'MenuAPI/bin/Release FiveM/net452'
+          Copy-Item README.md "$outDir/README.md" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ steps.version.outputs.zip_prefix }}-FiveM.zip" -Force
+
+      - name: Package RedM zip
+        shell: pwsh
+        run: |
+          $outDir = 'MenuAPI/bin/Release RedM/net452'
+          Copy-Item README.md "$outDir/README.md" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ steps.version.outputs.zip_prefix }}-RedM.zip" -Force
+
+      - name: Upload FiveM zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip-fivem
+          path: ${{ steps.version.outputs.zip_prefix }}-FiveM.zip
+
+      - name: Upload RedM zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip-redm
+          path: ${{ steps.version.outputs.zip_prefix }}-RedM.zip
+
+      # ── NuGet packaging (master only) ────────────────────────────────────────
+
+      - name: Pack NuGet FiveM
+        if: github.ref == 'refs/heads/master'
+        run: >-
+          dotnet pack MenuAPI/MenuAPI.csproj
+          -c "Release FiveM"
+          --no-restore
+          /p:PackageVersion=${{ steps.version.outputs.semver }}
+          /p:DefineConstants=FIVEM
+          /p:PackageId=MenuAPI.FiveM
+          -o nupkgs
+
+      - name: Pack NuGet RedM
+        if: github.ref == 'refs/heads/master'
+        run: >-
+          dotnet pack MenuAPI/MenuAPI.csproj
+          -c "Release RedM"
+          --no-restore
+          /p:PackageVersion=${{ steps.version.outputs.semver }}
+          /p:DefineConstants=REDM
+          /p:PackageId=MenuAPI.RedM
+          -o nupkgs
+
+      - name: Upload NuGet packages
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: nupkgs/*.nupkg
+
+  # ============================================================
+  # RELEASE — master only, after successful build
+  # ============================================================
+  release:
+    name: Release
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    runs-on: windows-latest
+
+    outputs:
+      release_url: ${{ steps.create_release.outputs.release_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download FiveM zip
+        uses: actions/download-artifact@v4
+        with:
+          name: zip-fivem
+          path: release-assets
+
+      - name: Download RedM zip
+        uses: actions/download-artifact@v4
+        with:
+          name: zip-redm
+          path: release-assets
+
+      - name: Download NuGet packages
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-packages
+          path: release-assets
+
+      # Generate changelog BEFORE tagging so the tag range is correct
+      - name: Generate changelog
+        shell: bash
+        run: |
+          LAST_TAG=$(git tag --sort=-version:refname | head -n 1)
+          if [ -n "$LAST_TAG" ]; then
+            git log "$LAST_TAG..HEAD" --pretty=format:"- %s" --no-merges > changelog.txt
+          else
+            git log --pretty=format:"- %s" --no-merges > changelog.txt
+          fi
+          echo "Last tag used for changelog: ${LAST_TAG:-<none, full history>}"
+          cat changelog.txt
+
+      - name: Create and push git tag
+        shell: bash
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
+      - name: Create GitHub Release
+        id: create_release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          {
+            echo "MenuAPI release v${VERSION}. Download the **FiveM** or **RedM** versions below."
+            echo ""
+            echo "## Changes"
+            cat changelog.txt
+            echo ""
+            echo "For more info, check the [docs](https://docs.vespura.com/mapi)."
+          } > release_notes.md
+
+          RELEASE_URL=$(gh release create "v$VERSION" \
+            --title "MenuAPI v$VERSION" \
+            --notes-file release_notes.md \
+            "release-assets/MenuAPI-$VERSION-FiveM.zip" \
+            "release-assets/MenuAPI-$VERSION-RedM.zip")
+
+          echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Publish NuGet — FiveM
+        run: >-
+          dotnet nuget push
+          "release-assets/MenuAPI.FiveM.${{ needs.build.outputs.version }}.nupkg"
+          --api-key ${{ secrets.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+      - name: Publish NuGet — RedM
+        run: >-
+          dotnet nuget push
+          "release-assets/MenuAPI.RedM.${{ needs.build.outputs.version }}.nupkg"
+          --api-key ${{ secrets.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+  # ============================================================
+  # DISCORD NOTIFICATION — always runs
+  # ============================================================
+  notify:
+    name: Discord Notification
+    needs: [build, release]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Discord notification
+        shell: bash
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_WEBHOOK_URL not configured, skipping."
+            exit 0
+          fi
+
+          BUILD_RESULT="${{ needs.build.result }}"
+          RELEASE_RESULT="${{ needs.release.result }}"
+          VERSION="${{ needs.build.outputs.version }}"
+
+          # ── Status colour & label ──────────────────────────────────────────
+          if [ "$BUILD_RESULT" = "cancelled" ] || [ "$RELEASE_RESULT" = "cancelled" ]; then
+            COLOR=16776960      # yellow
+            STATUS_TEXT="Build cancelled."
+          elif [ "$BUILD_RESULT" = "success" ] && \
+               { [ "$RELEASE_RESULT" = "success" ] || [ "$RELEASE_RESULT" = "skipped" ]; }; then
+            COLOR=4502298       # green
+            STATUS_TEXT="Build passed!"
+          else
+            COLOR=13632027      # red
+            STATUS_TEXT="Build FAILED!"
+          fi
+
+          # ── Link field ─────────────────────────────────────────────────────
+          RELEASE_URL="${{ needs.release.outputs.release_url }}"
+          if [ -n "$RELEASE_URL" ] && [ "$RELEASE_RESULT" = "success" ]; then
+            LINK_NAME="GitHub Release"
+            LINK_URL="$RELEASE_URL"
+          else
+            LINK_NAME="Build Run"
+            LINK_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi
+
+          # ── Version label ──────────────────────────────────────────────────
+          DISPLAY_VERSION="${VERSION:-dev-${{ github.run_number }}}"
+          SHA="${{ github.sha }}"
+          SHORT_SHA="${SHA:0:7}"
+
+          # ── Build JSON safely via jq ───────────────────────────────────────
+          PAYLOAD=$(jq -n \
+            --arg  title       "MenuAPI (v${DISPLAY_VERSION})" \
+            --arg  desc        "$STATUS_TEXT" \
+            --argjson color    "$COLOR" \
+            --arg  actor       "${{ github.actor }}" \
+            --arg  actor_url   "https://github.com/${{ github.actor }}" \
+            --arg  branch      "${{ github.ref_name }}" \
+            --arg  link_name   "$LINK_NAME" \
+            --arg  link_url    "$LINK_URL" \
+            --arg  short_sha   "$SHORT_SHA" \
+            --arg  commit_url  "https://github.com/${{ github.repository }}/commit/${{ github.sha }}" \
+            --arg  commit_msg  "${{ github.event.head_commit.message }}" \
+            '{
+              embeds: [{
+                title:       $title,
+                description: $desc,
+                color:       $color,
+                author: {
+                  name: ("Committed by " + $actor),
+                  url:  $actor_url
+                },
+                fields: [
+                  { name: "Branch",    value: $branch,                                       inline: true  },
+                  { name: $link_name,  value: ("[Link](" + $link_url + ")"),                 inline: true  },
+                  { name: "Commit",    value: ("[`" + $short_sha + "`](" + $commit_url + ") — " + $commit_msg), inline: false }
+                ]
+              }]
+            }')
+
+          curl -fsSL -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL"
