@@ -240,9 +240,9 @@ jobs:
         run: |
           LAST_TAG=$(git tag --sort=-version:refname | head -n 1)
           if [ -n "$LAST_TAG" ]; then
-            git log "$LAST_TAG..HEAD" --pretty=format:"- %s" --no-merges > changelog.txt
+            git log "$LAST_TAG..HEAD" --pretty=format:'- `%h` (%an) %s' > changelog.txt
           else
-            git log --pretty=format:"- %s" --no-merges > changelog.txt
+            git log --pretty=format:'- `%h` (%an) %s' > changelog.txt
           fi
           echo "Last tag used for changelog: ${LAST_TAG:-<none, full history>}"
           cat changelog.txt
