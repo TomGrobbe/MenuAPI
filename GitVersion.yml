@@ -13,6 +13,8 @@ assembly-versioning-scheme: MajorMinorPatch
 assembly-file-versioning-scheme: MajorMinorPatch
 mode: Mainline
 
-# Starting version — update this if you already have tagged releases and want
-# GitVersion to resume from a specific baseline instead.
-next-version: 1.0.0
+branches:
+  master:
+    regex: '^master$'
+    increment: Patch
+    is-mainline: true

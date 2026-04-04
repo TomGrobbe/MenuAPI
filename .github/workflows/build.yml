@@ -76,9 +76,9 @@ jobs:
         shell: bash
         run: |
           dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore \
-            /p:Version=${{ steps.version.outputs.semver }} \
-            /p:AssemblyVersion=${{ steps.version.outputs.assembly_ver }} \
-            /p:FileVersion=${{ steps.version.outputs.assembly_ver }}
+            -p:Version=${{ steps.version.outputs.semver }} \
+            -p:AssemblyVersion=${{ steps.version.outputs.assembly_ver }} \
+            -p:FileVersion=${{ steps.version.outputs.assembly_ver }}
 
       - name: Build FiveM
         if: github.ref != 'refs/heads/master'
@@ -91,9 +91,9 @@ jobs:
         shell: bash
         run: |
           dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore \
-            /p:Version=${{ steps.version.outputs.semver }} \
-            /p:AssemblyVersion=${{ steps.version.outputs.assembly_ver }} \
-            /p:FileVersion=${{ steps.version.outputs.assembly_ver }}
+            -p:Version=${{ steps.version.outputs.semver }} \
+            -p:AssemblyVersion=${{ steps.version.outputs.assembly_ver }} \
+            -p:FileVersion=${{ steps.version.outputs.assembly_ver }}
 
       - name: Build RedM
         if: github.ref != 'refs/heads/master'
