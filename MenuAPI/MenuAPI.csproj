@@ -17,13 +17,12 @@
     <RepositoryUrl>https://github.com/tomgrobbe/menuapi/</RepositoryUrl>
     <PackageTags Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">FiveM MenuAPI</PackageTags>
     <PackageTags Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">RedM MenuAPI</PackageTags>
-    <PackageLicenseFile>license.txt</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release FiveM'">
     <DefineConstants>FIVEM</DefineConstants>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(Configuration)' == 'Debug FiveM'">
     <DefineConstants>FIVEM;DEBUG</DefineConstants>
   </PropertyGroup>
