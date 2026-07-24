@@ -5,7 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core;
-using static CitizenFX.Core.Native.API;
+
+using CitizenFX.Core;
+using CitizenFX.FiveM.Client;
+using CitizenFX.FiveM.Client.Extensions;
+using static CitizenFX.FiveM.Client.Native;
 
 namespace MenuAPI
 {
@@ -59,7 +63,7 @@ namespace MenuAPI
                 Position = (Max - Min) / 2;
             }
 
-            float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * MathUtil.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
+            float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
 
             float width = 150f / MenuController.ScreenWidth;
             float height = 10f / MenuController.ScreenHeight;
@@ -84,14 +88,14 @@ namespace MenuAPI
                 if (ParentMenu.LeftAligned)
                 {
                     // left sprite left aligned.
-                    DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width / 2f + (4f / MenuController.ScreenWidth)) - (GetSpriteSize(SliderLeftIcon, true) / 2f), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor[0], leftColor[1], leftColor[2], 255);
+                    DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width / 2f + (4f / MenuController.ScreenWidth)) - (GetSpriteSize(SliderLeftIcon, true) / 2f), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor[0], leftColor[1], leftColor[2], 255, false, false);
 
                     // right sprite is managed by the regular function in MenuItem that handles the right icon.
                 }
                 else
                 {
                     // left sprite right aligned.
-                    DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width + (4f / MenuController.ScreenWidth)) - GetSpriteSize(SliderLeftIcon, true) - (20f / MenuController.ScreenWidth), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor[0], leftColor[1], leftColor[2], 255);
+                    DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width + (4f / MenuController.ScreenWidth)) - GetSpriteSize(SliderLeftIcon, true) - (20f / MenuController.ScreenWidth), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor[0], leftColor[1], leftColor[2], 255, false, false);
 
                     // right sprite is managed by the regular function in MenuItem that handles the right icon.
                 }
@@ -104,7 +108,7 @@ namespace MenuAPI
             #region drawing background bar and foreground bar
 
             // background
-            DrawRect(x, y, width, height, BackgroundColor.R, BackgroundColor.G, BackgroundColor.B, BackgroundColor.A);
+            DrawRect(x, y, width, height, BackgroundColor.R, BackgroundColor.G, BackgroundColor.B, BackgroundColor.A, false);
 
             float xOffset = Map(
                 (float)Position,
@@ -118,11 +122,11 @@ namespace MenuAPI
             // bar (foreground)
             if (!ParentMenu.LeftAligned)
             {
-                DrawRect(x - (width / 2f) + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A);
+                DrawRect(x - (width / 2f) + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A, false);
             }
             else
             {
-                DrawRect(x + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A);
+                DrawRect(x + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A, false);
             }
 
             #endregion
@@ -132,11 +136,11 @@ namespace MenuAPI
             {
                 if (!ParentMenu.LeftAligned)
                 {
-                    DrawRect(x - width + (4f / MenuController.ScreenWidth), y, 4f / MenuController.ScreenWidth, RowHeight / MenuController.ScreenHeight / 2f, 255, 255, 255, 255);
+                    DrawRect(x - width + (4f / MenuController.ScreenWidth), y, 4f / MenuController.ScreenWidth, RowHeight / MenuController.ScreenHeight / 2f, 255, 255, 255, 255, false);
                 }
                 else
                 {
-                    DrawRect(x + (2f / MenuController.ScreenWidth), y, 4f / MenuController.ScreenWidth, RowHeight / MenuController.ScreenHeight / 2f, 255, 255, 255, 255);
+                    DrawRect(x + (2f / MenuController.ScreenWidth), y, 4f / MenuController.ScreenWidth, RowHeight / MenuController.ScreenHeight / 2f, 255, 255, 255, 255, false);
                 }
             }
             #endregion

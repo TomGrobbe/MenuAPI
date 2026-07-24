@@ -1,5 +1,9 @@
-﻿using CitizenFX.Core;
-using static CitizenFX.Core.Native.API;
+﻿
+using System;
+using CitizenFX.Core;
+using CitizenFX.FiveM.Client;
+using CitizenFX.FiveM.Client.Extensions;
+using static CitizenFX.FiveM.Client.Native;
 
 namespace MenuAPI
 {
@@ -124,7 +128,7 @@ namespace MenuAPI
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 #endif
 
-            float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * MathUtil.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
+            float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
 #if FIVEM
             string name = GetSpriteName();
 #endif
@@ -137,7 +141,7 @@ namespace MenuAPI
 #endif
             int color = GetSpriteColour();
 #if FIVEM
-            DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255);
+            DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255, false, false);
             ResetScriptGfxAlign();
 #endif
 #if REDM

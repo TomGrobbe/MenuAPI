@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CitizenFX.Core;
-using static CitizenFX.Core.Native.API;
+
+using CitizenFX.FiveM.Client;
+using CitizenFX.FiveM.Client.Extensions;
+using static CitizenFX.FiveM.Client.Native;
+using CitizenFX.FiveM.Shared.Script;
 
 namespace MenuAPI
 {
-    public class MenuController : BaseScript
+    public class MenuController : IScript
     {
         public static List<Menu> Menus { get; protected set; } = new List<Menu>();
         internal static HashSet<Menu> VisibleMenus { get; } = new HashSet<Menu>();
@@ -50,7 +54,7 @@ namespace MenuAPI
         public static float ScreenHeight => 1080;
         public static bool DisableMenuButtons { get; set; } = false;
 #if FIVEM
-        public static bool AreMenuButtonsEnabled => IsAnyMenuOpen() && !Game.IsPaused && CitizenFX.Core.UI.Screen.Fading.IsFadedIn && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !Game.Player.IsDead;
+        public static bool AreMenuButtonsEnabled => IsAnyMenuOpen() && !IsPauseMenuActive() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !API.Players.Local.IsDead;
 #endif
 #if REDM
         public static bool AreMenuButtonsEnabled =>
@@ -119,7 +123,7 @@ namespace MenuAPI
 
                     // In case the value was being changed to be right aligned, notify the user properly.
                     if (value == MenuAlignmentOption.Right)
-                        Debug.WriteLine($"[MenuAPI ({GetCurrentResourceName()})] Warning: Right aligned menus are not supported for aspect ratios 17:9 or 21:9, left aligned will be used instead.");
+                        Console.WriteLine($"[MenuAPI ({GetCurrentResourceName()})] Warning: Right aligned menus are not supported for aspect ratios 17:9 or 21:9, left aligned will be used instead.");
                 }
             }
         }
@@ -134,16 +138,16 @@ namespace MenuAPI
         /// <summary>
         /// Constructor
         /// </summary>
-        public MenuController()
+        public void Initialize()
         {
-            Tick += ProcessMenus;
+            API.SetInterval(ProcessMenus, 3, 0);
 #if FIVEM
-            Tick += DrawInstructionalButtons;
+            API.SetInterval(DrawInstructionalButtons, 3, 0);
 #endif
-            Tick += ProcessMainButtons;
-            Tick += ProcessDirectionalButtons;
-            Tick += ProcessToggleMenuButton;
-            Tick += MenuButtonsDisableChecks;
+            API.SetInterval(ProcessMainButtons, 3, 0);
+            API.SetInterval(ProcessDirectionalButtons, 100l, 0);
+            API.SetInterval(ProcessToggleMenuButton, 3, 0);
+            API.SetInterval(MenuButtonsDisableChecks, 3, 0);
         }
 
         /// <summary>
@@ -209,7 +213,7 @@ namespace MenuAPI
             });
             while (menuTextureAssets.Any(asset => { return !HasStreamedTextureDictLoaded(asset); }))
             {
-                await Delay(0);
+                await API.Delay(0);
             }
         }
 
@@ -255,7 +259,7 @@ namespace MenuAPI
         /// Process the select & go back/cancel buttons.
         /// </summary>
         /// <returns></returns>
-        private async Task ProcessMainButtons()
+        private async void ProcessMainButtons()
         {
             if (!IsAnyMenuOpen())
             {
@@ -271,7 +275,7 @@ namespace MenuAPI
                 return;
             }
 #if FIVEM
-            Game.DisableControlThisFrame(0, Control.MultiplayerInfo);
+            DisableControlAction(0, (int)Control.MultiplayerInfo, false);
 #endif
             HandlePreventExit();
             if (!currentMenu.Visible || !AreMenuButtonsEnabled)
@@ -286,10 +290,10 @@ namespace MenuAPI
             // Select / Enter
             if (
 #if FIVEM
-                Game.IsDisabledControlJustReleased(0, Control.FrontendAccept) ||
-                Game.IsControlJustReleased(0, Control.FrontendAccept) ||
-                Game.IsDisabledControlJustReleased(0, Control.VehicleMouseControlOverride) ||
-                Game.IsControlJustReleased(0, Control.VehicleMouseControlOverride)
+                IsDisabledControlJustReleased(0, (int)Control.FrontendAccept) ||
+                IsControlJustReleased(0, (int)Control.FrontendAccept) ||
+                IsDisabledControlJustReleased(0, (int)Control.VehicleMouseControlOverride) ||
+                IsControlJustReleased(0, (int)Control.VehicleMouseControlOverride)
 #endif
 #if REDM
                 IsDisabledControlJustReleased(0, (uint)Control.FrontendAccept) ||
@@ -306,7 +310,7 @@ namespace MenuAPI
             else if (
                 !DisableBackButton &&
 #if FIVEM
-                Game.IsDisabledControlJustReleased(0, Control.PhoneCancel)
+                IsDisabledControlJustReleased(0, (int)Control.PhoneCancel)
 #endif
 #if REDM
                 IsDisabledControlJustReleased(0, (uint)Control.FrontendCancel)
@@ -314,13 +318,13 @@ namespace MenuAPI
             )
             {
                 // Wait for the next frame to make sure the "cinematic camera" button doesn't get "re-enabled" before the menu gets closed.
-                await Delay(0);
+                await API.Delay(0);
                 currentMenu.GoBack();
             }
             else if (
                 PreventExitingMenu && !DisableBackButton &&
 #if FIVEM
-                Game.IsDisabledControlJustReleased(0, Control.PhoneCancel)
+                IsDisabledControlJustReleased(0, (int)Control.PhoneCancel)
 #endif
 #if REDM
                 IsDisabledControlJustReleased(0, (uint)Control.CellphoneCancel)
@@ -332,7 +336,7 @@ namespace MenuAPI
                 {
                     currentMenu.GoBack();
                 }
-                await Delay(0);
+                await API.Delay(0);
             }
         }
 
@@ -341,8 +345,8 @@ namespace MenuAPI
             if (PreventExitingMenu)
             {
 #if FIVEM
-                Game.DisableControlThisFrame(0, Control.FrontendPause);
-                Game.DisableControlThisFrame(0, Control.FrontendPauseAlternate);
+                DisableControlAction(0, (int)Control.FrontendPause, false);
+                DisableControlAction(0, (int)Control.FrontendPauseAlternate, false);
 #endif
 #if REDM
                 DisableControlAction(0, (uint)Control.FrontendPause, true);
@@ -363,11 +367,11 @@ namespace MenuAPI
             }
 #if FIVEM
             // when the player is holding TAB, while not in a vehicle, and when the scrollwheel is being used, return false to prevent interferring with weapon selection.
-            if (!Game.PlayerPed.IsInVehicle())
+            if (!API.Players.Local.Ped.IsPedInAnyVehicle())
             {
-                if (Game.IsControlPressed(0, Control.SelectWeapon))
+                if (IsControlPressed(0, (int)Control.SelectWeapon))
                 {
-                    if (Game.IsControlPressed(0, Control.SelectNextWeapon) || Game.IsControlPressed(0, Control.SelectPrevWeapon))
+                    if (IsControlPressed(0, (int)Control.SelectNextWeapon) || IsControlPressed(0, (int)Control.SelectPrevWeapon))
                     {
                         return false;
                     }
@@ -375,10 +379,10 @@ namespace MenuAPI
             }
 
             // return true if the scrollwheel up or the arrow up key is being used at this frame.
-            if (Game.IsControlPressed(0, Control.FrontendUp) ||
-                Game.IsDisabledControlPressed(0, Control.FrontendUp) ||
-                Game.IsControlPressed(0, Control.PhoneScrollBackward) ||
-                Game.IsDisabledControlPressed(0, Control.PhoneScrollBackward))
+            if (IsControlPressed(0, (int)Control.FrontendUp) ||
+                IsDisabledControlPressed(0, (int)Control.FrontendUp) ||
+                IsControlPressed(0, (int)Control.PhoneScrollBackward) ||
+                IsDisabledControlPressed(0, (int)Control.PhoneScrollBackward))
             {
                 return true;
             }
@@ -409,11 +413,11 @@ namespace MenuAPI
             }
 #if FIVEM
             // when the player is holding TAB, while not in a vehicle, and when the scrollwheel is being used, return false to prevent interferring with weapon selection.
-            if (!Game.PlayerPed.IsInVehicle())
+            if (!API.Players.Local.Ped.IsPedInAnyVehicle())
             {
-                if (Game.IsControlPressed(0, Control.SelectWeapon))
+                if (IsControlPressed(0, (int)Control.SelectWeapon))
                 {
-                    if (Game.IsControlPressed(0, Control.SelectNextWeapon) || Game.IsControlPressed(0, Control.SelectPrevWeapon))
+                    if (IsControlPressed(0, (int)Control.SelectNextWeapon) || IsControlPressed(0, (int)Control.SelectPrevWeapon))
                     {
                         return false;
                     }
@@ -421,10 +425,10 @@ namespace MenuAPI
             }
 
             // return true if the scrollwheel down or the arrow down key is being used at this frame.
-            if (Game.IsControlPressed(0, Control.FrontendDown) ||
-                Game.IsDisabledControlPressed(0, Control.FrontendDown) ||
-                Game.IsControlPressed(0, Control.PhoneScrollForward) ||
-                Game.IsDisabledControlPressed(0, Control.PhoneScrollForward))
+            if (IsControlPressed(0, (int)Control.FrontendDown) ||
+                IsDisabledControlPressed(0, (int)Control.FrontendDown) ||
+                IsControlPressed(0, (int)Control.PhoneScrollForward) ||
+                IsDisabledControlPressed(0, (int)Control.PhoneScrollForward))
             {
                 return true;
             }
@@ -447,11 +451,11 @@ namespace MenuAPI
         /// Processes the menu toggle button to check if the menu should open or close.
         /// </summary>
         /// <returns></returns>
-        private async Task ProcessToggleMenuButton()
+        private async void ProcessToggleMenuButton()
         {
             if (!MenuToggleKeyIsValid)
             {
-                await Delay(1_500);
+                await API.Delay(1_500);
                 return;
             }
 
@@ -490,7 +494,7 @@ namespace MenuAPI
 #if FIVEM
         private async Task ProcessToggleMenuButtonFiveM()
         {
-            if (!Game.IsPaused && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !Game.Player.IsDead && !DisableMenuButtons)
+            if (!IsPauseMenuActive() && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !API.Players.Local.IsDead && !DisableMenuButtons)
             {
                 if (IsAnyMenuOpen())
                 {
@@ -498,7 +502,7 @@ namespace MenuAPI
                 }
                 else
                 {
-                    if (Game.CurrentInputMode == InputMode.GamePad)
+                    if (IsUsingKeyboardAndMouse(2))
                     {
                         if (!EnableMenuToggleKeyOnController)
                             return;
@@ -518,7 +522,7 @@ namespace MenuAPI
         /// Process left/right/up/down buttons (also holding down buttons will speed up after 3 iterations)
         /// </summary>
         /// <returns></returns>
-        private async Task ProcessDirectionalButtons()
+        private async void ProcessDirectionalButtons()
         {
             // Return if the buttons are not currently enabled.
             if (!AreMenuButtonsEnabled)
@@ -546,8 +550,8 @@ namespace MenuAPI
             else if (
                 AreMenuButtonsEnabled && (
 #if FIVEM
-                    Game.IsDisabledControlJustPressed(0, Control.PhoneLeft) ||
-                    Game.IsControlJustPressed(0, Control.PhoneLeft)
+                    IsDisabledControlJustPressed(0, (int)Control.PhoneLeft) ||
+                    IsControlJustPressed(0, (int)Control.PhoneLeft)
 #endif
 #if REDM
                     IsDisabledControlJustPressed(0, (uint)Control.FrontendLeft) ||
@@ -563,8 +567,8 @@ namespace MenuAPI
             else if (
                 AreMenuButtonsEnabled && (
 #if FIVEM
-                    Game.IsDisabledControlJustPressed(0, Control.PhoneRight) ||
-                    Game.IsControlJustPressed(0, Control.PhoneRight)
+                    IsDisabledControlJustPressed(0, (int)Control.PhoneRight) ||
+                    IsControlJustPressed(0, (int)Control.PhoneRight)
 #endif
 #if REDM
                     IsDisabledControlJustPressed(0, (uint)Control.FrontendRight) ||
@@ -587,7 +591,7 @@ namespace MenuAPI
                 var times = 0;
                 var delay = 200;
 #if FIVEM
-                while ((Game.IsDisabledControlPressed(0, Control.PhoneRight) || Game.IsControlPressed(0, Control.PhoneRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+                while ((IsDisabledControlPressed(0, (int)Control.PhoneRight) || IsControlPressed(0, (int)Control.PhoneRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
 #endif
 #if REDM
                 while (
@@ -622,7 +626,7 @@ namespace MenuAPI
                         currentMenu.GoRight();
                         time = GetGameTimer();
                     }
-                    await Delay(0);
+                    await API.Delay(0);
                 }
             }
         }
@@ -639,8 +643,8 @@ namespace MenuAPI
                     GetCurrentMenu() != null &&
                     AreMenuButtonsEnabled && (
 #if FIVEM
-                        Game.IsDisabledControlPressed(0, Control.PhoneLeft) ||
-                        Game.IsControlPressed(0, Control.PhoneLeft)
+                        IsDisabledControlPressed(0, (int)Control.PhoneLeft) ||
+                        IsControlPressed(0, (int)Control.PhoneLeft)
 #endif
 #if REDM
                         IsDisabledControlPressed(0, (uint)Control.FrontendLeft) ||
@@ -672,7 +676,7 @@ namespace MenuAPI
                         currentMenu.GoLeft();
                         time = GetGameTimer();
                     }
-                    await Delay(0);
+                    await API.Delay(0);
                 }
             }
         }
@@ -711,7 +715,7 @@ namespace MenuAPI
 
                     time = GetGameTimer();
                 }
-                await Delay(0);
+                await API.Delay(0);
             }
         }
 
@@ -719,9 +723,9 @@ namespace MenuAPI
         private void HandleMenuToggleKeyForKeyboard()
         {
             if (
-                (Game.IsControlJustPressed(0, MenuToggleKey) || Game.IsDisabledControlJustPressed(0, MenuToggleKey)) &&
-                !Game.IsPaused &&
-                !Game.Player.IsDead &&
+                (IsControlJustPressed(0, (int)MenuToggleKey) || IsDisabledControlJustPressed(0, (int)MenuToggleKey)) &&
+                !IsPauseMenuActive() &&
+                !API.Players.Local.IsDead &&
                 !IsPlayerSwitchInProgress() &&
                 !DontOpenAnyMenu &&
                 IsScreenFadedIn()
@@ -745,7 +749,7 @@ namespace MenuAPI
         private async Task HandleMenuToggleKeyForController()
         {
             int tmpTimer = GetGameTimer();
-            while ((Game.IsControlPressed(0, Control.InteractionMenu) || Game.IsDisabledControlPressed(0, Control.InteractionMenu)) && !Game.IsPaused && IsScreenFadedIn() && !Game.Player.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
+            while ((IsControlPressed(0, (int)Control.InteractionMenu) || IsDisabledControlPressed(0, (int)Control.InteractionMenu)) && !IsPauseMenuActive() && IsScreenFadedIn() && !API.Players.Local.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
             {
                 if (GetGameTimer() - tmpTimer > 400)
                 {
@@ -762,7 +766,7 @@ namespace MenuAPI
                     }
                     break;
                 }
-                await Delay(0);
+                await API.Delay(0);
             }
         }
 
@@ -773,10 +777,10 @@ namespace MenuAPI
                 return;
             }
 
-            Game.DisableControlThisFrame(0, MenuToggleKey);
-            if (Game.CurrentInputMode == InputMode.MouseAndKeyboard)
+            DisableControlAction(0, (int)MenuToggleKey, false);
+            if (IsUsingKeyboardAndMouse(2))
             {
-                if ((Game.IsControlJustPressed(0, MenuToggleKey) || Game.IsDisabledControlJustPressed(0, MenuToggleKey)) && !PreventExitingMenu)
+                if ((IsControlJustPressed(0, (int)MenuToggleKey) || IsDisabledControlJustPressed(0, (int)MenuToggleKey)) && !PreventExitingMenu)
                 {
                     var menu = GetCurrentMenu();
                     if (menu != null)
@@ -836,11 +840,11 @@ namespace MenuAPI
                 }
 
                 // Wait for the next game tick.
-                await Delay(0);
+                await API.Delay(0);
             }
         }
 
-        private async Task MenuButtonsDisableChecks()
+        private async void MenuButtonsDisableChecks()
         {
             bool isInputVisible() => UpdateOnscreenKeyboard() == 0;
             if (isInputVisible())
@@ -848,13 +852,13 @@ namespace MenuAPI
                 bool buttonsState = DisableMenuButtons;
                 while (isInputVisible())
                 {
-                    await Delay(0);
+                    await API.Delay(0);
                     DisableMenuButtons = true;
                 }
                 int timer = GetGameTimer();
                 while (GetGameTimer() - timer < 300)
                 {
-                    await Delay(0);
+                    await API.Delay(0);
                     DisableMenuButtons = true;
                 }
                 DisableMenuButtons = buttonsState;
@@ -882,7 +886,7 @@ namespace MenuAPI
                 return;
             if (
 #if FIVEM
-                    Game.PlayerPed.IsDead
+                API.Players.Local.IsDead
 #endif
 #if REDM
                     IsEntityDead(PlayerPedId())
@@ -899,11 +903,11 @@ namespace MenuAPI
             DisableAttackControls();
 
             // When in a vehicle
-            if (Game.PlayerPed.IsInVehicle())
+            if (API.Players.Local.Ped.IsPedInAnyVehicle())
             {
-                Game.DisableControlThisFrame(0, Control.VehicleSelectNextWeapon);
-                Game.DisableControlThisFrame(0, Control.VehicleSelectPrevWeapon);
-                Game.DisableControlThisFrame(0, Control.VehicleCinCam);
+                DisableControlAction(0, (int)Control.VehicleSelectNextWeapon, false);
+                DisableControlAction(0, (int)Control.VehicleSelectPrevWeapon, false);
+                DisableControlAction(0, (int)Control.VehicleCinCam, false);
             }
 #endif
 #if REDM
@@ -957,29 +961,29 @@ namespace MenuAPI
         private static void DisableGenericControls(Menu currMenu)
         {
             // Disable Gamepad/Controller Specific controls:
-            if (Game.CurrentInputMode == InputMode.GamePad)
+            if (IsUsingKeyboardAndMouse(2))
             {
-                Game.DisableControlThisFrame(0, Control.MultiplayerInfo);
+                DisableControlAction(0, (int)Control.MultiplayerInfo, false);
                 // when in a vehicle.
-                if (Game.PlayerPed.IsInVehicle())
+                if (API.Players.Local.Ped.IsPedInAnyVehicle())
                 {
-                    Game.DisableControlThisFrame(0, Control.VehicleHeadlight);
-                    Game.DisableControlThisFrame(0, Control.VehicleDuck);
+                    DisableControlAction(0, (int)Control.VehicleHeadlight, false);
+                    DisableControlAction(0, (int)Control.VehicleDuck, false);
 
                     // toggles boost in some dlc vehicles, hence it's disabled for controllers only (pressing select in the menu would trigger this).
-                    Game.DisableControlThisFrame(0, Control.VehicleFlyTransform);
+                    DisableControlAction(0, (int)Control.VehicleFlyTransform, false);
                 }
             }
             else // when not using a controller.
             {
-                Game.DisableControlThisFrame(0, Control.FrontendPauseAlternate); // disable the escape key opening the pause menu, pressing P still works.
+                DisableControlAction(0, (int)Control.FrontendPauseAlternate, false); // disable the escape key opening the pause menu, pressing P still works.
 
                 // Disable the scrollwheel button changing weapons while the menu is open.
                 // Only if you press TAB (to show the weapon wheel) then it will allow you to change weapons.
-                if (!Game.IsControlPressed(0, Control.SelectWeapon))
+                if (!IsControlPressed(0, (int)Control.SelectWeapon))
                 {
-                    Game.DisableControlThisFrame(24, Control.SelectNextWeapon);
-                    Game.DisableControlThisFrame(24, Control.SelectPrevWeapon);
+                    DisableControlAction(24, (int)Control.SelectNextWeapon, false);
+                    DisableControlAction(24, (int)Control.SelectPrevWeapon, false);
                 }
             }
             var currentItem = currMenu.GetCurrentMenuItem();
@@ -987,9 +991,9 @@ namespace MenuAPI
             {
                 if (currentItem is MenuSliderItem || currentItem is MenuListItem || currentItem is MenuDynamicListItem)
                 {
-                    if (Game.CurrentInputMode == InputMode.GamePad)
+                    if (IsUsingKeyboardAndMouse(2))
                     {
-                        Game.DisableControlThisFrame(0, Control.SelectWeapon);
+                        DisableControlAction(0, (int)Control.SelectWeapon, false);
                     }
                 }
             }
@@ -1000,20 +1004,20 @@ namespace MenuAPI
         /// </summary>
         private static void DisableAttackControls()
         {
-            Game.DisableControlThisFrame(0, Control.Attack);
-            Game.DisableControlThisFrame(0, Control.Attack2);
-            Game.DisableControlThisFrame(0, Control.MeleeAttack1);
-            Game.DisableControlThisFrame(0, Control.MeleeAttack2);
-            Game.DisableControlThisFrame(0, Control.MeleeAttackAlternate);
-            Game.DisableControlThisFrame(0, Control.MeleeAttackHeavy);
-            Game.DisableControlThisFrame(0, Control.MeleeAttackLight);
-            Game.DisableControlThisFrame(0, Control.VehicleAttack);
-            Game.DisableControlThisFrame(0, Control.VehicleAttack2);
-            Game.DisableControlThisFrame(0, Control.VehicleFlyAttack);
-            Game.DisableControlThisFrame(0, Control.VehiclePassengerAttack);
-            Game.DisableControlThisFrame(0, Control.Aim);
+            DisableControlAction(0, (int)Control.Attack, false);
+            DisableControlAction(0, (int)Control.Attack2, false);
+            DisableControlAction(0, (int)Control.MeleeAttack1, false);
+            DisableControlAction(0, (int)Control.MeleeAttack2, false);
+            DisableControlAction(0, (int)Control.MeleeAttackAlternate, false);
+            DisableControlAction(0, (int)Control.MeleeAttackHeavy, false);
+            DisableControlAction(0, (int)Control.MeleeAttackLight, false);
+            DisableControlAction(0, (int)Control.VehicleAttack, false);
+            DisableControlAction(0, (int)Control.VehicleAttack2, false);
+            DisableControlAction(0, (int)Control.VehicleFlyAttack, false);
+            DisableControlAction(0, (int)Control.VehiclePassengerAttack, false);
+            DisableControlAction(0, (int)Control.Aim, false);
             // fires vehicle specific weapons when using right click on the mouse sometimes.
-            Game.DisableControlThisFrame(0, Control.VehicleAim);
+            DisableControlAction(0, (int)Control.VehicleAim, false);
         }
 
         /// <summary>
@@ -1021,11 +1025,11 @@ namespace MenuAPI
         /// </summary>
         private static void DisablePhoneAndArrowKeysInputs()
         {
-            Game.DisableControlThisFrame(0, Control.Phone);
-            Game.DisableControlThisFrame(0, Control.PhoneCancel);
-            Game.DisableControlThisFrame(0, Control.PhoneDown);
-            Game.DisableControlThisFrame(0, Control.PhoneLeft);
-            Game.DisableControlThisFrame(0, Control.PhoneRight);
+            DisableControlAction(0, (int)Control.Phone, false);
+            DisableControlAction(0, (int)Control.PhoneCancel, false);
+            DisableControlAction(0, (int)Control.PhoneDown, false);
+            DisableControlAction(0, (int)Control.PhoneLeft, false);
+            DisableControlAction(0, (int)Control.PhoneRight, false);
         }
 
         /// <summary>
@@ -1033,11 +1037,11 @@ namespace MenuAPI
         /// </summary>
         private static void DisableRadioInputs()
         {
-            Game.DisableControlThisFrame(0, Control.RadioWheelLeftRight);
-            Game.DisableControlThisFrame(0, Control.RadioWheelUpDown);
-            Game.DisableControlThisFrame(0, Control.VehicleNextRadio);
-            Game.DisableControlThisFrame(0, Control.VehicleRadioWheel);
-            Game.DisableControlThisFrame(0, Control.VehiclePrevRadio);
+            DisableControlAction(0, (int)Control.RadioWheelLeftRight, false);
+            DisableControlAction(0, (int)Control.RadioWheelUpDown, false);
+            DisableControlAction(0, (int)Control.VehicleNextRadio, false);
+            DisableControlAction(0, (int)Control.VehicleRadioWheel, false);
+            DisableControlAction(0, (int)Control.VehiclePrevRadio, false);
         }
 #endif
 
@@ -1045,14 +1049,14 @@ namespace MenuAPI
         /// Draws all the menus that are visible on the screen.
         /// </summary>
         /// <returns></returns>
-        private static async Task ProcessMenus()
+        private static async void ProcessMenus()
         {
             if (!(
                 Menus.Any() &&
                 IsAnyMenuOpen() &&
                 IsScreenFadedIn() &&
                 !IsPauseMenuActive() &&
-                !IsEntityDead(PlayerPedId())
+                !API.Players.Local.IsDead
 #if FIVEM
                 && !IsPlayerSwitchInProgress()
 #endif
@@ -1102,11 +1106,11 @@ namespace MenuAPI
         }
 
 #if FIVEM
-        internal static async Task DrawInstructionalButtons()
+        internal static async void DrawInstructionalButtons()
         {
             if (
-                Game.IsPaused ||
-                Game.Player.IsDead ||
+                IsPlayerSwitchInProgress() ||
+                API.Players.Local.IsDead ||
                 !IsScreenFadedIn() ||
                 IsPlayerSwitchInProgress() ||
                 IsWarningMessageActive() ||
@@ -1128,7 +1132,7 @@ namespace MenuAPI
             }
             while (!HasScaleformMovieLoaded(_scale))
             {
-                await Delay(0);
+                await API.Delay(0);
             }
 
             DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 0, 0);
@@ -1144,7 +1148,7 @@ namespace MenuAPI
 
                 BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
                 ScaleformMovieMethodAddParamInt(i);
-                string buttonName = GetControlInstructionalButton(0, (int)control, 1);
+                string buttonName = GetControlInstructionalButton(0, (int)control, true);
                 PushScaleformMovieMethodParameterString(buttonName);
                 PushScaleformMovieMethodParameterString(text);
                 EndScaleformMovieMethod();
@@ -1175,7 +1179,7 @@ namespace MenuAPI
         {
             if (HasScaleformMovieLoaded(_scale))
             {
-                SetScaleformMovieAsNoLongerNeeded(ref _scale);
+                SetScaleformMovieAsNoLongerNeeded(out _scale);
             }
         }
 #endif

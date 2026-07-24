@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <DebugType>embedded</DebugType>
     <TargetName>MenuAPI</TargetName>
     <Configurations>Release RedM;Release FiveM;Debug RedM;Debug FiveM</Configurations>
@@ -17,6 +17,7 @@
     <RepositoryUrl>https://github.com/tomgrobbe/menuapi/</RepositoryUrl>
     <PackageTags Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">FiveM MenuAPI</PackageTags>
     <PackageTags Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">RedM MenuAPI</PackageTags>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release FiveM'">
@@ -42,15 +43,15 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
 
-    <PackageReference Include="CitizenFX.Core.Client" Version="1.0.3394" Condition="'$(Configuration)' == 'Release FiveM' Or '$(Configuration)' == 'Debug FiveM'">
-      <ExcludeAssets>runtime</ExcludeAssets>
-    </PackageReference>
-
     <!-- currently hardcoded path as no nuget package for RedM exists yet -->
     <Reference Include="CitizenFX.Core.Client" Condition="'$(Configuration)' == 'Release RedM' Or '$(Configuration)' == 'Debug RedM'">
       <HintPath>..\dependencies\RedM\CitizenFX.Core.dll</HintPath>
       <Private>false</Private>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CitizenFX.FiveM.Client" Version="0.0.2-alpha" />
   </ItemGroup>
 
 </Project>

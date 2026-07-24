@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
-using static CitizenFX.Core.Native.Function;
-using static CitizenFX.Core.Native.API;
+
+using CitizenFX.Core;
+using CitizenFX.FiveM.Client;
+using CitizenFX.FiveM.Client.Extensions;
+using static CitizenFX.FiveM.Client.Native;
 
 namespace MenuAPI
 {

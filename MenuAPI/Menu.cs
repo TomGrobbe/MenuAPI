@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CitizenFX.Core;
-using static CitizenFX.Core.Native.API;
-using static CitizenFX.Core.Native.Function;
-using static CitizenFX.Core.Native.Hash;
+using CitizenFX.FiveM.Client;
+using CitizenFX.FiveM.Client.Extensions;
+using static CitizenFX.FiveM.Client.Native;
 
 namespace MenuAPI
 {
@@ -405,7 +405,7 @@ namespace MenuAPI
 
         public Menu ParentMenu { get; internal set; } = null;
 
-        public int CurrentIndex { get { return index; } internal set { index = MathUtil.Clamp(value, 0, Math.Max(0, Size - 1)); } }
+        public int CurrentIndex { get { return index; } internal set { index = Math.Clamp(value, 0, Math.Max(0, Size - 1)); } }
 
         public bool EnableInstructionalButtons { get; set; } = true;
 
@@ -627,7 +627,7 @@ namespace MenuAPI
         /// <param name="max">A value between 3 and 10 (inclusive).</param>
         public void SetMaxItemsOnScreen(int max)
         {
-            MaxItemsOnScreen = MathUtil.Clamp(max, 3, 10);
+            MaxItemsOnScreen = Math.Clamp(max, 3, 10);
         }
 
         /// <summary>
@@ -1042,10 +1042,10 @@ namespace MenuAPI
         {
             WeaponStats = new float[4]
             {
-                MathUtil.Clamp(damage, 0f, 1f),
-                MathUtil.Clamp(fireRate, 0f, 1f),
-                MathUtil.Clamp(accuracy, 0f, 1f),
-                MathUtil.Clamp(range, 0f, 1f)
+                Math.Clamp(damage, 0f, 1f),
+                Math.Clamp(fireRate, 0f, 1f),
+                Math.Clamp(accuracy, 0f, 1f),
+                Math.Clamp(range, 0f, 1f)
             };
         }
 
@@ -1060,10 +1060,10 @@ namespace MenuAPI
         {
             WeaponComponentStats = new float[4]
             {
-                MathUtil.Clamp(WeaponStats[0] + damage, 0f, 1f),
-                MathUtil.Clamp(WeaponStats[1] + fireRate, 0f, 1f),
-                MathUtil.Clamp(WeaponStats[2] + accuracy, 0f, 1f),
-                MathUtil.Clamp(WeaponStats[3] + range, 0f, 1f)
+                Math.Clamp(WeaponStats[0] + damage, 0f, 1f),
+                Math.Clamp(WeaponStats[1] + fireRate, 0f, 1f),
+                Math.Clamp(WeaponStats[2] + accuracy, 0f, 1f),
+                Math.Clamp(WeaponStats[3] + range, 0f, 1f)
             };
         }
 
@@ -1078,10 +1078,10 @@ namespace MenuAPI
         {
             VehicleStats = new float[4]
             {
-                MathUtil.Clamp(topSpeed, 0f, 1f),
-                MathUtil.Clamp(acceleration, 0f, 1f),
-                MathUtil.Clamp(braking, 0f, 1f),
-                MathUtil.Clamp(traction, 0f, 1f)
+                Math.Clamp(topSpeed, 0f, 1f),
+                Math.Clamp(acceleration, 0f, 1f),
+                Math.Clamp(braking, 0f, 1f),
+                Math.Clamp(traction, 0f, 1f)
             };
         }
 
@@ -1099,10 +1099,10 @@ namespace MenuAPI
         {
             VehicleUpgradeStats = new float[4]
             {
-                MathUtil.Clamp(VehicleStats[0] + topSpeed, 0f, 1f),
-                MathUtil.Clamp(VehicleStats[1] + acceleration, 0f, 1f),
-                MathUtil.Clamp(VehicleStats[2] + braking, 0f, 1f),
-                MathUtil.Clamp(VehicleStats[3] + traction, 0f, 1f)
+                Math.Clamp(VehicleStats[0] + topSpeed, 0f, 1f),
+                Math.Clamp(VehicleStats[1] + acceleration, 0f, 1f),
+                Math.Clamp(VehicleStats[2] + braking, 0f, 1f),
+                Math.Clamp(VehicleStats[3] + traction, 0f, 1f)
             };
         }
 #endif
@@ -1123,7 +1123,7 @@ namespace MenuAPI
                         if (handler.disableControl)
                         {
 #if FIVEM
-                            Game.DisableControlThisFrame(0, handler.control);
+                            DisableControlAction(0, (int)handler.control, false);
 #endif
 #if REDM
                             DisableControlAction(0, (uint)handler.control, true);
@@ -1134,19 +1134,19 @@ namespace MenuAPI
                         {
 #if FIVEM
                             case ControlPressCheckType.JUST_PRESSED:
-                                if (Game.IsControlJustPressed(0, handler.control) || Game.IsDisabledControlJustPressed(0, handler.control))
+                                if (IsControlJustPressed(0, (int)handler.control) || IsDisabledControlJustPressed(0, (int)handler.control))
                                     handler.function.Invoke(this, handler.control);
                                 break;
                             case ControlPressCheckType.JUST_RELEASED:
-                                if (Game.IsControlJustReleased(0, handler.control) || Game.IsDisabledControlJustReleased(0, handler.control))
+                                if (IsControlJustReleased(0, (int)handler.control) || IsDisabledControlJustReleased(0, (int)handler.control))
                                     handler.function.Invoke(this, handler.control);
                                 break;
                             case ControlPressCheckType.PRESSED:
-                                if (Game.IsControlPressed(0, handler.control) || Game.IsDisabledControlPressed(0, handler.control))
+                                if (IsControlPressed(0, (int)handler.control) || IsDisabledControlPressed(0, (int)handler.control))
                                     handler.function.Invoke(this, handler.control);
                                 break;
                             case ControlPressCheckType.RELEASED:
-                                if (!Game.IsControlPressed(0, handler.control) && !Game.IsDisabledControlPressed(0, handler.control))
+                                if (!IsControlPressed(0, (int)handler.control) && !IsDisabledControlPressed(0, (int)handler.control))
                                     handler.function.Invoke(this, handler.control);
                                 break;
 #endif
@@ -1202,14 +1202,14 @@ namespace MenuAPI
                         RequestStreamedTextureDict(HeaderTexture.Key, false);
                         while (!HasStreamedTextureDictLoaded(HeaderTexture.Key))
                         {
-                            await BaseScript.Delay(0);
+                            await API.Delay(0);
                         }
                     }
-                    DrawSprite(HeaderTexture.Key, HeaderTexture.Value, x, y, width, height, 0f, 255, 255, 255, 255);
+                    DrawSprite(HeaderTexture.Key, HeaderTexture.Value, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
                 }
                 else
                 {
-                    DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 255, 255, 255, 255);
+                    DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
                 }
 
                 ResetScriptGfxAlign();
@@ -1242,11 +1242,11 @@ namespace MenuAPI
                 AddTextComponentSubstringPlayerName(MenuTitle);
                 if (LeftAligned)
                 {
-                    EndTextCommandDisplayText(((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f));
+                    EndTextCommandDisplayText(((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f), 0);
                 }
                 else
                 {
-                    EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f));
+                    EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f), 0);
                 }
                 ResetScriptGfxAlign();
                 menuItemsOffset = headerSize.Value;
@@ -1299,7 +1299,7 @@ namespace MenuAPI
             float width = headerSize.Key / MenuController.ScreenWidth;
             float height = bgHeight / MenuController.ScreenHeight;
 
-            DrawRect(x, y, width, height, 0, 0, 0, 250);
+            DrawRect(x, y, width, height, 0, 0, 0, 250, false);
             ResetScriptGfxAlign();
             #endregion
 #endif
@@ -1336,11 +1336,11 @@ namespace MenuAPI
 
                 if (LeftAligned)
                 {
-                    EndTextCommandDisplayText(10f / MenuController.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)));
+                    EndTextCommandDisplayText(10f / MenuController.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)), 0);
                 }
                 else
                 {
-                    EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Key - 10f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)));
+                    EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Key - 10f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)), 0);
                 }
                 ResetScriptGfxAlign();
             }
@@ -1388,12 +1388,12 @@ namespace MenuAPI
                 if (LeftAligned)
                 {
                     SetTextWrap(0f, (485f / MenuController.ScreenWidth));
-                    EndTextCommandDisplayText(10f / MenuController.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)));
+                    EndTextCommandDisplayText(10f / MenuController.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)), 0);
                 }
                 else
                 {
                     SetTextWrap(0f, GetSafeZoneSize() - (10f / MenuController.ScreenWidth));
-                    EndTextCommandDisplayText(0f, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)));
+                    EndTextCommandDisplayText(0f, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)), 0);
                 }
 
                 ResetScriptGfxAlign();
@@ -1439,13 +1439,13 @@ namespace MenuAPI
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 #endif
 #if FIVEM
-            float bgHeight = 38f * MathUtil.Clamp(Size, 0, MaxItemsOnScreen);
+            float bgHeight = 38f * Math.Clamp(Size, 0, MaxItemsOnScreen);
             float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
             float y = ((Position.Value + menuItemsOffset + ((bgHeight + 1f) / 2f)) / MenuController.ScreenHeight);
             float width = headerSize.Key / MenuController.ScreenWidth;
             float height = (bgHeight + 1f) / MenuController.ScreenHeight;
 
-            DrawRect(x, y, width, height, 0, 0, 0, 180);
+            DrawRect(x, y, width, height, 0, 0, 0, 180, false);
             menuItemsOffset += bgHeight - 1f;
             ResetScriptGfxAlign();
 #endif
@@ -1519,7 +1519,7 @@ namespace MenuAPI
             SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-            DrawRect(x, y, width, height, 0, 0, 0, 180);
+            DrawRect(x, y, width, height, 0, 0, 0, 180, false);
             descriptionYOffset = height;
             ResetScriptGfxAlign();
             #endregion
@@ -1542,7 +1542,7 @@ namespace MenuAPI
             if (LeftAligned)
             {
                 SetTextWrap(xMin, xMax);
-                EndTextCommandDisplayText(xCenter, yTop);
+                EndTextCommandDisplayText(xCenter, yTop, 0);
             }
             else
             {
@@ -1550,7 +1550,7 @@ namespace MenuAPI
                 xMax = GetSafeZoneSize() - (10f / MenuController.ScreenWidth);
                 xCenter = GetSafeZoneSize() - (250f / MenuController.ScreenWidth);
                 SetTextWrap(xMin, xMax);
-                EndTextCommandDisplayText(xCenter, yTop);
+                EndTextCommandDisplayText(xCenter, yTop, 0);
             }
 
             BeginTextCommandDisplayText("STRING");
@@ -1562,12 +1562,12 @@ namespace MenuAPI
             if (LeftAligned)
             {
                 SetTextWrap(xMin, xMax);
-                EndTextCommandDisplayText(xCenter, yBottom);
+                EndTextCommandDisplayText(xCenter, yBottom, 0);
             }
             else
             {
                 SetTextWrap(xMin, xMax);
-                EndTextCommandDisplayText(xCenter, yBottom);
+                EndTextCommandDisplayText(xCenter, yBottom, 0);
             }
 
             ResetScriptGfxAlign();
@@ -1606,7 +1606,7 @@ namespace MenuAPI
                 SetTextScale(textSize, textSize);
                 SetTextJustification(1);
                 string text = currentMenuItem.Description;
-                foreach (string s in CitizenFX.Core.UI.Screen.StringToArray(text))
+                foreach (string s in SplitString(text))
                 {
                     AddTextComponentSubstringPlayerName(s);
                 }
@@ -1614,14 +1614,14 @@ namespace MenuAPI
                 if (LeftAligned)
                 {
                     SetTextWrap(textMinX, textMaxX);
-                    EndTextCommandDisplayText(textMinX, textY);
+                    EndTextCommandDisplayText(textMinX, textY, 0);
                 }
                 else
                 {
                     textMinX = GetSafeZoneSize() - ((Width - 10f) / MenuController.ScreenWidth);
                     textMaxX = GetSafeZoneSize() - (10f / MenuController.ScreenWidth);
                     SetTextWrap(textMinX, textMaxX);
-                    EndTextCommandDisplayText(textMinX, textY);
+                    EndTextCommandDisplayText(textMinX, textY, 0);
                 }
 
                 ResetScriptGfxAlign();
@@ -1634,7 +1634,7 @@ namespace MenuAPI
                 SetTextJustification(1);
                 SetTextFont(font);
                 int lineCount;
-                foreach (string s in CitizenFX.Core.UI.Screen.StringToArray(text))
+                foreach (string s in SplitString(text))
                 {
                     AddTextComponentSubstringPlayerName(s);
                 }
@@ -1674,8 +1674,8 @@ namespace MenuAPI
                 SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-                DrawRect(descX, descY - (descHeight / 2f) + (2f / MenuController.ScreenHeight), descWidth, 4f / MenuController.ScreenHeight, 0, 0, 0, 200);
-                DrawRect(descX, descY, descWidth, descHeight, 0, 0, 0, 180);
+                DrawRect(descX, descY - (descHeight / 2f) + (2f / MenuController.ScreenHeight), descWidth, 4f / MenuController.ScreenHeight, 0, 0, 0, 200, false);
+                DrawRect(descX, descY, descWidth, descHeight, 0, 0, 0, 180, false);
 
                 ResetScriptGfxAlign();
                 #endregion
@@ -1731,7 +1731,7 @@ namespace MenuAPI
             #region background
             SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-            DrawRect(x, y, width, height, 0, 0, 0, 180);
+            DrawRect(x, y, width, height, 0, 0, 0, 180, false);
             ResetScriptGfxAlign();
             #endregion
 
@@ -1774,11 +1774,11 @@ namespace MenuAPI
                 SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
                 // bar bg
-                DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180);
+                DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180, false);
                 // component stats
-                DrawRect(componentBarX, barY, componentBarWidth, bgStatBarHeight, color[0], color[1], color[2], 255);
+                DrawRect(componentBarX, barY, componentBarWidth, bgStatBarHeight, color[0], color[1], color[2], 255, false);
                 // real bar
-                DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255);
+                DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255, false);
                 ResetScriptGfxAlign();
                 barY += 30f / MenuController.ScreenHeight;
             }
@@ -1795,7 +1795,7 @@ namespace MenuAPI
                 SetTextJustification(1);
                 SetTextScale(textSize, textSize);
 
-                EndTextCommandDisplayText(textX, textY);
+                EndTextCommandDisplayText(textX, textY, 0);
                 ResetScriptGfxAlign();
                 textY += 30f / MenuController.ScreenHeight;
             }
@@ -1866,11 +1866,11 @@ namespace MenuAPI
                         var b = 0;
                         if (listItem.ColorPanelColorType == MenuListItem.ColorPanelType.Hair)
                         {
-                            GetHairRgbColor(i, ref r, ref g, ref b); // _GetHairRgbColor
+                            GetHairRgbColor(i, out r, out g, out b); // _GetHairRgbColor
                         }
                         else
                         {
-                            GetMakeupRgbColor(i, ref r, ref g, ref b); // _GetMakeupRgbColor
+                            GetMakeupRgbColor(i, out r, out g, out b); // _GetMakeupRgbColor
                         }
 
                         BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT");
@@ -1919,8 +1919,8 @@ namespace MenuAPI
             if (!(
                 IsScreenFadedIn() &&
 #if FIVEM
-                !Game.IsPaused &&
-                !Game.PlayerPed.IsDead &&
+                !IsPauseMenuActive() &&
+                !API.Players.Local.IsDead &&
                 !IsPlayerSwitchInProgress()
 #endif
 #if REDM
@@ -1961,5 +1961,17 @@ namespace MenuAPI
             }
         }
         #endregion
+        public static String[] SplitString(String inputString)
+        {
+            int stringsNeeded = (inputString.Length - 1) / 99 + 1; // division with round up
+
+            String[] outputString = new String[stringsNeeded];
+            for (int i = 0; i < stringsNeeded; i++)
+            {
+                outputString[i] = inputString.Substring(i * 99, Math.Clamp(inputString.Substring(i * 99).Length, 0, 99));
+            }
+
+            return outputString;
+        }
     }
 }
