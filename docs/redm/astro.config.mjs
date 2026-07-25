@@ -61,6 +61,7 @@ export default defineConfig({
                 { label: 'MenuDynamicListItem', link: '/reference/menuitems/menudynamiclistitem/' },
               ],
             },
+            { label: 'Events', link: '/reference/events/' },
           ],
         },
         { label: 'Troubleshooting & Support', link: '/support/' },

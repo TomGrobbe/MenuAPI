@@ -62,6 +62,7 @@ export default defineConfig({
                 { label: 'MenuSliderItem', link: '/reference/menuitems/menuslideritem/' },
               ],
             },
+            { label: 'Events', link: '/reference/events/' },
           ],
         },
         { label: 'Troubleshooting & Support', link: '/support/' },
