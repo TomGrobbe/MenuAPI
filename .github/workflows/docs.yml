@@ -1,0 +1,98 @@
+name: Deploy Docs
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+  # Manual run from the Actions tab (no commit needed)
+  workflow_dispatch:
+
+# Only needs to read this repo; the push to the hub uses HUB_DEPLOY_TOKEN.
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & publish docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout MenuAPI
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies (legacy)
+        run: npm ci
+        working-directory: docs/legacy
+
+      - name: Install dependencies (redm)
+        run: npm ci
+        working-directory: docs/redm
+
+      # Build each doc set once per URL prefix. Astro bakes the base into the
+      # output URLs, so /menuapi and /mapi need separate builds. The MenuAPI repo
+      # is served from the TomGrobbe.github.io hub as lowercase /menuapi/ and, for
+      # backwards compatibility with the old docs, also at /mapi/.
+      - name: Build all variants
+        run: |
+          set -e
+          build() {
+            echo "== building $1 with base $2 -> $3 =="
+            (cd "$1" && DOCS_BASE="$2" npm run build)
+            mkdir -p "$3"
+            cp -r "$1/dist/." "$3/"
+          }
+          rm -rf _site
+          build docs/legacy /menuapi/legacy _site/menuapi/legacy
+          build docs/legacy /mapi/legacy    _site/mapi/legacy
+          build docs/redm   /menuapi/redm   _site/menuapi/redm
+          build docs/redm   /mapi/redm      _site/mapi/redm
+          # chooser landing + enhanced stub + favicon at each prefix root
+          for P in menuapi mapi; do
+            cp docs/landing/index.html "_site/$P/index.html"
+            mkdir -p "_site/$P/enhanced"
+            cp docs/landing/enhanced/index.html "_site/$P/enhanced/index.html"
+            cp docs/legacy/public/favicon.png "_site/$P/favicon.png"
+          done
+
+      # Publish into the hub repo. GitHub Pages serves a project site at the
+      # case-sensitive /RepoName/ path, so lowercase /menuapi/ (and the legacy
+      # /mapi/) come from pushing the built site into the user/hub site instead.
+      - name: Publish to hub site
+        env:
+          HUB_TOKEN: ${{ secrets.HUB_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${HUB_TOKEN}" ]; then
+            echo "::error::HUB_DEPLOY_TOKEN secret is not set. See docs/README.md for setup."
+            exit 1
+          fi
+          git clone --depth 1 --branch main \
+            "https://x-access-token:${HUB_TOKEN}@github.com/TomGrobbe/TomGrobbe.github.io.git" hub
+          # Replace only the MenuAPI folders; keep the hub index.html, CNAME,
+          # .nojekyll and other product folders (e.g. /vmenu/) intact.
+          rm -rf hub/menuapi hub/mapi
+          mkdir -p hub/menuapi hub/mapi
+          cp -r _site/menuapi/. hub/menuapi/
+          cp -r _site/mapi/. hub/mapi/
+          # Disable Jekyll so Astro's _astro/ asset folder is served (not skipped).
+          touch hub/.nojekyll
+          cd hub
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No documentation changes to publish."
+          else
+            git commit -m "Deploy MenuAPI docs"
+            git push origin main
+          fi
