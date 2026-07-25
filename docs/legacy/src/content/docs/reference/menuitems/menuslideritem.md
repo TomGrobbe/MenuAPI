@@ -39,6 +39,104 @@ menu.AddMenuItem(slider3);
 
 ![Example](https://vespura.com/hi/i/20-04-18_15-32-46_sjZJl_3290.png)
 
+#### Reacting to a slider
+
+```cs
+MenuSliderItem volume = new MenuSliderItem("Volume", 0, 10, 5, true);
+menu.AddMenuItem(volume);
+
+// Fires every time the slider moves.
+menu.OnSliderPositionChange += (_menu, _sliderItem, _oldPosition, _newPosition, _itemIndex) =>
+{
+    if (_sliderItem == volume)
+    {
+        SetVolume(_newPosition / 10f);
+    }
+};
+
+// Fires when the user presses select on the slider.
+menu.OnSliderItemSelect += (_menu, _sliderItem, _sliderPosition, _itemIndex) =>
+{
+    Debug.WriteLine($"Slider pressed at position {_sliderPosition}.");
+};
+```
+
+:::note
+Sliders do **not** wrap around. Pressing left at `Min` or right at `Max` plays the error sound and does not raise [OnSliderPositionChange](../../events/#onsliderpositionchange).
+:::
+
+----
+
+### Constructors
+
+:::note
+`Min` and `Max` can only be set through a constructor; they are read-only afterwards. `Position` can be changed at any time.
+:::
+
+----
+
+#### MenuSliderItem(string name, int min, int max, int startPosition)
+
+Creates a slider without a description and without the divider line.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|name|string|The text displayed on the left side of the item.|
+|min|int|The minimum slider position. Must be 0 or higher, and lower than `max`.|
+|max|int|The maximum slider position. Must be higher than `min`.|
+|startPosition|int|The position the slider starts at. Should be between `min` and `max` (inclusive).|
+
+----
+
+#### MenuSliderItem(string name, int min, int max, int startPosition, bool showDivider)
+
+Creates a slider without a description.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|name|string|The text displayed on the left side of the item.|
+|min|int|The minimum slider position.|
+|max|int|The maximum slider position.|
+|startPosition|int|The position the slider starts at.|
+|showDivider|boolean|Whether to draw the white divider line in the middle of the slider.|
+
+----
+
+#### MenuSliderItem(string name, string description, int min, int max, int startPosition)
+
+Creates a slider with a description and without the divider line.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|name|string|The text displayed on the left side of the item.|
+|description|string|The description shown below the menu while this item is selected.|
+|min|int|The minimum slider position.|
+|max|int|The maximum slider position.|
+|startPosition|int|The position the slider starts at.|
+
+----
+
+#### MenuSliderItem(string name, string description, int min, int max, int startPosition, bool showDivider)
+
+Creates a slider with all options set.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|name|string|The text displayed on the left side of the item.|
+|description|string|The description shown below the menu while this item is selected.|
+|min|int|The minimum slider position.|
+|max|int|The maximum slider position.|
+|startPosition|int|The position the slider starts at.|
+|showDivider|boolean|Whether to draw the white divider line in the middle of the slider.|
+
 ----
 
 ### Properties

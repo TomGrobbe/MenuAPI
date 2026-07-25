@@ -22,6 +22,95 @@ item.Style = CheckboxStyle.Tick;
 menu.AddMenuItem(item);
 ```
 
+#### Reacting to a checkbox
+
+Toggling a checkbox raises the [OnCheckboxChange](../../events/#oncheckboxchange) event on its parent menu. `Checked` has already been updated by the time your handler runs, and the `newCheckedState` parameter holds the same value.
+
+```cs
+MenuCheckboxItem godMode = new MenuCheckboxItem("God mode", "Makes you invincible.", false);
+menu.AddMenuItem(godMode);
+
+menu.OnCheckboxChange += (_menu, _item, _index, _checked) =>
+{
+    if (_item == godMode)
+    {
+        SetEntityInvincible(PlayerPedId(), _checked);
+    }
+};
+```
+
+:::note
+A checkbox can be toggled with the select control **and** with the right control, so do not assume [OnItemSelect](../../events/#onitemselect) will fire. It never fires for checkbox items.
+:::
+
+#### A locked checkbox
+
+Disabled checkboxes are greyed out and can not be toggled, which is useful for showing a state the user is not allowed to change.
+
+```cs
+menu.AddMenuItem(new MenuCheckboxItem("Premium feature", "Only available to donators.", false)
+{
+    Enabled = false,
+    LeftIcon = MenuItem.Icon.LOCK
+});
+```
+
+----
+
+### Constructors
+
+----
+
+#### MenuCheckboxItem(string text)
+
+Creates an unchecked checkbox without a description.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|text|string|The text displayed on the left side of the item.|
+
+----
+
+#### MenuCheckboxItem(string text, bool _checked)
+
+Creates a checkbox without a description, with the given checked state.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|text|string|The text displayed on the left side of the item.|
+|_checked|boolean|The initial checked state.|
+
+----
+
+#### MenuCheckboxItem(string text, string description)
+
+Creates an unchecked checkbox with a description.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|text|string|The text displayed on the left side of the item.|
+|description|string|The description shown below the menu while this item is selected.|
+
+----
+
+#### MenuCheckboxItem(string text, string description, bool _checked)
+
+Creates a checkbox with a description and the given checked state.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|text|string|The text displayed on the left side of the item.|
+|description|string|The description shown below the menu while this item is selected.|
+|_checked|boolean|The initial checked state.|
+
 ----
 
 ### Properties

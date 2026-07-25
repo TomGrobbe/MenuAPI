@@ -44,8 +44,100 @@ string description = "Description for this dynamic item. Pressing left will make
 MenuDynamicListItem dynList = new MenuDynamicListItem(title, initialSelectedText, callback, description);
 
 // Add a menu item to a menu:
-menu.AddMenuItem(item);
+menu.AddMenuItem(dynList);
 ```
+
+#### A clamped counter
+
+Because the callback decides what the next value is, you can clamp it, step by any amount, or format it however you like.
+
+```cs
+string VolumeCallback(MenuDynamicListItem item, bool left)
+{
+    int value = int.Parse(item.CurrentItem.Replace("%", ""));
+    value = MathUtil.Clamp(left ? value - 5 : value + 5, 0, 100);
+    return $"{value}%";
+}
+
+menu.AddMenuItem(new MenuDynamicListItem(
+    "Volume",
+    "50%",
+    new MenuDynamicListItem.ChangeItemCallback(VolumeCallback),
+    "Changes in steps of 5%, between 0% and 100%."
+));
+```
+
+#### Reacting to a dynamic list item
+
+```cs
+// Fires after your callback returned a new value.
+menu.OnDynamicListItemCurrentItemChange += (_menu, _item, _oldValue, _newValue) =>
+{
+    Debug.WriteLine($"'{_item.Text}' went from {_oldValue} to {_newValue}.");
+};
+
+// Fires when the user presses select on the item.
+menu.OnDynamicListItemSelect += (_menu, _item, _currentItem) =>
+{
+    Debug.WriteLine($"'{_item.Text}' was pressed while showing {_currentItem}.");
+};
+```
+
+:::caution
+The callback is called directly, without a null check, so `Callback` must never be null. It also has to return a value for every input — returning null makes the item display `N/A`.
+:::
+
+----
+
+### Constructors
+
+----
+
+#### MenuDynamicListItem(string text, string initialValue, ChangeItemCallback callback)
+
+Creates a dynamic list item without a description.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|text|string|The text displayed on the left side of the item.|
+|initialValue|string|The value that is displayed before the user changes anything.|
+|callback|[ChangeItemCallback](#changeitemcallback)|The function that returns the next value.|
+
+----
+
+#### MenuDynamicListItem(string text, string initialValue, ChangeItemCallback callback, string description)
+
+Creates a dynamic list item with a description.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|text|string|The text displayed on the left side of the item.|
+|initialValue|string|The value that is displayed before the user changes anything.|
+|callback|[ChangeItemCallback](#changeitemcallback)|The function that returns the next value.|
+|description|string|The description shown below the menu while this item is selected.|
+
+----
+
+### ChangeItemCallback
+
+```cs
+public delegate string ChangeItemCallback(MenuDynamicListItem item, bool left);
+```
+
+The callback runs every time the user presses left or right on the item. Whatever string you return becomes the new displayed value.
+
+|Parameter|Type|Description|
+|-|-|-|
+|item|MenuDynamicListItem|The item the user is interacting with. Read `item.CurrentItem` to get the current value.|
+|left|boolean|True when the **left** control was pressed, false when the **right** control was pressed.|
+
+|Return type|Description|
+|-|-|
+|string|The new value to display.|
 
 ----
 

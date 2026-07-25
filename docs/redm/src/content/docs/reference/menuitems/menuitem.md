@@ -4,7 +4,9 @@ title: "MenuItem"
 
 ## MenuItem
 
-All menu items inherit the 'regular' MenuItem class.
+A plain button: the simplest menu item there is. All other menu items inherit the 'regular' MenuItem class, so every property on this page also applies to them.
+
+A `MenuItem` is also what you use to open a [submenu](../../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem).
 
 ----
 
@@ -23,6 +25,81 @@ item.LeftIcon = Icon.LOCK;
 menu.AddMenuItem(item);
 ```
 
+Items are usually created with an object initializer, which keeps things a bit shorter:
+
+```cs
+menu.AddMenuItem(new MenuItem("Buy horse", "Costs $50.")
+{
+    Label = "$50",
+    LeftIcon = MenuItem.Icon.SADDLE,
+    RightIcon = MenuItem.Icon.STAR
+});
+```
+
+#### Reacting to a button press
+
+Pressing a plain menu item raises the [OnItemSelect](../../events/#onitemselect) event on its parent menu:
+
+```cs
+MenuItem button = new MenuItem("Heal", "Restores your health.");
+menu.AddMenuItem(button);
+
+menu.OnItemSelect += (_menu, _item, _index) =>
+{
+    if (_item == button)
+    {
+        SetEntityHealth(PlayerPedId(), 200, 0);
+    }
+};
+```
+
+#### Using it as a submenu button
+
+```cs
+Menu submenu = new Menu("Horse options");
+
+MenuItem submenuButton = new MenuItem("Horse options", "Open the horse options.")
+{
+    RightIcon = MenuItem.Icon.ARROW_RIGHT
+};
+menu.AddMenuItem(submenuButton);
+
+MenuController.BindMenuItem(menu, submenu, submenuButton);
+```
+
+----
+
+### Constructors
+
+----
+
+#### MenuItem(string text)
+
+Creates a new menu item without a description.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|text|string|The text displayed on the left side of the item.|
+
+----
+
+#### MenuItem(string text, string description)
+
+Creates a new menu item with a description, which is shown in the box below the menu while the item is highlighted.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|text|string|The text displayed on the left side of the item.|
+|description|string|The description shown below the menu while this item is selected. Pass `null` for no description.|
+
+:::note
+In RedM, descriptions are automatically word wrapped at roughly 50 characters per line when you set them, because the RedM description box does not wrap by itself. Reading `Description` back gives you the wrapped text, not exactly what you passed in.
+:::
+
 ----
 
 ### Properties
@@ -37,7 +114,7 @@ Please note that not all properties or methods are available in RedM. Also note 
 |Description|String|Null|A description text which will be displayed below the menu, when this menu item is currently selected.|Yes|
 |Label|String|Null|Text that is displayed on the right side of the item.[¹](#footnotes)|Yes|
 |LeftIcon|[Icon](#icons)|Icon.NONE|An [Icon](#icons) that will appear on the left side of the menu item.[¹](#footnotes)|Yes|
-|RightIcon|[Icon](#icons)|Icon.NONE|An [Icon](#icons) that will appear on the left side of the menu item.[¹](#footnotes)|Yes|
+|RightIcon|[Icon](#icons)|Icon.NONE|An [Icon](#icons) that will appear on the right side of the menu item.[¹](#footnotes)|Yes|
 |Enabled|boolean|true|If set to false, the menu item will be grayed out and can not be toggled on/off.|Yes|
 |Index|int|-1|(Getter only) Gets the position of this menu item in the current menu. Returns -1 if this menu item is not inside a menu.|Yes|
 |Selected|boolean|false|(Getter only) Gets whether or not this menu item is currently highlighted (if the current menu index is the same as this menu item index). Returns false by default if this menu item is not in a menu.|Yes|
@@ -54,6 +131,76 @@ Please note that not all properties or methods are available in RedM. Also note 
 ### Methods
 
 _There are no methods available for the standard MenuItem type._
+
+Everything you would do *to* an item is done through its menu instead:
+
+|I want to…|Use|
+|-|-|
+|Press an item from code|[Menu.SelectItem()](../../menu/#selectitemmenuitem-item)|
+|Remove an item|[Menu.RemoveMenuItem()](../../menu/#removemenuitemmenuitem-item)|
+|Highlight an item|[Menu.RefreshIndex()](../../menu/#refreshindexint-index)|
+|Bind a submenu to an item|[MenuController.BindMenuItem()](../../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem)|
+
+----
+
+### Attaching your own data
+
+`ItemData` is a `dynamic` property that lets you hang whatever you like on a menu item, so you do not have to encode identifying information in the visible text or description. This is the easiest way to handle menus that are built in a loop.
+
+```cs
+foreach (var horse in horses)
+{
+    menu.AddMenuItem(new MenuItem(horse.DisplayName, $"Spawn a {horse.DisplayName}.")
+    {
+        ItemData = horse
+    });
+}
+
+menu.OnItemSelect += (_menu, _item, _index) =>
+{
+    if (_item.ItemData != null)
+    {
+        SpawnHorse(_item.ItemData.Model);
+    }
+};
+```
+
+Because `ItemData` is `dynamic`, anything works: a string, an int, an anonymous object, or one of your own classes.
+
+```cs
+// An anonymous object.
+item.ItemData = new { category = "horses", price = 50 };
+
+// Then filter on it.
+menu.FilterMenuItems(i => i.ItemData?.category == "horses");
+```
+
+----
+
+### Text formatting
+
+Item text, labels and descriptions all support the game's text formatting codes.
+
+|Code|Effect|
+|-|-|
+|`~r~`|Red|
+|`~b~`|Blue|
+|`~g~`|Green|
+|`~y~`|Yellow|
+|`~p~`|Purple|
+|`~o~`|Orange|
+|`~c~`|Grey|
+|`~w~`|White|
+|`~s~`|Resets back to the default color|
+|`~n~`|New line|
+|`~h~`|Bold (toggles)|
+
+```cs
+MenuItem item = new MenuItem(
+    "~b~Important~s~ button",
+    "This description has a ~r~red~s~ word in it."
+);
+```
 
 ----
 
