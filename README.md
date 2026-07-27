@@ -8,6 +8,8 @@ Designed specifically as a replacement of **NativeUI**, MenuAPI features perform
 
 This is the **FiveM Enhanced** version, targeting `net10.0` and the modern `CitizenFX.FiveM.Client` runtime.
 
+> ⚠️ **Work in progress:** MenuAPI for FiveM Enhanced is an early alpha. The API and docs are still changing, and NuGet releases are published as pre-release (`0.0.1-alpha`).
+
 This has been coded from the ground up. Using decompiled scripts from GTA V to figure out what some undocumented natives were used for.
 
 ## Installation
