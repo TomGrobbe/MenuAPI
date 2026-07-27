@@ -1,20 +1,23 @@
-# GitVersion configuration
+# GitVersion configuration (FiveM Enhanced branch)
 # Docs: https://gitversion.net/docs/reference/configuration
 #
-# Mode: Mainline — every commit to master auto-increments the patch version.
-# Override the increment for a specific commit by including one of these
-# anywhere in the commit message:
-#   +semver: major   →  bumps major (e.g. 1.2.3 → 2.0.0)
-#   +semver: minor   →  bumps minor (e.g. 1.2.3 → 1.3.0)
-#   +semver: patch   →  bumps patch (e.g. 1.2.3 → 1.2.4)  ← default
-#   +semver: none    →  no bump on this commit
+# The Enhanced branch publishes auto-incrementing alpha pre-releases in the
+# format 0.0.1-alpha.1, 0.0.1-alpha.2, ... (the trailing number increments as
+# commits are added). Release tags are prefixed `enhanced-v` so they stay
+# separate from the legacy `v` tags on master. Bump major/minor/patch with a
+# commit-message trailer anywhere in the message:
+#   +semver: major | minor | patch | none
 
 assembly-versioning-scheme: MajorMinorPatch
 assembly-file-versioning-scheme: MajorMinorPatch
-mode: Mainline
+mode: ContinuousDelivery
+tag-prefix: 'enhanced-v'
+next-version: 0.0.1
 
 branches:
-  master:
-    regex: '^master$'
+  fivem-enhanced:
+    regex: '^fivem-enhanced$'
+    tag: alpha
     increment: Patch
-    is-mainline: true
+    source-branches: []
+    is-mainline: false

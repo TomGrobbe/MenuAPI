@@ -39,25 +39,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Auto-increment the pre-release version from the latest enhanced-v*-alpha git
-      # tag: every build bumps the patch (0.0.1-alpha -> 0.0.2-alpha -> ...). Because
-      # the number is always "latest tag + 1", a build never reuses an existing tag,
-      # so re-runs also can't fail with "tag already exists". The `-alpha` suffix makes
-      # NuGet and GitHub treat the release as a pre-release. Needs fetch-depth: 0 above
-      # so all tags are available.
+      - name: Install GitVersion
+        if: github.ref == 'refs/heads/fivem-enhanced'
+        uses: gittools/actions/gitversion/setup@v3.0.0
+        with:
+          versionSpec: '5.x'
+
+      - name: Execute GitVersion
+        if: github.ref == 'refs/heads/fivem-enhanced'
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.0.0
+
+      # GitVersion produces auto-incrementing alpha pre-releases in the format
+      # 0.0.1-alpha.1, 0.0.1-alpha.2, ... (see GitVersion.yml). AssemblyVersion uses
+      # the numeric assemblySemVer, since pre-release labels aren't valid there.
       - name: Set version outputs
         id: version
         shell: bash
         run: |
           if [ "$GITHUB_REF" = "refs/heads/fivem-enhanced" ]; then
-            LATEST=$(git tag --list 'enhanced-v*-alpha' | sed 's/^enhanced-v//; s/-alpha$//' | sort -V | tail -n 1)
-            if [ -z "$LATEST" ]; then
-              SEMVER="0.0.1-alpha"
-            else
-              MAJOR=${LATEST%%.*}; REST=${LATEST#*.}; MINOR=${REST%%.*}; PATCH=${REST#*.}
-              SEMVER="${MAJOR}.${MINOR}.$((PATCH + 1))-alpha"
-            fi
-            ASSEMBLY_VER="${SEMVER%-alpha}"   # AssemblyVersion must be purely numeric
+            SEMVER="${{ steps.gitversion.outputs.semVer }}"
+            ASSEMBLY_VER="${{ steps.gitversion.outputs.assemblySemVer }}"
           else
             SEMVER=""
             ASSEMBLY_VER=""
@@ -187,8 +189,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
-          git tag "enhanced-v$VERSION"
-          git push origin "enhanced-v$VERSION"
+          # Idempotent: GitVersion is deterministic per commit, so re-running the same
+          # commit yields the same tag. Skip creation if it already exists on origin.
+          if git ls-remote --exit-code --tags origin "refs/tags/enhanced-v$VERSION" >/dev/null 2>&1; then
+            echo "Tag enhanced-v$VERSION already exists on origin, skipping."
+          else
+            git tag "enhanced-v$VERSION"
+            git push origin "enhanced-v$VERSION"
+          fi
 
       - name: Create GitHub Release
         id: create_release
@@ -206,14 +214,21 @@ jobs:
             echo "For more info, check the [docs](https://docs.vespura.com/menuapi/enhanced)."
           } > release_notes.md
 
-          # Draft + pre-release for now. Tag is enhanced-v<version> to keep the
-          # Enhanced release line separate from the legacy v<version> tags.
-          RELEASE_URL=$(gh release create "enhanced-v$VERSION" \
-            --title "MenuAPI for FiveM Enhanced" \
-            --notes-file release_notes.md \
-            --draft \
-            --prerelease \
-            "release-assets/MenuAPI-$VERSION-FiveM-Enhanced.zip")
+          # Draft + pre-release. Tag is enhanced-v<version> to keep the Enhanced
+          # release line separate from the legacy v<version> tags. Idempotent: a
+          # re-run of the same version reuses the existing draft instead of failing.
+          if gh release view "enhanced-v$VERSION" >/dev/null 2>&1; then
+            echo "Release enhanced-v$VERSION already exists, updating its asset."
+            gh release upload "enhanced-v$VERSION" "release-assets/MenuAPI-$VERSION-FiveM-Enhanced.zip" --clobber
+            RELEASE_URL=$(gh release view "enhanced-v$VERSION" --json url --jq .url)
+          else
+            RELEASE_URL=$(gh release create "enhanced-v$VERSION" \
+              --title "MenuAPI for FiveM Enhanced" \
+              --notes-file release_notes.md \
+              --draft \
+              --prerelease \
+              "release-assets/MenuAPI-$VERSION-FiveM-Enhanced.zip")
+          fi
 
           echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
 
