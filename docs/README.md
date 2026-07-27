@@ -9,7 +9,7 @@ the hub repo (`TomGrobbe/TomGrobbe.github.io`) and served at:
 | `/menuapi/`, `/mapi/` | Version chooser (FiveM Legacy, FiveM Enhanced, RedM) |
 | `/menuapi/legacy/`, `/mapi/legacy/` | FiveM (Legacy) docs |
 | `/menuapi/redm/`, `/mapi/redm/` | RedM docs |
-| `/menuapi/enhanced/`, `/mapi/enhanced/` | Coming-soon stub |
+| `/menuapi/enhanced/`, `/mapi/enhanced/` | FiveM (Enhanced) docs (deployed from the `fivem-enhanced` branch) |
 
 `/mapi/` is a full copy of `/menuapi/`, kept for backwards compatibility with the
 old documentation URLs. (Today under `wiki.vespura.com`, later `docs.vespura.com`.)
@@ -19,7 +19,8 @@ old documentation URLs. (Today under `wiki.vespura.com`, later `docs.vespura.com
 - `docs/legacy/` — Astro Starlight project for the FiveM docs.
 - `docs/redm/` — Astro Starlight project for the RedM docs (a copy of legacy,
   adjusted for RedM's reduced feature set).
-- `docs/landing/` — the static chooser page and the enhanced "coming soon" stub.
+- `docs/landing/` — the static chooser page. (The `enhanced/` docs are built and deployed
+  from the `fivem-enhanced` branch, not here.)
 
 Each project's base path is env-driven (`DOCS_BASE`) so it can be built for both
 the `/menuapi` and `/mapi` prefixes.
@@ -39,6 +40,10 @@ npm run dev
 `.github/workflows/docs.yml` builds each project twice (once per prefix), assembles
 `/menuapi/**` and `/mapi/**`, and pushes them into the hub repo. It runs on pushes
 to `master` that touch `docs/**`, and via the manual **Run workflow** button.
+
+When publishing, it replaces only the folders this branch owns and deliberately keeps
+each prefix's `enhanced/` subfolder intact, because those docs are deployed separately
+from the `fivem-enhanced` branch into the same hub repo. The two deploys never overlap.
 
 ## One-time setup
 

@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: docs-deploy
+  group: docs-deploy-legacy
   cancel-in-progress: true
 
 jobs:
@@ -56,11 +56,11 @@ jobs:
           build docs/legacy /mapi/legacy    _site/mapi/legacy
           build docs/redm   /menuapi/redm   _site/menuapi/redm
           build docs/redm   /mapi/redm      _site/mapi/redm
-          # chooser landing + enhanced stub + favicon at each prefix root
+          # chooser landing + favicon at each prefix root. The enhanced/ docs are
+          # deployed separately from the fivem-enhanced branch, so we don't build
+          # or touch them here (see the Publish step).
           for P in menuapi mapi; do
             cp docs/landing/index.html "_site/$P/index.html"
-            mkdir -p "_site/$P/enhanced"
-            cp docs/landing/enhanced/index.html "_site/$P/enhanced/index.html"
             cp docs/legacy/public/favicon.png "_site/$P/favicon.png"
           done
 
@@ -78,12 +78,16 @@ jobs:
           fi
           git clone --depth 1 --branch main \
             "https://x-access-token:${HUB_TOKEN}@github.com/TomGrobbe/TomGrobbe.github.io.git" hub
-          # Replace only the MenuAPI folders; keep the hub index.html, CNAME,
-          # .nojekyll and other product folders (e.g. /vmenu/) intact.
-          rm -rf hub/menuapi hub/mapi
-          mkdir -p hub/menuapi hub/mapi
-          cp -r _site/menuapi/. hub/menuapi/
-          cp -r _site/mapi/. hub/mapi/
+          # Replace the MenuAPI folders, but keep the hub index.html, CNAME,
+          # .nojekyll and other product folders (e.g. /vmenu/) intact. Within each
+          # prefix, also keep the enhanced/ subfolder: those docs are deployed from
+          # the fivem-enhanced branch, so wiping the whole prefix here would clobber
+          # them (last push wins). Remove only what this branch owns, then copy in.
+          for P in menuapi mapi; do
+            mkdir -p "hub/$P"
+            find "hub/$P" -mindepth 1 -maxdepth 1 ! -name enhanced -exec rm -rf {} +
+            cp -r "_site/$P/." "hub/$P/"
+          done
           # Disable Jekyll so Astro's _astro/ asset folder is served (not skipped).
           touch hub/.nojekyll
           cd hub
