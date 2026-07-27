@@ -39,22 +39,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      # The Enhanced package is published as a pre-release: the `-alpha` suffix
-      # makes NuGet (and GitHub) treat it as a pre-release automatically. Bump this
-      # single value to cut a new Enhanced version. Assembly/file versions strip the
-      # suffix (they must be purely numeric).
+      # Auto-increment the pre-release version from the latest enhanced-v*-alpha git
+      # tag: every build bumps the patch (0.0.1-alpha -> 0.0.2-alpha -> ...). Because
+      # the number is always "latest tag + 1", a build never reuses an existing tag,
+      # so re-runs also can't fail with "tag already exists". The `-alpha` suffix makes
+      # NuGet and GitHub treat the release as a pre-release. Needs fetch-depth: 0 above
+      # so all tags are available.
       - name: Set version outputs
         id: version
         shell: bash
         run: |
-          ENHANCED_VERSION="0.0.1-alpha"
           if [ "$GITHUB_REF" = "refs/heads/fivem-enhanced" ]; then
-            SEMVER="$ENHANCED_VERSION"
-            ASSEMBLY_VER="${SEMVER%%-*}"   # AssemblyVersion can't carry a -alpha suffix
+            LATEST=$(git tag --list 'enhanced-v*-alpha' | sed 's/^enhanced-v//; s/-alpha$//' | sort -V | tail -n 1)
+            if [ -z "$LATEST" ]; then
+              SEMVER="0.0.1-alpha"
+            else
+              MAJOR=${LATEST%%.*}; REST=${LATEST#*.}; MINOR=${REST%%.*}; PATCH=${REST#*.}
+              SEMVER="${MAJOR}.${MINOR}.$((PATCH + 1))-alpha"
+            fi
+            ASSEMBLY_VER="${SEMVER%-alpha}"   # AssemblyVersion must be purely numeric
           else
             SEMVER=""
             ASSEMBLY_VER=""
           fi
+          echo "Computed version: ${SEMVER:-<none, non-release build>}"
           ZIP_PREFIX="MenuAPI-${SEMVER:-dev-${{ github.run_number }}}"
           echo "semver=$SEMVER"             >> "$GITHUB_OUTPUT"
           echo "assembly_ver=$ASSEMBLY_VER" >> "$GITHUB_OUTPUT"
