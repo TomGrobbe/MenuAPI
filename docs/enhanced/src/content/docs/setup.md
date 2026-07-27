@@ -7,7 +7,7 @@ title: "Setup"
 _Note, this is only for resource developers, don't install this on your server manually if you're not making a resource with it._
 
 :::caution[Pre-release]
-MenuAPI for FiveM Enhanced is a work in progress. Releases are published as a **pre-release** (`MenuAPI.FiveM.Enhanced`, currently `0.0.1-alpha`), so enable "include prerelease" in your NuGet client, and expect breaking changes while it stabilises.
+MenuAPI for FiveM Enhanced is a work in progress. Releases of `MenuAPI.FiveM.Enhanced` are published as **alpha pre-releases**, so enable "include prerelease" in your NuGet client, and expect breaking changes while it stabilises.
 :::
 
 You have 2 options:

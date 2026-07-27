@@ -2,17 +2,21 @@
 # Docs: https://gitversion.net/docs/reference/configuration
 #
 # The Enhanced branch publishes auto-incrementing alpha pre-releases in the
-# format 0.0.1-alpha.1, 0.0.1-alpha.2, ... (the trailing number increments as
-# commits are added). Release tags are prefixed `enhanced-v` so they stay
-# separate from the legacy `v` tags on master. Bump major/minor/patch with a
-# commit-message trailer anywhere in the message:
-#   +semver: major | minor | patch | none
+# format 0.1.0-alpha.1, 0.1.0-alpha.2, ... The trailing number bumps by one for
+# each tagged release: the next commit after tag enhanced-v0.1.0-alpha.N builds
+# as 0.1.0-alpha.(N+1) (ContinuousDelivery). Release tags are prefixed
+# `enhanced-v` so they stay separate from the legacy `v` tags on master. Move the
+# base version (0.1.0) up with `next-version` below, or bump it on a single commit
+# with a message trailer:  +semver: major | minor | patch | none
+#
+# NOTE: the first alpha shipped as 0.1.0 (not 0.0.1), so the base is pinned to
+# 0.1.0 here to keep the published series consistent going forward.
 
 assembly-versioning-scheme: MajorMinorPatch
 assembly-file-versioning-scheme: MajorMinorPatch
 mode: ContinuousDelivery
 tag-prefix: 'enhanced-v'
-next-version: 0.0.1
+next-version: 0.1.0
 
 branches:
   fivem-enhanced:

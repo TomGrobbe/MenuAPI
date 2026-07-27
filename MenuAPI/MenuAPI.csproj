@@ -8,13 +8,14 @@
     <AssemblyTitle>MenuAPI FiveM Enhanced</AssemblyTitle>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Tom Grobbe</Authors>
-    <Description>An advanced Menu API for FiveM (Enhanced) C# resources.</Description>
+    <Description>An advanced Menu API for FiveM (Enhanced) C# resources. Work in progress (alpha).</Description>
     <Copyright>Copyright Tom Grobbe 2018-2026</Copyright>
-    <PackageLicenseExpression></PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/tomgrobbe/menuapi/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/tomgrobbe/menuapi/</RepositoryUrl>
     <PackageId>MenuAPI.FiveM.Enhanced</PackageId>
     <PackageTags>FiveM Enhanced MenuAPI</PackageTags>
+    <PackageProjectUrl>https://github.com/tomgrobbe/menuapi/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/tomgrobbe/menuapi/</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <LangVersion>default</LangVersion>
   </PropertyGroup>
 
@@ -36,6 +37,12 @@
 
   <ItemGroup>
     <PackageReference Include="CitizenFX.FiveM.Client" Version="0.0.2-alpha" />
+  </ItemGroup>
+
+  <!-- Packed into the NuGet package root so nuget.org shows a README + license. -->
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
