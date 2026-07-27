@@ -13,27 +13,17 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug FiveM|Any CPU = Debug FiveM|Any CPU
-		Debug RedM|Any CPU = Debug RedM|Any CPU
 		Release FiveM|Any CPU = Release FiveM|Any CPU
-		Release RedM|Any CPU = Release RedM|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Debug FiveM|Any CPU.ActiveCfg = Debug FiveM|Any CPU
 		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Debug FiveM|Any CPU.Build.0 = Debug FiveM|Any CPU
-		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Debug RedM|Any CPU.ActiveCfg = Debug RedM|Any CPU
-		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Debug RedM|Any CPU.Build.0 = Debug RedM|Any CPU
 		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Release FiveM|Any CPU.ActiveCfg = Release FiveM|Any CPU
 		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Release FiveM|Any CPU.Build.0 = Release FiveM|Any CPU
-		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Release RedM|Any CPU.ActiveCfg = Release RedM|Any CPU
-		{9C746601-9F3D-4B0D-877C-1C7BC493C5BC}.Release RedM|Any CPU.Build.0 = Release RedM|Any CPU
 		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Debug FiveM|Any CPU.ActiveCfg = Debug FiveM|Any CPU
 		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Debug FiveM|Any CPU.Build.0 = Debug FiveM|Any CPU
-		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Debug RedM|Any CPU.ActiveCfg = Debug RedM|Any CPU
-		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Debug RedM|Any CPU.Build.0 = Debug RedM|Any CPU
 		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Release FiveM|Any CPU.ActiveCfg = Release FiveM|Any CPU
 		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Release FiveM|Any CPU.Build.0 = Release FiveM|Any CPU
-		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Release RedM|Any CPU.ActiveCfg = Release RedM|Any CPU
-		{A91669DA-E3C1-4DC3-A3A6-97476B17214A}.Release RedM|Any CPU.Build.0 = Release RedM|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

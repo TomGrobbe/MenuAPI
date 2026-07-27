@@ -3,20 +3,18 @@
     <TargetFramework>net10.0</TargetFramework>
     <DebugType>embedded</DebugType>
     <TargetName>MenuAPI</TargetName>
-    <Configurations>Release RedM;Release FiveM;Debug RedM;Debug FiveM</Configurations>
+    <Configurations>Release FiveM;Debug FiveM</Configurations>
 
-    <AssemblyTitle Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">MenuAPI FiveM</AssemblyTitle>
-    <AssemblyTitle Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">MenuAPI RedM</AssemblyTitle>
+    <AssemblyTitle>MenuAPI FiveM Enhanced</AssemblyTitle>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Tom Grobbe</Authors>
-    <Description Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">An advanced Menu API for FiveM C# resources.</Description>
-    <Description Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">An advanced Menu API for RedM C# resources.</Description>
+    <Description>An advanced Menu API for FiveM (Enhanced) C# resources.</Description>
     <Copyright>Copyright Tom Grobbe 2018-2026</Copyright>
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/tomgrobbe/menuapi/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/tomgrobbe/menuapi/</RepositoryUrl>
-    <PackageTags Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">FiveM MenuAPI</PackageTags>
-    <PackageTags Condition="'$(Configuration)' == 'Debug RedM' Or '$(Configuration)' == 'Release RedM'">RedM MenuAPI</PackageTags>
+    <PackageId>MenuAPI.FiveM.Enhanced</PackageId>
+    <PackageTags>FiveM Enhanced MenuAPI</PackageTags>
     <LangVersion>default</LangVersion>
   </PropertyGroup>
 
@@ -28,26 +26,12 @@
     <DefineConstants>FIVEM;DEBUG</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release RedM'">
-    <DefineConstants>REDM</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug RedM'">
-    <DefineConstants>REDM;DEBUG</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
-    <Compile Include="..\shared\RedM\Controls.cs" Link="Controls.cs" />
+    <Compile Include="..\shared\Controls.cs" Link="Controls.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-
-    <!-- currently hardcoded path as no nuget package for RedM exists yet -->
-    <Reference Include="CitizenFX.Core.Client" Condition="'$(Configuration)' == 'Release RedM' Or '$(Configuration)' == 'Debug RedM'">
-      <HintPath>..\dependencies\RedM\CitizenFX.Core.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

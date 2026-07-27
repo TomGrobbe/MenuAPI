@@ -13,7 +13,6 @@ namespace MenuAPI
         public enum Icon
         {
             NONE,
-#if FIVEM
             LOCK,
             STAR,
             WARNING,
@@ -193,18 +192,6 @@ namespace MenuAPI
             BRAND_WILLARD,
             BRAND_ZIRCONIUM,
             INFO
-#endif
-#if REDM
-            LOCK,
-            TICK,
-            CIRCLE,
-            SADDLE,
-            STAR,
-            ARROW_LEFT,
-            ARROW_RIGHT,
-            INVITE_SENT,
-            SELECTION_BOX
-#endif
         }
         public string Text { get; set; }
         public string Label { get; set; }
@@ -219,35 +206,7 @@ namespace MenuAPI
             }
             set
             {
-#if FIVEM
                 _description = value;
-#endif
-#if REDM
-                if (value != null)
-                {
-                    string text = value;
-                    int maxLength = 50;
-                    List<string> lines = new List<string>();
-                    while (text.Length > maxLength)
-                    {
-                        var substr = text.Substring(0, Math.Min(text.Length - 1, maxLength));
-                        var lastIndex = substr.LastIndexOf(" ");
-                        if (lastIndex == -1)
-                        {
-                            lastIndex = Math.Min(text.Length - 1, maxLength);
-                        }
-                        lines.Add(text.Substring(0, lastIndex));
-                        text = text.Substring(lastIndex);
-                    }
-                    lines.Add(text);
-                    text = "";
-                    foreach (var str in lines)
-                    {
-                        text += str + "\n";
-                    }
-                    _description = text;
-                }
-#endif
             }
         }
         private string _description;
@@ -287,7 +246,6 @@ namespace MenuAPI
         {
             switch (icon)
             {
-#if FIVEM
                 case Icon.MALE:
                 case Icon.FEMALE:
                 case Icon.AUDIO_MUTE:
@@ -450,21 +408,6 @@ namespace MenuAPI
                     return "shared";
                 default:
                     return "commonmenu";
-#endif
-#if REDM
-                case Icon.LOCK:
-                case Icon.TICK:
-                case Icon.CIRCLE:
-                case Icon.SADDLE:
-                case Icon.STAR:
-                case Icon.ARROW_LEFT:
-                case Icon.ARROW_RIGHT:
-                case Icon.INVITE_SENT:
-                case Icon.SELECTION_BOX:
-                    return "menu_textures";
-                default:
-                    return "";
-#endif
             }
         }
 
@@ -478,7 +421,6 @@ namespace MenuAPI
         {
             switch (icon)
             {
-#if FIVEM
                 case Icon.AMMO: return selected ? "shop_ammo_icon_b" : "shop_ammo_icon_a";
                 case Icon.ARMOR: return selected ? "shop_armour_icon_b" : "shop_armour_icon_a";
                 case Icon.BARBER: return selected ? "shop_barber_icon_b" : "shop_barber_icon_a";
@@ -661,27 +603,6 @@ namespace MenuAPI
                 case Icon.INFO: return "info_icon_32";
                 default:
                     break;
-#endif
-#if REDM
-                case Icon.LOCK:
-                    return "MENU_ICON_LOCK";
-                case Icon.TICK:
-                    return "MENU_ICON_TICK";
-                case Icon.CIRCLE:
-                    return "MENU_ICON_CIRCLE";
-                case Icon.SADDLE:
-                    return "MENU_ICON_ON_HORSE";
-                case Icon.STAR:
-                    return "MENU_ICON_INFO_NEW";
-                case Icon.ARROW_LEFT:
-                    return "SELECTION_ARROW_LEFT";
-                case Icon.ARROW_RIGHT:
-                    return "SELECTION_ARROW_RIGHT";
-                case Icon.INVITE_SENT:
-                    return "MENU_ICON_INVITE_SENT";
-                case Icon.SELECTION_BOX:
-                    return "SELECTION_BOX_SQUARE";
-#endif
             }
             return "";
         }
@@ -696,7 +617,6 @@ namespace MenuAPI
         {
             switch (icon)
             {
-#if FIVEM
                 case Icon.CASH:
                 case Icon.COKE:
                 case Icon.CROWN:
@@ -857,25 +777,6 @@ namespace MenuAPI
                     return 22f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
                 default:
                     return 38f / (width ? MenuController.ScreenWidth : MenuController.ScreenHeight);
-#endif
-#if REDM
-                case Icon.TICK:
-                    return width ? (16f / MenuController.ScreenWidth) : (24f / MenuController.ScreenHeight);
-                case Icon.CIRCLE:
-                    return width ? (16f / MenuController.ScreenWidth) : (26f / MenuController.ScreenHeight);
-                case Icon.SADDLE:
-                    return width ? (16f / MenuController.ScreenWidth) : (24f / MenuController.ScreenHeight);
-                case Icon.STAR:
-                case Icon.ARROW_LEFT:
-                case Icon.ARROW_RIGHT:
-                    return width ? (14f / MenuController.ScreenWidth) : (22f / MenuController.ScreenHeight);
-                case Icon.SELECTION_BOX:
-                case Icon.INVITE_SENT:
-                    return width ? (16f / MenuController.ScreenWidth) : (24f / MenuController.ScreenHeight);
-                case Icon.LOCK:
-                default:
-                    return width ? (24f / MenuController.ScreenWidth) : (30f / MenuController.ScreenHeight);
-#endif
             }
         }
 
@@ -889,7 +790,6 @@ namespace MenuAPI
         {
             switch (icon)
             {
-#if FIVEM
                 case Icon.CROWN:
                 case Icon.TICK:
                 case Icon.MALE:
@@ -997,14 +897,6 @@ namespace MenuAPI
                     return Enabled ? new int[3] { 232, 207, 14 } : new int[3] { 131, 133, 12 };
                 default:
                     return Enabled ? new int[3] { 255, 255, 255 } : new int[3] { 109, 109, 109 };
-#endif
-#if REDM
-                case Icon.STAR:
-                    return !Enabled ? new int[3] { 163, 106, 5 } : new int[3] { 237, 154, 9 };
-                default:
-                    return Enabled ? new int[3] { 255, 255, 255 } : new int[3] { 109, 109, 109 };
-                    //return new int[3] { 255, 255, 255 };
-#endif
             }
         }
 
@@ -1017,7 +909,6 @@ namespace MenuAPI
         /// <returns></returns>
         protected float GetSpriteX(Icon icon, bool leftAligned, bool leftSide)
         {
-#if FIVEM
             if (icon == Icon.NONE)
             {
                 return 0f;
@@ -1044,14 +935,6 @@ namespace MenuAPI
                     return GetSafeZoneSize() - (20f / MenuController.ScreenWidth);
                 }
             }
-#endif
-#if REDM
-            if (leftSide)
-            {
-                return 30f / MenuController.ScreenWidth;
-            }
-            return (Width - 30f) / MenuController.ScreenWidth;
-#endif
         }
 
         /// <summary>
@@ -1110,9 +993,7 @@ namespace MenuAPI
 
             textXOffset = DrawLeftIcon(textXOffset, y);
             rightTextIconOffset = DrawRightIcon(rightTextIconOffset, y);
-#if FIVEM
             DrawLabelText(textXOffset, rightTextIconOffset, y, font, textSize, textColor, textY);
-#endif
             DrawItemText(font, textSize, textColor, textMinX, textMaxX, textY, textXOffset, y);
         }
 
@@ -1129,7 +1010,6 @@ namespace MenuAPI
         /// <param name="y"></param>
         private void DrawItemText(int font, float textSize, int textColor, float textMinX, float textMaxX, float textY, float textXOffset, float y)
         {
-#if FIVEM
             SetScriptGfxAlign(76, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
             SetTextFont(font);
@@ -1154,24 +1034,8 @@ namespace MenuAPI
                 EndTextCommandDisplayText(textMinX, textY, 0);
             }
             ResetScriptGfxAlign();
-#endif
-#if REDM
-            SetTextScale(textSize, textSize);
-            textColor = Enabled ? 255 : 109;
-            SetTextColor(textColor, textColor, textColor, 255);
-            textMinX = ((8f + textXOffset) / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
-            textMaxX = (Width - 10f) / MenuController.ScreenWidth;
-            textY = y - ((30f / 2f) / MenuController.ScreenHeight);
-            font = 23;
-            // Cfx native, undocumented.
-            Call((CitizenFX.Core.Native.Hash)0xADA9255D, font);
-            // API version has incorrect parameter types.
-            long _text = Call<long>(_CREATE_VAR_STRING, 10, "LITERAL_STRING", (Text ?? "N/A") + (" " + Label ?? ""));
-            DisplayText(_text, textMinX, textY);
-#endif
         }
 
-#if FIVEM
         /// <summary>
         /// Draw the item label text if it exists.
         /// </summary>
@@ -1212,7 +1076,6 @@ namespace MenuAPI
             }
             ResetScriptGfxAlign();
         }
-#endif
 
         /// <summary>
         /// Draw the right icon if it exists.
@@ -1226,7 +1089,6 @@ namespace MenuAPI
             {
                 return rightTextIconOffset;
             }
-#if FIVEM
             rightTextIconOffset = 25f;
 
             SetScriptGfxAlign(76, 84);
@@ -1240,17 +1102,6 @@ namespace MenuAPI
             string textureDictionary = GetSpriteDictionary(RightIcon);
             DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255, false, false);
             ResetScriptGfxAlign();
-#endif
-#if REDM
-            string spriteName = GetSpriteName(RightIcon, Selected);
-            string spriteDict = GetSpriteDictionary(RightIcon);
-            float spriteX = GetSpriteX(RightIcon, true, false);
-            float spriteY = y;
-            float spriteHeight = GetSpriteSize(RightIcon, false);
-            float spriteWidth = GetSpriteSize(RightIcon, true);
-            int[] spriteColor = GetSpriteColour(RightIcon, Selected);
-            DrawSprite(spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255, false);
-#endif
             return rightTextIconOffset;
         }
 
@@ -1267,7 +1118,6 @@ namespace MenuAPI
                 return textXOffset;
             }
             textXOffset = 25f;
-#if FIVEM
             SetScriptGfxAlign(76, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
@@ -1281,17 +1131,6 @@ namespace MenuAPI
 
             DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255, false, false);
             ResetScriptGfxAlign();
-#endif
-#if REDM
-            string spriteName = GetSpriteName(LeftIcon, Selected);
-            string spriteDict = GetSpriteDictionary(LeftIcon);
-            float spriteX = GetSpriteX(LeftIcon, true, true);
-            float spriteY = y;
-            float spriteHeight = GetSpriteSize(LeftIcon, false);
-            float spriteWidth = GetSpriteSize(LeftIcon, true);
-            int[] spriteColor = GetSpriteColour(LeftIcon, Selected);
-            DrawSprite(spriteDict, spriteName, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor[0], spriteColor[1], spriteColor[2], 255, false);
-#endif
             return textXOffset;
         }
 
@@ -1311,18 +1150,11 @@ namespace MenuAPI
             {
                 float width = Width / MenuController.ScreenWidth;
                 float height = (RowHeight) / MenuController.ScreenHeight;
-#if FIVEM
                 SetScriptGfxAlign(ParentMenu.LeftAligned ? 76 : 82, 84);
                 SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
                 DrawRect(x, y, width, height, 255, 255, 255, 225, false);
                 ResetScriptGfxAlign();
-#endif
-#if REDM
-                DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 181, 17, 18, 255, false);
-#endif
             }
-#if FIVEM
-#endif
         }
     }
 }

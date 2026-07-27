@@ -1,33 +1,28 @@
 # MenuAPI
 
-**FiveM & RedM C# Menu API**
+**FiveM (Enhanced) C# Menu API**
 
 [![Discord](https://discordapp.com/api/guilds/285424882534187008/widget.png)](https://vespura.com/discord) [![CodeFactor](https://www.codefactor.io/repository/github/tomgrobbe/menuapi/badge)](https://www.codefactor.io/repository/github/tomgrobbe/menuapi) [![Patreon](https://img.shields.io/badge/donate-Patreon-orange.svg)](https://www.patreon.com/vespura)
 
-Designed specifically as a replacement of **NativeUI**, MenuAPI features performance improvements, **RedM** _and_ **FiveM** support, improved stability, better features, less bugs, full safezone alignment support for both left and right algined menus (FiveM only) and less (in my opinion) unnecessary features.
+Designed specifically as a replacement of **NativeUI**, MenuAPI features performance improvements, improved stability, better features, less bugs, full safezone alignment support for both left and right aligned menus and less (in my opinion) unnecessary features.
 
-This has been coded from the ground up. Using decompiled scripts from GTA V & RedM to figure out what some undocumented natives were used for.
+This is the **FiveM Enhanced** version, targeting `net10.0` and the modern `CitizenFX.FiveM.Client` runtime.
+
+This has been coded from the ground up. Using decompiled scripts from GTA V to figure out what some undocumented natives were used for.
 
 ## Installation
 
-_Note, this is only for resource developers, don't install this on your server manually if you're not making a resource with it._
-
-You have 2 options:
-
-1. Download the latest release zip and use the correct version (FiveM/RedM) for your resource. Simply include the DLL as a reference in your C# project and add `using MenuAPI;` to each file where you need to use MenuAPI.
-2. Use the NuGet package, which can be found [here](https://www.nuget.org/packages/MenuAPI.FiveM/) for FiveM, and [here](https://www.nuget.org/packages/MenuAPI.RedM/) for RedM.
-
-After doing either of the above and you're ready to build and publish your resource, add `files {'MenuAPI.dll'}` to your `fxmanifest.lua` file, and make sure that you include the `MenuAPI.dll` file in the folder of your resource.
+Please refer to the [documentation](https://docs.vespura.com/menuapi/enhanced) for installation instructions.
 
 ## Documentation
 
-Limited documentation is available [here](https://docs.vespura.com/mapi).
+Documentation is available [here](https://docs.vespura.com/menuapi/enhanced).
 
-Feel like contributing to the documentation? The repository for the documentation site can be found [here](https://github.com/TomGrobbe/MenuAPI-Docs), thanks!
+Feel like contributing to the documentation? The docs source lives in the [`docs/`](docs/) folder of this repository, thanks!
 
 ## Copyright / License
 
-Copyright © Tom Grobbe 2018-2021.
+Copyright © Tom Grobbe 2018-2026.
 
 MenuAPI is a free resource, using a custom license.
 Conditions are listed below.

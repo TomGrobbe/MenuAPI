@@ -84,13 +84,7 @@ namespace MenuAPI
                 }
                 ListIndex = newIndex;
                 ParentMenu.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, newIndex, Index);
-#if FIVEM
                 PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
-#endif
-#if REDM
-                // Has invalid parameter types in API.
-                Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
-#endif
             }
         }
 
@@ -111,13 +105,7 @@ namespace MenuAPI
                 ListIndex = newIndex;
 
                 ParentMenu.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, newIndex, Index);
-#if FIVEM
                 PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
-#endif
-#if REDM
-                // Has invalid parameter types in API.
-                Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_LEFT", "HUD_SHOP_SOUNDSET", 1);
-#endif
             }
         }
 

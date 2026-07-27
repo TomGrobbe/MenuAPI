@@ -15,17 +15,10 @@ namespace MenuAPI
     {
         public static List<Menu> Menus { get; protected set; } = new List<Menu>();
         internal static HashSet<Menu> VisibleMenus { get; } = new HashSet<Menu>();
-#if FIVEM
         public const string _texture_dict = "commonmenu";
         public const string _header_texture = "interaction_bgd";
-#endif
-#if REDM
-        public const string _texture_dict = "menu_textures";
-        public const string _header_texture = "translate_bg_1a";
-#endif
         private static List<string> menuTextureAssets = new List<string>()
         {
-#if FIVEM
             "commonmenu",
             "commonmenutu",
             "mpleaderboard",
@@ -36,34 +29,13 @@ namespace MenuAPI
             "mpcarhud",
             "mpcarhud2",
             "shared"
-#endif
-#if REDM
-            "menu_textures",
-            "boot_flow",
-            "generic_textures",
-#endif
         };
 
-#if FIVEM
         private static float AspectRatio => GetScreenAspectRatio(false);
-#endif
-#if REDM
-        private static float AspectRatio => 16 / 9;
-#endif
         public static float ScreenWidth => 1080 * AspectRatio;
         public static float ScreenHeight => 1080;
         public static bool DisableMenuButtons { get; set; } = false;
-#if FIVEM
         public static bool AreMenuButtonsEnabled => IsAnyMenuOpen() && !IsPauseMenuActive() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !API.Players.Local.IsDead;
-#endif
-#if REDM
-        public static bool AreMenuButtonsEnabled =>
-            IsAnyMenuOpen() &&
-            IsScreenFadedIn() &&
-            !IsPauseMenuActive() &&
-            !DisableMenuButtons &&
-            !IsEntityDead(PlayerPedId());
-#endif
 
         public static bool NavigateMenuUsingArrows { get; set; } = true;
         public static bool EnableManualGCs { get; set; } = true;
@@ -80,12 +52,7 @@ namespace MenuAPI
             }
         }
         public static Control MenuToggleKey { get; set; }
-#if FIVEM
             = Control.InteractionMenu;
-#endif
-#if REDM
-            = Control.PlayerMenu;
-#endif
 
         public static bool EnableMenuToggleKeyOnController { get; set; } = true;
 
@@ -93,13 +60,10 @@ namespace MenuAPI
 
         public static Menu MainMenu { get; set; } = null;
 
-#if FIVEM
         internal static int _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
-#endif
 
         private static int ManualTimerForGC = GetGameTimer();
 
-#if FIVEM
         private static MenuAlignmentOption _alignment = MenuAlignmentOption.Left;
         public static MenuAlignmentOption MenuAlignment
         {
@@ -133,7 +97,6 @@ namespace MenuAPI
             Left,
             Right
         }
-#endif
 
         /// <summary>
         /// Constructor
@@ -141,9 +104,7 @@ namespace MenuAPI
         public void Initialize()
         {
             API.SetInterval(ProcessMenus, 3, 0);
-#if FIVEM
             API.SetInterval(DrawInstructionalButtons, 3, 0);
-#endif
             API.SetInterval(ProcessMainButtons, 3, 0);
             API.SetInterval(ProcessDirectionalButtons, 100l, 0);
             API.SetInterval(ProcessToggleMenuButton, 3, 0);
@@ -274,9 +235,7 @@ namespace MenuAPI
             {
                 return;
             }
-#if FIVEM
             DisableControlAction(0, (int)Control.MultiplayerInfo, false);
-#endif
             HandlePreventExit();
             if (!currentMenu.Visible || !AreMenuButtonsEnabled)
             {
@@ -289,16 +248,10 @@ namespace MenuAPI
         {
             // Select / Enter
             if (
-#if FIVEM
                 IsDisabledControlJustReleased(0, (int)Control.FrontendAccept) ||
                 IsControlJustReleased(0, (int)Control.FrontendAccept) ||
                 IsDisabledControlJustReleased(0, (int)Control.VehicleMouseControlOverride) ||
                 IsControlJustReleased(0, (int)Control.VehicleMouseControlOverride)
-#endif
-#if REDM
-                IsDisabledControlJustReleased(0, (uint)Control.FrontendAccept) ||
-                IsControlJustReleased(0, (uint)Control.FrontendAccept)
-#endif
             )
             {
                 if (currentMenu.Size > 0)
@@ -309,12 +262,7 @@ namespace MenuAPI
             // Cancel / Go Back
             else if (
                 !DisableBackButton &&
-#if FIVEM
                 IsDisabledControlJustReleased(0, (int)Control.PhoneCancel)
-#endif
-#if REDM
-                IsDisabledControlJustReleased(0, (uint)Control.FrontendCancel)
-#endif
             )
             {
                 // Wait for the next frame to make sure the "cinematic camera" button doesn't get "re-enabled" before the menu gets closed.
@@ -323,12 +271,7 @@ namespace MenuAPI
             }
             else if (
                 PreventExitingMenu && !DisableBackButton &&
-#if FIVEM
                 IsDisabledControlJustReleased(0, (int)Control.PhoneCancel)
-#endif
-#if REDM
-                IsDisabledControlJustReleased(0, (uint)Control.CellphoneCancel)
-#endif
             )
             {
                 // if there's a parent menu, allow going back to that, but don't allow a 'top-level' menu to be closed.
@@ -344,14 +287,8 @@ namespace MenuAPI
         {
             if (PreventExitingMenu)
             {
-#if FIVEM
                 DisableControlAction(0, (int)Control.FrontendPause, false);
                 DisableControlAction(0, (int)Control.FrontendPauseAlternate, false);
-#endif
-#if REDM
-                DisableControlAction(0, (uint)Control.FrontendPause, true);
-                DisableControlAction(0, (uint)Control.FrontendPauseAlternate, true);
-#endif
             }
         }
 
@@ -365,7 +302,6 @@ namespace MenuAPI
             {
                 return false;
             }
-#if FIVEM
             // when the player is holding TAB, while not in a vehicle, and when the scrollwheel is being used, return false to prevent interferring with weapon selection.
             if (!API.Players.Local.Ped.IsPedInAnyVehicle())
             {
@@ -386,18 +322,6 @@ namespace MenuAPI
             {
                 return true;
             }
-#endif
-#if REDM
-            if (
-                IsControlPressed(0, (uint)Control.FrontendUp) ||
-                IsDisabledControlPressed(0, (uint)Control.FrontendUp) ||
-                IsControlPressed(0, (uint)Control.CellphoneScrollBackward) ||
-                IsDisabledControlPressed(0, (uint)Control.CellphoneScrollBackward)
-            )
-            {
-                return true;
-            }
-#endif
             return false;
         }
 
@@ -411,7 +335,6 @@ namespace MenuAPI
             {
                 return false;
             }
-#if FIVEM
             // when the player is holding TAB, while not in a vehicle, and when the scrollwheel is being used, return false to prevent interferring with weapon selection.
             if (!API.Players.Local.Ped.IsPedInAnyVehicle())
             {
@@ -432,18 +355,6 @@ namespace MenuAPI
             {
                 return true;
             }
-#endif
-#if REDM
-            if (
-                IsControlPressed(0, (uint)Control.FrontendDown) ||
-                IsDisabledControlPressed(0, (uint)Control.FrontendDown) ||
-                IsControlPressed(0, (uint)Control.CellphoneScrollForward) ||
-                IsDisabledControlPressed(0, (uint)Control.CellphoneScrollForward)
-            )
-            {
-                return true;
-            }
-#endif
             return false;
         }
 
@@ -459,39 +370,8 @@ namespace MenuAPI
                 return;
             }
 
-#if FIVEM
             await ProcessToggleMenuButtonFiveM();
-#endif
-#if REDM
-            ProcessToggleMenuButtonRedM();
-            await Task.FromResult(0);
-#endif
         }
-#if REDM
-        private void ProcessToggleMenuButtonRedM()
-        {
-            DisableControlAction(0, (uint)MenuToggleKey, true);
-            if (
-                !IsPauseMenuActive() &&
-                IsScreenFadedIn() &&
-                !IsAnyMenuOpen() &&
-                !DisableMenuButtons &&
-                !IsEntityDead(PlayerPedId()) &&
-                IsDisabledControlJustReleased(0, (uint)MenuToggleKey)
-            )
-            {
-                if (MainMenu != null)
-                {
-                    MainMenu.OpenMenu();
-                }
-                else
-                {
-                    Debug.WriteLine($"[ERROR] [{GetCurrentResourceName()}] [MenuAPI] MainMenu is null, so we can't open it! Make sure that MenuController.MainMenu is set to a valid Menu which is not null!");
-                }
-            }
-        }
-#endif
-#if FIVEM
         private async Task ProcessToggleMenuButtonFiveM()
         {
             if (!IsPauseMenuActive() && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !API.Players.Local.IsDead && !DisableMenuButtons)
@@ -516,7 +396,6 @@ namespace MenuAPI
                 }
             }
         }
-#endif
 
         /// <summary>
         /// Process left/right/up/down buttons (also holding down buttons will speed up after 3 iterations)
@@ -549,14 +428,8 @@ namespace MenuAPI
             // Check if the Go Left controls are pressed.
             else if (
                 AreMenuButtonsEnabled && (
-#if FIVEM
                     IsDisabledControlJustPressed(0, (int)Control.PhoneLeft) ||
                     IsControlJustPressed(0, (int)Control.PhoneLeft)
-#endif
-#if REDM
-                    IsDisabledControlJustPressed(0, (uint)Control.FrontendLeft) ||
-                    IsControlJustPressed(0, (uint)Control.FrontendLeft)
-#endif
                 )
             )
             {
@@ -566,14 +439,8 @@ namespace MenuAPI
             // Check if the Go Right controls are pressed.
             else if (
                 AreMenuButtonsEnabled && (
-#if FIVEM
                     IsDisabledControlJustPressed(0, (int)Control.PhoneRight) ||
                     IsControlJustPressed(0, (int)Control.PhoneRight)
-#endif
-#if REDM
-                    IsDisabledControlJustPressed(0, (uint)Control.FrontendRight) ||
-                    IsControlJustPressed(0, (uint)Control.FrontendRight)
-#endif
                 )
             )
             {
@@ -590,18 +457,7 @@ namespace MenuAPI
                 var time = GetGameTimer();
                 var times = 0;
                 var delay = 200;
-#if FIVEM
                 while ((IsDisabledControlPressed(0, (int)Control.PhoneRight) || IsControlPressed(0, (int)Control.PhoneRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
-#endif
-#if REDM
-                while (
-                    GetCurrentMenu() != null &&
-                    AreMenuButtonsEnabled && (
-                        IsDisabledControlPressed(0, (uint)Control.FrontendRight) ||
-                        IsControlPressed(0, (uint)Control.FrontendRight)
-                    )
-                )
-#endif
                 {
                     currentMenu = GetCurrentMenu();
                     if (GetGameTimer() - time > delay)
@@ -642,14 +498,8 @@ namespace MenuAPI
                 while (
                     GetCurrentMenu() != null &&
                     AreMenuButtonsEnabled && (
-#if FIVEM
                         IsDisabledControlPressed(0, (int)Control.PhoneLeft) ||
                         IsControlPressed(0, (int)Control.PhoneLeft)
-#endif
-#if REDM
-                        IsDisabledControlPressed(0, (uint)Control.FrontendLeft) ||
-                        IsControlPressed(0, (uint)Control.FrontendLeft)
-#endif
                     )
                 )
                 {
@@ -719,7 +569,6 @@ namespace MenuAPI
             }
         }
 
-#if FIVEM
         private void HandleMenuToggleKeyForKeyboard()
         {
             if (
@@ -790,7 +639,6 @@ namespace MenuAPI
                 }
             }
         }
-#endif
 
         private async Task HandleUpNavigation(Menu currentMenu)
         {
@@ -885,18 +733,12 @@ namespace MenuAPI
             if (currMenu == null)
                 return;
             if (
-#if FIVEM
                 API.Players.Local.IsDead
-#endif
-#if REDM
-                    IsEntityDead(PlayerPedId())
-#endif
                 )
             {
                 // Close all menus when the player dies.
                 CloseAllMenus();
             }
-#if FIVEM
             DisableGenericControls(currMenu);
             DisableRadioInputs();
             DisablePhoneAndArrowKeysInputs();
@@ -909,51 +751,8 @@ namespace MenuAPI
                 DisableControlAction(0, (int)Control.VehicleSelectPrevWeapon, false);
                 DisableControlAction(0, (int)Control.VehicleCinCam, false);
             }
-#endif
-#if REDM
-            DisableControlsRedM();
-#endif
         }
 
-#if REDM
-        private static void DisableControlsRedM()
-        {
-            DisableControlAction(0, (uint)Control.Attack, true);
-            DisableControlAction(0, (uint)Control.Attack2, true);
-            DisableControlAction(0, (uint)Control.HorseAim, true);
-            DisableControlAction(0, (uint)Control.HorseAttack, true);
-            DisableControlAction(0, (uint)Control.HorseAttack2, true);
-            DisableControlAction(0, (uint)Control.HorseMelee, true);
-            DisableControlAction(0, (uint)Control.MeleeAttack, true);
-            DisableControlAction(0, (uint)Control.MeleeBlock, true);
-            DisableControlAction(0, (uint)Control.MeleeGrapple, true);
-            DisableControlAction(0, (uint)Control.MeleeGrappleAttack, true);
-            DisableControlAction(0, (uint)Control.MeleeGrappleBreakout, true);
-            DisableControlAction(0, (uint)Control.MeleeGrappleChoke, true);
-            DisableControlAction(0, (uint)Control.MeleeGrappleMountSwitch, true);
-            DisableControlAction(0, (uint)Control.MeleeGrappleReversal, true);
-            DisableControlAction(0, (uint)Control.MeleeGrappleStandSwitch, true);
-            DisableControlAction(0, (uint)Control.MeleeHorseAttackPrimary, true);
-            DisableControlAction(0, (uint)Control.MeleeHorseAttackSecondary, true);
-            DisableControlAction(0, (uint)Control.MeleeModifier, true);
-            DisableControlAction(0, (uint)Control.VehAttack, true);
-            DisableControlAction(0, (uint)Control.VehAttack2, true);
-            DisableControlAction(0, (uint)Control.VehBoatAttack, true);
-            DisableControlAction(0, (uint)Control.VehBoatAttack2, true);
-            DisableControlAction(0, (uint)Control.VehCarAttack, true);
-            DisableControlAction(0, (uint)Control.VehCarAttack2, true);
-            DisableControlAction(0, (uint)Control.VehDraftAttack, true);
-            DisableControlAction(0, (uint)Control.VehDraftAttack2, true);
-            DisableControlAction(0, (uint)Control.VehFlyAttack, true);
-            DisableControlAction(0, (uint)Control.VehFlyAttack2, true);
-            DisableControlAction(0, (uint)Control.VehPassengerAttack, true);
-            if (IsInputDisabled(2))
-            {
-                DisableControlAction(0, (uint)Control.FrontendPauseAlternate, true);
-            }
-        }
-#endif
-#if FIVEM
         /// <summary>
         /// Disable required game controls when the menu is open.
         /// </summary>
@@ -1043,7 +842,6 @@ namespace MenuAPI
             DisableControlAction(0, (int)Control.VehicleRadioWheel, false);
             DisableControlAction(0, (int)Control.VehiclePrevRadio, false);
         }
-#endif
 
         /// <summary>
         /// Draws all the menus that are visible on the screen.
@@ -1057,9 +855,7 @@ namespace MenuAPI
                 IsScreenFadedIn() &&
                 !IsPauseMenuActive() &&
                 !API.Players.Local.IsDead
-#if FIVEM
                 && !IsPlayerSwitchInProgress()
-#endif
                 )
             )
             {
@@ -1105,7 +901,6 @@ namespace MenuAPI
             }
         }
 
-#if FIVEM
         internal static async void DrawInstructionalButtons()
         {
             if (
@@ -1182,21 +977,5 @@ namespace MenuAPI
                 SetScaleformMovieAsNoLongerNeeded(out _scale);
             }
         }
-#endif
-#if REDM
-        /// <summary>
-        /// Prevent the UI prompts getting stuck on screen if this resource is ever to be restarted while someone has any menu's open.
-        /// </summary>
-        /// <param name="name"></param>
-        [EventHandler("onResourceStop")]
-        internal static void OnResourceStop(string name)
-        {
-            if (name == GetCurrentResourceName())
-            {
-                Debug.WriteLine($"^3[WARNING] [{name}] Closing all menus because this resource is being stopped, to prevent the UI Prompts getting stuck.^7");
-                CloseAllMenus();
-            }
-        }
-#endif
     }
 }

@@ -1,0 +1,88 @@
+name: Deploy Docs (Enhanced)
+
+on:
+  push:
+    branches: [fivem-enhanced]
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+  # Manual run from the Actions tab (no commit needed)
+  workflow_dispatch:
+
+# Only needs to read this repo; the push to the hub uses HUB_DEPLOY_TOKEN.
+permissions:
+  contents: read
+
+# Separate group from the Legacy/RedM deploy so the two branches' runs never
+# cancel each other.
+concurrency:
+  group: docs-deploy-enhanced
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & publish Enhanced docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout MenuAPI
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies (enhanced)
+        run: npm ci
+        working-directory: docs/enhanced
+
+      # Build the Enhanced doc set once per URL prefix. Astro bakes the base into
+      # the output URLs, so /menuapi and /mapi need separate builds. The MenuAPI
+      # repo is served from the TomGrobbe.github.io hub as lowercase /menuapi/ and,
+      # for backwards compatibility with the old docs, also at /mapi/.
+      - name: Build enhanced (both prefixes)
+        run: |
+          set -e
+          build() {
+            echo "== building $1 with base $2 -> $3 =="
+            (cd "$1" && DOCS_BASE="$2" npm run build)
+            mkdir -p "$3"
+            cp -r "$1/dist/." "$3/"
+          }
+          rm -rf _site
+          build docs/enhanced /menuapi/enhanced _site/menuapi/enhanced
+          build docs/enhanced /mapi/enhanced    _site/mapi/enhanced
+
+      # Publish into the hub repo. This branch OWNS only the `enhanced/` subfolders
+      # of each prefix; the Legacy/RedM docs deploy from a different branch. So we
+      # replace ONLY hub/<prefix>/enhanced and never touch the rest of the prefix,
+      # otherwise the two deploys would clobber each other (last push wins).
+      - name: Publish to hub site
+        env:
+          HUB_TOKEN: ${{ secrets.HUB_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${HUB_TOKEN}" ]; then
+            echo "::error::HUB_DEPLOY_TOKEN secret is not set. See docs/README.md for setup."
+            exit 1
+          fi
+          git clone --depth 1 --branch main \
+            "https://x-access-token:${HUB_TOKEN}@github.com/TomGrobbe/TomGrobbe.github.io.git" hub
+          # Replace only the Enhanced folders; keep the hub index.html, CNAME,
+          # .nojekyll, the Legacy/RedM docs and other product folders intact.
+          rm -rf hub/menuapi/enhanced hub/mapi/enhanced
+          mkdir -p hub/menuapi/enhanced hub/mapi/enhanced
+          cp -r _site/menuapi/enhanced/. hub/menuapi/enhanced/
+          cp -r _site/mapi/enhanced/.    hub/mapi/enhanced/
+          # Disable Jekyll so Astro's _astro/ asset folder is served (not skipped).
+          touch hub/.nojekyll
+          cd hub
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No documentation changes to publish."
+          else
+            git commit -m "Deploy MenuAPI Enhanced docs"
+            git push origin main
+          fi

@@ -41,13 +41,7 @@ namespace MenuAPI
             string newSelectedItem = Callback(this, false);
             CurrentItem = newSelectedItem;
             ParentMenu.DynamicListItemCurrentItemChanged(ParentMenu, this, oldValue, newSelectedItem);
-#if FIVEM
             PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
-#endif
-#if REDM
-            // Has invalid parameter types in API.
-            Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
-#endif
         }
 
         internal override void GoLeft()
@@ -56,13 +50,7 @@ namespace MenuAPI
             string newSelectedItem = Callback(this, true);
             CurrentItem = newSelectedItem;
             ParentMenu.DynamicListItemCurrentItemChanged(ParentMenu, this, oldValue, newSelectedItem);
-#if FIVEM
             PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
-#endif
-#if REDM
-            // Has invalid parameter types in API.
-            Call((CitizenFX.Core.Native.Hash)0xCE5D0FFE83939AF1, -1, "NAV_RIGHT", "HUD_SHOP_SOUNDSET", 1);
-#endif
         }
 
         internal override void Select()

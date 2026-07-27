@@ -13,9 +13,7 @@ namespace MenuAPI
         public CheckboxStyle Style { get; set; } = CheckboxStyle.Tick;
         public enum CheckboxStyle
         {
-#if FIVEM
             Cross,
-#endif
             Tick
         }
 
@@ -52,7 +50,6 @@ namespace MenuAPI
             return Enabled ? 255 : 109;
         }
 
-#if FIVEM
         private string GetSpriteName()
         {
             if (Checked)
@@ -83,11 +80,9 @@ namespace MenuAPI
                 return "shop_box_blank";
             }
         }
-#endif
 
         private float GetSpriteX()
         {
-#if FIVEM
             bool leftSide = false;
             bool leftAligned = ParentMenu.LeftAligned;
             if (leftSide)
@@ -112,10 +107,6 @@ namespace MenuAPI
                     return GetSafeZoneSize() - (20f / MenuController.ScreenWidth);
                 }
             }
-#endif
-#if REDM
-            return (Width - 30f) / MenuController.ScreenWidth;
-#endif
         }
 
         internal override void Draw(int offset)
@@ -123,37 +114,19 @@ namespace MenuAPI
             RightIcon = Icon.NONE;
             Label = null;
             base.Draw(offset);
-#if FIVEM
             SetScriptGfxAlign(76, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-#endif
 
             float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
-#if FIVEM
             string name = GetSpriteName();
-#endif
 
             float spriteY = (ParentMenu.Position.Value + ((Index - offset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
             float spriteX = GetSpriteX();
-#if FIVEM
             float spriteHeight = 45f / MenuController.ScreenHeight;
             float spriteWidth = 45f / MenuController.ScreenWidth;
-#endif
             int color = GetSpriteColour();
-#if FIVEM
             DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255, false, false);
             ResetScriptGfxAlign();
-#endif
-#if REDM
-            float spriteHeight = 24f / MenuController.ScreenHeight;
-            float spriteWidth = 16f / MenuController.ScreenWidth;
-            DrawSprite("menu_textures", "SELECTION_BOX_SQUARE", spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255, false);
-            if (Checked)
-            {
-                int[] sc = Enabled ? (Selected ? new int[3] { 255, 255, 255 } : new int[3] { 181, 17, 18 }) : (Selected ? new int[3] { 109, 109, 109 } : new int[3] { 110, 10, 10 });
-                DrawSprite("generic_textures", "TICK", spriteX, spriteY, spriteWidth, spriteHeight, 0f, sc[0], sc[1], sc[2], 255, false);
-            }
-#endif
         }
 
         internal override void GoRight()

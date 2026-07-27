@@ -13,11 +13,9 @@ namespace TestMenu
     {
         public ExampleMenu()
         {
-#if FIVEM
             // Setting the menu alignment to be right aligned. This can be changed at any time and it'll update instantly.
             // To test this, checkout one of the checkbox items in this example menu. Clicking it will toggle the menu alignment.
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
-#endif
             // Creating the first menu.
             Menu menu = new Menu("Main Menu", "Subtitle");
             MenuController.AddMenu(menu);
@@ -34,7 +32,6 @@ namespace TestMenu
                     LeftIcon = MenuItem.Icon.TICK
                 }
             );
-#if FIVEM
             // Creating 3 sliders, showing off the 3 possible variations and custom colors.
             MenuSliderItem slider = new MenuSliderItem("Slider", 0, 10, 5, false);
             MenuSliderItem slider2 = new MenuSliderItem("Slider + Bar", 0, 10, 5, true)
@@ -61,8 +58,6 @@ namespace TestMenu
             menu.AddMenuItem(slider);
             menu.AddMenuItem(slider2);
             menu.AddMenuItem(slider3);
-#endif
-#if FIVEM
             // Creating 3 checkboxs, 2 different styles and one has a locked icon and it's 'not enabled' (not enabled meaning you can't toggle it).
             MenuCheckboxItem box = new MenuCheckboxItem(
                 "Checkbox - Style 1 (click me!)",
@@ -72,7 +67,6 @@ namespace TestMenu
             {
                 Style = MenuCheckboxItem.CheckboxStyle.Cross
             };
-#endif
             MenuCheckboxItem box2 = new MenuCheckboxItem(
                 "Checkbox - Style 2",
                 "This checkbox does nothing right now.",
@@ -93,9 +87,7 @@ namespace TestMenu
             };
 
             // Adding the checkboxes to the menu.
-#if FIVEM
             menu.AddMenuItem(box);
-#endif
             menu.AddMenuItem(box2);
             menu.AddMenuItem(box3);
 
@@ -113,7 +105,6 @@ namespace TestMenu
                 "Description for this dynamic item. Pressing left will make the value smaller, pressing right will make the value bigger."
             );
             menu.AddMenuItem(dynList);
-#if FIVEM
             // List items (first the 3 special variants, then a normal one)
             List<string> colorList = new List<string>();
             for (var i = 0; i < 64; i++)
@@ -156,7 +147,6 @@ namespace TestMenu
             menu.AddMenuItem(hairColors);
             menu.AddMenuItem(makeupColors);
             menu.AddMenuItem(opacity);
-#endif
             // Normal
             List<string> normalList = new List<string>() { "Item #1", "Item #2", "Item #3" };
             MenuListItem normalListItem = new MenuListItem(
@@ -178,12 +168,7 @@ namespace TestMenu
                 "This button is bound to a submenu. Clicking it will take you to the submenu."
             )
             {
-#if FIVEM
                 Label = "→→→"
-#endif
-#if REDM
-                RightIcon = MenuItem.Icon.ARROW_RIGHT
-#endif
             };
             menu.AddMenuItem(menuButton);
             MenuController.BindMenuItem(menu, submenu, menuButton);
@@ -197,8 +182,6 @@ namespace TestMenu
                 )
                 {
                     Label = $"(#{i})",
-#if FIVEM
-#endif
                     RightIcon = (MenuItem.Icon)i,
                     LeftIcon = (MenuItem.Icon)i
                 };
@@ -213,14 +196,12 @@ namespace TestMenu
                     m.GetMenuItems().ForEach(a => a.Enabled = !a.Enabled);
                 }), true)
             );
-#if FIVEM
             // Instructional buttons setup for the second (submenu) menu.
             submenu.InstructionalButtons.Add(Control.CharacterWheel, "Right?!");
             submenu.InstructionalButtons.Add(Control.CursorScrollDown, "Cool");
             submenu.InstructionalButtons.Add(Control.CreatorDelete, "Out!");
             submenu.InstructionalButtons.Add(Control.Cover, "This");
             submenu.InstructionalButtons.Add(Control.Context, "Check");
-#endif
             // Create a third menu without a banner.
             Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
 
@@ -233,12 +214,7 @@ namespace TestMenu
                 "lines and see if they work properly. Let's find out if it works as intended."
             )
             {
-#if FIVEM
                 Label = "→→→"
-#endif
-#if REDM
-                RightIcon = MenuItem.Icon.ARROW_RIGHT
-#endif
             };
             menu.AddMenuItem(thirdSubmenuBtn);
             MenuController.BindMenuItem(menu, menu3, thirdSubmenuBtn);
@@ -252,7 +228,6 @@ namespace TestMenu
                 menu.AddMenuItem(new MenuItem($"Item #{i + 1}.", "With an invisible description."));
             }
 
-#if FIVEM
             // Create menu with weapon stats panel
             Menu menu4 = new Menu("Weapon Stats", "Weapon Stats Panel") { ShowWeaponStatsPanel = true };
             menu4.AddMenuItem(new MenuItem("dummy item", "You should add at least one item when using weapon stat panels"));
@@ -272,7 +247,6 @@ namespace TestMenu
             MenuItem vehicleStats = new MenuItem("Vehicle stats", "Demo menu for vehicle stats components");
             menu.AddMenuItem(vehicleStats);
             MenuController.BindMenuItem(menu, menu5, vehicleStats);
-#endif
             /*--------------
              Event handlers
             --------------*/
@@ -281,7 +255,6 @@ namespace TestMenu
             {
                 // Code in here gets executed whenever a checkbox is toggled.
                 Console.WriteLine($"OnCheckboxChange: [{_menu}, {_item}, {_index}, {_checked}]");
-#if FIVEM
                 // If the align-menu checkbox is toggled, toggle the menu alignment.
                 if (_item == box)
                 {
@@ -294,7 +267,6 @@ namespace TestMenu
                         MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Left;
                     }
                 }
-#endif
             };
 
             menu.OnItemSelect += (_menu, _item, _index) =>
@@ -321,7 +293,6 @@ namespace TestMenu
                 Console.WriteLine($"OnListItemSelect: [{_menu}, {_listItem}, {_listIndex}, {_itemIndex}]");
             };
 
-#if FIVEM
             menu.OnSliderPositionChange += (_menu, _sliderItem, _oldPosition, _newPosition, _itemIndex) =>
             {
                 // Code in here would get executed whenever the position of a slider is changed (when left/right key is pressed).
@@ -333,7 +304,6 @@ namespace TestMenu
                 // Code in here would get executed whenever a slider item is pressed.
                 Console.WriteLine($"OnSliderItemSelect: [{_menu}, {_sliderItem}, {_sliderPosition}, {_itemIndex}]");
             };
-#endif
 
             menu.OnMenuClose += (_menu) =>
             {
