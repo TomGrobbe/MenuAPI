@@ -11,8 +11,10 @@ on:
       - '.github/workflows/docs.yml'
   pull_request:
 
+# Least privilege by default. The release job elevates its own permissions
+# (contents: write for tags/releases, id-token: write for NuGet OIDC).
 permissions:
-  contents: write
+  contents: read
 
 # Cancel any in-progress run on the same branch
 concurrency:
@@ -207,6 +209,12 @@ jobs:
     if: github.ref == 'refs/heads/master'
     runs-on: windows-latest
 
+    # contents: write for the git tag + GitHub release; id-token: write so NuGet
+    # Trusted Publishing (OIDC) can mint a short-lived key (no API-key secret).
+    permissions:
+      contents: write
+      id-token: write
+
     outputs:
       release_url: ${{ steps.create_release.outputs.release_url }}
 
@@ -287,19 +295,28 @@ jobs:
 
           echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
 
-      - name: Publish NuGet — FiveM
+      # NuGet Trusted Publishing (OIDC): exchange the GitHub Actions id-token for a
+      # short-lived NuGet API key, used for both packages. No NUGET_API_KEY secret.
+      # Requires a matching trusted-publishing policy on nuget.org.
+      - name: NuGet login (trusted publishing)
+        uses: NuGet/login@v1
+        id: nuget_login
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Publish NuGet (FiveM)
         run: >-
           dotnet nuget push
           "release-assets/MenuAPI.FiveM.${{ needs.version.outputs.semver }}.nupkg"
-          --api-key ${{ secrets.NUGET_API_KEY }}
+          --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
 
-      - name: Publish NuGet — RedM
+      - name: Publish NuGet (RedM)
         run: >-
           dotnet nuget push
           "release-assets/MenuAPI.RedM.${{ needs.version.outputs.semver }}.nupkg"
-          --api-key ${{ secrets.NUGET_API_KEY }}
+          --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
 
