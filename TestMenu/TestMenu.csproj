@@ -8,12 +8,7 @@
     <LangVersion>default</LangVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug FiveM' Or '$(Configuration)' == 'Release FiveM'">
-    <DefineConstants>FIVEM</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
 
     <ProjectReference Include="..\MenuAPI\MenuAPI.csproj" />
   </ItemGroup>

@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="MenuAPI/MenuAPI.csproj" />
+  <Project Path="TestMenu/TestMenu.csproj" />
+</Solution>
