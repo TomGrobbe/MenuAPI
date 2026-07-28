@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 
@@ -103,14 +104,62 @@ namespace MenuAPI
         /// </summary>
         public void Initialize()
         {
-            API.SetInterval(ProcessMenus, 3, 0);
-            API.SetInterval(DrawInstructionalButtons, 3, 0);
-            API.SetInterval(ProcessMainButtons, 3, 0);
-            API.SetInterval(ProcessDirectionalButtons, 100l, 0);
-            API.SetInterval(ProcessToggleMenuButton, 3, 0);
-            API.SetInterval(MenuButtonsDisableChecks, 3, 0);
+            LoopProcessMenus();
+            LoopDrawInstructionalButtons();
+            LoopProcessMainButtons();
+            LoopProcessDirectionalButtons();
+            LoopProcessToggleMenuButton();
+            LoopMenuButtonsDisableChecks();
         }
 
+        async void LoopProcessMenus()
+        {
+            while (true)
+            {
+                await ProcessMenus();
+                await API.Yield();
+            }
+        }
+        async void LoopDrawInstructionalButtons()
+        {
+            while (true)
+            {
+                await DrawInstructionalButtons();
+                await API.Yield();
+            }
+        }
+        async void LoopProcessMainButtons()
+        {
+            while (true)
+            {
+                await ProcessMainButtons();
+                await API.Yield();
+            }
+        }
+        async void LoopProcessDirectionalButtons()
+        {
+            while (true)
+            {
+                await ProcessDirectionalButtons();
+                await API.Yield();
+            }
+        }
+        async void LoopProcessToggleMenuButton()
+        {
+            while (true)
+            {
+                await ProcessToggleMenuButton();
+                await API.Yield();
+            }
+        }
+        async void LoopMenuButtonsDisableChecks()
+        {
+            while (true)
+            {
+                await MenuButtonsDisableChecks();
+                await API.Yield();
+            }
+        }
         /// <summary>
         /// This binds the <paramref name="childMenu"/> menu to the <paramref name="menuItem"/> and sets the menu's parent to <paramref name="parentMenu"/>.
         /// </summary>
@@ -220,7 +269,7 @@ namespace MenuAPI
         /// Process the select & go back/cancel buttons.
         /// </summary>
         /// <returns></returns>
-        private async void ProcessMainButtons()
+        private async Task ProcessMainButtons()
         {
             if (!IsAnyMenuOpen())
             {
@@ -362,7 +411,7 @@ namespace MenuAPI
         /// Processes the menu toggle button to check if the menu should open or close.
         /// </summary>
         /// <returns></returns>
-        private async void ProcessToggleMenuButton()
+        private async Task ProcessToggleMenuButton()
         {
             if (!MenuToggleKeyIsValid)
             {
@@ -401,7 +450,7 @@ namespace MenuAPI
         /// Process left/right/up/down buttons (also holding down buttons will speed up after 3 iterations)
         /// </summary>
         /// <returns></returns>
-        private async void ProcessDirectionalButtons()
+        private async Task ProcessDirectionalButtons()
         {
             // Return if the buttons are not currently enabled.
             if (!AreMenuButtonsEnabled)
@@ -692,7 +741,7 @@ namespace MenuAPI
             }
         }
 
-        private async void MenuButtonsDisableChecks()
+        private async Task MenuButtonsDisableChecks()
         {
             bool isInputVisible() => UpdateOnscreenKeyboard() == 0;
             if (isInputVisible())
@@ -847,7 +896,7 @@ namespace MenuAPI
         /// Draws all the menus that are visible on the screen.
         /// </summary>
         /// <returns></returns>
-        private static async void ProcessMenus()
+        private static async Task ProcessMenus()
         {
             if (!(
                 Menus.Any() &&
@@ -901,7 +950,7 @@ namespace MenuAPI
             }
         }
 
-        internal static async void DrawInstructionalButtons()
+        internal static async Task DrawInstructionalButtons()
         {
             if (
                 IsPlayerSwitchInProgress() ||
