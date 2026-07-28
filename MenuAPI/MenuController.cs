@@ -431,7 +431,7 @@ namespace MenuAPI
                 }
                 else
                 {
-                    if (IsUsingKeyboardAndMouse(2))
+                    if (!IsUsingKeyboardAndMouse(2))
                     {
                         if (!EnableMenuToggleKeyOnController)
                             return;
