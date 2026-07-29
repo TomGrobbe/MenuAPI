@@ -36,7 +36,20 @@ namespace MenuAPI
         public static float ScreenWidth => 1080 * AspectRatio;
         public static float ScreenHeight => 1080;
         public static bool DisableMenuButtons { get; set; } = false;
-        public static bool AreMenuButtonsEnabled => IsAnyMenuOpen() && !IsPauseMenuActive() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !DisableMenuButtons && !API.Players.Local.IsDead;
+
+        // Control 360 is a control that is rarely used, no other scripts should be disabling
+        // it randomly (I hope). It gets disabled when the console (F8) is opened, so we
+        // can use that to guess if the console is open or not by checking if the control is enabled.
+        private static bool IsF8ConsoleLikelyOpen => !IsControlEnabled(0, 360);
+
+        public static bool AreMenuButtonsEnabled =>
+            IsAnyMenuOpen() &&
+            !IsPauseMenuActive() &&
+            IsScreenFadedIn() &&
+            !IsPlayerSwitchInProgress() &&
+            !DisableMenuButtons &&
+            !API.Players.Local.IsDead &&
+            !IsF8ConsoleLikelyOpen;
 
         public static bool NavigateMenuUsingArrows { get; set; } = true;
         public static bool EnableManualGCs { get; set; } = true;
@@ -82,7 +95,7 @@ namespace MenuAPI
                 // right aligned menus are not supported for aspect ratios 17:9 or 21:9.
                 else
                 {
-                    // no matter what the new value would've been, the aspect ratio does not support right aligned menus, 
+                    // no matter what the new value would've been, the aspect ratio does not support right aligned menus,
                     // so (re)set it to be left aligned.
                     _alignment = MenuAlignmentOption.Left;
 
