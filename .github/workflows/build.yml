@@ -86,25 +86,25 @@ jobs:
 
       - name: Restore NuGet (FiveM only)
         shell: bash
-        run: dotnet restore "MenuAPI/MenuAPI.csproj" "-p:Configuration=Release FiveM"
+        run: dotnet restore "MenuAPI/MenuAPI.csproj" -p:Configuration=Release
 
       - name: Build FiveM (versioned)
         if: github.ref == 'refs/heads/fivem-enhanced'
         shell: bash
         run: |
-          dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore \
+          dotnet build MenuAPI/MenuAPI.csproj -c Release --no-restore \
             -p:Version=${{ needs.version.outputs.semver }} \
             -p:AssemblyVersion=${{ needs.version.outputs.assembly_ver }} \
             -p:FileVersion=${{ needs.version.outputs.assembly_ver }}
 
       - name: Build FiveM
         if: github.ref != 'refs/heads/fivem-enhanced'
-        run: dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore
+        run: dotnet build MenuAPI/MenuAPI.csproj -c Release --no-restore
 
       - name: Package FiveM zip
         shell: pwsh
         run: |
-          $outDir = 'MenuAPI/bin/Release FiveM/net10.0'
+          $outDir = 'MenuAPI/bin/Release/net10.0'
           Copy-Item README.md "$outDir/README.md" -Force
           Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version.outputs.zip_prefix }}-FiveM-Enhanced.zip" -Force
 
@@ -118,11 +118,9 @@ jobs:
         if: github.ref == 'refs/heads/fivem-enhanced'
         run: >-
           dotnet pack MenuAPI/MenuAPI.csproj
-          -c "Release FiveM"
+          -c Release
           --no-restore
           -p:PackageVersion=${{ needs.version.outputs.semver }}
-          -p:DefineConstants=FIVEM
-          -p:PackageId=MenuAPI.FiveM.Enhanced
           -o nupkgs
 
       - name: Upload NuGet FiveM

@@ -3,7 +3,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <DebugType>embedded</DebugType>
     <TargetName>MenuAPI</TargetName>
-    <Configurations>Release FiveM;Debug FiveM</Configurations>
 
     <AssemblyTitle>MenuAPI FiveM Enhanced</AssemblyTitle>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -19,14 +18,6 @@
     <LangVersion>default</LangVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release FiveM'">
-    <DefineConstants>FIVEM</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug FiveM'">
-    <DefineConstants>FIVEM;DEBUG</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\shared\Controls.cs" Link="Controls.cs" />
   </ItemGroup>
@@ -35,7 +26,6 @@
     <PackageReference Include="CitizenFX.FiveM.Client" Version="0.0.2-alpha" />
   </ItemGroup>
 
-  <!-- Packed into the NuGet package root so nuget.org shows a README + license. -->
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />
     <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />

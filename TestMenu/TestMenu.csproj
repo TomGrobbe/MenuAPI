@@ -4,7 +4,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <DebugType>embedded</DebugType>
     <TargetName>$(AssemblyName).net</TargetName>
-    <Configurations>Release FiveM;Debug FiveM</Configurations>
     <LangVersion>default</LangVersion>
   </PropertyGroup>
 
