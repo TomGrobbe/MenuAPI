@@ -791,16 +791,19 @@ namespace MenuAPI
         {
             if (!IsAnyMenuOpen())
                 return;
+
             var currMenu = GetCurrentMenu();
+
             if (currMenu == null)
                 return;
-            if (
-                API.Players.Local.IsDead
-                )
+
+            if (API.Players.Local.IsDead)
             {
                 // Close all menus when the player dies.
                 CloseAllMenus();
+                return;
             }
+
             DisableGenericControls(currMenu);
             DisableRadioInputs();
             DisablePhoneAndArrowKeysInputs();
@@ -879,6 +882,10 @@ namespace MenuAPI
             DisableControlAction(0, (int)Control.Aim, false);
             // fires vehicle specific weapons when using right click on the mouse sometimes.
             DisableControlAction(0, (int)Control.VehicleAim, false);
+
+            // Scroll wheel for changing weapons
+            DisableControlAction(0, 16, false);
+            DisableControlAction(0, 17, false);
         }
 
         /// <summary>
