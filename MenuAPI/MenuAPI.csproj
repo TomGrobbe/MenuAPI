@@ -8,13 +8,13 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Tom Grobbe</Authors>
     <Description>An advanced Menu API for FiveM (Enhanced) C# resources. Work in progress (alpha).</Description>
-    <Copyright>Copyright Tom Grobbe 2018-2026</Copyright>
+    <Copyright>Copyright (C) 2018-2026 Tom Grobbe</Copyright>
     <PackageId>MenuAPI.FiveM.Enhanced</PackageId>
     <PackageTags>FiveM Enhanced MenuAPI</PackageTags>
     <PackageProjectUrl>https://github.com/tomgrobbe/menuapi/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/tomgrobbe/menuapi/</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
     <LangVersion>default</LangVersion>
   </PropertyGroup>
 
@@ -28,7 +28,9 @@
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <!-- LGPL-3.0 is written as a set of additional permissions on top of the GPL-3.0, so both texts ship. -->
     <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE.GPL.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

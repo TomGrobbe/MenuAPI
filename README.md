@@ -26,30 +26,34 @@ Feel like contributing to the documentation? The docs source lives in the [`docs
 
 Copyright © Tom Grobbe 2018-2026.
 
-MenuAPI is a free resource, using a custom license.
-Conditions are listed below.
+MenuAPI is licensed under the **[GNU Lesser General Public License v3.0 or later](LICENSE.md)** (`LGPL-3.0-or-later`).
 
-### You are allowed to
+The LGPL is written as a set of additional permissions on top of the GPL, so both texts are included: [LICENSE.md](LICENSE.md) (LGPL-3.0) and [LICENSE.GPL.md](LICENSE.GPL.md) (GPL-3.0).
 
-- Include the pre-built files in your projects, for both commercial and non-commercial use
-- Modify this code, feel free to create PR's :)
+In short — this is not legal advice, read the license itself:
 
-### You are NOT allowed to
+- You may link MenuAPI into your own resource and ship it, **including closed-source and paid resources**. Your own code does not become LGPL.
+- If you **modify MenuAPI itself** and distribute it, you must release those modifications under the LGPL.
+- You must credit MenuAPI, keep the copyright and license notices intact, and make clear that MenuAPI is used and available under the LGPL.
+- Your users must be able to relink your resource against a modified MenuAPI. Shipping `MenuAPI.dll` as its own file (rather than merging it into your assembly) satisfies this.
+- It comes with **absolutely no warranty**. Nothing is guaranteed to work, I do not take responsibility for any bugs or damages caused by this code. Use at your own risk.
 
-- Sell this code or a modified version of it.
-- If you release a paid resource that uses MenuAPI, you are not allowed to include MenuAPI in the resource. You will need to provide a free way for anyone to download the MenuAPI version of your resource.
-- Re-release this code without using the Fork feature.
+### Full notice
 
-### You must
+```
+MenuAPI
+Copyright (C) 2018-2026 Tom Grobbe
 
-- Provide appropritate credits when including this in your project.
-- State any changes you made if you want to re-release this code.
-- Keep this license when editing the source code or using this code in your own projects.
+This library is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-### In short
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
 
-It's very simple, don't steal my stuff, don't try to take credit for code that isn't yours and don't try to make money using my work. That's all I ask.
-
-If you'd like to do something that's not allowed per this license, contact me and we might be able to figure something out.
-
-Nothing is guaranteed to work, I do not take responsibility for any bugs or damages caused by this code. Use at your own risk.
+You should have received a copy of the GNU Lesser General Public License
+along with this library.  If not, see <https://www.gnu.org/licenses/>.
+```
