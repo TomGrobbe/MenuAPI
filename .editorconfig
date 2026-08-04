@@ -242,3 +242,9 @@ dotnet_style_namespace_match_folder = false
 # MenuAPI is a library, so making a public or protected member static because it happens not to
 # touch instance state is a breaking change for everyone consuming or subclassing it.
 dotnet_code_quality.CA1822.api_surface = private, internal
+
+# Off because the FiveM client JIT-verifies every method, and reading a member off a readonly field
+# of a *struct* type takes its address, which the verifier rejects with "Unverifiable CIL
+# encountered: InitOnly". The build stays clean and the resource dies at runtime, so an automated
+# fix-all is the worst possible way to apply this rule. Mark fields readonly by hand instead.
+dotnet_style_readonly_field = false

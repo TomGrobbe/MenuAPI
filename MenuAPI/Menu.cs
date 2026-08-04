@@ -310,10 +310,15 @@ public class Menu
 
     #region constants or readonlys
     public const float Width = 500f;
+
+    // Plain consts rather than a KeyValuePair: reading a member off a static readonly *struct* field
+    // takes its address, which the client's IL verifier rejects and the resource dies on the first
+    // menu draw.
+    private const float HeaderWidth = Width;
+    private const float HeaderHeight = 110f;
     #endregion
 
     #region private variables
-    private static readonly KeyValuePair<float, float> headerSize = new(Width, 110f);
 
     private int index = 0;
 
@@ -983,10 +988,10 @@ public class Menu
             SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-            float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
-            float y = (Position.Value + (headerSize.Value / 2f)) / MenuController.ScreenHeight;
-            float width = headerSize.Key / MenuController.ScreenWidth;
-            float height = headerSize.Value / MenuController.ScreenHeight;
+            float x = (Position.Key + (HeaderWidth / 2f)) / MenuController.ScreenWidth;
+            float y = (Position.Value + (HeaderHeight / 2f)) / MenuController.ScreenHeight;
+            float width = HeaderWidth / MenuController.ScreenWidth;
+            float height = HeaderHeight / MenuController.ScreenHeight;
 
             if (!string.IsNullOrEmpty(HeaderTexture.Key) && !string.IsNullOrEmpty(HeaderTexture.Value))
             {
@@ -1022,14 +1027,14 @@ public class Menu
             AddTextComponentSubstringPlayerName(MenuTitle);
             if (LeftAligned)
             {
-                EndTextCommandDisplayText(((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f), 0);
+                EndTextCommandDisplayText(((HeaderWidth / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f), 0);
             }
             else
             {
-                EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Key / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f), 0);
+                EndTextCommandDisplayText(GetSafeZoneSize() - ((HeaderWidth / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f), 0);
             }
             ResetScriptGfxAlign();
-            menuItemsOffset = headerSize.Value;
+            menuItemsOffset = HeaderHeight;
             #endregion
         }
         else
@@ -1052,9 +1057,9 @@ public class Menu
 
         float bgHeight = 38f;
 
-        float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
+        float x = (Position.Key + (HeaderWidth / 2f)) / MenuController.ScreenWidth;
         float y = ((Position.Value + menuItemsOffset + (bgHeight / 2f)) / MenuController.ScreenHeight);
-        float width = headerSize.Key / MenuController.ScreenWidth;
+        float width = HeaderWidth / MenuController.ScreenWidth;
         float height = bgHeight / MenuController.ScreenHeight;
 
         DrawRect(x, y, width, height, 0, 0, 0, 250, false);
@@ -1089,7 +1094,7 @@ public class Menu
             }
             else
             {
-                EndTextCommandDisplayText(GetSafeZoneSize() - ((headerSize.Key - 10f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)), 0);
+                EndTextCommandDisplayText(GetSafeZoneSize() - ((HeaderWidth - 10f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)), 0);
             }
             ResetScriptGfxAlign();
         }
@@ -1151,9 +1156,9 @@ public class Menu
         SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
         float bgHeight = 38f * Math.Clamp(Size, 0, MaxItemsOnScreen);
-        float x = (Position.Key + (headerSize.Key / 2f)) / MenuController.ScreenWidth;
+        float x = (Position.Key + (HeaderWidth / 2f)) / MenuController.ScreenWidth;
         float y = ((Position.Value + menuItemsOffset + ((bgHeight + 1f) / 2f)) / MenuController.ScreenHeight);
-        float width = headerSize.Key / MenuController.ScreenWidth;
+        float width = HeaderWidth / MenuController.ScreenWidth;
         float height = (bgHeight + 1f) / MenuController.ScreenHeight;
 
         DrawRect(x, y, width, height, 0, 0, 0, 180, false);
