@@ -64,8 +64,9 @@ namespace MyResource
                 Debug.WriteLine($"The checkbox is now {_checked}.");
             };
 
-            // 4. Open it. (The menu toggle key opens the first registered menu
-            //    for you, so this is only needed if you want your own trigger.)
+            // 4. Open it. (The menu toggle key, M by default, already opens the
+            //    first registered menu for you, so this is only needed if you
+            //    want your own trigger.)
             menu.OpenMenu();
         }
     }
@@ -81,7 +82,8 @@ namespace MyResource
 |Create a menu, add or remove items, sort or filter them|[Menu](menu/)|
 |Open, close or navigate a menu from code|[Menu](menu/#methods)|
 |Create a submenu|[MenuController.BindMenuItem()](menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem)|
-|Change the menu toggle key, or open menus myself|[MenuController](menucontroller/#the-menu-toggle-key)|
+|Know which keys open and control the menu, and how players rebind them|[Key bindings](keybindings/)|
+|Open menus myself instead of using the toggle key|[Menu.OpenMenu()](menu/#openmenu)|
 |Move menus to the right side of the screen|[MenuController.MenuAlignment](menucontroller/#menu-alignment)|
 |Stop the user from closing a menu|[MenuController.PreventExitingMenu](menucontroller/#properties)|
 |Change the instructional buttons at the bottom of the screen|[Menu.InstructionalButtons](menu/#instructional-buttons)|

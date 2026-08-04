@@ -113,10 +113,14 @@ Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
 |CounterPreText|string|Null|Text placed in front of the `current / total` counter in the top right of the subtitle bar. Setting this forces the counter to be shown, even when all items already fit on screen.|Yes|
 |Visible|boolean|false|Whether this menu is currently being drawn. Prefer [OpenMenu()](#openmenu) and [CloseMenu()](#closemenu), because those also trigger the open/close events.|Yes|
 |EnableInstructionalButtons|boolean|true|Whether the instructional buttons for this menu are drawn at the bottom of the screen.|Yes|
+|ShowSelectInstructionalButton|boolean|true|Whether the built in **select** hint is drawn. On a keyboard it follows the player's own [key binding](../keybindings/).|Yes|
+|ShowBackInstructionalButton|boolean|true|Whether the built in **back** hint is drawn. On a keyboard it follows the player's own [key binding](../keybindings/).|Yes|
+|SelectButtonText|string|"Select"|The text next to the built in **select** hint. Defaults to the game's own translated label.|Yes|
+|BackButtonText|string|"Back"|The text next to the built in **back** hint. Defaults to the game's own translated label.|Yes|
 |IgnoreDontOpenMenus|boolean|false|When true, this menu keeps being drawn even while [MenuController.DontOpenAnyMenu](../menucontroller/#properties) is set to true.|Yes|
 |ShowWeaponStatsPanel|boolean|false|Shows the weapon stats panel below the menu. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).|Yes|
 |ShowVehicleStatsPanel|boolean|false|Shows the vehicle stats panel below the menu. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).|Yes|
-|InstructionalButtons|Dictionary&lt;Control,&nbsp;string&gt;|Select + Back|The instructional buttons for this menu. See [Instructional buttons](#instructional-buttons).|Yes|
+|InstructionalButtons|Dictionary&lt;Control,&nbsp;string&gt;|(empty)|Extra instructional buttons for this menu, keyed by a fixed `Control`. Select and back are not in here, they have their own properties above. See [Instructional buttons](#instructional-buttons).|Yes|
 |CustomInstructionalButtons|List&lt;[InstructionalButton](#instructionalbutton)&gt;|(empty)|Extra instructional buttons that use a raw button string instead of a `Control`. See [Instructional buttons](#instructional-buttons).|Yes|
 |ButtonPressHandlers|List&lt;[ButtonPressHandler](#buttonpresshandler)&gt;|(empty)|Custom control handlers that run while this menu is open. See [Button press handlers](#button-press-handlers).|Yes|
 |Size|int|0|(Getter only) The number of items in this menu. When a filter is active, this is the number of items that passed the filter.|Yes|
@@ -668,26 +672,33 @@ MenuController.AddSubmenu(menu, vehicleMenu);
 
 Instructional buttons are the button hints drawn in the bottom right of the screen. Every menu has its own set, and they update instantly when the user switches between keyboard/mouse and a controller.
 
-By default every menu has a **select** and a **back/cancel** button. You can remove those, or add your own. Set [EnableInstructionalButtons](#properties) to false if you want to handle them yourself.
+Every menu starts with a **select** and a **back** button. Those two are special: on a keyboard they follow whatever the player bound in their own [key bindings](../keybindings/), so if someone moves select to <kbd>J</kbd> the hint shows <kbd>J</kbd>. That is why they are not part of `InstructionalButtons`, which is keyed by a fixed `Control`. You get separate properties for them instead.
 
 ```cs
-// Add your own buttons.
+// Change the text next to the built in buttons.
+menu.SelectButtonText = "Buy";
+menu.BackButtonText = "Nevermind";
+
+// Hide the built in 'back' button.
+menu.ShowBackInstructionalButton = false;
+
+// Add your own buttons. These are fixed controls, they are not rebindable.
 menu.InstructionalButtons.Add(Control.CharacterWheel, "Right?!");
 menu.InstructionalButtons.Add(Control.Context, "Check");
 
-// Remove the default 'back' button.
-menu.InstructionalButtons.Remove(Control.FrontendCancel);
-
-// Replace the text of the default 'select' button.
-menu.InstructionalButtons[Control.FrontendAccept] = "Buy";
-
-// Or turn them off entirely for this menu.
+// Or turn them all off for this menu and draw your own.
 menu.EnableInstructionalButtons = false;
 ```
 
+They are drawn in this order: the built in select and back first, then everything in `InstructionalButtons`, then everything in `CustomInstructionalButtons`.
+
+:::caution[Coming from the older MenuAPI?]
+`InstructionalButtons` used to start with a `Control.FrontendAccept` and a `Control.FrontendCancel` entry in it. It now starts **empty** and is only for extra buttons you add yourself. Anything that did `menu.InstructionalButtons.Remove(Control.FrontendCancel)` or `menu.InstructionalButtons[Control.FrontendAccept] = "Buy"` should use `ShowBackInstructionalButton` and `SelectButtonText` instead.
+:::
+
 #### InstructionalButton
 
-Use `CustomInstructionalButtons` when a single `Control` is not enough, for example to show a button combination. These take a raw instructional button string instead of a `Control`, and they are drawn before the regular instructional buttons.
+Use `CustomInstructionalButtons` when a single `Control` is not enough, for example to show a button combination. These take a raw instructional button string instead of a `Control`.
 
 |Field|Type|Description|
 |-|-|-|

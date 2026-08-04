@@ -416,7 +416,15 @@ namespace MenuAPI
 
         private bool filterActive = false;
 
-        public Dictionary<Control, string> InstructionalButtons = new Dictionary<Control, string>() { { Control.FrontendAccept, GetLabelText("HUD_INPUT28") }, { Control.FrontendCancel, GetLabelText("HUD_INPUT53") } };
+        public bool ShowSelectInstructionalButton { get; set; } = true;
+        public bool ShowBackInstructionalButton { get; set; } = true;
+
+        public string SelectButtonText { get; set; } = GetLabelText("HUD_INPUT28");
+        public string BackButtonText { get; set; } = GetLabelText("HUD_INPUT53");
+
+        // Select and back are not in here because on keyboard they are key mappings the player can rebind,
+        // not a fixed Control. This dictionary is for whatever extra controls the resource wants to show.
+        public Dictionary<Control, string> InstructionalButtons = new Dictionary<Control, string>();
 
         public List<InstructionalButton> CustomInstructionalButtons = new List<InstructionalButton>();
 

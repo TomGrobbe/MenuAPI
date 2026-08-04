@@ -57,18 +57,15 @@ namespace MenuAPI
         public static bool PreventExitingMenu { get; set; } = false;
         public static bool DisableBackButton { get; set; } = false;
         public static bool SetDrawOrder { get; set; } = true;
-        public static bool MenuToggleKeyIsValid
-        {
-            get
-            {
-                int keyInt = (int)MenuToggleKey;
-                return keyInt >= 0 && keyInt <= 402; // 402 is max control value allowed after TU3788
-            }
-        }
-        public static Control MenuToggleKey { get; set; }
-            = Control.InteractionMenu;
 
         public static bool EnableMenuToggleKeyOnController { get; set; } = true;
+
+        /// <summary>
+        /// The key the menu toggle is bound to for players who have never rebound it themselves. Must be
+        /// set before the first tick, so from your resource's constructor. A FiveM keyboard input mapper
+        /// parameter id, for example "M" or "F5".
+        /// </summary>
+        public static string MenuToggleKeyDefault { get; set; } = "M";
 
         internal static Dictionary<MenuItem, Menu> MenuButtons { get; private set; } = new Dictionary<MenuItem, Menu>();
 
@@ -77,6 +74,10 @@ namespace MenuAPI
         internal static int _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
 
         private static int ManualTimerForGC = GetGameTimer();
+
+        // Whether the mouse button was pressed down while a menu was open, see IsMouseButtonUsed.
+        private static bool mouseSelectArmed = false;
+        private static bool mouseBackArmed = false;
 
         private static MenuAlignmentOption _alignment = MenuAlignmentOption.Left;
         public static MenuAlignmentOption MenuAlignment
@@ -101,7 +102,7 @@ namespace MenuAPI
 
                     // In case the value was being changed to be right aligned, notify the user properly.
                     if (value == MenuAlignmentOption.Right)
-                        Console.WriteLine($"[MenuAPI ({GetCurrentResourceName()})] Warning: Right aligned menus are not supported for aspect ratios 17:9 or 21:9, left aligned will be used instead.");
+                        API.Log.Error($"[MenuAPI ({GetCurrentResourceName()})] Right aligned menus are not supported for aspect ratios 17:9 or 21:9, left aligned will be used instead.");
                 }
             }
         }
@@ -117,6 +118,7 @@ namespace MenuAPI
         /// </summary>
         public void Initialize()
         {
+            LoopRegisterKeyBindings();
             LoopProcessMenus();
             LoopDrawInstructionalButtons();
             LoopProcessMainButtons();
@@ -125,6 +127,14 @@ namespace MenuAPI
             LoopMenuButtonsDisableChecks();
         }
 
+        // Waits a frame before registering. Every IScript is constructed before the first tick runs, so
+        // this is what lets a resource set MenuToggleKeyDefault without having to care whether its own
+        // script or MenuAPI's was constructed first.
+        async void LoopRegisterKeyBindings()
+        {
+            await API.Delay(0);
+            MenuKeyBindings.Register();
+        }
         async void LoopProcessMenus()
         {
             while (true)
@@ -284,8 +294,18 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessMainButtons()
         {
+            // Always drained, so a press that arrived while the menu could not act on it is dropped
+            // instead of firing later.
+            bool selectPressed = MenuKeyBindings.ConsumeSelect();
+            bool backPressed = MenuKeyBindings.ConsumeBack();
+
             if (!IsAnyMenuOpen())
             {
+                MenuKeyBindings.ClearHeld();
+                // Disarming here is what stops a mouse button that was already down before the menu
+                // opened from selecting or going back the moment it is released.
+                mouseSelectArmed = false;
+                mouseBackArmed = false;
                 return;
             }
             if (IsPauseMenuActive())
@@ -303,18 +323,31 @@ namespace MenuAPI
             {
                 return;
             }
-            await HandleMainNavigationButtons(currentMenu);
+            await HandleMainNavigationButtons(currentMenu, selectPressed, backPressed);
         }
 
-        private async Task HandleMainNavigationButtons(Menu currentMenu)
+        private async Task HandleMainNavigationButtons(Menu currentMenu, bool selectPressed, bool backPressed)
         {
+            bool onController = !IsUsingKeyboardAndMouse(2);
+
+            // On keyboard the mouse buttons are the only polled part left, everything else comes from the
+            // key mappings. The controller controls are gated so a keyboard press is not counted twice.
+            bool select = selectPressed || (!onController && IsMouseButtonUsed(Control.VehicleMouseControlOverride, ref mouseSelectArmed));
+            bool back = backPressed || (!onController && IsMouseButtonUsed(Control.Aim, ref mouseBackArmed));
+
+            if (onController)
+            {
+                select = select ||
+                    IsDisabledControlJustReleased(0, (int)Control.FrontendAccept) ||
+                    IsControlJustReleased(0, (int)Control.FrontendAccept);
+
+                back = back ||
+                    IsDisabledControlJustReleased(0, (int)Control.PhoneCancel) ||
+                    IsControlJustReleased(0, (int)Control.PhoneCancel);
+            }
+
             // Select / Enter
-            if (
-                IsDisabledControlJustReleased(0, (int)Control.FrontendAccept) ||
-                IsControlJustReleased(0, (int)Control.FrontendAccept) ||
-                IsDisabledControlJustReleased(0, (int)Control.VehicleMouseControlOverride) ||
-                IsControlJustReleased(0, (int)Control.VehicleMouseControlOverride)
-            )
+            if (select)
             {
                 if (currentMenu.Size > 0)
                 {
@@ -322,27 +355,39 @@ namespace MenuAPI
                 }
             }
             // Cancel / Go Back
-            else if (
-                !DisableBackButton &&
-                IsDisabledControlJustReleased(0, (int)Control.PhoneCancel)
-            )
+            else if (back && !DisableBackButton)
             {
                 // Wait for the next frame to make sure the "cinematic camera" button doesn't get "re-enabled" before the menu gets closed.
                 await API.Delay(0);
-                currentMenu.GoBack();
-            }
-            else if (
-                PreventExitingMenu && !DisableBackButton &&
-                IsDisabledControlJustReleased(0, (int)Control.PhoneCancel)
-            )
-            {
-                // if there's a parent menu, allow going back to that, but don't allow a 'top-level' menu to be closed.
-                if (currentMenu.ParentMenu != null)
+
+                // A submenu can always go back to its parent, a top level menu can only be closed when
+                // the resource allows it.
+                if (currentMenu.ParentMenu != null || !PreventExitingMenu)
                 {
                     currentMenu.GoBack();
                 }
-                await API.Delay(0);
             }
+        }
+
+        /// <summary>
+        /// Acts on a mouse button release, but only when the press that goes with it also happened while
+        /// the menu was open. Without that, aiming and then opening the menu would go back as soon as the
+        /// right mouse button is let go.
+        /// </summary>
+        private static bool IsMouseButtonUsed(Control control, ref bool armed)
+        {
+            if (IsDisabledControlJustPressed(0, (int)control) || IsControlJustPressed(0, (int)control))
+            {
+                armed = true;
+            }
+
+            if (!armed || !(IsDisabledControlJustReleased(0, (int)control) || IsControlJustReleased(0, (int)control)))
+            {
+                return false;
+            }
+
+            armed = false;
+            return true;
         }
 
         private void HandlePreventExit()
@@ -355,6 +400,23 @@ namespace MenuAPI
         }
 
         /// <summary>
+        /// Returns true when the scrollwheel should be ignored because the player is picking a weapon
+        /// with it (holding TAB, on foot).
+        /// </summary>
+        private static bool IsUsingWeaponWheel()
+        {
+            if (API.Players.Local.Ped.IsPedInAnyVehicle())
+            {
+                return false;
+            }
+            if (!IsControlPressed(0, (int)Control.SelectWeapon))
+            {
+                return false;
+            }
+            return IsControlPressed(0, (int)Control.SelectNextWeapon) || IsControlPressed(0, (int)Control.SelectPrevWeapon);
+        }
+
+        /// <summary>
         /// Returns true when one of the 'up' controls is currently pressed, only if the button can be active according to some conditions.
         /// </summary>
         /// <returns></returns>
@@ -364,27 +426,21 @@ namespace MenuAPI
             {
                 return false;
             }
-            // when the player is holding TAB, while not in a vehicle, and when the scrollwheel is being used, return false to prevent interferring with weapon selection.
-            if (!API.Players.Local.Ped.IsPedInAnyVehicle())
-            {
-                if (IsControlPressed(0, (int)Control.SelectWeapon))
-                {
-                    if (IsControlPressed(0, (int)Control.SelectNextWeapon) || IsControlPressed(0, (int)Control.SelectPrevWeapon))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            // return true if the scrollwheel up or the arrow up key is being used at this frame.
-            if (IsControlPressed(0, (int)Control.FrontendUp) ||
-                IsDisabledControlPressed(0, (int)Control.FrontendUp) ||
-                IsControlPressed(0, (int)Control.PhoneScrollBackward) ||
-                IsDisabledControlPressed(0, (int)Control.PhoneScrollBackward))
+            if (MenuKeyBindings.UpHeld)
             {
                 return true;
             }
-            return false;
+            if (!IsUsingWeaponWheel() && (
+                IsControlPressed(0, (int)Control.PhoneScrollBackward) ||
+                IsDisabledControlPressed(0, (int)Control.PhoneScrollBackward)))
+            {
+                return true;
+            }
+            // Only on a controller, otherwise a keyboard press would count twice: once through the key
+            // mapping and once here.
+            return !IsUsingKeyboardAndMouse(2) && (
+                IsControlPressed(0, (int)Control.FrontendUp) ||
+                IsDisabledControlPressed(0, (int)Control.FrontendUp));
         }
 
         /// <summary>
@@ -397,27 +453,57 @@ namespace MenuAPI
             {
                 return false;
             }
-            // when the player is holding TAB, while not in a vehicle, and when the scrollwheel is being used, return false to prevent interferring with weapon selection.
-            if (!API.Players.Local.Ped.IsPedInAnyVehicle())
-            {
-                if (IsControlPressed(0, (int)Control.SelectWeapon))
-                {
-                    if (IsControlPressed(0, (int)Control.SelectNextWeapon) || IsControlPressed(0, (int)Control.SelectPrevWeapon))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            // return true if the scrollwheel down or the arrow down key is being used at this frame.
-            if (IsControlPressed(0, (int)Control.FrontendDown) ||
-                IsDisabledControlPressed(0, (int)Control.FrontendDown) ||
-                IsControlPressed(0, (int)Control.PhoneScrollForward) ||
-                IsDisabledControlPressed(0, (int)Control.PhoneScrollForward))
+            if (MenuKeyBindings.DownHeld)
             {
                 return true;
             }
-            return false;
+            if (!IsUsingWeaponWheel() && (
+                IsControlPressed(0, (int)Control.PhoneScrollForward) ||
+                IsDisabledControlPressed(0, (int)Control.PhoneScrollForward)))
+            {
+                return true;
+            }
+            return !IsUsingKeyboardAndMouse(2) && (
+                IsControlPressed(0, (int)Control.FrontendDown) ||
+                IsDisabledControlPressed(0, (int)Control.FrontendDown));
+        }
+
+        /// <summary>
+        /// Returns true when one of the 'left' controls is currently pressed, only if the button can be active according to some conditions.
+        /// </summary>
+        /// <returns></returns>
+        private bool IsLeftPressed()
+        {
+            if (!AreMenuButtonsEnabled)
+            {
+                return false;
+            }
+            if (MenuKeyBindings.LeftHeld)
+            {
+                return true;
+            }
+            return !IsUsingKeyboardAndMouse(2) && (
+                IsControlPressed(0, (int)Control.PhoneLeft) ||
+                IsDisabledControlPressed(0, (int)Control.PhoneLeft));
+        }
+
+        /// <summary>
+        /// Returns true when one of the 'right' controls is currently pressed, only if the button can be active according to some conditions.
+        /// </summary>
+        /// <returns></returns>
+        private bool IsRightPressed()
+        {
+            if (!AreMenuButtonsEnabled)
+            {
+                return false;
+            }
+            if (MenuKeyBindings.RightHeld)
+            {
+                return true;
+            }
+            return !IsUsingKeyboardAndMouse(2) && (
+                IsControlPressed(0, (int)Control.PhoneRight) ||
+                IsDisabledControlPressed(0, (int)Control.PhoneRight));
         }
 
         /// <summary>
@@ -426,36 +512,52 @@ namespace MenuAPI
         /// <returns></returns>
         private async Task ProcessToggleMenuButton()
         {
-            if (!MenuToggleKeyIsValid)
+            // Drained every frame, so a press from while the menu could not open does not open it later.
+            bool togglePressed = MenuKeyBindings.ConsumeToggle();
+
+            if (IsPauseMenuActive() || IsPauseMenuRestarting() || !IsScreenFadedIn() || IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
             {
-                await API.Delay(1_500);
                 return;
             }
 
-            await ProcessToggleMenuButtonFiveM();
-        }
-        private async Task ProcessToggleMenuButtonFiveM()
-        {
-            if (!IsPauseMenuActive() && !IsPauseMenuRestarting() && IsScreenFadedIn() && !IsPlayerSwitchInProgress() && !API.Players.Local.IsDead && !DisableMenuButtons)
+            if (IsAnyMenuOpen())
             {
-                if (IsAnyMenuOpen())
+                if (togglePressed && !PreventExitingMenu)
                 {
-                    DisableMenuKeyThisFrame();
+                    GetCurrentMenu()?.CloseMenu();
                 }
-                else
-                {
-                    if (!IsUsingKeyboardAndMouse(2))
-                    {
-                        if (!EnableMenuToggleKeyOnController)
-                            return;
+                return;
+            }
 
-                        await HandleMenuToggleKeyForController();
-                    }
-                    else
-                    {
-                        HandleMenuToggleKeyForKeyboard();
-                    }
-                }
+            if (DontOpenAnyMenu)
+            {
+                return;
+            }
+
+            if (togglePressed)
+            {
+                OpenMainMenu();
+                return;
+            }
+
+            if (!IsUsingKeyboardAndMouse(2) && EnableMenuToggleKeyOnController)
+            {
+                await HandleMenuToggleKeyForController();
+            }
+        }
+
+        /// <summary>
+        /// Opens <see cref="MainMenu"/>, or the first registered menu when no main menu is set.
+        /// </summary>
+        private static void OpenMainMenu()
+        {
+            if (MainMenu != null)
+            {
+                MainMenu.OpenMenu();
+            }
+            else if (Menus.Count > 0)
+            {
+                Menus[0].OpenMenu();
             }
         }
 
@@ -488,23 +590,13 @@ namespace MenuAPI
             }
 
             // Check if the Go Left controls are pressed.
-            else if (
-                AreMenuButtonsEnabled && (
-                    IsDisabledControlJustPressed(0, (int)Control.PhoneLeft) ||
-                    IsControlJustPressed(0, (int)Control.PhoneLeft)
-                )
-            )
+            else if (IsLeftPressed())
             {
                 await HandleLeftNavigation(currentMenu);
             }
 
             // Check if the Go Right controls are pressed.
-            else if (
-                AreMenuButtonsEnabled && (
-                    IsDisabledControlJustPressed(0, (int)Control.PhoneRight) ||
-                    IsControlJustPressed(0, (int)Control.PhoneRight)
-                )
-            )
+            else if (IsRightPressed())
             {
                 await HandleRightNavigation(currentMenu);
             }
@@ -512,14 +604,13 @@ namespace MenuAPI
 
         private async Task HandleRightNavigation(Menu currentMenu)
         {
-            var item = currentMenu.GetMenuItems()[currentMenu.CurrentIndex];
-            if (item.Enabled)
+            if (currentMenu.GetCurrentMenuItem() is MenuItem item && item.Enabled)
             {
                 currentMenu.GoRight();
                 var time = GetGameTimer();
                 var times = 0;
                 var delay = 200;
-                while ((IsDisabledControlPressed(0, (int)Control.PhoneRight) || IsControlPressed(0, (int)Control.PhoneRight)) && GetCurrentMenu() != null && AreMenuButtonsEnabled)
+                while (IsRightPressed() && GetCurrentMenu() != null)
                 {
                     currentMenu = GetCurrentMenu();
                     if (GetGameTimer() - time > delay)
@@ -557,13 +648,7 @@ namespace MenuAPI
                 var time = GetGameTimer();
                 var times = 0;
                 var delay = 200;
-                while (
-                    GetCurrentMenu() != null &&
-                    AreMenuButtonsEnabled && (
-                        IsDisabledControlPressed(0, (int)Control.PhoneLeft) ||
-                        IsControlPressed(0, (int)Control.PhoneLeft)
-                    )
-                )
+                while (IsLeftPressed() && GetCurrentMenu() != null)
                 {
                     currentMenu = GetCurrentMenu();
                     if (GetGameTimer() - time > delay)
@@ -631,32 +716,10 @@ namespace MenuAPI
             }
         }
 
-        private void HandleMenuToggleKeyForKeyboard()
-        {
-            if (
-                (IsControlJustPressed(0, (int)MenuToggleKey) || IsDisabledControlJustPressed(0, (int)MenuToggleKey)) &&
-                !IsPauseMenuActive() &&
-                !API.Players.Local.IsDead &&
-                !IsPlayerSwitchInProgress() &&
-                !DontOpenAnyMenu &&
-                IsScreenFadedIn()
-            )
-            {
-                if (!Menus.Any())
-                {
-                    return;
-                }
-                if (MainMenu != null)
-                {
-                    MainMenu.OpenMenu();
-                }
-                else
-                {
-                    Menus.First().OpenMenu();
-                }
-            }
-        }
-
+        /// <summary>
+        /// The controller toggle is deliberately not a key mapping: it stays the back/select button, held
+        /// for 400ms, and can not be rebound.
+        /// </summary>
         private async Task HandleMenuToggleKeyForController()
         {
             int tmpTimer = GetGameTimer();
@@ -664,41 +727,10 @@ namespace MenuAPI
             {
                 if (GetGameTimer() - tmpTimer > 400)
                 {
-                    if (MainMenu != null)
-                    {
-                        MainMenu.OpenMenu();
-                    }
-                    else
-                    {
-                        if (Menus.Count > 0)
-                        {
-                            Menus[0].OpenMenu();
-                        }
-                    }
+                    OpenMainMenu();
                     break;
                 }
                 await API.Delay(0);
-            }
-        }
-
-        private void DisableMenuKeyThisFrame()
-        {
-            if (!MenuToggleKeyIsValid)
-            {
-                return;
-            }
-
-            DisableControlAction(0, (int)MenuToggleKey, false);
-            if (IsUsingKeyboardAndMouse(2))
-            {
-                if ((IsControlJustPressed(0, (int)MenuToggleKey) || IsDisabledControlJustPressed(0, (int)MenuToggleKey)) && !PreventExitingMenu)
-                {
-                    var menu = GetCurrentMenu();
-                    if (menu != null)
-                    {
-                        menu.CloseMenu();
-                    }
-                }
             }
         }
 
@@ -809,6 +841,10 @@ namespace MenuAPI
             DisablePhoneAndArrowKeysInputs();
             DisableAttackControls();
 
+            // Both the default 'M' toggle key and the controller toggle button sit on this control, so
+            // the game must not react to it while a menu is open.
+            DisableControlAction(0, (int)Control.InteractionMenu, false);
+
             // When in a vehicle
             if (API.Players.Local.Ped.IsPedInAnyVehicle())
             {
@@ -825,7 +861,7 @@ namespace MenuAPI
         private static void DisableGenericControls(Menu currMenu)
         {
             // Disable Gamepad/Controller Specific controls:
-            if (IsUsingKeyboardAndMouse(2))
+            if (!IsUsingKeyboardAndMouse(2))
             {
                 DisableControlAction(0, (int)Control.MultiplayerInfo, false);
                 // when in a vehicle.
@@ -855,7 +891,9 @@ namespace MenuAPI
             {
                 if (currentItem is MenuSliderItem || currentItem is MenuListItem || currentItem is MenuDynamicListItem)
                 {
-                    if (IsUsingKeyboardAndMouse(2))
+                    // Controller only. Disabling it on keyboard would break the TAB + scrollwheel weapon
+                    // wheel check, because a disabled control never reads as pressed.
+                    if (!IsUsingKeyboardAndMouse(2))
                     {
                         DisableControlAction(0, (int)Control.SelectWeapon, false);
                     }
@@ -1005,31 +1043,27 @@ namespace MenuAPI
             EndScaleformMovieMethod();
 
 
-            for (int i = 0; i < menu.InstructionalButtons.Count; i++)
-            {
-                string text = menu.InstructionalButtons.ElementAt(i).Value;
-                Control control = menu.InstructionalButtons.ElementAt(i).Key;
+            int slot = 0;
 
-                BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
-                ScaleformMovieMethodAddParamInt(i);
-                string buttonName = GetControlInstructionalButton(0, (int)control, true);
-                PushScaleformMovieMethodParameterString(buttonName);
-                PushScaleformMovieMethodParameterString(text);
-                EndScaleformMovieMethod();
+            if (menu.ShowSelectInstructionalButton)
+            {
+                SetInstructionalButtonSlot(slot++, MenuKeyBindings.GetSelectButton(), menu.SelectButtonText);
+            }
+            if (menu.ShowBackInstructionalButton)
+            {
+                SetInstructionalButtonSlot(slot++, MenuKeyBindings.GetBackButton(), menu.BackButtonText);
             }
 
-            // Use custom instructional buttons FIRST if they're present.
-            if (menu.CustomInstructionalButtons.Count > 0)
+            for (int i = 0; i < menu.InstructionalButtons.Count; i++)
             {
-                for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)
-                {
-                    Menu.InstructionalButton button = menu.CustomInstructionalButtons[i];
-                    BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
-                    ScaleformMovieMethodAddParamInt(i + menu.InstructionalButtons.Count);
-                    PushScaleformMovieMethodParameterString(button.controlString);
-                    PushScaleformMovieMethodParameterString(button.instructionText);
-                    EndScaleformMovieMethod();
-                }
+                KeyValuePair<Control, string> button = menu.InstructionalButtons.ElementAt(i);
+                SetInstructionalButtonSlot(slot++, GetControlInstructionalButton(0, (int)button.Key, true), button.Value);
+            }
+
+            for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)
+            {
+                Menu.InstructionalButton button = menu.CustomInstructionalButtons[i];
+                SetInstructionalButtonSlot(slot++, button.controlString, button.instructionText);
             }
 
             BeginScaleformMovieMethod(_scale, "DRAW_INSTRUCTIONAL_BUTTONS");
@@ -1037,6 +1071,15 @@ namespace MenuAPI
             EndScaleformMovieMethod();
 
             DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
+        }
+
+        private static void SetInstructionalButtonSlot(int slot, string buttonString, string text)
+        {
+            BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
+            ScaleformMovieMethodAddParamInt(slot);
+            PushScaleformMovieMethodParameterString(buttonString);
+            PushScaleformMovieMethodParameterString(text);
+            EndScaleformMovieMethod();
         }
 
         private static void DisposeInstructionalButtonsScaleform()

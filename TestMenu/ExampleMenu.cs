@@ -247,6 +247,172 @@ namespace TestMenu
             MenuItem vehicleStats = new MenuItem("Vehicle stats", "Demo menu for vehicle stats components");
             menu.AddMenuItem(vehicleStats);
             MenuController.BindMenuItem(menu, menu5, vehicleStats);
+
+            // Create a menu to play with the built in select/back instructional buttons. Those two follow
+            // whatever the player bound in FiveM's own key bindings screen, so rebinding 'Menu select'
+            // there should immediately change the button shown at the bottom of the screen.
+            Menu menu6 = new Menu("Key Bindings", "Instructional buttons");
+            MenuCheckboxItem showSelectButton = new MenuCheckboxItem(
+                "Show the 'select' button",
+                "Toggles ShowSelectInstructionalButton for this menu.",
+                menu6.ShowSelectInstructionalButton
+            );
+            MenuCheckboxItem showBackButton = new MenuCheckboxItem(
+                "Show the 'back' button",
+                "Toggles ShowBackInstructionalButton for this menu.",
+                menu6.ShowBackInstructionalButton
+            );
+            List<string> buttonTexts = new List<string>() { "Select", "Buy", "Confirm", "Do the thing" };
+            MenuListItem selectButtonText = new MenuListItem(
+                "'Select' button text",
+                buttonTexts,
+                0,
+                "Changes SelectButtonText. The button itself still follows the player's own key binding."
+            );
+            MenuItem bindingInfo = new MenuItem(
+                "How to rebind these",
+                "Every keyboard menu control is a FiveM key binding. Open the pause menu, go to Settings, " +
+                "Key Bindings, and look for this resource. The menu opens with ~r~M~s~ by default."
+            )
+            {
+                Enabled = false,
+                LeftIcon = MenuItem.Icon.LOCK
+            };
+            menu6.AddMenuItem(bindingInfo);
+            menu6.AddMenuItem(showSelectButton);
+            menu6.AddMenuItem(showBackButton);
+            menu6.AddMenuItem(selectButtonText);
+
+            menu6.OnCheckboxChange += (_menu, _item, _index, _checked) =>
+            {
+                if (_item == showSelectButton)
+                {
+                    _menu.ShowSelectInstructionalButton = _checked;
+                }
+                else if (_item == showBackButton)
+                {
+                    _menu.ShowBackInstructionalButton = _checked;
+                }
+            };
+            menu6.OnListIndexChange += (_menu, _listItem, _oldIndex, _newIndex, _itemIndex) =>
+            {
+                if (_listItem == selectButtonText)
+                {
+                    _menu.SelectButtonText = buttonTexts[_newIndex];
+                }
+            };
+
+            MenuController.AddSubmenu(menu, menu6);
+            MenuItem keyBindings = new MenuItem("Key bindings", "Demo menu for the select and back instructional buttons.");
+            menu.AddMenuItem(keyBindings);
+            MenuController.BindMenuItem(menu, menu6, keyBindings);
+
+            // Create a menu that shows off SortMenuItems, FilterMenuItems and ResetFilter. The action
+            // buttons live in the same menu as the produce, so the sort and filter callbacks have to keep
+            // them in place, otherwise you would sort away the buttons you need to press.
+            Menu menu7 = new Menu("Sorting & Filtering", "Fruit and veg");
+            List<MenuItem> produce = new List<MenuItem>();
+            List<MenuItem> fruits = new List<MenuItem>();
+            List<MenuItem> vegetables = new List<MenuItem>();
+
+            // Deliberately out of order so sorting visibly does something.
+            foreach (var name in new string[] { "Peach", "Apple", "Mango", "Cherry", "Banana", "Strawberry", "Orange" })
+            {
+                var fruitItem = new MenuItem(name, $"{name} is a fruit.") { Label = "Fruit", LeftIcon = MenuItem.Icon.STAR };
+                fruits.Add(fruitItem);
+                produce.Add(fruitItem);
+            }
+            foreach (var name in new string[] { "Onion", "Carrot", "Spinach", "Broccoli", "Leek", "Potato", "Cucumber" })
+            {
+                var vegItem = new MenuItem(name, $"{name} is a vegetable.") { Label = "Vegetable", LeftIcon = MenuItem.Icon.TICK };
+                vegetables.Add(vegItem);
+                produce.Add(vegItem);
+            }
+
+            MenuItem sortAscending = new MenuItem("Sort A to Z", "Sorts the produce by name. Note that sorting also clears an active filter.");
+            MenuItem sortDescending = new MenuItem("Sort Z to A", "Sorts the produce by name, backwards.");
+            MenuItem randomizeOrder = new MenuItem("Randomize the order", "Shuffles the produce back into a random order.");
+            MenuItem onlyFruits = new MenuItem("Show only fruit", "Filters the list down to the fruit.") { Label = "Filter" };
+            MenuItem onlyVegetables = new MenuItem("Show only vegetables", "Filters the list down to the vegetables.") { Label = "Filter" };
+            MenuItem clearFilter = new MenuItem("Show everything", "Clears the filter so all the produce comes back.") { Label = "Filter" };
+
+            List<MenuItem> actions = new List<MenuItem>() { sortAscending, sortDescending, randomizeOrder, onlyFruits, onlyVegetables, clearFilter };
+
+            // ReferenceEquals rather than Contains, because List<T>.Contains needs a default equality
+            // comparer and those are not available on the FiveM client.
+            int ActionOrder(MenuItem item) => actions.FindIndex(a => ReferenceEquals(a, item));
+            int ProduceOrder(MenuItem item) => produce.FindIndex(p => ReferenceEquals(p, item));
+            bool IsIn(List<MenuItem> list, MenuItem item) => list.FindIndex(i => ReferenceEquals(i, item)) >= 0;
+
+            // Keeps the action buttons pinned to the top in their original order, and hands everything
+            // else to the caller's comparison.
+            void SortProduce(Comparison<MenuItem> compareProduce)
+            {
+                menu7.SortMenuItems((a, b) =>
+                {
+                    int aAction = ActionOrder(a);
+                    int bAction = ActionOrder(b);
+                    if (aAction >= 0 || bAction >= 0)
+                    {
+                        return (aAction < 0 ? int.MaxValue : aAction).CompareTo(bAction < 0 ? int.MaxValue : bAction);
+                    }
+                    return compareProduce(a, b);
+                });
+                menu7.RefreshIndex();
+            }
+
+            foreach (var actionItem in actions)
+            {
+                menu7.AddMenuItem(actionItem);
+            }
+            foreach (var produceItem in produce)
+            {
+                menu7.AddMenuItem(produceItem);
+            }
+
+            Random shuffleRandom = new Random();
+            menu7.OnItemSelect += (_menu, _item, _index) =>
+            {
+                if (ReferenceEquals(_item, sortAscending))
+                {
+                    SortProduce((a, b) => string.Compare(a.Text, b.Text, StringComparison.OrdinalIgnoreCase));
+                }
+                else if (ReferenceEquals(_item, sortDescending))
+                {
+                    SortProduce((a, b) => string.Compare(b.Text, a.Text, StringComparison.OrdinalIgnoreCase));
+                }
+                else if (ReferenceEquals(_item, randomizeOrder))
+                {
+                    // Shuffle the backing list, then sort by position in it. Sorting with a comparison that
+                    // returns random values would throw, because List.Sort rejects inconsistent comparers.
+                    for (int i = produce.Count - 1; i > 0; i--)
+                    {
+                        int j = shuffleRandom.Next(i + 1);
+                        (produce[i], produce[j]) = (produce[j], produce[i]);
+                    }
+                    SortProduce((a, b) => ProduceOrder(a).CompareTo(ProduceOrder(b)));
+                }
+                else if (ReferenceEquals(_item, onlyFruits))
+                {
+                    _menu.FilterMenuItems(i => ActionOrder(i) >= 0 || IsIn(fruits, i));
+                }
+                else if (ReferenceEquals(_item, onlyVegetables))
+                {
+                    _menu.FilterMenuItems(i => ActionOrder(i) >= 0 || IsIn(vegetables, i));
+                }
+                else if (ReferenceEquals(_item, clearFilter))
+                {
+                    _menu.ResetFilter();
+                }
+            };
+
+            MenuController.AddSubmenu(menu, menu7);
+            MenuItem sortingAndFiltering = new MenuItem("Sorting & filtering", "Demo menu for SortMenuItems, FilterMenuItems and ResetFilter.")
+            {
+                Label = "→→→"
+            };
+            menu.AddMenuItem(sortingAndFiltering);
+            MenuController.BindMenuItem(menu, menu7, sortingAndFiltering);
             /*--------------
              Event handlers
             --------------*/
@@ -254,7 +420,7 @@ namespace TestMenu
             menu.OnCheckboxChange += (_menu, _item, _index, _checked) =>
             {
                 // Code in here gets executed whenever a checkbox is toggled.
-                Console.WriteLine($"OnCheckboxChange: [{_menu}, {_item}, {_index}, {_checked}]");
+                API.Log.Info($"OnCheckboxChange: [{_menu}, {_item}, {_index}, {_checked}]");
                 // If the align-menu checkbox is toggled, toggle the menu alignment.
                 if (_item == box)
                 {
@@ -272,61 +438,61 @@ namespace TestMenu
             menu.OnItemSelect += (_menu, _item, _index) =>
             {
                 // Code in here would get executed whenever an item is pressed.
-                Console.WriteLine($"OnItemSelect: [{_menu}, {_item}, {_index}]");
+                API.Log.Info($"OnItemSelect: [{_menu}, {_item}, {_index}]");
             };
 
             menu.OnIndexChange += (_menu, _oldItem, _newItem, _oldIndex, _newIndex) =>
             {
                 // Code in here would get executed whenever the up or down key is pressed and the index of the menu is changed.
-                Console.WriteLine($"OnIndexChange: [{_menu}, {_oldItem}, {_newItem}, {_oldIndex}, {_newIndex}]");
+                API.Log.Info($"OnIndexChange: [{_menu}, {_oldItem}, {_newItem}, {_oldIndex}, {_newIndex}]");
             };
 
             menu.OnListIndexChange += (_menu, _listItem, _oldIndex, _newIndex, _itemIndex) =>
             {
                 // Code in here would get executed whenever the selected value of a list item changes (when left/right key is pressed).
-                Console.WriteLine($"OnListIndexChange: [{_menu}, {_listItem}, {_oldIndex}, {_newIndex}, {_itemIndex}]");
+                API.Log.Info($"OnListIndexChange: [{_menu}, {_listItem}, {_oldIndex}, {_newIndex}, {_itemIndex}]");
             };
 
             menu.OnListItemSelect += (_menu, _listItem, _listIndex, _itemIndex) =>
             {
                 // Code in here would get executed whenever a list item is pressed.
-                Console.WriteLine($"OnListItemSelect: [{_menu}, {_listItem}, {_listIndex}, {_itemIndex}]");
+                API.Log.Info($"OnListItemSelect: [{_menu}, {_listItem}, {_listIndex}, {_itemIndex}]");
             };
 
             menu.OnSliderPositionChange += (_menu, _sliderItem, _oldPosition, _newPosition, _itemIndex) =>
             {
                 // Code in here would get executed whenever the position of a slider is changed (when left/right key is pressed).
-                Console.WriteLine($"OnSliderPositionChange: [{_menu}, {_sliderItem}, {_oldPosition}, {_newPosition}, {_itemIndex}]");
+                API.Log.Info($"OnSliderPositionChange: [{_menu}, {_sliderItem}, {_oldPosition}, {_newPosition}, {_itemIndex}]");
             };
 
             menu.OnSliderItemSelect += (_menu, _sliderItem, _sliderPosition, _itemIndex) =>
             {
                 // Code in here would get executed whenever a slider item is pressed.
-                Console.WriteLine($"OnSliderItemSelect: [{_menu}, {_sliderItem}, {_sliderPosition}, {_itemIndex}]");
+                API.Log.Info($"OnSliderItemSelect: [{_menu}, {_sliderItem}, {_sliderPosition}, {_itemIndex}]");
             };
 
             menu.OnMenuClose += (_menu) =>
             {
                 // Code in here gets triggered whenever the menu is closed.
-                Console.WriteLine($"OnMenuClose: [{_menu}]");
+                API.Log.Info($"OnMenuClose: [{_menu}]");
             };
 
             menu.OnMenuOpen += (_menu) =>
             {
                 // Code in here gets triggered whenever the menu is opened.
-                Console.WriteLine($"OnMenuOpen: [{_menu}]");
+                API.Log.Info($"OnMenuOpen: [{_menu}]");
             };
 
             menu.OnDynamicListItemCurrentItemChange += (_menu, _dynamicListItem, _oldCurrentItem, _newCurrentItem) =>
             {
                 // Code in here would get executed whenever the value of the current item of a dynamic list item changes.
-                Console.WriteLine($"OnDynamicListItemCurrentItemChange: [{_menu}, {_dynamicListItem}, {_oldCurrentItem}, {_newCurrentItem}]");
+                API.Log.Info($"OnDynamicListItemCurrentItemChange: [{_menu}, {_dynamicListItem}, {_oldCurrentItem}, {_newCurrentItem}]");
             };
 
             menu.OnDynamicListItemSelect += (_menu, _dynamicListItem, _currentItem) =>
             {
                 // Code in here would get executed whenever a dynamic list item is pressed.
-                Console.WriteLine($"OnDynamicListItemSelect: [{_menu}, {_dynamicListItem}, {_currentItem}]");
+                API.Log.Info($"OnDynamicListItemSelect: [{_menu}, {_dynamicListItem}, {_currentItem}]");
             };
         }
     }

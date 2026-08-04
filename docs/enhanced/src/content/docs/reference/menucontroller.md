@@ -25,8 +25,10 @@ public class MyMenus : IScript
     {
         // Global settings. These can be changed at any time.
         MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
-        MenuController.MenuToggleKey = Control.SelectCharacterMichael;
         MenuController.EnableMenuToggleKeyOnController = false;
+
+        // The key that opens the menu, for players who have not rebound it themselves.
+        MenuController.MenuToggleKeyDefault = "F5";
 
         // The first menu you register becomes MenuController.MainMenu, which is
         // the menu that opens when the user presses the toggle key.
@@ -62,9 +64,8 @@ All properties are **static**.
 |MainMenu|Menu|Null|The menu that is opened when the user presses the [menu toggle key](#the-menu-toggle-key). This is set automatically to the first menu you register, but you can change it at any time. When it is null, the first registered menu is opened instead.|Yes|
 |Menus|List&lt;[Menu](../menu/)&gt;|(empty)|(Getter only) Every menu that has been registered with [AddMenu()](#addmenumenu-menu) or [AddSubmenu()](#addsubmenumenu-parent-menu-child).|Yes|
 |MenuAlignment|[MenuAlignmentOption](#menu-alignment)|MenuAlignmentOption.Left|Whether menus are drawn on the left or the right side of the screen. See [Menu alignment](#menu-alignment).|Yes|
-|MenuToggleKey|Control|Control.InteractionMenu|The control that opens [MainMenu](#properties). See [The menu toggle key](#the-menu-toggle-key).|Yes|
-|MenuToggleKeyIsValid|boolean|true|(Getter only) Whether the current `MenuToggleKey` is a control the game accepts (0 - 402). When this is false, the toggle key is ignored entirely.|Yes|
-|EnableMenuToggleKeyOnController|boolean|true|Whether the menu can also be toggled with a controller. The controller binding can not be changed: it is always the back/select button, held for 400ms.|Yes|
+|MenuToggleKeyDefault|string|"M"|The key that opens the menu for players who have never rebound it themselves. Set it in your constructor. See [Changing the default toggle key](../keybindings/#changing-the-default-toggle-key).|Yes|
+|EnableMenuToggleKeyOnController|boolean|true|Whether the menu can also be toggled with a controller. The controller binding can not be changed: it is always the back/select button, held for 400ms. See [Key bindings](../keybindings/).|Yes|
 |DisableMenuButtons|boolean|false|When true, all menu controls are ignored. The menu stays on screen, it just does not respond to input. Useful while you are doing something that should not be interrupted.|Yes|
 |AreMenuButtonsEnabled|boolean|false|(Getter only) Whether menu controls are currently being processed. This is false when no menu is open, the game is paused, the screen is faded out, a player switch is in progress, the player is dead, or `DisableMenuButtons` is true.|Yes|
 |DontOpenAnyMenu|boolean|false|When true, menus stop being drawn and can not be opened. Menus with [IgnoreDontOpenMenus](../menu/#properties) set to true are excluded.|Yes|
@@ -279,19 +280,22 @@ Menu alignment is only available in FiveM.
 
 ### The menu toggle key
 
-MenuAPI handles all menu controls for you, including one key that opens [MainMenu](#properties). By default that is `Control.InteractionMenu` (the interaction menu key, <kbd>M</kbd> on a default keyboard layout).
+MenuAPI handles all menu controls for you, including one key that opens [MainMenu](#properties). On a keyboard that key defaults to <kbd>M</kbd>, and **the player can rebind it themselves** from FiveM's **Settings, Key Bindings** screen. See [Key bindings](../keybindings/) for the full list and how it works.
 
 ```cs
-// Use a different key.
-MenuController.MenuToggleKey = Control.SelectCharacterMichael;
-
 // Decide which menu the toggle key opens.
 MenuController.MainMenu = myOtherMenu;
+
+// Pick a different default key. Only affects players who never rebound it.
+MenuController.MenuToggleKeyDefault = "F5";
 ```
 
 - Pressing the toggle key while a menu is open closes that menu, unless [PreventExitingMenu](#properties) is true.
-- Only controls in the range 0 - 402 are accepted. If you set anything else, [MenuToggleKeyIsValid](#properties) becomes false and the toggle key is ignored entirely (all other menu controls keep working).
 - When [MainMenu](#properties) is null, the first registered menu is opened instead. If no menus are registered at all, nothing happens.
 - The controller binding can **not** be changed: it is always the interaction menu button, held for 400ms. Set [EnableMenuToggleKeyOnController](#properties) to false to disable it.
 
-If you would rather open menus yourself, ignore the toggle key and call [Menu.OpenMenu()](../menu/#openmenu) from your own command or key mapping.
+If you would rather open menus yourself, call [Menu.OpenMenu()](../menu/#openmenu) from your own command or key mapping.
+
+:::caution[Coming from the older MenuAPI?]
+`MenuController.MenuToggleKey` and `MenuController.MenuToggleKeyIsValid` are **gone**. Which key opens the menu is now the player's choice, not the resource's, so there is nothing to set. Delete any code that assigned them.
+:::
