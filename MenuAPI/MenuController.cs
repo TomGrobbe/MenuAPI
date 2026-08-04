@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Client.Extensions;
+using CitizenFX.FiveM.Shared.Data;
 using CitizenFX.FiveM.Shared.Script;
 
 using static CitizenFX.FiveM.Client.Native;
@@ -1087,7 +1088,7 @@ public class MenuController : IScript
     {
         if (HasScaleformMovieLoaded(_scale))
         {
-            SetScaleformMovieAsNoLongerNeeded(out _scale);
+            SetScaleformMovieAsNoLongerNeeded(new Ref<int>(ref _scale));
         }
     }
 }
