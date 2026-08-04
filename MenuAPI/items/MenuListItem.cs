@@ -1,117 +1,108 @@
 ﻿using System.Collections.Generic;
 
-using CitizenFX.Core;
-using CitizenFX.FiveM.Client;
-using CitizenFX.FiveM.Client.Extensions;
 using static CitizenFX.FiveM.Client.Native;
 
-namespace MenuAPI
+namespace MenuAPI;
+
+public class MenuListItem(string text, List<string> items, int index, string description) : MenuItem(text, description)
 {
-    public class MenuListItem : MenuItem
+    public int ListIndex { get; set; } = index;
+    public List<string> ListItems { get; set; } = items;
+    public bool HideArrowsWhenNotSelected { get; set; } = false;
+    public bool ShowOpacityPanel { get; set; } = false;
+    public bool ShowColorPanel { get; set; } = false;
+    public ColorPanelType ColorPanelColorType = ColorPanelType.Hair;
+    public enum ColorPanelType
     {
-        public int ListIndex { get; set; } = 0;
-        public List<string> ListItems { get; set; } = new List<string>();
-        public bool HideArrowsWhenNotSelected { get; set; } = false;
-        public bool ShowOpacityPanel { get; set; } = false;
-        public bool ShowColorPanel { get; set; } = false;
-        public ColorPanelType ColorPanelColorType = ColorPanelType.Hair;
-        public enum ColorPanelType
-        {
-            Hair,
-            Makeup
-        }
-        public int ItemsCount => ListItems.Count;
+        Hair,
+        Makeup
+    }
+    public int ItemsCount => ListItems.Count;
 
-        public string GetCurrentSelection()
+    public string GetCurrentSelection()
+    {
+        if (ItemsCount > 0 && ListIndex >= 0 && ListIndex < ItemsCount)
         {
-            if (ItemsCount > 0 && ListIndex >= 0 && ListIndex < ItemsCount)
-            {
-                return ListItems[ListIndex];
-            }
-            return null;
+            return ListItems[ListIndex];
         }
+        return null;
+    }
 
-        public MenuListItem(string text, List<string> items, int index) : this(text, items, index, null) { }
-        public MenuListItem(string text, List<string> items, int index, string description) : base(text, description)
+    public MenuListItem(string text, List<string> items, int index) : this(text, items, index, null) { }
+
+    internal override void Draw(int indexOffset)
+    {
+        if (ItemsCount < 1)
         {
-            ListItems = items;
-            ListIndex = index;
+            // Add a dummy item to prevent the other while loops from freezing the game.
+            ListItems.Add("N/A");
         }
 
-        internal override void Draw(int indexOffset)
+        while (ListIndex < 0)
         {
-            if (ItemsCount < 1)
-            {
-                // Add a dummy item to prevent the other while loops from freezing the game.
-                ListItems.Add("N/A");
-            }
+            ListIndex += ItemsCount;
+        }
 
-            while (ListIndex < 0)
-            {
-                ListIndex += ItemsCount;
-            }
+        while (ListIndex >= ItemsCount)
+        {
+            ListIndex -= ItemsCount;
+        }
 
-            while (ListIndex >= ItemsCount)
-            {
-                ListIndex -= ItemsCount;
-            }
+        if (HideArrowsWhenNotSelected && !Selected)
+        {
+            Label = GetCurrentSelection() ?? "~r~N/A";
+        }
+        else
+        {
+            Label = $"~s~← {GetCurrentSelection() ?? "~r~N/A~s~"} ~s~→";
+        }
 
-            if (HideArrowsWhenNotSelected && !Selected)
+        base.Draw(indexOffset);
+    }
+
+    internal override void GoRight()
+    {
+        if (ItemsCount > 0)
+        {
+            int oldIndex = ListIndex;
+            int newIndex = oldIndex;
+            if (ListIndex >= ItemsCount - 1)
             {
-                Label = GetCurrentSelection() ?? "~r~N/A";
+                newIndex = 0;
             }
             else
             {
-                Label = $"~s~← {GetCurrentSelection() ?? "~r~N/A~s~"} ~s~→";
+                newIndex++;
             }
-
-            base.Draw(indexOffset);
+            ListIndex = newIndex;
+            ParentMenu.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, newIndex, Index);
+            PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
+    }
 
-        internal override void GoRight()
+    internal override void GoLeft()
+    {
+        if (ItemsCount > 0)
         {
-            if (ItemsCount > 0)
+            int oldIndex = ListIndex;
+            int newIndex = oldIndex;
+            if (ListIndex < 1)
             {
-                int oldIndex = ListIndex;
-                int newIndex = oldIndex;
-                if (ListIndex >= ItemsCount - 1)
-                {
-                    newIndex = 0;
-                }
-                else
-                {
-                    newIndex++;
-                }
-                ListIndex = newIndex;
-                ParentMenu.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, newIndex, Index);
-                PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+                newIndex = ItemsCount - 1;
             }
-        }
-
-        internal override void GoLeft()
-        {
-            if (ItemsCount > 0)
+            else
             {
-                int oldIndex = ListIndex;
-                int newIndex = oldIndex;
-                if (ListIndex < 1)
-                {
-                    newIndex = ItemsCount - 1;
-                }
-                else
-                {
-                    newIndex--;
-                }
-                ListIndex = newIndex;
-
-                ParentMenu.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, newIndex, Index);
-                PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+                newIndex--;
             }
-        }
+            ListIndex = newIndex;
 
-        internal override void Select()
-        {
-            ParentMenu.ListItemSelectEvent(ParentMenu, this, ListIndex, Index);
+            ParentMenu.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, newIndex, Index);
+            PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
+    }
+
+    internal override void Select()
+    {
+        ParentMenu.ListItemSelectEvent(ParentMenu, this, ListIndex, Index);
     }
 }
