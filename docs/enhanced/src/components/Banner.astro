@@ -2,7 +2,8 @@
 // Override of Starlight's default Banner. The default only renders a banner when
 // a page sets `banner` in its frontmatter; this one always renders a site-wide
 // "work in progress" notice, since MenuAPI for FiveM Enhanced is an early alpha.
-// Using the built-in `.sl-banner` class keeps Starlight's native banner styling.
+// Styling lives in cartoon.css, because Starlight's own .sl-banner rule would
+// otherwise win on stylesheet order and leave this transparent.
 ---
 
 <div class="sl-banner">

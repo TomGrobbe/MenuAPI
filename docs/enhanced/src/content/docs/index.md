@@ -8,10 +8,6 @@ Welcome to the **MenuAPI** documentation.
 
 Here you'll find basic information about how to use MenuAPI in your projects.
 
-:::caution[Work in progress]
-**MenuAPI for FiveM Enhanced is an early alpha and a work in progress.** The library and these docs are still being built out, so expect breaking changes, missing pieces, and pages that may not yet match the latest code. The NuGet package is published as an alpha pre-release.
-:::
-
 :::tip
 **Please choose a category on the left to get started.**
 :::

@@ -41,8 +41,9 @@ They are grouped under your resource's name in the key bindings screen, so playe
 any other resource's bindings.
 
 :::note
-FiveM allows exactly **one** key per binding. There is no second or alternate key. If a player wants two keys
-for the same thing, that is not something FiveM can do today.
+A resource can only hand FiveM **one** default key per binding, which is why the table above lists a single
+key for each row. Players are not stuck with one though: in the key bindings screen everything can have a
+primary **and** a secondary key, so anyone who wants two keys for the same action can simply set both.
 :::
 
 ----

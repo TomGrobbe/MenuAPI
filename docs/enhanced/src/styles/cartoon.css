@@ -326,3 +326,20 @@ a.pagination-link:active {
     scroll-behavior: auto !important;
   }
 }
+
+/* Site-wide "work in progress" banner (src/components/Banner.astro). Starlight's own .sl-banner
+   rule resolves to a transparent background here, which left the notice looking like stray text
+   above the page, so it is restyled to match the theme. */
+.sl-banner {
+  margin: 1rem 1.5rem 0;
+  padding: 0.6rem 1rem;
+  border: 2px solid var(--ink);
+  border-radius: var(--toon-radius);
+  background-color: var(--cream-deep);
+  box-shadow: var(--toon-shadow-sm);
+  color: var(--ink);
+  font-size: var(--sl-text-sm);
+  line-height: var(--sl-line-height-headings);
+  text-align: center;
+  text-wrap: balance;
+}
