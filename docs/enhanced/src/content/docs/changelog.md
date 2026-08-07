@@ -10,6 +10,20 @@ title: "Changelog"
 These are the changes in the MenuAPI FiveM Enhanced alpha packages. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way. The final Enhanced release is not ready yet, so more of these can still show up.
 :::
 
+### Menus can be split into pages
+
+A menu can now hold thousands of items without the player having to scroll through all of them. Call `menu.SetPageSize(48)` and the menu is split into pages of 48, moved between with left and right. Everything is on the new [Pagination](reference/pagination/) page.
+
+**Things you have to change in your own code:**
+
+- Nothing. Pagination is off by default, and a menu that never calls `SetPageSize()` behaves exactly as it did.
+
+**Things that just behave differently now:**
+
+- In a menu you *have* paginated, left and right turn the page instead of going back and selecting. List, dynamic list and slider items are unaffected, they still change their own value.
+- `Size`, `CurrentIndex`, `GetMenuItems()` and `GetCurrentMenuItem()` describe the current page of a paginated menu, not the whole item list.
+- Two long standing bugs got fixed on the way. `ClearMenuItems()` used to leave an active filter switched on, so an emptied menu stayed stuck at `Size` 0 even after you refilled it. And `RemoveMenuItem(int)` counted against the filtered list while indexing the unfiltered one, so it could remove the wrong item while a filter was active.
+
 ### Menus stop costing anything while they are closed
 
 MenuAPI used to run seven loops that never stopped. Four of them did real work on every single frame even with every menu closed, which added up to roughly 24 wasted calls into the game per frame, forever. All of that work now sits behind a small scheduler, and a loop that is switched off genuinely **ends** instead of running and immediately returning. With no menu open, MenuAPI does almost nothing at all.

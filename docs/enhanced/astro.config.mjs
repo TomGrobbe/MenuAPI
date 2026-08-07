@@ -55,6 +55,7 @@ export default defineConfig({
             { label: 'Overview', link: '/reference/' },
             { label: 'Menu', link: '/reference/menu/' },
             { label: 'MenuController', link: '/reference/menucontroller/' },
+            { label: 'Pagination', link: '/reference/pagination/' },
             { label: 'Key bindings', link: '/reference/keybindings/' },
             {
               label: 'Menu Items',

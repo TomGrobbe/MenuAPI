@@ -653,26 +653,48 @@ public class MenuController : IScript
         }
     }
 
+    /// <summary>
+    /// Paging is deliberately slower than changing a value, and never accelerates. Held down, the
+    /// accelerating repeat below would run through hundreds of pages before the player let go.
+    /// </summary>
+    private const int PageRepeatFirstDelay = 400;
+    private const int PageRepeatDelay = 250;
+
     private static async Task HandleRightNavigation(Menu currentMenu)
     {
-        if (currentMenu.GetCurrentMenuItem() is MenuItem item && item.Enabled)
+        var item = currentMenu.GetCurrentMenuItem();
+
+        // A page move belongs to the menu, not to the row the cursor happens to be on, so a locked
+        // row does not stop it.
+        var paging = currentMenu.IsPageNavigation(item);
+
+        if (item is null || (!item.Enabled && !paging))
         {
-            currentMenu.GoRight();
-            var time = GetGameTimer();
-            var times = 0;
-            var delay = 200;
-            while (IsRightPressed(AreMenuButtonsEnabled))
+            return;
+        }
+
+        currentMenu.GoRight();
+        var time = GetGameTimer();
+        var times = 0;
+        var delay = paging ? PageRepeatFirstDelay : 200;
+        while (IsRightPressed(AreMenuButtonsEnabled))
+        {
+            // Re-read rather than trust the captured menu: this loop awaits every frame, so the
+            // menu can be closed from anywhere while it is suspended.
+            if (GetCurrentMenu() is not Menu openMenu)
             {
-                // Re-read rather than trust the captured menu: this loop awaits every frame, so the
-                // menu can be closed from anywhere while it is suspended.
-                if (GetCurrentMenu() is not Menu openMenu)
+                break;
+            }
+            currentMenu = openMenu;
+            if (GetGameTimer() - time > delay)
+            {
+                times++;
+                if (paging)
                 {
-                    break;
+                    delay = PageRepeatDelay;
                 }
-                currentMenu = openMenu;
-                if (GetGameTimer() - time > delay)
+                else
                 {
-                    times++;
                     if (times > 2)
                     {
                         delay = 150;
@@ -689,34 +711,47 @@ public class MenuController : IScript
                     {
                         delay = 25;
                     }
-                    currentMenu.GoRight();
-                    time = GetGameTimer();
                 }
-                await API.Delay(0);
+                currentMenu.GoRight();
+                time = GetGameTimer();
             }
+            await API.Delay(0);
         }
     }
 
     private static async Task HandleLeftNavigation(Menu currentMenu)
     {
-        if (currentMenu.GetCurrentMenuItem() is MenuItem item && item.Enabled)
+        var item = currentMenu.GetCurrentMenuItem();
+
+        var paging = currentMenu.IsPageNavigation(item);
+
+        if (item is null || (!item.Enabled && !paging))
         {
-            currentMenu.GoLeft();
-            var time = GetGameTimer();
-            var times = 0;
-            var delay = 200;
-            while (IsLeftPressed(AreMenuButtonsEnabled))
+            return;
+        }
+
+        currentMenu.GoLeft();
+        var time = GetGameTimer();
+        var times = 0;
+        var delay = paging ? PageRepeatFirstDelay : 200;
+        while (IsLeftPressed(AreMenuButtonsEnabled))
+        {
+            // Re-read rather than trust the captured menu: this loop awaits every frame, so the
+            // menu can be closed from anywhere while it is suspended.
+            if (GetCurrentMenu() is not Menu openMenu)
             {
-                // Re-read rather than trust the captured menu: this loop awaits every frame, so the
-                // menu can be closed from anywhere while it is suspended.
-                if (GetCurrentMenu() is not Menu openMenu)
+                break;
+            }
+            currentMenu = openMenu;
+            if (GetGameTimer() - time > delay)
+            {
+                times++;
+                if (paging)
                 {
-                    break;
+                    delay = PageRepeatDelay;
                 }
-                currentMenu = openMenu;
-                if (GetGameTimer() - time > delay)
+                else
                 {
-                    times++;
                     if (times > 2)
                     {
                         delay = 150;
@@ -733,11 +768,11 @@ public class MenuController : IScript
                     {
                         delay = 25;
                     }
-                    currentMenu.GoLeft();
-                    time = GetGameTimer();
                 }
-                await API.Delay(0);
+                currentMenu.GoLeft();
+                time = GetGameTimer();
             }
+            await API.Delay(0);
         }
     }
 
@@ -1130,6 +1165,13 @@ public class MenuController : IScript
         if (menu.ShowBackInstructionalButton)
         {
             SetInstructionalButtonSlot(slot++, MenuKeyBindings.GetBackButton(), menu.BackButtonText);
+        }
+
+        // Only worth a hint when there is more than one page to move between.
+        if (menu.Paginated && menu.ShowPageInstructionalButtons && menu.PageCount > 1)
+        {
+            SetInstructionalButtonSlot(slot++, MenuKeyBindings.GetLeftButton(), menu.PreviousPageButtonText);
+            SetInstructionalButtonSlot(slot++, MenuKeyBindings.GetRightButton(), menu.NextPageButtonText);
         }
 
         // Enumerated rather than indexed: ElementAt on a dictionary walks it from the start every

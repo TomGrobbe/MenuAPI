@@ -44,7 +44,11 @@ Each item type raises **only its own** select event. `OnItemSelect` is *not* a c
 |[MenuDynamicListItem](../menuitems/menudynamiclistitem/)|[OnDynamicListItemSelect](#ondynamiclistitemselect)|[OnDynamicListItemCurrentItemChange](#ondynamiclistitemcurrentitemchange)|
 |[MenuSliderItem](../menuitems/menuslideritem/)|[OnSliderItemSelect](#onslideritemselect)|[OnSliderPositionChange](#onsliderpositionchange)|
 
-Two more events are not tied to a specific item type: [OnIndexChange](#onindexchange) (the highlighted item changed) and [OnMenuOpen](#onmenuopen) / [OnMenuClose](#onmenuclose).
+Three more events are not tied to a specific item type: [OnIndexChange](#onindexchange) (the highlighted item changed), [OnMenuOpen](#onmenuopen) / [OnMenuClose](#onmenuclose), and [OnPageChange](../pagination/#the-onpagechange-event) (the page of a paginated menu changed).
+
+:::note
+In a [paginated](../pagination/) menu, left and right turn the page on every item type except list, dynamic list and slider items. Those three keep changing their own value.
+:::
 
 ----
 
@@ -376,3 +380,4 @@ If you prefer to declare your handlers explicitly, these are the delegate types 
 |OnIndexChange|`void IndexChangedEvent(Menu menu, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex)`|
 |OnMenuOpen|`void MenuOpenedEvent(Menu menu)`|
 |OnMenuClose|`void MenuClosedEvent(Menu menu)`|
+|OnPageChange|`void PageChangedEvent(Menu menu, int oldPage, int newPage, bool wrapped)`|

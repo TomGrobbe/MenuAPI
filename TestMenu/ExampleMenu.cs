@@ -412,6 +412,53 @@ public class ExampleMenu : IScript
         };
         menu.AddMenuItem(sortingAndFiltering);
         MenuController.BindMenuItem(menu, menu7, sortingAndFiltering);
+
+        // A paginated menu. Left and right turn the page on the plain buttons, and still change the
+        // value on the list and the slider, because those already mean something with arrows.
+        Menu menu8 = new Menu("Pagination", "Page 1 / 4");
+        menu8.SetPageSize(12);
+
+        MenuListItem pickAPlanet = new MenuListItem(
+            "A list item",
+            new List<string>() { "Mercury", "Venus", "Earth", "Mars" },
+            0,
+            "Arrows still change this value, they do not turn the page. Same for the slider below."
+        );
+        MenuSliderItem aSlider = new MenuSliderItem("A slider item", 0, 10, 5, true);
+        MenuItem lockedButton = new MenuItem("A locked button", "Locked rows do not stop you turning the page.")
+        {
+            Enabled = false,
+            LeftIcon = MenuItem.Icon.LOCK
+        };
+
+        menu8.AddMenuItem(pickAPlanet);
+        menu8.AddMenuItem(aSlider);
+        menu8.AddMenuItem(lockedButton);
+
+        for (int i = 1; i <= 45; i++)
+        {
+            menu8.AddMenuItem(new MenuItem($"Item #{i}", $"Item number {i} of 45. Press left or right to turn the page.")
+            {
+                Label = $"#{i}"
+            });
+        }
+
+        menu8.OnPageChange += (_menu, _oldPage, _newPage, _wrapped) =>
+        {
+            API.Log.Info($"OnPageChange: [{_menu}, {_oldPage}, {_newPage}, wrapped: {_wrapped}]");
+
+            _menu.MenuSubtitle = _wrapped
+                ? $"~y~Page {_newPage + 1} / {_menu.PageCount} (wrapped around)"
+                : $"Page {_newPage + 1} / {_menu.PageCount}";
+        };
+
+        MenuController.AddSubmenu(menu, menu8);
+        MenuItem pagination = new MenuItem("Pagination", "Demo menu for SetPageSize and the page navigation.")
+        {
+            Label = "→→→"
+        };
+        menu.AddMenuItem(pagination);
+        MenuController.BindMenuItem(menu, menu8, pagination);
         /*--------------
          Event handlers
         --------------*/

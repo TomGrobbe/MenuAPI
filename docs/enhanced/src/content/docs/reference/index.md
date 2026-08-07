@@ -16,6 +16,7 @@ If you have not set up MenuAPI yet, start at [Setup](../setup/).
 |-|-|
 |[Menu](menu/)|A single menu: a banner, a subtitle, a list of items and a description box. This is also where all [events](events/) live.|
 |[MenuController](menucontroller/)|The static controller that draws your menus and handles all controls. You register your menus here.|
+|[Pagination](pagination/)|Splitting a long menu into pages, moved between with left and right.|
 |[Menu Items](menuitems/)|Everything you can put inside a menu: buttons, checkboxes, lists, dynamic lists and sliders.|
 |[Events](events/)|Every event a menu can raise, with the parameters they pass to your handler.|
 |[MenuTicks](ticks/)|A read only look at the loops MenuAPI runs, and when each one is switched off.|
@@ -81,6 +82,7 @@ namespace MyResource
 |I want to…|See|
 |-|-|
 |Create a menu, add or remove items, sort or filter them|[Menu](menu/)|
+|Show hundreds or thousands of items without endless scrolling|[Pagination](pagination/)|
 |Open, close or navigate a menu from code|[Menu](menu/#methods)|
 |Create a submenu|[MenuController.BindMenuItem()](menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem)|
 |Know which keys open and control the menu, and how players rebind them|[Key bindings](keybindings/)|

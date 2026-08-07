@@ -38,6 +38,8 @@ internal static class MenuKeyBindings
 
     private static readonly int SelectControl = BindingControl($"+{Select}");
     private static readonly int BackControl = BindingControl($"+{Back}");
+    private static readonly int LeftControl = BindingControl($"+{Left}");
+    private static readonly int RightControl = BindingControl($"+{Right}");
 
     /// <summary>
     /// Registers every command and its key mapping. Deliberately called a tick after MenuAPI starts,
@@ -143,6 +145,12 @@ internal static class MenuKeyBindings
 
     internal static string GetBackButton() =>
         GetControlInstructionalButton(0, IsUsingKeyboardAndMouse(2) ? BackControl : (int)Control.FrontendCancel, true);
+
+    internal static string GetLeftButton() =>
+        GetControlInstructionalButton(0, IsUsingKeyboardAndMouse(2) ? LeftControl : (int)Control.PhoneLeft, true);
+
+    internal static string GetRightButton() =>
+        GetControlInstructionalButton(0, IsUsingKeyboardAndMouse(2) ? RightControl : (int)Control.PhoneRight, true);
 
     /// <summary>
     /// The control id FiveM uses for a key mapping, so the game's own control functions resolve it to

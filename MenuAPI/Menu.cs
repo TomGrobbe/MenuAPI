@@ -103,6 +103,15 @@ public class Menu
     /// <param name="dynamicListItem">The <see cref="MenuDynamicListItem"/> that was selected.</param>
     /// <param name="currentItem">The <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/> in the <see cref="Menu"/>.</param>
     public delegate void DynamicListItemSelectedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string? currentItem);
+
+    /// <summary>
+    /// Triggered when the <see cref="PageIndex"/> of a paginated <see cref="Menu"/> changes.
+    /// </summary>
+    /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnPageChange"/> event occurred.</param>
+    /// <param name="oldPage">The <see cref="PageIndex"/> the menu was on.</param>
+    /// <param name="newPage">The <see cref="PageIndex"/> the menu is now on.</param>
+    /// <param name="wrapped">Whether the move rolled past the first or last page and came out the other end.</param>
+    public delegate void PageChangedEvent(Menu menu, int oldPage, int newPage, bool wrapped);
     #endregion
 
     #region events
@@ -170,6 +179,12 @@ public class Menu
     /// Parameters: <see cref="Menu"/> menu, <see cref="MenuDynamicListItem"/> dynamicListItem, <see cref="MenuDynamicListItem.CurrentItem"/> itemValue.
     /// </summary>
     public event DynamicListItemSelectedEvent? OnDynamicListItemSelect;
+
+    /// <summary>
+    /// Triggered when the <see cref="PageIndex"/> of a paginated <see cref="Menu"/> changes.
+    /// Parameters: <see cref="Menu"/> menu, <see cref="int"/> oldPage, <see cref="int"/> newPage, <see cref="bool"/> wrapped.
+    /// </summary>
+    public event PageChangedEvent? OnPageChange;
     #endregion
 
     #region virtual voids
@@ -299,6 +314,18 @@ public class Menu
     {
         OnDynamicListItemSelect?.Invoke(menu, dynamicListItem, currentItem);
     }
+
+    /// <summary>
+    /// Triggered when the <see cref="PageIndex"/> of a paginated <see cref="Menu"/> changes.
+    /// </summary>
+    /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnPageChange"/> event occurred.</param>
+    /// <param name="oldPage">The <see cref="PageIndex"/> the menu was on.</param>
+    /// <param name="newPage">The <see cref="PageIndex"/> the menu is now on.</param>
+    /// <param name="wrapped">Whether the move rolled past the first or last page and came out the other end.</param>
+    internal virtual void PageChangeEvent(Menu menu, int oldPage, int newPage, bool wrapped)
+    {
+        OnPageChange?.Invoke(menu, oldPage, newPage, wrapped);
+    }
     #endregion
 
     #endregion
@@ -327,9 +354,40 @@ public class Menu
         {
             // GetRange already copies, so the duplicate this needs comes for free. It used to copy
             // the whole list twice more on the way here, once per frame, for nothing.
-            var source = filterActive ? FilterItems : MenuItems;
+            var source = ActiveItems;
 
             return source.GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
+        }
+    }
+
+    /// <summary>Everything the filter left, pages included. What a page is then taken out of.</summary>
+    private List<MenuItem> SourceItems => filterActive ? FilterItems : MenuItems;
+
+    /// <summary>
+    /// What the menu currently acts on: the filtered list, narrowed to the current page.
+    /// </summary>
+    // Without pagination this hands back the source list itself, so nothing allocates and every menu
+    // that does not use pages behaves exactly as it did. With pagination the slice is cached, because
+    // drawing reaches for it dozens of times per frame.
+    private List<MenuItem> ActiveItems
+    {
+        get
+        {
+            if (!Paginated)
+            {
+                return SourceItems;
+            }
+
+            if (pageItemsDirty)
+            {
+                var source = SourceItems;
+                var start = Math.Clamp(PageIndex * PageSize, 0, source.Count);
+
+                pageItems = source.GetRange(start, Math.Min(PageSize, source.Count - start));
+                pageItemsDirty = false;
+            }
+
+            return pageItems;
         }
     }
 
@@ -337,10 +395,16 @@ public class Menu
     // Same answer as looking it up in GetMenuItems(), without that method's defensive copy. Drawing
     // reads an item's index around nine times per item per frame, and those copies were the bulk of
     // everything MenuAPI allocated.
-    internal int IndexOf(MenuItem item) => filterActive ? FilterItems.IndexOf(item) : MenuItems.IndexOf(item);
+    internal int IndexOf(MenuItem item) => ActiveItems.IndexOf(item);
 
     private List<MenuItem> FilterItems { get; set; } = new List<MenuItem>();
     private List<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
+
+    private List<MenuItem> pageItems = new List<MenuItem>();
+    private bool pageItemsDirty = true;
+
+    /// <summary>Anything that changes what belongs on the current page calls this.</summary>
+    private void InvalidatePage() => pageItemsDirty = true;
 
     // What is currently loaded into ColorPanelScaleform, so the 64 swatches are only re-sent when
     // they would actually differ. See DrawColorAndOpacityPanel. Static because the scaleform is.
@@ -366,7 +430,22 @@ public class Menu
 
     public int MaxItemsOnScreen { get; internal set; } = 10;
 
-    public int Size => filterActive ? FilterItems.Count : MenuItems.Count;
+    public int Size => ActiveItems.Count;
+
+    /// <summary>How many items fit on one page. 0 means the menu is not paginated.</summary>
+    public int PageSize { get; private set; } = 0;
+
+    /// <summary>Whether this menu is split into pages.</summary>
+    public bool Paginated => PageSize > 0;
+
+    /// <summary>The page currently being shown, counting from 0.</summary>
+    public int PageIndex { get; private set; } = 0;
+
+    /// <summary>Always at least 1, so an empty paginated menu still reads as "page 1 of 1".</summary>
+    public int PageCount => Paginated ? Math.Max(1, (SourceItems.Count + PageSize - 1) / PageSize) : 1;
+
+    /// <summary>Whether paging past the last page comes out at the first, and the other way around.</summary>
+    public bool WrapPages { get; set; } = true;
 
     public bool Visible
     {
@@ -440,6 +519,12 @@ public class Menu
     public string SelectButtonText { get; set; } = GetLabelText("HUD_INPUT28");
     public string BackButtonText { get; set; } = GetLabelText("HUD_INPUT53");
 
+    /// <summary>Only ever drawn when the menu is paginated, whatever this is set to.</summary>
+    public bool ShowPageInstructionalButtons { get; set; } = true;
+
+    public string PreviousPageButtonText { get; set; } = "Previous page";
+    public string NextPageButtonText { get; set; } = "Next page";
+
     // Select and back are not in here because on keyboard they are key mappings the player can rebind,
     // not a fixed Control. This dictionary is for whatever extra controls the resource wants to show.
     public Dictionary<Control, string> InstructionalButtons = new();
@@ -510,6 +595,113 @@ public class Menu
     }
 
     /// <summary>
+    /// Splits this menu into pages of <paramref name="size"/> items, navigated with left and right.
+    /// Pass 0 or less to turn pagination off again.
+    /// </summary>
+    /// <remarks>
+    /// This sits on top of <see cref="MaxItemsOnScreen"/> rather than replacing it: a page of 48 items
+    /// still scrolls ten rows at a time inside itself.
+    /// </remarks>
+    /// <param name="size">How many items belong on one page.</param>
+    public void SetPageSize(int size)
+    {
+        PageSize = Math.Max(0, size);
+        PageIndex = 0;
+
+        InvalidatePage();
+        RefreshIndex(0, 0);
+    }
+
+    /// <summary>
+    /// Jumps to <paramref name="pageIndex"/>, counting from 0. Out of range values are clamped, so
+    /// this never wraps. Returns whether the page actually changed.
+    /// </summary>
+    public bool GoToPage(int pageIndex) => GoToPage(pageIndex, false);
+
+    /// <summary>
+    /// Goes to the next page. Wraps around to the first page when <see cref="WrapPages"/> is set.
+    /// Returns whether the page actually changed.
+    /// </summary>
+    public bool NextPage()
+    {
+        if (!Paginated)
+        {
+            return false;
+        }
+
+        var last = PageCount - 1;
+
+        if (PageIndex < last)
+        {
+            return GoToPage(PageIndex + 1, false);
+        }
+
+        return WrapPages && GoToPage(0, true);
+    }
+
+    /// <summary>
+    /// Goes to the previous page. Wraps around to the last page when <see cref="WrapPages"/> is set.
+    /// Returns whether the page actually changed.
+    /// </summary>
+    public bool PreviousPage()
+    {
+        if (!Paginated)
+        {
+            return false;
+        }
+
+        if (PageIndex > 0)
+        {
+            return GoToPage(PageIndex - 1, false);
+        }
+
+        return WrapPages && GoToPage(PageCount - 1, true);
+    }
+
+    private bool GoToPage(int pageIndex, bool wrapped)
+    {
+        if (!Paginated)
+        {
+            return false;
+        }
+
+        var target = Math.Clamp(pageIndex, 0, PageCount - 1);
+
+        if (target == PageIndex)
+        {
+            return false;
+        }
+
+        var oldPage = PageIndex;
+
+        PageIndex = target;
+
+        InvalidatePage();
+
+        // A page is a fresh list, so the cursor starts at the top of it rather than wherever it sat
+        // on the page before.
+        RefreshIndex(0, 0);
+
+        PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+        PageChangeEvent(this, oldPage, PageIndex, wrapped);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Puts <see cref="PageIndex"/> back in range after the item list changed underneath it.
+    /// </summary>
+    private void ClampPageIndex()
+    {
+        if (!Paginated)
+        {
+            return;
+        }
+
+        PageIndex = Math.Clamp(PageIndex, 0, PageCount - 1);
+    }
+
+    /// <summary>
     /// Resets the index to 0
     /// </summary>
     public void RefreshIndex() => RefreshIndex(0, 0);
@@ -522,7 +714,7 @@ public class Menu
     /// <returns></returns>
     public List<MenuItem> GetMenuItems()
     {
-        return filterActive ? FilterItems.ToList() : MenuItems.ToList();
+        return ActiveItems.ToList();
     }
 
     /// <summary>
@@ -531,7 +723,8 @@ public class Menu
     /// <returns>Retuns the currently selected menu item. Or null if there are no menu items, or the current menu index is out of range.</returns>
     public MenuItem? GetCurrentMenuItem()
     {
-        return GetMenuItems().ElementAtOrDefault(CurrentIndex);
+        // Straight off the active list rather than through GetMenuItems, which copies it.
+        return ActiveItems.ElementAtOrDefault(CurrentIndex);
     }
 
     /// <summary>
@@ -539,10 +732,7 @@ public class Menu
     /// </summary>
     public void ClearMenuItems()
     {
-        CurrentIndex = 0;
-        ViewIndexOffset = 0;
-        MenuItems.Clear();
-        FilterItems.Clear();
+        ClearMenuItems(false);
     }
 
     /// <summary>
@@ -554,9 +744,16 @@ public class Menu
         {
             CurrentIndex = 0;
             ViewIndexOffset = 0;
+            PageIndex = 0;
         }
         MenuItems.Clear();
         FilterItems.Clear();
+
+        // Without this an emptied menu would keep reporting a filter that no longer has anything to
+        // say, and stay stuck at Size 0 even after it was refilled.
+        filterActive = false;
+
+        InvalidatePage();
     }
 
     /// <summary>
@@ -568,29 +765,26 @@ public class Menu
         MenuItems.Add(item);
         item.PositionOnScreen = item.Index;
         item.ParentMenu = this;
+
+        InvalidatePage();
     }
 
     /// <summary>
     /// Removes the item at that index.
     /// </summary>
-    /// <param name="itemIndex"></param>
+    /// <param name="itemIndex">An index into the items currently on screen, page and filter applied.</param>
     public void RemoveMenuItem(int itemIndex)
     {
-        if (CurrentIndex >= itemIndex)
+        // Read before anything moves, and out of the same list the index was counted in. This used to
+        // compare against the filtered count while indexing the unfiltered list.
+        var items = ActiveItems;
+
+        if (itemIndex < 0 || itemIndex >= items.Count)
         {
-            if (Size > CurrentIndex)
-            {
-                CurrentIndex--;
-            }
-            else
-            {
-                CurrentIndex = 0;
-            }
+            return;
         }
-        if (itemIndex < Size && itemIndex > -1)
-        {
-            RemoveMenuItem(MenuItems[itemIndex]);
-        }
+
+        RemoveMenuItem(items[itemIndex]);
     }
 
     /// <summary>
@@ -603,7 +797,11 @@ public class Menu
         {
             return;
         }
-        if (CurrentIndex >= item.Index)
+        // Index is -1 for an item the filter or another page is holding back, and the cursor is not
+        // sitting after something it cannot see.
+        var index = item.Index;
+
+        if (index > -1 && CurrentIndex >= index)
         {
             if (Size > CurrentIndex)
             {
@@ -615,6 +813,13 @@ public class Menu
             }
         }
         MenuItems.Remove(item);
+
+        // The filter keeps its own list, so leaving it in there would keep drawing an item the menu
+        // no longer has.
+        FilterItems.Remove(item);
+
+        InvalidatePage();
+        ClampPageIndex();
     }
 
     /// <summary>
@@ -623,19 +828,11 @@ public class Menu
     /// <param name="index"></param>
     public void SelectItem(int index)
     {
-        if (!filterActive)
+        var items = ActiveItems;
+
+        if (index > -1 && items.Count - 1 >= index)
         {
-            if (index > -1 && MenuItems.Count - 1 >= index)
-            {
-                SelectItem(MenuItems[index]);
-            }
-        }
-        else
-        {
-            if (index > -1 && FilterItems.Count - 1 >= index)
-            {
-                SelectItem(FilterItems[index]);
-            }
+            SelectItem(items[index]);
         }
     }
 
@@ -714,16 +911,7 @@ public class Menu
         {
             return;
         }
-        MenuItem oldItem;
-
-        if (filterActive)
-        {
-            oldItem = FilterItems[CurrentIndex];
-        }
-        else
-        {
-            oldItem = MenuItems[CurrentIndex];
-        }
+        MenuItem oldItem = ActiveItems[CurrentIndex];
 
         if (CurrentIndex == 0)
         {
@@ -759,16 +947,7 @@ public class Menu
             return;
         }
 
-        MenuItem oldItem;
-
-        if (filterActive)
-        {
-            oldItem = FilterItems[CurrentIndex];
-        }
-        else
-        {
-            oldItem = MenuItems[CurrentIndex];
-        }
+        MenuItem oldItem = ActiveItems[CurrentIndex];
 
         if (CurrentIndex > 0 && CurrentIndex >= Size - 1)
         {
@@ -802,6 +981,13 @@ public class Menu
             return;
         }
         var item = GetCurrentMenuItem();
+
+        if (IsPageNavigation(item))
+        {
+            PreviousPage();
+            return;
+        }
+
         if (item != null)
         {
             item.GoLeft();
@@ -823,8 +1009,23 @@ public class Menu
             return;
         }
         var item = GetCurrentMenuItem();
+
+        if (IsPageNavigation(item))
+        {
+            NextPage();
+            return;
+        }
+
         item?.GoRight();
     }
+
+    /// <summary>
+    /// Whether left and right should turn the page rather than act on <paramref name="item"/>.
+    /// </summary>
+    // Items that hold a value keep their arrows, because there is nothing else those arrows could
+    // mean on them. Everything else in a paginated menu pages instead of going back or selecting.
+    internal bool IsPageNavigation(MenuItem? item) =>
+        Paginated && item is not (MenuListItem or MenuSliderItem or MenuDynamicListItem);
 
     /// <summary>
     /// Sorts the menu items using the provided compare function.
@@ -838,6 +1039,8 @@ public class Menu
             FilterItems.Clear();
         }
         MenuItems.Sort(compare);
+
+        InvalidatePage();
     }
 
     /// <summary>
@@ -854,6 +1057,10 @@ public class Menu
         ViewIndexOffset = 0;
         FilterItems = MenuItems.Where(i => predicate.Invoke(i)).ToList();
         filterActive = true;
+
+        // Filtering changes how many items there are, so the page they were split into changes too.
+        PageIndex = 0;
+        InvalidatePage();
     }
 
     /// <summary>
@@ -864,6 +1071,9 @@ public class Menu
         RefreshIndex(0, 0);
         filterActive = false;
         FilterItems.Clear();
+
+        PageIndex = 0;
+        InvalidatePage();
     }
 
     /// <summary>

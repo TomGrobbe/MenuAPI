@@ -41,6 +41,11 @@ They are grouped under your resource's name in the key bindings screen, so playe
 any other resource's bindings.
 
 :::note
+In a [paginated](../pagination/) menu, left and right turn the page instead of going back and selecting. Lists
+and sliders are unaffected, they still change their own value.
+:::
+
+:::note
 A resource can only hand FiveM **one** default key per binding, which is why the table above lists a single
 key for each row. Players are not stuck with one though: in the key bindings screen everything can have a
 primary **and** a secondary key, so anyone who wants two keys for the same action can simply set both.

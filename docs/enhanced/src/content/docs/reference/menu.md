@@ -123,9 +123,17 @@ Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
 |InstructionalButtons|Dictionary&lt;Control,&nbsp;string&gt;|(empty)|Extra instructional buttons for this menu, keyed by a fixed `Control`. Select and back are not in here, they have their own properties above. See [Instructional buttons](#instructional-buttons).|Yes|
 |CustomInstructionalButtons|List&lt;[InstructionalButton](#instructionalbutton)&gt;|(empty)|Extra instructional buttons that use a raw button string instead of a `Control`. See [Instructional buttons](#instructional-buttons).|Yes|
 |ButtonPressHandlers|List&lt;[ButtonPressHandler](#buttonpresshandler)&gt;|(empty)|Custom control handlers that run while this menu is open. See [Button press handlers](#button-press-handlers).|Yes|
-|Size|int|0|(Getter only) The number of items in this menu. When a filter is active, this is the number of items that passed the filter.|Yes|
+|Size|int|0|(Getter only) The number of items in this menu. When a filter is active, this is the number of items that passed the filter. When the menu is [paginated](../pagination/), this is the number of items on the current page.|Yes|
 |CurrentIndex|int|0|(Getter only) The index of the currently highlighted menu item. Use [RefreshIndex()](#refreshindexint-index) to change it.|Yes|
 |MaxItemsOnScreen|int|10|(Getter only) How many items are visible on screen at a time. Use [SetMaxItemsOnScreen()](#setmaxitemsonscreenint-max) to change it.|Yes|
+|PageSize|int|0|(Getter only) How many items fit on one page, or `0` when the menu is not paginated. See [Pagination](../pagination/).|Yes|
+|Paginated|boolean|false|(Getter only) Whether this menu is split into pages. See [Pagination](../pagination/).|Yes|
+|PageIndex|int|0|(Getter only) The page currently being shown, counting from 0. See [Pagination](../pagination/).|Yes|
+|PageCount|int|1|(Getter only) How many pages this menu has. See [Pagination](../pagination/).|Yes|
+|WrapPages|boolean|true|Whether paging past either end of a paginated menu comes out the other side. See [Pagination](../pagination/).|Yes|
+|ShowPageInstructionalButtons|boolean|true|Whether the previous/next page hints are drawn. Only ever drawn for a paginated menu with more than one page.|Yes|
+|PreviousPageButtonText|string|"Previous page"|The text next to the previous page hint.|Yes|
+|NextPageButtonText|string|"Next page"|The text next to the next page hint.|Yes|
 |ViewIndexOffset|int|0|(Getter only) The index of the first item that is currently visible on screen.|Yes|
 |ParentMenu|Menu|Null|(Getter only) The parent of this menu, or null if it has none. Set by [MenuController.AddSubmenu()](../menucontroller/#addsubmenumenu-parent-menu-child).|Yes|
 |LeftAligned|boolean|true|(Getter only) Whether menus are currently left aligned. Shortcut for [MenuController.MenuAlignment](../menucontroller/#menu-alignment).|Yes|
@@ -172,6 +180,10 @@ _This function does not return anything_.
 // Only show 5 items at a time.
 menu.SetMaxItemsOnScreen(5);
 ```
+
+:::tip
+This is about how many items you can *see*, not about how long the menu is allowed to be. For a menu with hundreds or thousands of items, see [Pagination](../pagination/) instead: `SetPageSize()`, `GoToPage()`, `NextPage()`, `PreviousPage()` and the `OnPageChange` event are all documented there.
+:::
 
 ----
 
@@ -464,6 +476,8 @@ _This function does not return anything_.
 
 Moves the currently highlighted item to the left, if it supports that (list, dynamic list and slider items). If the item does not support it and [MenuController.NavigateMenuUsingArrows](../menucontroller/#properties) is enabled, this returns to the parent menu instead.
 
+In a [paginated](../pagination/) menu it goes to the previous page instead, unless the highlighted item is a list, dynamic list or slider item.
+
 ##### Parameters
 
 _This function does not have any parameters_.
@@ -476,7 +490,9 @@ _This function does not return anything_.
 
 #### GoRight()
 
-Moves the currently highlighted item to the right, if it supports that (list, dynamic list and slider items).
+Moves the currently highlighted item to the right, if it supports that (list, dynamic list and slider items). Otherwise it selects the item.
+
+In a [paginated](../pagination/) menu it goes to the next page instead, unless the highlighted item is a list, dynamic list or slider item.
 
 ##### Parameters
 
