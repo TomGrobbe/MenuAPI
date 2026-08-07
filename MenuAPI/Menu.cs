@@ -325,25 +325,34 @@ public class Menu
     {
         get
         {
-            // Create a duplicate list, just in case the original list is modified while we're looping through it.
-            if (filterActive)
-            {
-                var items = FilterItems.ToList().GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
-                return items;
-            }
-            else
-            {
-                var items = GetMenuItems().ToList().GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
-                return items;
-            }
+            // GetRange already copies, so the duplicate this needs comes for free. It used to copy
+            // the whole list twice more on the way here, once per frame, for nothing.
+            var source = filterActive ? FilterItems : MenuItems;
+
+            return source.GetRange(ViewIndexOffset, Math.Min(MaxItemsOnScreen, Size - ViewIndexOffset));
         }
     }
+
+    /// <summary>Where <paramref name="item"/> sits in whichever list is currently active.</summary>
+    // Same answer as looking it up in GetMenuItems(), without that method's defensive copy. Drawing
+    // reads an item's index around nine times per item per frame, and those copies were the bulk of
+    // everything MenuAPI allocated.
+    internal int IndexOf(MenuItem item) => filterActive ? FilterItems.IndexOf(item) : MenuItems.IndexOf(item);
 
     private List<MenuItem> FilterItems { get; set; } = new List<MenuItem>();
     private List<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
 
-    private readonly int ColorPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_02"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
-    private readonly int OpacityPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_01"); // Could probably be improved, but was getting some glitchy results if it wasn't pre-loaded.
+    // What is currently loaded into ColorPanelScaleform, so the 64 swatches are only re-sent when
+    // they would actually differ. See DrawColorAndOpacityPanel. Static because the scaleform is.
+    private static MenuListItem? _paletteItem;
+    private static MenuListItem.ColorPanelType _paletteType;
+
+    // Static rather than one pair per menu. Only the current menu ever draws a panel, so a resource
+    // with fifty menus was asking the game for a hundred scaleform movies and holding them all for
+    // the lifetime of the resource. Still requested up front, because loading them on first use was
+    // what gave the glitchy results the original comment here warned about.
+    private static readonly int ColorPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_02");
+    private static readonly int OpacityPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_01");
     #endregion
 
     #region Public Variables
@@ -386,6 +395,8 @@ public class Menu
     }
 
     public bool LeftAligned => MenuController.MenuAlignment == MenuController.MenuAlignmentOption.Left;
+    // Nothing has ever assigned this, so it has always been (0, 0), and every position calculation
+    // used to add it anyway. The drawing code no longer reads it. Kept because it is public.
     public KeyValuePair<float, float> Position { get; private set; } = new KeyValuePair<float, float>(0f, 0f);
 
     public float MenuItemsYOffset { get; private set; } = 0f;
@@ -677,6 +688,11 @@ public class Menu
     public void CloseMenu()
     {
         Visible = false;
+
+        // Cheap insurance: the swatch cache assumes the scaleform still holds what it was given, so
+        // a reopen starts from scratch rather than trusting it across a gap.
+        _paletteItem = null;
+
         MenuCloseEvent(this);
     }
 
@@ -994,10 +1010,10 @@ public class Menu
             SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-            float x = (Position.Key + (HeaderWidth / 2f)) / MenuController.ScreenWidth;
-            float y = (Position.Value + (HeaderHeight / 2f)) / MenuController.ScreenHeight;
-            float width = HeaderWidth / MenuController.ScreenWidth;
-            float height = HeaderHeight / MenuController.ScreenHeight;
+            float x = MenuLayout.RowCenterX;
+            float y = MenuLayout.HeaderHeightN / 2f;
+            float width = HeaderWidth / MenuLayout.ScreenWidth;
+            float height = HeaderHeight / MenuLayout.ScreenHeight;
 
             if (!string.IsNullOrEmpty(HeaderTexture.Key) && !string.IsNullOrEmpty(HeaderTexture.Value))
             {
@@ -1021,7 +1037,7 @@ public class Menu
 
             #region Draw Header Menu Title
             int font = 1;
-            float size = (45f * 27f) / MenuController.ScreenHeight;
+            float size = (45f * 27f) / MenuLayout.ScreenHeight;
             SetScriptGfxAlign(76, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
@@ -1033,11 +1049,11 @@ public class Menu
             AddTextComponentSubstringPlayerName(MenuTitle);
             if (LeftAligned)
             {
-                EndTextCommandDisplayText(((HeaderWidth / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f), 0);
+                EndTextCommandDisplayText(((HeaderWidth / 2f) / MenuLayout.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f), 0);
             }
             else
             {
-                EndTextCommandDisplayText(GetSafeZoneSize() - ((HeaderWidth / 2f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f), 0);
+                EndTextCommandDisplayText(MenuLayout.RightHeaderCenterX, y - (GetTextScaleHeight(size, font) / 2f), 0);
             }
             ResetScriptGfxAlign();
             menuItemsOffset = HeaderHeight;
@@ -1063,10 +1079,10 @@ public class Menu
 
         float bgHeight = 38f;
 
-        float x = (Position.Key + (HeaderWidth / 2f)) / MenuController.ScreenWidth;
-        float y = ((Position.Value + menuItemsOffset + (bgHeight / 2f)) / MenuController.ScreenHeight);
-        float width = HeaderWidth / MenuController.ScreenWidth;
-        float height = bgHeight / MenuController.ScreenHeight;
+        float x = MenuLayout.RowCenterX;
+        float y = ((menuItemsOffset + (bgHeight / 2f)) / MenuLayout.ScreenHeight);
+        float width = HeaderWidth / MenuLayout.ScreenWidth;
+        float height = bgHeight / MenuLayout.ScreenHeight;
 
         DrawRect(x, y, width, height, 0, 0, 0, 250, false);
         ResetScriptGfxAlign();
@@ -1075,7 +1091,7 @@ public class Menu
         if (!string.IsNullOrEmpty(MenuSubtitle))
         {
             int font = 0;
-            float size = (14f * 27f) / MenuController.ScreenHeight;
+            float size = MenuLayout.ItemTextSize;
 
             SetScriptGfxAlign(76, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -1096,11 +1112,11 @@ public class Menu
 
             if (LeftAligned)
             {
-                EndTextCommandDisplayText(10f / MenuController.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)), 0);
+                EndTextCommandDisplayText(10f / MenuLayout.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
             }
             else
             {
-                EndTextCommandDisplayText(GetSafeZoneSize() - ((HeaderWidth - 10f) / MenuController.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)), 0);
+                EndTextCommandDisplayText(MenuLayout.RightHeaderTextX, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
             }
             ResetScriptGfxAlign();
         }
@@ -1110,7 +1126,7 @@ public class Menu
         if (!string.IsNullOrEmpty(CounterPreText) || MaxItemsOnScreen < Size)
         {
             int font = 0;
-            float size = (14f * 27f) / MenuController.ScreenHeight;
+            float size = MenuLayout.ItemTextSize;
 
             SetScriptGfxAlign(76, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -1129,13 +1145,13 @@ public class Menu
             }
             if (LeftAligned)
             {
-                SetTextWrap(0f, (485f / MenuController.ScreenWidth));
-                EndTextCommandDisplayText(10f / MenuController.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)), 0);
+                SetTextWrap(0f, (485f / MenuLayout.ScreenWidth));
+                EndTextCommandDisplayText(10f / MenuLayout.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
             }
             else
             {
-                SetTextWrap(0f, GetSafeZoneSize() - (10f / MenuController.ScreenWidth));
-                EndTextCommandDisplayText(0f, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuController.ScreenHeight)), 0);
+                SetTextWrap(0f, MenuLayout.RightTextMaxX);
+                EndTextCommandDisplayText(0f, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
             }
 
             ResetScriptGfxAlign();
@@ -1162,10 +1178,10 @@ public class Menu
         SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
         float bgHeight = 38f * Math.Clamp(Size, 0, MaxItemsOnScreen);
-        float x = (Position.Key + (HeaderWidth / 2f)) / MenuController.ScreenWidth;
-        float y = ((Position.Value + menuItemsOffset + ((bgHeight + 1f) / 2f)) / MenuController.ScreenHeight);
-        float width = HeaderWidth / MenuController.ScreenWidth;
-        float height = (bgHeight + 1f) / MenuController.ScreenHeight;
+        float x = MenuLayout.RowCenterX;
+        float y = ((menuItemsOffset + ((bgHeight + 1f) / 2f)) / MenuLayout.ScreenHeight);
+        float width = HeaderWidth / MenuLayout.ScreenWidth;
+        float height = (bgHeight + 1f) / MenuLayout.ScreenHeight;
 
         DrawRect(x, y, width, height, 0, 0, 0, 180, false);
         menuItemsOffset += bgHeight - 1f;
@@ -1200,10 +1216,10 @@ public class Menu
             return descriptionYOffset;
         }
         #region background
-        float width = Width / MenuController.ScreenWidth;
-        float height = 60f / MenuController.ScreenWidth;
-        float x = (Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
-        float y = (MenuItemsYOffset / MenuController.ScreenHeight) + (height / 2f) + (6f / MenuController.ScreenHeight);
+        float width = Width / MenuLayout.ScreenWidth;
+        float height = 60f / MenuLayout.ScreenWidth;
+        float x = MenuLayout.RowCenterX;
+        float y = (MenuItemsYOffset / MenuLayout.ScreenHeight) + (height / 2f) + (6f / MenuLayout.ScreenHeight);
 
         SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -1217,16 +1233,16 @@ public class Menu
         SetScriptGfxAlign(76, 84);
         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
         float xMin = 0f;
-        float xMax = Width / MenuController.ScreenWidth;
-        float xCenter = 250f / MenuController.ScreenWidth;
-        float yTop = y - (20f / MenuController.ScreenHeight);
-        float yBottom = y - (10f / MenuController.ScreenHeight);
+        float xMax = Width / MenuLayout.ScreenWidth;
+        float xCenter = 250f / MenuLayout.ScreenWidth;
+        float yTop = y - (20f / MenuLayout.ScreenHeight);
+        float yBottom = y - (10f / MenuLayout.ScreenHeight);
 
         BeginTextCommandDisplayText("STRING");
         AddTextComponentSubstringPlayerName("↑");
 
         SetTextFont(0);
-        SetTextScale(1f, (14f * 27f) / MenuController.ScreenHeight);
+        SetTextScale(1f, MenuLayout.ItemTextSize);
         SetTextJustification(0);
         if (LeftAligned)
         {
@@ -1235,9 +1251,9 @@ public class Menu
         }
         else
         {
-            xMin = GetSafeZoneSize() - ((Width - 10f) / MenuController.ScreenWidth);
-            xMax = GetSafeZoneSize() - (10f / MenuController.ScreenWidth);
-            xCenter = GetSafeZoneSize() - (250f / MenuController.ScreenWidth);
+            xMin = MenuLayout.RightTextMinX;
+            xMax = MenuLayout.RightTextMaxX;
+            xCenter = MenuLayout.RightDescriptionCenterX;
             SetTextWrap(xMin, xMax);
             EndTextCommandDisplayText(xCenter, yTop, 0);
         }
@@ -1246,7 +1262,7 @@ public class Menu
         AddTextComponentSubstringPlayerName("↓");
 
         SetTextFont(0);
-        SetTextScale(1f, (14f * 27f) / MenuController.ScreenHeight);
+        SetTextScale(1f, MenuLayout.ItemTextSize);
         SetTextJustification(0);
         if (LeftAligned)
         {
@@ -1280,11 +1296,11 @@ public class Menu
         {
             #region description text
             int font = 0;
-            float textSize = (14f * 27f) / MenuController.ScreenHeight;
+            float textSize = MenuLayout.ItemTextSize;
 
-            float textMinX = 0f + (10f / MenuController.ScreenWidth);
-            float textMaxX = Width / MenuController.ScreenWidth - (10f / MenuController.ScreenWidth);
-            float textY = menuItemsOffset / MenuController.ScreenHeight + (16f / MenuController.ScreenHeight) + descriptionYOffset;
+            float textMinX = 0f + (10f / MenuLayout.ScreenWidth);
+            float textMaxX = Width / MenuLayout.ScreenWidth - (10f / MenuLayout.ScreenWidth);
+            float textY = menuItemsOffset / MenuLayout.ScreenHeight + (16f / MenuLayout.ScreenHeight) + descriptionYOffset;
             SetScriptGfxAlign(76, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
@@ -1305,8 +1321,8 @@ public class Menu
             }
             else
             {
-                textMinX = GetSafeZoneSize() - ((Width - 10f) / MenuController.ScreenWidth);
-                textMaxX = GetSafeZoneSize() - (10f / MenuController.ScreenWidth);
+                textMinX = MenuLayout.RightTextMinX;
+                textMaxX = MenuLayout.RightTextMaxX;
                 SetTextWrap(textMinX, textMaxX);
                 EndTextCommandDisplayText(textMinX, textY, 0);
             }
@@ -1339,25 +1355,25 @@ public class Menu
             ResetScriptGfxAlign();
             #endregion
             #region background
-            float descWidth = Width / MenuController.ScreenWidth;
-            float descHeight = (textHeight + 0.005f) * lineCount + (8f / MenuController.ScreenHeight) + (2.5f / MenuController.ScreenHeight);
-            float descX = (Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
-            float descY = textY - (6f / MenuController.ScreenHeight) + (descHeight / 2f);
+            float descWidth = Width / MenuLayout.ScreenWidth;
+            float descHeight = (textHeight + 0.005f) * lineCount + (8f / MenuLayout.ScreenHeight) + (2.5f / MenuLayout.ScreenHeight);
+            float descX = MenuLayout.RowCenterX;
+            float descY = textY - (6f / MenuLayout.ScreenHeight) + (descHeight / 2f);
 
             SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-            DrawRect(descX, descY - (descHeight / 2f) + (2f / MenuController.ScreenHeight), descWidth, 4f / MenuController.ScreenHeight, 0, 0, 0, 200, false);
+            DrawRect(descX, descY - (descHeight / 2f) + (2f / MenuLayout.ScreenHeight), descWidth, 4f / MenuLayout.ScreenHeight, 0, 0, 0, 200, false);
             DrawRect(descX, descY, descWidth, descHeight, 0, 0, 0, 180, false);
 
             ResetScriptGfxAlign();
             #endregion
 
-            descriptionYOffset += descY + (descHeight / 2f) - (4f / MenuController.ScreenHeight);
+            descriptionYOffset += descY + (descHeight / 2f) - (4f / MenuLayout.ScreenHeight);
         }
         else
         {
-            descriptionYOffset += menuItemsOffset / MenuController.ScreenHeight + (2f / MenuController.ScreenHeight) + descriptionYOffset;
+            descriptionYOffset += menuItemsOffset / MenuLayout.ScreenHeight + (2f / MenuLayout.ScreenHeight) + descriptionYOffset;
         }
         return descriptionYOffset;
     }
@@ -1389,14 +1405,14 @@ public class Menu
             return;
         }
 
-        float textSize = (14f * 27f) / MenuController.ScreenHeight;
-        float width = Width / MenuController.ScreenWidth;
-        float height = (140f) / MenuController.ScreenHeight;
-        float x = ((Width / 2f) / MenuController.ScreenWidth);
-        float y = descriptionYOffset + (height / 2f) + (8f / MenuController.ScreenHeight);
+        float textSize = MenuLayout.ItemTextSize;
+        float width = Width / MenuLayout.ScreenWidth;
+        float height = (140f) / MenuLayout.ScreenHeight;
+        float x = ((Width / 2f) / MenuLayout.ScreenWidth);
+        float y = descriptionYOffset + (height / 2f) + (8f / MenuLayout.ScreenHeight);
         if (Size > MaxItemsOnScreen)
         {
-            y -= (30f / MenuController.ScreenHeight);
+            y -= (30f / MenuLayout.ScreenHeight);
         }
 
         #region background
@@ -1406,17 +1422,17 @@ public class Menu
         ResetScriptGfxAlign();
         #endregion
 
-        float bgStatBarWidth = (Width / 2f) / MenuController.ScreenWidth;
-        float bgStatBarX = x + (bgStatBarWidth / 2f) - (10f / MenuController.ScreenWidth);
+        float bgStatBarWidth = (Width / 2f) / MenuLayout.ScreenWidth;
+        float bgStatBarX = x + (bgStatBarWidth / 2f) - (10f / MenuLayout.ScreenWidth);
 
         if (!LeftAligned)
         {
-            bgStatBarX = x - (bgStatBarWidth / 2f) - (10f / MenuController.ScreenWidth);
+            bgStatBarX = x - (bgStatBarWidth / 2f) - (10f / MenuLayout.ScreenWidth);
         }
         float barWidth;
         float componentBarWidth;
-        float barY = y - (height / 2f) + (25f / MenuController.ScreenHeight);
-        float bgStatBarHeight = 10f / MenuController.ScreenHeight;
+        float barY = y - (height / 2f) + (25f / MenuLayout.ScreenHeight);
+        float bgStatBarHeight = 10f / MenuLayout.ScreenHeight;
         float barX;
         float componentBarX;
 
@@ -1439,8 +1455,8 @@ public class Menu
             }
             else
             {
-                barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
-                componentBarX = (componentBarWidth * 1.5f) - bgStatBarWidth - (10f / MenuController.ScreenWidth);
+                barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuLayout.ScreenWidth);
+                componentBarX = (componentBarWidth * 1.5f) - bgStatBarWidth - (10f / MenuLayout.ScreenWidth);
             }
             SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -1451,12 +1467,12 @@ public class Menu
             // real bar
             DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255, false);
             ResetScriptGfxAlign();
-            barY += 30f / MenuController.ScreenHeight;
+            barY += 30f / MenuLayout.ScreenHeight;
         }
 
         #region weapon stats text
-        float textX = LeftAligned ? x - (width / 2f) + (10f / MenuController.ScreenWidth) : GetSafeZoneSize() - ((Width - 10f) / MenuController.ScreenWidth);
-        float textY = y - (height / 2f) + (10f / MenuController.ScreenHeight);
+        float textX = LeftAligned ? x - (width / 2f) + (10f / MenuLayout.ScreenWidth) : MenuLayout.RightTextMinX;
+        float textY = y - (height / 2f) + (10f / MenuLayout.ScreenHeight);
 
         for (int i = 0; i < 4; i++)
         {
@@ -1468,7 +1484,7 @@ public class Menu
 
             EndTextCommandDisplayText(textX, textY, 0);
             ResetScriptGfxAlign();
-            textY += 30f / MenuController.ScreenHeight;
+            textY += 30f / MenuLayout.ScreenHeight;
         }
         #endregion
     }
@@ -1499,13 +1515,13 @@ public class Menu
                 ScaleformMovieMethodAddParamInt(listItem.ListIndex * 10); // opacity percent
                 EndScaleformMovieMethod();
 
-                float width = Width / MenuController.ScreenWidth;
-                float height = ((700f / 500f) * Width) / MenuController.ScreenHeight;
-                float x = ((Width / 2f) / MenuController.ScreenWidth);
-                float y = descriptionYOffset + (height / 2f) + (4f / MenuController.ScreenHeight);
+                float width = Width / MenuLayout.ScreenWidth;
+                float height = ((700f / 500f) * Width) / MenuLayout.ScreenHeight;
+                float x = ((Width / 2f) / MenuLayout.ScreenWidth);
+                float y = descriptionYOffset + (height / 2f) + (4f / MenuLayout.ScreenHeight);
                 if (Size > MaxItemsOnScreen)
                 {
-                    y -= (30f / MenuController.ScreenHeight);
+                    y -= (30f / MenuLayout.ScreenHeight);
                 }
 
                 SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
@@ -1527,33 +1543,44 @@ public class Menu
                 ScaleformMovieMethodAddParamBool(true);
                 EndScaleformMovieMethod();
 
-                BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT_EMPTY");
-                EndScaleformMovieMethod();
-
-                for (int i = 0; i < 64; i++)
+                // The swatches themselves only change when the palette does, but filling them costs
+                // 64 colour lookups and 64 scaleform calls. The scaleform keeps what it was given,
+                // so this only re-sends them when the row or the palette type actually changed.
+                // ReferenceEquals rather than !=, matching how the rest of this codebase compares
+                // menu objects on a client that cannot load the default equality comparers.
+                if (!ReferenceEquals(_paletteItem, listItem) || _paletteType != listItem.ColorPanelColorType)
                 {
-                    int r;
-                    int g;
-                    int b;
-                    if (listItem.ColorPanelColorType == MenuListItem.ColorPanelType.Hair)
+                    _paletteItem = listItem;
+                    _paletteType = listItem.ColorPanelColorType;
+
+                    BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT_EMPTY");
+                    EndScaleformMovieMethod();
+
+                    for (int i = 0; i < 64; i++)
                     {
-                        GetHairRgbColor(i, out r, out g, out b); // _GetHairRgbColor
-                    }
-                    else
-                    {
-                        GetMakeupRgbColor(i, out r, out g, out b); // _GetMakeupRgbColor
+                        int r;
+                        int g;
+                        int b;
+                        if (listItem.ColorPanelColorType == MenuListItem.ColorPanelType.Hair)
+                        {
+                            GetHairRgbColor(i, out r, out g, out b); // _GetHairRgbColor
+                        }
+                        else
+                        {
+                            GetMakeupRgbColor(i, out r, out g, out b); // _GetMakeupRgbColor
+                        }
+
+                        BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT");
+                        ScaleformMovieMethodAddParamInt(i); // index
+                        ScaleformMovieMethodAddParamInt(r); // r
+                        ScaleformMovieMethodAddParamInt(g); // g
+                        ScaleformMovieMethodAddParamInt(b); // b
+                        EndScaleformMovieMethod();
                     }
 
-                    BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT");
-                    ScaleformMovieMethodAddParamInt(i); // index
-                    ScaleformMovieMethodAddParamInt(r); // r
-                    ScaleformMovieMethodAddParamInt(g); // g
-                    ScaleformMovieMethodAddParamInt(b); // b
+                    BeginScaleformMovieMethod(ColorPanelScaleform, "DISPLAY_VIEW");
                     EndScaleformMovieMethod();
                 }
-
-                BeginScaleformMovieMethod(ColorPanelScaleform, "DISPLAY_VIEW");
-                EndScaleformMovieMethod();
 
                 BeginScaleformMovieMethod(ColorPanelScaleform, "SET_HIGHLIGHT");
                 ScaleformMovieMethodAddParamInt(listItem.ListIndex);
@@ -1564,13 +1591,13 @@ public class Menu
                 ScaleformMovieMethodAddParamBool(true);
                 EndScaleformMovieMethod();
 
-                float width = Width / MenuController.ScreenWidth;
-                float height = ((700f / 500f) * Width) / MenuController.ScreenHeight;
-                float x = ((Width / 2f) / MenuController.ScreenWidth);
-                float y = descriptionYOffset + (height / 2f) + (4f / MenuController.ScreenHeight);
+                float width = Width / MenuLayout.ScreenWidth;
+                float height = ((700f / 500f) * Width) / MenuLayout.ScreenHeight;
+                float x = ((Width / 2f) / MenuLayout.ScreenWidth);
+                float y = descriptionYOffset + (height / 2f) + (4f / MenuLayout.ScreenHeight);
                 if (Size > MaxItemsOnScreen)
                 {
-                    y -= (30f / MenuController.ScreenHeight);
+                    y -= (30f / MenuLayout.ScreenHeight);
                 }
 
                 SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
@@ -1586,15 +1613,9 @@ public class Menu
     /// </summary>
     internal async Task Draw()
     {
-        if (!(
-            IsScreenFadedIn() &&
-            !IsPauseMenuActive() &&
-            !API.Players.Local.IsDead &&
-            !IsPlayerSwitchInProgress()
-        ))
-        {
-            return;
-        }
+        // The pause menu, screen fade, death and player switch checks that used to be here are the
+        // same four MenuController.ProcessMenus makes immediately before calling this, so they were
+        // eight natives a frame answering a question that had just been answered.
         ProcessButtonPressHandlers();
 
         MenuItemsYOffset = 0f;

@@ -41,13 +41,13 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
         return Enabled ? 255 : 109;
     }
 
-    private string GetSpriteName()
+    private string GetSpriteName(bool selected)
     {
         if (Checked)
         {
             if (Style == CheckboxStyle.Tick)
             {
-                if (Selected)
+                if (selected)
                 {
                     return "shop_box_tickb";
                 }
@@ -55,7 +55,7 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
             }
             else
             {
-                if (Selected)
+                if (selected)
                 {
                     return "shop_box_crossb";
                 }
@@ -64,7 +64,7 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
         }
         else
         {
-            if (Selected)
+            if (selected)
             {
                 return "shop_box_blankb";
             }
@@ -80,22 +80,22 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
         {
             if (leftAligned)
             {
-                return 20f / MenuController.ScreenWidth;
+                return 20f / MenuLayout.ScreenWidth;
             }
             else
             {
-                return GetSafeZoneSize() - ((Width - 20f) / MenuController.ScreenWidth);
+                return MenuLayout.RightWideIconX;
             }
         }
         else
         {
             if (leftAligned)
             {
-                return (Width - 20f) / MenuController.ScreenWidth;
+                return (Width - 20f) / MenuLayout.ScreenWidth;
             }
             else
             {
-                return GetSafeZoneSize() - (20f / MenuController.ScreenWidth);
+                return MenuLayout.RightIconX;
             }
         }
     }
@@ -114,13 +114,16 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
         SetScriptGfxAlign(76, 84);
         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-        float yOffset = parent.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(parent.Size, 0, parent.MaxItemsOnScreen));
-        string name = GetSpriteName();
+        int index = Index;
+        bool selected = parent.CurrentIndex == index;
 
-        float spriteY = (parent.Position.Value + ((Index - offset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
+        float yOffset = RowYOffset(parent);
+        string name = GetSpriteName(selected);
+
+        float spriteY = (((index - offset) * RowHeight) + 20f + yOffset) / MenuLayout.ScreenHeight;
         float spriteX = GetSpriteX(parent);
-        float spriteHeight = 45f / MenuController.ScreenHeight;
-        float spriteWidth = 45f / MenuController.ScreenWidth;
+        float spriteHeight = 45f / MenuLayout.ScreenHeight;
+        float spriteWidth = 45f / MenuLayout.ScreenWidth;
         int color = GetSpriteColour();
         DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255, false, false);
         ResetScriptGfxAlign();

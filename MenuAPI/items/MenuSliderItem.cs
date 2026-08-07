@@ -50,22 +50,25 @@ public class MenuSliderItem(string name, string? description, int min, int max, 
             Position = (Max - Min) / 2;
         }
 
-        float yOffset = parent.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(parent.Size, 0, parent.MaxItemsOnScreen));
+        int index = Index;
+        bool selected = parent.CurrentIndex == index;
 
-        float width = 150f / MenuController.ScreenWidth;
-        float height = 10f / MenuController.ScreenHeight;
-        float y = (parent.Position.Value + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
-        float x = (parent.Position.Key + (Width)) / MenuController.ScreenWidth - (width / 2f) - (8f / MenuController.ScreenWidth);
+        float yOffset = RowYOffset(parent);
+
+        float width = 150f / MenuLayout.ScreenWidth;
+        float height = 10f / MenuLayout.ScreenHeight;
+        float y = (((index - indexOffset) * RowHeight) + 20f + yOffset) / MenuLayout.ScreenHeight;
+        float x = MenuLayout.MenuWidthN - (width / 2f) - (8f / MenuLayout.ScreenWidth);
         if (!parent.LeftAligned)
         {
-            x = (width / 2f) - (8f / MenuController.ScreenWidth);
+            x = (width / 2f) - (8f / MenuLayout.ScreenWidth);
         }
 
         if (SliderLeftIcon != Icon.NONE && SliderRightIcon != Icon.NONE)
         {
-            x -= 40f / MenuController.ScreenWidth;
+            x -= 40f / MenuLayout.ScreenWidth;
 
-            var leftColor = GetSpriteColour(SliderLeftIcon, Selected);
+            var leftColor = GetSpriteColour(SliderLeftIcon, selected);
 
             SetScriptGfxAlign(parent.LeftAligned ? 76 : 82, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -75,14 +78,14 @@ public class MenuSliderItem(string name, string? description, int min, int max, 
             if (parent.LeftAligned)
             {
                 // left sprite left aligned.
-                DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width / 2f + (4f / MenuController.ScreenWidth)) - (GetSpriteSize(SliderLeftIcon, true) / 2f), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor[0], leftColor[1], leftColor[2], 255, false, false);
+                DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, selected), x - (width / 2f + (4f / MenuLayout.ScreenWidth)) - (GetSpriteSize(SliderLeftIcon, true) / 2f), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor.R, leftColor.G, leftColor.B, 255, false, false);
 
                 // right sprite is managed by the regular function in MenuItem that handles the right icon.
             }
             else
             {
                 // left sprite right aligned.
-                DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width + (4f / MenuController.ScreenWidth)) - GetSpriteSize(SliderLeftIcon, true) - (20f / MenuController.ScreenWidth), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor[0], leftColor[1], leftColor[2], 255, false, false);
+                DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, selected), x - (width + (4f / MenuLayout.ScreenWidth)) - GetSpriteSize(SliderLeftIcon, true) - (20f / MenuLayout.ScreenWidth), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor.R, leftColor.G, leftColor.B, 255, false, false);
 
                 // right sprite is managed by the regular function in MenuItem that handles the right icon.
             }
@@ -101,10 +104,10 @@ public class MenuSliderItem(string name, string? description, int min, int max, 
             (float)Position,
             (float)Min,
             (float)Max,
-            -((width / 4f) * MenuController.ScreenWidth),
-            (width / 4f) * MenuController.ScreenWidth
+            -((width / 4f) * MenuLayout.ScreenWidth),
+            (width / 4f) * MenuLayout.ScreenWidth
         );
-        xOffset /= MenuController.ScreenWidth;
+        xOffset /= MenuLayout.ScreenWidth;
 
         // bar (foreground)
         if (!parent.LeftAligned)
@@ -123,11 +126,11 @@ public class MenuSliderItem(string name, string? description, int min, int max, 
         {
             if (!parent.LeftAligned)
             {
-                DrawRect(x - width + (4f / MenuController.ScreenWidth), y, 4f / MenuController.ScreenWidth, RowHeight / MenuController.ScreenHeight / 2f, 255, 255, 255, 255, false);
+                DrawRect(x - width + (4f / MenuLayout.ScreenWidth), y, 4f / MenuLayout.ScreenWidth, RowHeight / MenuLayout.ScreenHeight / 2f, 255, 255, 255, 255, false);
             }
             else
             {
-                DrawRect(x + (2f / MenuController.ScreenWidth), y, 4f / MenuController.ScreenWidth, RowHeight / MenuController.ScreenHeight / 2f, 255, 255, 255, 255, false);
+                DrawRect(x + (2f / MenuLayout.ScreenWidth), y, 4f / MenuLayout.ScreenWidth, RowHeight / MenuLayout.ScreenHeight / 2f, 255, 255, 255, 255, false);
             }
         }
         #endregion

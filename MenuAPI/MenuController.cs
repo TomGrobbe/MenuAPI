@@ -31,6 +31,11 @@ public class MenuController : IScript
     // hold, so this is well inside it: once the button is actually down the hold is timed per frame.
     private const long ControllerPollIntervalMs = 100;
 
+    // How often the cached screen values are re-read while a menu is open. The safe zone slider is in
+    // the pause menu and a resolution change is not something a player does mid menu, so this only has
+    // to be often enough that the menu has settled by the time they look at it again.
+    private const long LayoutRefreshIntervalMs = 500;
+
     private static float AspectRatio => GetScreenAspectRatio(false);
     public static float ScreenWidth => 1080 * AspectRatio;
     public static float ScreenHeight => 1080;
@@ -157,6 +162,12 @@ public class MenuController : IScript
         // Every one of these is gated on a menu actually being open, so with everything closed none
         // of them run at all. Stopping a tick ends its loop rather than idling it, which is the whole
         // point: no wasted native calls while the player is just driving around.
+
+        // Registered before Menu.Draw so that when a menu opens, this one's onStarted has already
+        // refreshed the screen values before the draw tick's first frame reads them.
+        MenuTicks.Register("Menu.Layout", MenuLayout.Refresh, MenuTickRate.Every(LayoutRefreshIntervalMs), IsAnyMenuOpen,
+            onStarted: MenuLayout.Refresh);
+
         MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame, IsAnyMenuOpen, onStopped: UnloadAssets);
 
         MenuTicks.Register("Menu.InstructionalButtons", DrawInstructionalButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
@@ -252,8 +263,11 @@ public class MenuController : IScript
     /// Loads the texture dict for the common menu sprites.
     /// </summary>
     /// <returns></returns>
-    private static async Task LoadAssets()
+    /// <returns>Whether it had to wait for streaming, so callers know time has passed.</returns>
+    private static async Task<bool> LoadAssets()
     {
+        var waited = false;
+
         menuTextureAssets.ForEach(asset =>
         {
             if (!HasStreamedTextureDictLoaded(asset))
@@ -267,11 +281,15 @@ public class MenuController : IScript
             // leave dicts requested that nothing is going to release.
             if (!IsAnyMenuOpen())
             {
-                return;
+                return true;
             }
+
+            waited = true;
 
             await API.Delay(0);
         }
+
+        return waited;
     }
 
     /// <summary>
@@ -435,9 +453,9 @@ public class MenuController : IScript
     /// Returns true when one of the 'up' controls is currently pressed, only if the button can be active according to some conditions.
     /// </summary>
     /// <returns></returns>
-    private static bool IsUpPressed()
+    private static bool IsUpPressed(bool buttonsEnabled)
     {
-        if (!AreMenuButtonsEnabled)
+        if (!buttonsEnabled)
         {
             return false;
         }
@@ -462,9 +480,9 @@ public class MenuController : IScript
     /// Returns true when one of the 'down' controls is currently pressed, only if the button can be active according to some conditions.
     /// </summary>
     /// <returns></returns>
-    private static bool IsDownPressed()
+    private static bool IsDownPressed(bool buttonsEnabled)
     {
-        if (!AreMenuButtonsEnabled)
+        if (!buttonsEnabled)
         {
             return false;
         }
@@ -487,9 +505,9 @@ public class MenuController : IScript
     /// Returns true when one of the 'left' controls is currently pressed, only if the button can be active according to some conditions.
     /// </summary>
     /// <returns></returns>
-    private static bool IsLeftPressed()
+    private static bool IsLeftPressed(bool buttonsEnabled)
     {
-        if (!AreMenuButtonsEnabled)
+        if (!buttonsEnabled)
         {
             return false;
         }
@@ -506,9 +524,9 @@ public class MenuController : IScript
     /// Returns true when one of the 'right' controls is currently pressed, only if the button can be active according to some conditions.
     /// </summary>
     /// <returns></returns>
-    private static bool IsRightPressed()
+    private static bool IsRightPressed(bool buttonsEnabled)
     {
-        if (!AreMenuButtonsEnabled)
+        if (!buttonsEnabled)
         {
             return false;
         }
@@ -597,8 +615,11 @@ public class MenuController : IScript
     /// <returns></returns>
     private static async Task ProcessDirectionalButtons()
     {
-        // Return if the buttons are not currently enabled.
-        if (!AreMenuButtonsEnabled)
+        // Read once and handed to whichever check runs. Each of those used to work it out again, so
+        // a frame with nothing pressed evaluated the same seven conditions five times over.
+        var buttonsEnabled = AreMenuButtonsEnabled;
+
+        if (!buttonsEnabled)
         {
             return;
         }
@@ -610,23 +631,23 @@ public class MenuController : IScript
         {
             return;
         }
-        if (IsUpPressed())
+        if (IsUpPressed(buttonsEnabled))
         {
             await HandleUpNavigation(currentMenu);
         }
-        else if (IsDownPressed())
+        else if (IsDownPressed(buttonsEnabled))
         {
             await HandleDownNavigation(currentMenu);
         }
 
         // Check if the Go Left controls are pressed.
-        else if (IsLeftPressed())
+        else if (IsLeftPressed(buttonsEnabled))
         {
             await HandleLeftNavigation(currentMenu);
         }
 
         // Check if the Go Right controls are pressed.
-        else if (IsRightPressed())
+        else if (IsRightPressed(buttonsEnabled))
         {
             await HandleRightNavigation(currentMenu);
         }
@@ -640,7 +661,7 @@ public class MenuController : IScript
             var time = GetGameTimer();
             var times = 0;
             var delay = 200;
-            while (IsRightPressed())
+            while (IsRightPressed(AreMenuButtonsEnabled))
             {
                 // Re-read rather than trust the captured menu: this loop awaits every frame, so the
                 // menu can be closed from anywhere while it is suspended.
@@ -684,7 +705,7 @@ public class MenuController : IScript
             var time = GetGameTimer();
             var times = 0;
             var delay = 200;
-            while (IsLeftPressed())
+            while (IsLeftPressed(AreMenuButtonsEnabled))
             {
                 // Re-read rather than trust the captured menu: this loop awaits every frame, so the
                 // menu can be closed from anywhere while it is suspended.
@@ -727,7 +748,7 @@ public class MenuController : IScript
         var time = GetGameTimer();
         var times = 0;
         var delay = 200;
-        while (IsDownPressed())
+        while (IsDownPressed(AreMenuButtonsEnabled))
         {
             // Re-read rather than trust the captured menu: this loop awaits every frame, so the menu
             // can be closed from anywhere while it is suspended.
@@ -793,7 +814,7 @@ public class MenuController : IScript
         var delay = 200;
 
         // Do the following as long as the controls are being pressed.
-        while (IsUpPressed())
+        while (IsUpPressed(AreMenuButtonsEnabled))
         {
             // Re-read rather than trust the captured menu: this loop awaits every frame, so the menu
             // can be closed from anywhere while it is suspended.
@@ -1013,23 +1034,36 @@ public class MenuController : IScript
     /// <returns></returns>
     private static async Task ProcessMenus()
     {
+        // Cheap insurance: Menu.Layout's onStarted normally fills this in before the first frame
+        // here, but a resource that draws through some other path should never read an empty cache.
+        MenuLayout.EnsureComputed();
+
         // Whether a menu is open is the tick's own condition, so it is not checked again here. What
         // is left changes every frame with no event to react to, which is why it stays inline: the
-        // tick keeps running through a pause menu and simply draws nothing.
-        if (!(
-            IsScreenFadedIn() &&
-            !IsPauseMenuActive() &&
-            !API.Players.Local.IsDead
-            && !IsPlayerSwitchInProgress()
-            )
-        )
+        // tick keeps running through a pause menu and simply draws nothing. Menu.Draw trusts this
+        // check rather than repeating it.
+        if (!CanDraw())
         {
             return;
         }
-        await LoadAssets();
+
+        // Only re-checked when the textures actually had to stream in, which waits frames and gives
+        // the player time to open the pause menu. Normally they are already loaded and this is free.
+        if (await LoadAssets() && !CanDraw())
+        {
+            return;
+        }
+
         DisableControls();
         await DrawMenus();
     }
+
+    /// <summary>The game states that stop a menu being drawn, none of which announce a change.</summary>
+    private static bool CanDraw() =>
+        IsScreenFadedIn() &&
+        !IsPauseMenuActive() &&
+        !API.Players.Local.IsDead &&
+        !IsPlayerSwitchInProgress();
 
     private static async Task DrawMenus()
     {
@@ -1098,9 +1132,10 @@ public class MenuController : IScript
             SetInstructionalButtonSlot(slot++, MenuKeyBindings.GetBackButton(), menu.BackButtonText);
         }
 
-        for (int i = 0; i < menu.InstructionalButtons.Count; i++)
+        // Enumerated rather than indexed: ElementAt on a dictionary walks it from the start every
+        // time, so indexing it in a loop re-walked the whole thing once per button, every frame.
+        foreach (KeyValuePair<Control, string> button in menu.InstructionalButtons)
         {
-            KeyValuePair<Control, string> button = menu.InstructionalButtons.ElementAt(i);
             SetInstructionalButtonSlot(slot++, GetControlInstructionalButton(0, (int)button.Key, true), button.Value);
         }
 
