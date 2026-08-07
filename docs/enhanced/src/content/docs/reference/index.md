@@ -18,6 +18,7 @@ If you have not set up MenuAPI yet, start at [Setup](../setup/).
 |[MenuController](menucontroller/)|The static controller that draws your menus and handles all controls. You register your menus here.|
 |[Menu Items](menuitems/)|Everything you can put inside a menu: buttons, checkboxes, lists, dynamic lists and sliders.|
 |[Events](events/)|Every event a menu can raise, with the parameters they pass to your handler.|
+|[MenuTicks](ticks/)|A read only look at the loops MenuAPI runs, and when each one is switched off.|
 
 ----
 
@@ -92,3 +93,4 @@ namespace MyResource
 |Attach my own data to an item|[MenuItem.ItemData](menuitems/menuitem/#properties)|
 |Know which event fires for which item type|[Events](events/#which-event-fires-for-which-item)|
 |Show a weapon or vehicle stats panel|[Menu](menu/#weapon--vehicle-stats-panels)|
+|See what MenuAPI is actually running, and when|[MenuTicks](ticks/)|

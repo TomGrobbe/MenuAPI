@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-
-using static CitizenFX.FiveM.Client.Native;
+﻿using static CitizenFX.FiveM.Client.Native;
 
 namespace MenuAPI;
 
-public class MenuListItem(string text, List<string> items, int index, string description) : MenuItem(text, description)
+public class MenuListItem(string text, List<string> items, int index, string? description) : MenuItem(text, description)
 {
     public int ListIndex { get; set; } = index;
     public List<string> ListItems { get; set; } = items;
@@ -19,7 +17,7 @@ public class MenuListItem(string text, List<string> items, int index, string des
     }
     public int ItemsCount => ListItems.Count;
 
-    public string GetCurrentSelection()
+    public string? GetCurrentSelection()
     {
         if (ItemsCount > 0 && ListIndex >= 0 && ListIndex < ItemsCount)
         {
@@ -75,7 +73,11 @@ public class MenuListItem(string text, List<string> items, int index, string des
                 newIndex++;
             }
             ListIndex = newIndex;
-            ParentMenu.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, newIndex, Index);
+            if (ParentMenu is Menu parent)
+            {
+                parent.ListItemIndexChangeEvent(parent, this, oldIndex, newIndex, Index);
+            }
+
             PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
     }
@@ -96,13 +98,20 @@ public class MenuListItem(string text, List<string> items, int index, string des
             }
             ListIndex = newIndex;
 
-            ParentMenu.ListItemIndexChangeEvent(ParentMenu, this, oldIndex, newIndex, Index);
+            if (ParentMenu is Menu parent)
+            {
+                parent.ListItemIndexChangeEvent(parent, this, oldIndex, newIndex, Index);
+            }
+
             PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
     }
 
     internal override void Select()
     {
-        ParentMenu.ListItemSelectEvent(ParentMenu, this, ListIndex, Index);
+        if (ParentMenu is Menu parent)
+        {
+            parent.ListItemSelectEvent(parent, this, ListIndex, Index);
+        }
     }
 }

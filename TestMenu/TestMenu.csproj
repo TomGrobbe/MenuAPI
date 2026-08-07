@@ -1,20 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Shared settings (framework, langversion, nullable, ...) live in ../Directory.Build.props. -->
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <DebugType>embedded</DebugType>
     <TargetName>$(AssemblyName).net</TargetName>
-    <LangVersion>default</LangVersion>
+
+    <!--
+      FiveM has no host to resolve NuGet assemblies from the package cache, so MenuAPI.dll and the
+      CitizenFX assemblies have to sit next to TestMenu.net.dll in the resource folder.
+    -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+    <!-- The .deps.json file is not used, so don't generate it during build. -->
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+
+    <!-- Not shipped anywhere, so nothing consumes the XML docs or the package. -->
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-
     <ProjectReference Include="..\MenuAPI\MenuAPI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CitizenFX.FiveM.Client" Version="0.0.3-alpha" />
+    <PackageReference Include="CitizenFX.FiveM.Client" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="fxmanifest.lua" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
 </Project>

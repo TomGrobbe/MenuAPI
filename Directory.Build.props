@@ -1,0 +1,21 @@
+<Project>
+
+  <!--
+    Shared MSBuild settings for every project in this repo (MenuAPI, TestMenu).
+
+    OutputPath is deliberately NOT set here. CI builds MenuAPI/MenuAPI.csproj directly and
+    zips MenuAPI/bin/Release/net10.0, so moving the output would break the release workflow.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Configurations>Release;Debug</Configurations>
+    <DebugType>embedded</DebugType>
+
+    <Authors>Tom Grobbe</Authors>
+    <Copyright>Copyright (C) 2018-2026 Tom Grobbe</Copyright>
+  </PropertyGroup>
+
+</Project>

@@ -1,5 +1,3 @@
-using System;
-
 using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Shared;
 
@@ -17,7 +15,7 @@ internal static class MenuKeyBindings
     // Command names are global across every resource, so they carry the resource name to stop two
     // resources that both ship MenuAPI from fighting over the same commands. Lowercased because the
     // hash the instructional buttons are looked up by is case sensitive, see BindingControl.
-    private static readonly string Prefix = $"menuapi:{GetCurrentResourceName().ToLower()}:";
+    internal static readonly string Prefix = $"menuapi:{GetCurrentResourceName().ToLower()}:";
 
     private static readonly string Toggle = $"{Prefix}toggle";
     private static readonly string Up = $"{Prefix}up";
@@ -106,6 +104,17 @@ internal static class MenuKeyBindings
         DownHeld = false;
         LeftHeld = false;
         RightHeld = false;
+    }
+
+    /// <summary>
+    /// Drops a select or back press that has not been acted on yet. The loop that drains these only
+    /// runs while a menu is open, so without this a Return pressed while everything was closed would
+    /// fire the moment a menu opens.
+    /// </summary>
+    internal static void ClearPending()
+    {
+        selectReleased = false;
+        backReleased = false;
     }
 
     internal static bool ConsumeToggle()

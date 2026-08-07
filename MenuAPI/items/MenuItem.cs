@@ -1,6 +1,4 @@
-﻿using System;
-
-using static CitizenFX.FiveM.Client.Native;
+﻿using static CitizenFX.FiveM.Client.Native;
 
 namespace MenuAPI;
 
@@ -190,11 +188,11 @@ public class MenuItem
         INFO
     }
     public string Text { get; set; }
-    public string Label { get; set; }
+    public string? Label { get; set; }
     public Icon LeftIcon { get; set; }
     public Icon RightIcon { get; set; }
     public bool Enabled { get; set; } = true;
-    public string Description
+    public string? Description
     {
         get
         {
@@ -205,7 +203,7 @@ public class MenuItem
             _description = value;
         }
     }
-    private string _description;
+    private string? _description;
     public int Index
     {
         get
@@ -219,13 +217,13 @@ public class MenuItem
         }
     }
     public bool Selected { get { if (ParentMenu != null) { return ParentMenu.CurrentIndex == Index; } return false; } }
-    public Menu ParentMenu { get; set; }
+    public Menu? ParentMenu { get; set; }
     public int PositionOnScreen { get; internal set; }
     protected const float Width = Menu.Width;
     protected const float RowHeight = 38f;
 
     // Allows you to attach data to a menu item if you want to identify the menu item without having to put identification info in the visible text or description.
-    public dynamic ItemData { get; set; }
+    public dynamic? ItemData { get; set; }
 
     /// <summary>
     /// Creates a new <see cref="MenuItem"/>.
@@ -238,7 +236,7 @@ public class MenuItem
     /// </summary>
     /// <param name="text"></param>
     /// <param name="description"></param>
-    public MenuItem(string text, string description)
+    public MenuItem(string text, string? description)
     {
         Text = text;
         Description = description;
@@ -543,7 +541,7 @@ public class MenuItem
     {
         if (Enabled)
         {
-            ParentMenu.SelectItem(this);
+            ParentMenu?.SelectItem(this);
         }
     }
 
@@ -554,7 +552,7 @@ public class MenuItem
     {
         if (MenuController.NavigateMenuUsingArrows && !MenuController.DisableBackButton && !(MenuController.PreventExitingMenu && ParentMenu == null))
         {
-            ParentMenu.GoBack();
+            ParentMenu?.GoBack();
         }
     }
 
@@ -563,7 +561,7 @@ public class MenuItem
     /// </summary>
     internal virtual void Select()
     {
-        ParentMenu.ItemSelectedEvent(this, Index);
+        ParentMenu?.ItemSelectedEvent(this, Index);
     }
 
     /// <summary>
@@ -571,7 +569,7 @@ public class MenuItem
     /// </summary>
     internal virtual void Draw(int indexOffset)
     {
-        if (ParentMenu == null)
+        if (ParentMenu is not Menu parent)
         {
             return;
         }
@@ -580,24 +578,24 @@ public class MenuItem
         float textSize = (14f * 27f) / MenuController.ScreenHeight;
         int textColor = Selected ? (Enabled ? 0 : 50) : (Enabled ? 255 : 109);
 
-        float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
+        float yOffset = parent.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(parent.Size, 0, parent.MaxItemsOnScreen));
         float textXOffset = 0f;
         float rightTextIconOffset = 0f;
 
-        DrawBackground(indexOffset, yOffset, out _, out float y);
+        DrawBackground(parent, indexOffset, yOffset, out _, out float y);
 
         float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
         float textY = y - ((30f / 2f) / MenuController.ScreenHeight);
 
-        textXOffset = DrawLeftIcon(textXOffset, y);
-        rightTextIconOffset = DrawRightIcon(rightTextIconOffset, y);
+        textXOffset = DrawLeftIcon(parent, textXOffset, y);
+        rightTextIconOffset = DrawRightIcon(parent, rightTextIconOffset, y);
 
         // must be calculated after DrawLeftIcon, otherwise the left icon offset is not taken into account
         // and the item text will be drawn on top of the icon.
         float textMinX = (textXOffset / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
 
-        DrawLabelText(rightTextIconOffset, font, textSize, textColor, textY);
-        DrawItemText(font, textSize, textColor, textMinX, textMaxX, textY, textXOffset);
+        DrawLabelText(parent, rightTextIconOffset, font, textSize, textColor, textY);
+        DrawItemText(parent, font, textSize, textColor, textMinX, textMaxX, textY, textXOffset);
     }
 
     /// <summary>
@@ -610,7 +608,7 @@ public class MenuItem
     /// <param name="textMaxX"></param>
     /// <param name="textY"></param>
     /// <param name="textXOffset"></param>
-    private void DrawItemText(int font, float textSize, int textColor, float textMinX, float textMaxX, float textY, float textXOffset)
+    private void DrawItemText(Menu parent, int font, float textSize, int textColor, float textMinX, float textMaxX, float textY, float textXOffset)
     {
         SetScriptGfxAlign(76, 84);
         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
@@ -623,7 +621,7 @@ public class MenuItem
         {
             SetTextColour(textColor, textColor, textColor, 255);
         }
-        if (ParentMenu.LeftAligned)
+        if (parent.LeftAligned)
         {
             SetTextWrap(textMinX, textMaxX);
             EndTextCommandDisplayText(textMinX, textY, 0);
@@ -646,7 +644,7 @@ public class MenuItem
     /// <param name="textSize"></param>
     /// <param name="textColor"></param>
     /// <param name="textY"></param>
-    private void DrawLabelText(float rightTextIconOffset, int font, float textSize, int textColor, float textY)
+    private void DrawLabelText(Menu parent, float rightTextIconOffset, int font, float textSize, int textColor, float textY)
     {
         if (string.IsNullOrEmpty(Label))
         {
@@ -664,7 +662,7 @@ public class MenuItem
         {
             SetTextColour(textColor, textColor, textColor, 255);
         }
-        if (ParentMenu.LeftAligned)
+        if (parent.LeftAligned)
         {
             SetTextWrap(0f, ((490f - rightTextIconOffset) / MenuController.ScreenWidth));
             EndTextCommandDisplayText((10f + rightTextIconOffset) / MenuController.ScreenWidth, textY, 0);
@@ -683,7 +681,7 @@ public class MenuItem
     /// <param name="rightTextIconOffset"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    private float DrawRightIcon(float rightTextIconOffset, float y)
+    private float DrawRightIcon(Menu parent, float rightTextIconOffset, float y)
     {
         if (RightIcon == Icon.NONE)
         {
@@ -695,7 +693,7 @@ public class MenuItem
         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
         string name = GetSpriteName(RightIcon, Selected);
         float spriteY = y;
-        float spriteX = GetSpriteX(RightIcon, ParentMenu.LeftAligned, false);
+        float spriteX = GetSpriteX(RightIcon, parent.LeftAligned, false);
         float spriteHeight = GetSpriteSize(RightIcon, false);
         float spriteWidth = GetSpriteSize(RightIcon, true);
         int[] spriteColor = GetSpriteColour(RightIcon, Selected);
@@ -711,7 +709,7 @@ public class MenuItem
     /// <param name="textXOffset"></param>
     /// <param name="y"></param>
     /// <returns></returns>
-    private float DrawLeftIcon(float textXOffset, float y)
+    private float DrawLeftIcon(Menu parent, float textXOffset, float y)
     {
         if (LeftIcon == Icon.NONE)
         {
@@ -723,7 +721,7 @@ public class MenuItem
 
         string name = GetSpriteName(LeftIcon, Selected);
         float spriteY = y;
-        float spriteX = GetSpriteX(LeftIcon, ParentMenu.LeftAligned, true);
+        float spriteX = GetSpriteX(LeftIcon, parent.LeftAligned, true);
         float spriteHeight = GetSpriteSize(LeftIcon, false);
         float spriteWidth = GetSpriteSize(LeftIcon, true);
         int[] spriteColor = GetSpriteColour(LeftIcon, Selected);
@@ -741,16 +739,16 @@ public class MenuItem
     /// <param name="yOffset"></param>
     /// <param name="x"></param>
     /// <param name="y"></param>
-    private void DrawBackground(int indexOffset, float yOffset, out float x, out float y)
+    private void DrawBackground(Menu parent, int indexOffset, float yOffset, out float x, out float y)
     {
-        x = (ParentMenu.Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
-        y = (ParentMenu.Position.Value + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
+        x = (parent.Position.Key + (Width / 2f)) / MenuController.ScreenWidth;
+        y = (parent.Position.Value + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
 
         if (Selected)
         {
             float width = Width / MenuController.ScreenWidth;
             float height = (RowHeight) / MenuController.ScreenHeight;
-            SetScriptGfxAlign(ParentMenu.LeftAligned ? 76 : 82, 84);
+            SetScriptGfxAlign(parent.LeftAligned ? 76 : 82, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
             DrawRect(x, y, width, height, 255, 255, 255, 225, false);
             ResetScriptGfxAlign();

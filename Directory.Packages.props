@@ -1,0 +1,12 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- CitizenFX runtime for FiveM Enhanced. Both projects consume the client package. -->
+    <PackageVersion Include="CitizenFX.FiveM.Client" Version="0.0.3-alpha" />
+  </ItemGroup>
+
+</Project>

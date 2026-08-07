@@ -93,12 +93,9 @@ public class ExampleMenu : IScript
         // Dynamic list item
         string ChangeCallback(MenuDynamicListItem item, bool left)
         {
-            if (left)
-            {
-                return (int.Parse(item.CurrentItem) - 1).ToString();
-            }
+            int current = int.TryParse(item.CurrentItem, out int parsed) ? parsed : 0;
 
-            return (int.Parse(item.CurrentItem) + 1).ToString();
+            return (left ? current - 1 : current + 1).ToString();
         }
         MenuDynamicListItem dynList = new MenuDynamicListItem(
             "Dynamic list item.",

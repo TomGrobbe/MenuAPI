@@ -68,6 +68,7 @@ export default defineConfig({
               ],
             },
             { label: 'Events', link: '/reference/events/' },
+            { label: 'MenuTicks', link: '/reference/ticks/' },
           ],
         },
         { label: 'Troubleshooting & Support', link: '/support/' },

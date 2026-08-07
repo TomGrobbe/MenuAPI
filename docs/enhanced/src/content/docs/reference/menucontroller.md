@@ -73,7 +73,6 @@ All properties are **static**.
 |DisableBackButton|boolean|false|When true, the back/cancel control does nothing at all, not even in submenus.|Yes|
 |NavigateMenuUsingArrows|boolean|true|When true, pressing left on an item that has no left/right behaviour goes back to the parent menu.|Yes|
 |SetDrawOrder|boolean|true|Whether MenuAPI sets the script graphics draw order while drawing. Turn this off if the menu draws over (or under) your own UI in the wrong order.|Yes|
-|EnableManualGCs|boolean|true|Whether MenuAPI triggers a manual garbage collect every 60 seconds while no menu is open. Turn this off if your resource manages GCs itself.|Yes|
 |ScreenWidth|float|1920f|(Getter only) The width of the screen, scaled to a 1080p height. This changes with the aspect ratio.|Yes|
 |ScreenHeight|float|1080f|(Getter only) The height of the screen. This is always 1080.|Yes|
 

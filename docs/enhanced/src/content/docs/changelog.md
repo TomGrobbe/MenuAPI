@@ -10,6 +10,23 @@ title: "Changelog"
 These are the changes in the MenuAPI FiveM Enhanced alpha packages. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way. The final Enhanced release is not ready yet, so more of these can still show up.
 :::
 
+### Menus stop costing anything while they are closed
+
+MenuAPI used to run seven loops that never stopped. Four of them did real work on every single frame even with every menu closed, which added up to roughly 24 wasted calls into the game per frame, forever. All of that work now sits behind a small scheduler, and a loop that is switched off genuinely **ends** instead of running and immediately returning. With no menu open, MenuAPI does almost nothing at all.
+
+You can see this for yourself. Type `menuapi:yourresourcename:ticks` in the console and it prints every loop and whether it is running. You can also read the same thing from code through the new [MenuTicks](reference/ticks/) class, which is handy if your resource has its own debug overlay.
+
+**Things you have to change in your own code:**
+
+- `MenuController.EnableManualGCs` is **gone**, along with the manual garbage collect it controlled. The .NET runtime handles this on its own, and forcing a collect on the game thread was a stutter nobody asked for.
+- MenuAPI is now built with **nullable reference types** switched on, so things that really can be null now say so. `MenuController.GetCurrentMenu()`, `MenuController.MainMenu`, `Menu.ParentMenu`, `Menu.GetCurrentMenuItem()`, `Menu.MenuTitle`, `Menu.MenuSubtitle`, `Menu.CounterPreText`, `MenuItem.Label`, `MenuItem.Description` and `MenuDynamicListItem.CurrentItem` are all nullable now. If your own resource has nullable switched on too, you may get new warnings where you use one of these without checking it first. Those warnings are pointing at real crashes waiting to happen, so it is worth fixing them rather than silencing them. Nothing needs to change if you do not use nullable yourself.
+
+**Things that just behave differently now:**
+
+- The controller open gesture is checked ten times a second instead of every frame. It is a 400ms hold, so it still opens at exactly the same moment.
+- A few genuine crashes are fixed along the way. Holding a direction key while something else closed the menu could crash, and so could selecting an item that opens a submenu if a handler closed the menu first.
+- Menu textures stay loaded while the pause menu is open instead of being thrown away and re-requested. Nothing visible changes, there is just less streaming churn.
+
 ### Keyboard controls are now FiveM key bindings
 
 Every keyboard menu control is registered as a proper FiveM key mapping, so players can rebind all of them from their own **Settings, Key Bindings** screen. Full details on the [Key bindings](reference/keybindings/) page.

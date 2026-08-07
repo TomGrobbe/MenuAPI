@@ -1,7 +1,4 @@
-﻿
-using System;
-
-using static CitizenFX.FiveM.Client.Native;
+﻿using static CitizenFX.FiveM.Client.Native;
 
 namespace MenuAPI;
 
@@ -11,7 +8,7 @@ namespace MenuAPI;
 /// <param name="text"></param>
 /// <param name="description"></param>
 /// <param name="_checked"></param>
-public class MenuCheckboxItem(string text, string description, bool _checked) : MenuItem(text, description)
+public class MenuCheckboxItem(string text, string? description, bool _checked) : MenuItem(text, description)
 {
     public bool Checked { get; set; } = _checked;
     public CheckboxStyle Style { get; set; } = CheckboxStyle.Tick;
@@ -37,7 +34,7 @@ public class MenuCheckboxItem(string text, string description, bool _checked) : 
     /// </summary>
     /// <param name="text"></param>
     /// <param name="description"></param>
-    public MenuCheckboxItem(string text, string description) : this(text, description, false) { }
+    public MenuCheckboxItem(string text, string? description) : this(text, description, false) { }
 
     private int GetSpriteColour()
     {
@@ -75,10 +72,10 @@ public class MenuCheckboxItem(string text, string description, bool _checked) : 
         }
     }
 
-    private float GetSpriteX()
+    private static float GetSpriteX(Menu parent)
     {
         bool leftSide = false;
-        bool leftAligned = ParentMenu.LeftAligned;
+        bool leftAligned = parent.LeftAligned;
         if (leftSide)
         {
             if (leftAligned)
@@ -108,14 +105,20 @@ public class MenuCheckboxItem(string text, string description, bool _checked) : 
         RightIcon = Icon.NONE;
         Label = null;
         base.Draw(offset);
+
+        if (ParentMenu is not Menu parent)
+        {
+            return;
+        }
+
         SetScriptGfxAlign(76, 84);
         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-        float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
+        float yOffset = parent.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(parent.Size, 0, parent.MaxItemsOnScreen));
         string name = GetSpriteName();
 
-        float spriteY = (ParentMenu.Position.Value + ((Index - offset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
-        float spriteX = GetSpriteX();
+        float spriteY = (parent.Position.Value + ((Index - offset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
+        float spriteX = GetSpriteX(parent);
         float spriteHeight = 45f / MenuController.ScreenHeight;
         float spriteWidth = 45f / MenuController.ScreenWidth;
         int color = GetSpriteColour();
@@ -125,12 +128,12 @@ public class MenuCheckboxItem(string text, string description, bool _checked) : 
 
     internal override void GoRight()
     {
-        ParentMenu.SelectItem(this);
+        ParentMenu?.SelectItem(this);
     }
 
     internal override void Select()
     {
         Checked = !Checked;
-        ParentMenu.CheckboxChangedEvent(this, Index, Checked);
+        ParentMenu?.CheckboxChangedEvent(this, Index, Checked);
     }
 }

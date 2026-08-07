@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Client.Extensions;
 using CitizenFX.FiveM.Shared.Data;
@@ -32,6 +27,10 @@ public class MenuController : IScript
         "shared"
     };
 
+    // How often the controller toggle button is checked while no menu is open. The gesture is a 400ms
+    // hold, so this is well inside it: once the button is actually down the hold is timed per frame.
+    private const long ControllerPollIntervalMs = 100;
+
     private static float AspectRatio => GetScreenAspectRatio(false);
     public static float ScreenWidth => 1080 * AspectRatio;
     public static float ScreenHeight => 1080;
@@ -52,13 +51,46 @@ public class MenuController : IScript
         !IsF8ConsoleLikelyOpen;
 
     public static bool NavigateMenuUsingArrows { get; set; } = true;
-    public static bool EnableManualGCs { get; set; } = true;
-    public static bool DontOpenAnyMenu { get; set; } = false;
     public static bool PreventExitingMenu { get; set; } = false;
     public static bool DisableBackButton { get; set; } = false;
     public static bool SetDrawOrder { get; set; } = true;
 
-    public static bool EnableMenuToggleKeyOnController { get; set; } = true;
+    private static bool _dontOpenAnyMenu = false;
+
+    // Backed by a field rather than an auto property because the controller toggle tick is gated on
+    // it, and a tick's condition is only re-run when something asks for it.
+    public static bool DontOpenAnyMenu
+    {
+        get => _dontOpenAnyMenu;
+        set
+        {
+            if (_dontOpenAnyMenu == value)
+            {
+                return;
+            }
+
+            _dontOpenAnyMenu = value;
+            MenuTicks.Reevaluate();
+        }
+    }
+
+    private static bool _enableMenuToggleKeyOnController = true;
+
+    // Same as DontOpenAnyMenu: gates a tick, so a change has to re-run the conditions.
+    public static bool EnableMenuToggleKeyOnController
+    {
+        get => _enableMenuToggleKeyOnController;
+        set
+        {
+            if (_enableMenuToggleKeyOnController == value)
+            {
+                return;
+            }
+
+            _enableMenuToggleKeyOnController = value;
+            MenuTicks.Reevaluate();
+        }
+    }
 
     /// <summary>
     /// The key the menu toggle is bound to for players who have never rebound it themselves. Must be
@@ -69,11 +101,9 @@ public class MenuController : IScript
 
     internal static Dictionary<MenuItem, Menu> MenuButtons { get; private set; } = new Dictionary<MenuItem, Menu>();
 
-    public static Menu MainMenu { get; set; } = null;
+    public static Menu? MainMenu { get; set; } = null;
 
     internal static int _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
-
-    private static int ManualTimerForGC = GetGameTimer();
 
     // Whether the mouse button was pressed down while a menu was open, see IsMouseButtonUsed.
     private static bool mouseSelectArmed = false;
@@ -120,70 +150,59 @@ public class MenuController : IScript
     /// </summary>
     public void Initialize()
     {
-        LoopRegisterKeyBindings();
-        LoopProcessMenus();
-        LoopDrawInstructionalButtons();
-        LoopProcessMainButtons();
-        LoopProcessDirectionalButtons();
-        LoopProcessToggleMenuButton();
-        LoopMenuButtonsDisableChecks();
+        MenuTicks.Initialize();
+
+        RegisterKeyBindings();
+
+        // Every one of these is gated on a menu actually being open, so with everything closed none
+        // of them run at all. Stopping a tick ends its loop rather than idling it, which is the whole
+        // point: no wasted native calls while the player is just driving around.
+        MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame, IsAnyMenuOpen, onStopped: UnloadAssets);
+
+        MenuTicks.Register("Menu.InstructionalButtons", DrawInstructionalButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
+            onStopped: DisposeInstructionalButtonsScaleform);
+
+        MenuTicks.Register("Menu.Select", ProcessMainButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
+            // Nothing drains input while every menu is closed, so a menu has to open from a clean
+            // slate rather than acting on presses that arrived when there was nothing to act on.
+            onStarted: () =>
+            {
+                MenuKeyBindings.ClearPending();
+                MenuKeyBindings.ClearHeld();
+            },
+            onStopped: () =>
+            {
+                MenuKeyBindings.ClearHeld();
+                // Disarming here is what stops a mouse button that was already down before the menu
+                // opened from selecting or going back the moment it is released.
+                mouseSelectArmed = false;
+                mouseBackArmed = false;
+            });
+
+        // Separate from Menu.Select rather than merged: this one blocks inside its hold to repeat
+        // loops until the key is released, and select has to stay responsive while that happens.
+        MenuTicks.Register("Menu.Navigate", ProcessDirectionalButtons, MenuTickRate.PerFrame, IsAnyMenuOpen);
+
+        MenuTicks.Register("Menu.OnscreenKeyboard", MenuButtonsDisableChecks, MenuTickRate.PerFrame, IsAnyMenuOpen);
+
+        // The only always on tick. It has to notice the toggle key with everything closed, but it
+        // reads a flag the key mapping sets rather than polling, so an idle frame costs no natives.
+        MenuTicks.Register("Menu.Toggle", ProcessToggleMenuButton, MenuTickRate.PerFrame);
+
+        // Polling is the only way to see a held controller button, so this one cannot be event
+        // driven. The gesture is a 400ms hold, so checking ten times a second still opens the menu at
+        // the same moment while costing a sixth of what a per frame check did.
+        MenuTicks.Register("Menu.ToggleController", ProcessControllerToggle, MenuTickRate.Every(ControllerPollIntervalMs),
+            condition: () => !IsAnyMenuOpen() && EnableMenuToggleKeyOnController && !DontOpenAnyMenu);
     }
 
     // Waits a frame before registering. Every IScript is constructed before the first tick runs, so
     // this is what lets a resource set MenuToggleKeyDefault without having to care whether its own
-    // script or MenuAPI's was constructed first.
-    static async void LoopRegisterKeyBindings()
+    // script or MenuAPI's was constructed first. Not a tick, so it is not worth a handle.
+    static async void RegisterKeyBindings()
     {
         await API.Delay(0);
         MenuKeyBindings.Register();
-    }
-    static async void LoopProcessMenus()
-    {
-        while (true)
-        {
-            await ProcessMenus();
-            await API.Yield();
-        }
-    }
-    static async void LoopDrawInstructionalButtons()
-    {
-        while (true)
-        {
-            await DrawInstructionalButtons();
-            await API.Yield();
-        }
-    }
-    static async void LoopProcessMainButtons()
-    {
-        while (true)
-        {
-            await ProcessMainButtons();
-            await API.Yield();
-        }
-    }
-    static async void LoopProcessDirectionalButtons()
-    {
-        while (true)
-        {
-            await ProcessDirectionalButtons();
-            await API.Yield();
-        }
-    }
-    static async void LoopProcessToggleMenuButton()
-    {
-        while (true)
-        {
-            await ProcessToggleMenuButton();
-            await API.Yield();
-        }
-    }
-    static async void LoopMenuButtonsDisableChecks()
-    {
-        while (true)
-        {
-            await MenuButtonsDisableChecks();
-            await API.Yield();
-        }
     }
     /// <summary>
     /// This binds the <paramref name="childMenu"/> menu to the <paramref name="menuItem"/> and sets the menu's parent to <paramref name="parentMenu"/>.
@@ -244,6 +263,13 @@ public class MenuController : IScript
         });
         while (menuTextureAssets.Any(asset => { return !HasStreamedTextureDictLoaded(asset); }))
         {
+            // The menu closing already ran UnloadAssets, so waiting out the rest of the stream would
+            // leave dicts requested that nothing is going to release.
+            if (!IsAnyMenuOpen())
+            {
+                return;
+            }
+
             await API.Delay(0);
         }
     }
@@ -269,7 +295,7 @@ public class MenuController : IScript
     /// Returns the currently opened menu.
     /// </summary>
     /// <returns></returns>
-    public static Menu GetCurrentMenu()
+    public static Menu? GetCurrentMenu()
     {
         if (IsAnyMenuOpen())
         {
@@ -297,15 +323,6 @@ public class MenuController : IScript
         bool selectPressed = MenuKeyBindings.ConsumeSelect();
         bool backPressed = MenuKeyBindings.ConsumeBack();
 
-        if (!IsAnyMenuOpen())
-        {
-            MenuKeyBindings.ClearHeld();
-            // Disarming here is what stops a mouse button that was already down before the menu
-            // opened from selecting or going back the moment it is released.
-            mouseSelectArmed = false;
-            mouseBackArmed = false;
-            return;
-        }
         if (IsPauseMenuActive())
         {
             return;
@@ -508,10 +525,15 @@ public class MenuController : IScript
     /// Processes the menu toggle button to check if the menu should open or close.
     /// </summary>
     /// <returns></returns>
-    private static async Task ProcessToggleMenuButton()
+    private static void ProcessToggleMenuButton()
     {
         // Drained every frame, so a press from while the menu could not open does not open it later.
-        bool togglePressed = MenuKeyBindings.ConsumeToggle();
+        // Checked before anything else so an idle frame costs nothing: with no press the game state
+        // below could not have changed the outcome anyway.
+        if (!MenuKeyBindings.ConsumeToggle())
+        {
+            return;
+        }
 
         if (IsPauseMenuActive() || IsPauseMenuRestarting() || !IsScreenFadedIn() || IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
         {
@@ -520,7 +542,7 @@ public class MenuController : IScript
 
         if (IsAnyMenuOpen())
         {
-            if (togglePressed && !PreventExitingMenu)
+            if (!PreventExitingMenu)
             {
                 GetCurrentMenu()?.CloseMenu();
             }
@@ -532,16 +554,26 @@ public class MenuController : IScript
             return;
         }
 
-        if (togglePressed)
+        OpenMainMenu();
+    }
+
+    /// <summary>
+    /// The controller half of the toggle. Only registered while every menu is closed, so it does not
+    /// need to check for that itself.
+    /// </summary>
+    private static async Task ProcessControllerToggle()
+    {
+        if (IsUsingKeyboardAndMouse(2))
         {
-            OpenMainMenu();
             return;
         }
 
-        if (!IsUsingKeyboardAndMouse(2) && EnableMenuToggleKeyOnController)
+        if (IsPauseMenuActive() || IsPauseMenuRestarting() || !IsScreenFadedIn() || IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
         {
-            await HandleMenuToggleKeyForController();
+            return;
         }
+
+        await HandleMenuToggleKeyForController();
     }
 
     /// <summary>
@@ -608,9 +640,15 @@ public class MenuController : IScript
             var time = GetGameTimer();
             var times = 0;
             var delay = 200;
-            while (IsRightPressed() && GetCurrentMenu() != null)
+            while (IsRightPressed())
             {
-                currentMenu = GetCurrentMenu();
+                // Re-read rather than trust the captured menu: this loop awaits every frame, so the
+                // menu can be closed from anywhere while it is suspended.
+                if (GetCurrentMenu() is not Menu openMenu)
+                {
+                    break;
+                }
+                currentMenu = openMenu;
                 if (GetGameTimer() - time > delay)
                 {
                     times++;
@@ -646,9 +684,15 @@ public class MenuController : IScript
             var time = GetGameTimer();
             var times = 0;
             var delay = 200;
-            while (IsLeftPressed() && GetCurrentMenu() != null)
+            while (IsLeftPressed())
             {
-                currentMenu = GetCurrentMenu();
+                // Re-read rather than trust the captured menu: this loop awaits every frame, so the
+                // menu can be closed from anywhere while it is suspended.
+                if (GetCurrentMenu() is not Menu openMenu)
+                {
+                    break;
+                }
+                currentMenu = openMenu;
                 if (GetGameTimer() - time > delay)
                 {
                     times++;
@@ -683,9 +727,15 @@ public class MenuController : IScript
         var time = GetGameTimer();
         var times = 0;
         var delay = 200;
-        while (IsDownPressed() && GetCurrentMenu() != null)
+        while (IsDownPressed())
         {
-            currentMenu = GetCurrentMenu();
+            // Re-read rather than trust the captured menu: this loop awaits every frame, so the menu
+            // can be closed from anywhere while it is suspended.
+            if (GetCurrentMenu() is not Menu openMenu)
+            {
+                break;
+            }
+            currentMenu = openMenu;
             if (GetGameTimer() - time > delay)
             {
                 times++;
@@ -743,10 +793,15 @@ public class MenuController : IScript
         var delay = 200;
 
         // Do the following as long as the controls are being pressed.
-        while (IsUpPressed() && IsAnyMenuOpen() && GetCurrentMenu() != null)
+        while (IsUpPressed())
         {
-            // Update the current menu.
-            currentMenu = GetCurrentMenu();
+            // Re-read rather than trust the captured menu: this loop awaits every frame, so the menu
+            // can be closed from anywhere while it is suspended.
+            if (GetCurrentMenu() is not Menu openMenu)
+            {
+                break;
+            }
+            currentMenu = openMenu;
 
             // Check if the game time has changed by "delay" amount.
             if (GetGameTimer() - time > delay)
@@ -958,9 +1013,10 @@ public class MenuController : IScript
     /// <returns></returns>
     private static async Task ProcessMenus()
     {
+        // Whether a menu is open is the tick's own condition, so it is not checked again here. What
+        // is left changes every frame with no event to react to, which is why it stays inline: the
+        // tick keeps running through a pause menu and simply draws nothing.
         if (!(
-            Menus.Count != 0 &&
-            IsAnyMenuOpen() &&
             IsScreenFadedIn() &&
             !IsPauseMenuActive() &&
             !API.Players.Local.IsDead
@@ -968,31 +1024,16 @@ public class MenuController : IScript
             )
         )
         {
-            UnloadAssets();
             return;
         }
         await LoadAssets();
         DisableControls();
         await DrawMenus();
-        PerformGC();
-    }
-
-    private static void PerformGC()
-    {
-        if (EnableManualGCs)
-        {
-            // once a minute
-            if (GetGameTimer() - ManualTimerForGC > 60000)
-            {
-                GC.Collect();
-                ManualTimerForGC = GetGameTimer();
-            }
-        }
     }
 
     private static async Task DrawMenus()
     {
-        Menu menu = GetCurrentMenu();
+        Menu? menu = GetCurrentMenu();
         if (menu == null)
         {
             return;
@@ -1012,11 +1053,12 @@ public class MenuController : IScript
 
     internal static async Task DrawInstructionalButtons()
     {
+        // Whether a menu is open is the tick's own condition. What is left is volatile game state
+        // that changes every frame, so it stays inline.
         if (
             IsPlayerSwitchInProgress() ||
             API.Players.Local.IsDead ||
             !IsScreenFadedIn() ||
-            IsPlayerSwitchInProgress() ||
             IsWarningMessageActive() ||
             UpdateOnscreenKeyboard() == 0
         )
@@ -1024,7 +1066,7 @@ public class MenuController : IScript
             DisposeInstructionalButtonsScaleform();
             return;
         }
-        Menu menu = GetCurrentMenu();
+        Menu? menu = GetCurrentMenu();
         if (menu == null || !menu.Visible || !menu.EnableInstructionalButtons)
         {
             DisposeInstructionalButtonsScaleform();

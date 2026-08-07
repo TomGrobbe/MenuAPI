@@ -1,10 +1,8 @@
-﻿using System;
-
-using static CitizenFX.FiveM.Client.Native;
+﻿using static CitizenFX.FiveM.Client.Native;
 
 namespace MenuAPI;
 
-public class MenuSliderItem(string name, string description, int min, int max, int startPosition, bool showDivider) : MenuItem(name, description)
+public class MenuSliderItem(string name, string? description, int min, int max, int startPosition, bool showDivider) : MenuItem(name, description)
 {
     public int Min { get; private set; } = min;
     public int Max { get; private set; } = max;
@@ -19,7 +17,7 @@ public class MenuSliderItem(string name, string description, int min, int max, i
 
     public MenuSliderItem(string name, int min, int max, int startPosition) : this(name, min, max, startPosition, false) { }
     public MenuSliderItem(string name, int min, int max, int startPosition, bool showDivider) : this(name, null, min, max, startPosition, showDivider) { }
-    public MenuSliderItem(string name, string description, int min, int max, int startPosition) : this(name, description, min, max, startPosition, false) { }
+    public MenuSliderItem(string name, string? description, int min, int max, int startPosition) : this(name, description, min, max, startPosition, false) { }
 
     /// <summary>
     /// Maps '<see cref="float"/> <paramref name="val"/>' to be a value between '<see cref="float"/> <paramref name="out_min"/>' and '<see cref="float"/> <paramref name="out_max"/>'.
@@ -42,18 +40,23 @@ public class MenuSliderItem(string name, string description, int min, int max, i
 
         base.Draw(indexOffset);
 
+        if (ParentMenu is not Menu parent)
+        {
+            return;
+        }
+
         if (Position > Max || Position < Min)
         {
             Position = (Max - Min) / 2;
         }
 
-        float yOffset = ParentMenu.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(ParentMenu.Size, 0, ParentMenu.MaxItemsOnScreen));
+        float yOffset = parent.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(parent.Size, 0, parent.MaxItemsOnScreen));
 
         float width = 150f / MenuController.ScreenWidth;
         float height = 10f / MenuController.ScreenHeight;
-        float y = (ParentMenu.Position.Value + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
-        float x = (ParentMenu.Position.Key + (Width)) / MenuController.ScreenWidth - (width / 2f) - (8f / MenuController.ScreenWidth);
-        if (!ParentMenu.LeftAligned)
+        float y = (parent.Position.Value + ((Index - indexOffset) * RowHeight) + (20f) + yOffset) / MenuController.ScreenHeight;
+        float x = (parent.Position.Key + (Width)) / MenuController.ScreenWidth - (width / 2f) - (8f / MenuController.ScreenWidth);
+        if (!parent.LeftAligned)
         {
             x = (width / 2f) - (8f / MenuController.ScreenWidth);
         }
@@ -64,12 +67,12 @@ public class MenuSliderItem(string name, string description, int min, int max, i
 
             var leftColor = GetSpriteColour(SliderLeftIcon, Selected);
 
-            SetScriptGfxAlign(ParentMenu.LeftAligned ? 76 : 82, 84);
+            SetScriptGfxAlign(parent.LeftAligned ? 76 : 82, 84);
             SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
             string textureDictionary = GetSpriteDictionary(SliderLeftIcon);
 
-            if (ParentMenu.LeftAligned)
+            if (parent.LeftAligned)
             {
                 // left sprite left aligned.
                 DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, Selected), x - (width / 2f + (4f / MenuController.ScreenWidth)) - (GetSpriteSize(SliderLeftIcon, true) / 2f), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor[0], leftColor[1], leftColor[2], 255, false, false);
@@ -87,7 +90,7 @@ public class MenuSliderItem(string name, string description, int min, int max, i
             ResetScriptGfxAlign();
         }
 
-        SetScriptGfxAlign(ParentMenu.LeftAligned ? 76 : 82, 84);
+        SetScriptGfxAlign(parent.LeftAligned ? 76 : 82, 84);
         SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
         #region drawing background bar and foreground bar
 
@@ -104,7 +107,7 @@ public class MenuSliderItem(string name, string description, int min, int max, i
         xOffset /= MenuController.ScreenWidth;
 
         // bar (foreground)
-        if (!ParentMenu.LeftAligned)
+        if (!parent.LeftAligned)
         {
             DrawRect(x - (width / 2f) + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A, false);
         }
@@ -118,7 +121,7 @@ public class MenuSliderItem(string name, string description, int min, int max, i
         #region drawing divider
         if (ShowDivider)
         {
-            if (!ParentMenu.LeftAligned)
+            if (!parent.LeftAligned)
             {
                 DrawRect(x - width + (4f / MenuController.ScreenWidth), y, 4f / MenuController.ScreenWidth, RowHeight / MenuController.ScreenHeight / 2f, 255, 255, 255, 255, false);
             }
@@ -136,7 +139,10 @@ public class MenuSliderItem(string name, string description, int min, int max, i
         if (Position < Max)
         {
             Position++;
-            ParentMenu.SliderItemChangedEvent(ParentMenu, this, Position - 1, Position, Index);
+            if (ParentMenu is Menu parent)
+            {
+                parent.SliderItemChangedEvent(parent, this, Position - 1, Position, Index);
+            }
             PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
         else
@@ -150,7 +156,10 @@ public class MenuSliderItem(string name, string description, int min, int max, i
         if (Position > Min)
         {
             Position--;
-            ParentMenu.SliderItemChangedEvent(ParentMenu, this, Position + 1, Position, Index);
+            if (ParentMenu is Menu parent)
+            {
+                parent.SliderItemChangedEvent(parent, this, Position + 1, Position, Index);
+            }
             PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
         else
@@ -161,6 +170,9 @@ public class MenuSliderItem(string name, string description, int min, int max, i
 
     internal override void Select()
     {
-        ParentMenu.SliderSelectedEvent(ParentMenu, this, Position, Index);
+        if (ParentMenu is Menu parent)
+        {
+            parent.SliderSelectedEvent(parent, this, Position, Index);
+        }
     }
 }

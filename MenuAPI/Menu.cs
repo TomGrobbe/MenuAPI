@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Client.Extensions;
 
@@ -71,7 +66,7 @@ public class Menu
     /// <param name="newItem">The new <see cref="MenuItem"/> that is now selected.</param>
     /// <param name="oldIndex">The old <see cref="MenuItem.Index"/> of this item.</param>
     /// <param name="newIndex">The new <see cref="MenuItem.Index"/> of this item.</param>
-    public delegate void IndexChangedEvent(Menu menu, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex);
+    public delegate void IndexChangedEvent(Menu menu, MenuItem oldItem, MenuItem? newItem, int oldIndex, int newIndex);
 
     /// <summary>
     /// Triggered when the <see cref="MenuSliderItem.Position"/> changes.
@@ -99,7 +94,7 @@ public class Menu
     /// <param name="dynamicListItem">The <see cref="MenuDynamicListItem"/> that was changed.</param>
     /// <param name="oldValue">The old <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/>.</param>
     /// <param name="newValue">The new <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/>.</param>
-    public delegate void DynamicListItemCurrentItemChangedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string oldValue, string newValue);
+    public delegate void DynamicListItemCurrentItemChangedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string? oldValue, string newValue);
 
     /// <summary>
     /// Triggered when a <see cref="MenuDynamicListItem"/> is selected.
@@ -107,7 +102,7 @@ public class Menu
     /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnDynamicListItemSelect"/> event occurred.</param>
     /// <param name="dynamicListItem">The <see cref="MenuDynamicListItem"/> that was selected.</param>
     /// <param name="currentItem">The <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/> in the <see cref="Menu"/>.</param>
-    public delegate void DynamicListItemSelectedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string currentItem);
+    public delegate void DynamicListItemSelectedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string? currentItem);
     #endregion
 
     #region events
@@ -115,66 +110,66 @@ public class Menu
     /// Triggered when a <see cref="MenuItem"/> is selected.
     /// Parameters: <see cref="Menu"/> parentMenu, <see cref="MenuItem"/> menuItem, <see cref="int"/> itemIndex.
     /// </summary>
-    public event ItemSelectEvent OnItemSelect;
+    public event ItemSelectEvent? OnItemSelect;
 
     /// <summary>
     /// Triggered when a <see cref="MenuCheckboxItem"/> was toggled.
     /// Parameters: <see cref="Menu"/> parentMenu, <see cref="MenuCheckboxItem"/> menuItem, <see cref="int"/> itemIndex, <see cref="bool"/> newCheckedState.
     /// </summary>
-    public event CheckboxItemChangeEvent OnCheckboxChange;
+    public event CheckboxItemChangeEvent? OnCheckboxChange;
 
     /// <summary>
     /// Triggered when a <see cref="MenuListItem"/> is selected.
     /// Parameters: <see cref="Menu"/> menu, <see cref="MenuListItem"/> listItem, <see cref="MenuListItem.ListIndex"/> selectedIndex, <see cref="int"/> itemIndex.
     /// </summary>
-    public event ListItemSelectedEvent OnListItemSelect;
+    public event ListItemSelectedEvent? OnListItemSelect;
 
     /// <summary>
     /// Triggered when a <see cref="MenuListItem"/>'s index was changed.
     /// Parameters: <see cref="Menu"/> menu, <see cref="MenuListItem"/> listItem, <see cref="MenuListItem.ListIndex"/> oldSelectionIndex, <see cref="int"/> newSelectionIndex, <see cref="int"/> itemIndex.
     /// </summary>
-    public event ListItemIndexChangedEvent OnListIndexChange;
+    public event ListItemIndexChangedEvent? OnListIndexChange;
 
     /// <summary>
     /// Triggered when a <see cref="Menu"/> is closed.
     /// Parameters: <see cref="Menu"/> closedMenu.
     /// </summary>
-    public event MenuClosedEvent OnMenuClose;
+    public event MenuClosedEvent? OnMenuClose;
 
     /// <summary>
     /// Triggered when a <see cref="Menu"/> is opened.
     /// Parameters: <see cref="Menu"/> openedMenu.
     /// </summary>
-    public event MenuOpenedEvent OnMenuOpen;
+    public event MenuOpenedEvent? OnMenuOpen;
 
     /// <summary>
     /// Triggered when the <see cref="CurrentIndex"/> changes.
     /// Parameters: <see cref="Menu"/> menu, <see cref="MenuItem"/> oldSelectedItem, <see cref="MenuItem"/> newSelectedItem, <see cref="int"/> oldIndex, <see cref="int"/> newIndex.
     /// </summary>
-    public event IndexChangedEvent OnIndexChange;
+    public event IndexChangedEvent? OnIndexChange;
     /// <summary>
     /// Triggered when the <see cref="MenuSliderItem.Position"/> changes.
     /// Parameters: <see cref="Menu"/> menu, <see cref="MenuSliderItem"/> sliderItem, <see cref="int"/> oldPosition, <see cref="int"/> newPosition, <see cref="int"/> itemIndex
     /// </summary>
-    public event SliderPositionChangedEvent OnSliderPositionChange;
+    public event SliderPositionChangedEvent? OnSliderPositionChange;
 
     /// <summary>
     /// Triggered when a <see cref="MenuSliderItem"/> was selected.
     /// Parameters: <see cref="Menu"/> menu, <see cref="MenuSliderItem"/> sliderItem, <see cref="int"/> sliderPosition, <see cref="int"/> itemIndex.
     /// </summary>
-    public event SliderItemSelectedEvent OnSliderItemSelect;
+    public event SliderItemSelectedEvent? OnSliderItemSelect;
 
     /// <summary>
     /// Triggered when a <see cref="MenuDynamicListItem"/>'s value was changed.
     /// Parameters: <see cref="Menu"/> menu, <see cref="MenuListItem"/> dynamicListItem, <see cref="MenuDynamicListItem.CurrentItem"/> oldValue, <see cref="MenuDynamicListItem.CurrentItem"/> newValue.
     /// </summary>
-    public event DynamicListItemCurrentItemChangedEvent OnDynamicListItemCurrentItemChange;
+    public event DynamicListItemCurrentItemChangedEvent? OnDynamicListItemCurrentItemChange;
 
     /// <summary>
     /// Triggered when a <see cref="MenuDynamicListItem"/> is selected.
     /// Parameters: <see cref="Menu"/> menu, <see cref="MenuDynamicListItem"/> dynamicListItem, <see cref="MenuDynamicListItem.CurrentItem"/> itemValue.
     /// </summary>
-    public event DynamicListItemSelectedEvent OnDynamicListItemSelect;
+    public event DynamicListItemSelectedEvent? OnDynamicListItemSelect;
     #endregion
 
     #region virtual voids
@@ -252,7 +247,7 @@ public class Menu
     /// <param name="newItem">The new <see cref="MenuItem"/> that is now selected.</param>
     /// <param name="oldIndex">The old <see cref="MenuItem.Index"/> of this item.</param>
     /// <param name="newIndex">The new <see cref="MenuItem.Index"/> of this item.</param>
-    internal virtual void IndexChangeEvent(Menu menu, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex)
+    internal virtual void IndexChangeEvent(Menu menu, MenuItem oldItem, MenuItem? newItem, int oldIndex, int newIndex)
     {
         OnIndexChange?.Invoke(menu, oldItem, newItem, oldIndex, newIndex);
     }
@@ -289,7 +284,7 @@ public class Menu
     /// <param name="dynamicListItem">The <see cref="MenuDynamicListItem"/> that was changed.</param>
     /// <param name="oldValue">The old <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/>.</param>
     /// <param name="newValue">The new <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/>.</param>
-    internal virtual void DynamicListItemCurrentItemChanged(Menu menu, MenuDynamicListItem dynamicListItem, string oldValue, string newValue)
+    internal virtual void DynamicListItemCurrentItemChanged(Menu menu, MenuDynamicListItem dynamicListItem, string? oldValue, string newValue)
     {
         OnDynamicListItemCurrentItemChange?.Invoke(menu, dynamicListItem, oldValue, newValue);
     }
@@ -300,7 +295,7 @@ public class Menu
     /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnDynamicListItemSelect"/> event occurred.</param>
     /// <param name="dynamicListItem">The <see cref="MenuDynamicListItem"/> that was selected.</param>
     /// <param name="currentItem">The <see cref="MenuDynamicListItem.CurrentItem"/> of the <see cref="MenuDynamicListItem"/> in the <see cref="Menu"/>.</param>
-    internal virtual void DynamicListItemSelectEvent(Menu menu, MenuDynamicListItem dynamicListItem, string currentItem)
+    internal virtual void DynamicListItemSelectEvent(Menu menu, MenuDynamicListItem dynamicListItem, string? currentItem)
     {
         OnDynamicListItemSelect?.Invoke(menu, dynamicListItem, currentItem);
     }
@@ -352,9 +347,9 @@ public class Menu
     #endregion
 
     #region Public Variables
-    public string MenuTitle { get; set; }
+    public string? MenuTitle { get; set; }
 
-    public string MenuSubtitle { get; set; }
+    public string? MenuSubtitle { get; set; }
 
     public KeyValuePair<string, string> HeaderTexture { get; set; } = new KeyValuePair<string, string>();
 
@@ -381,6 +376,12 @@ public class Menu
                 MenuController.VisibleMenus.Remove(this);
             }
             visible = value;
+
+            // The single funnel for OpenMenu, CloseMenu, GoBack and CloseAllMenus, so every one of
+            // MenuAPI's ticks learns about a menu opening or closing from right here. Safe to call
+            // from a setter: it only starts a loop, and a loop always waits a frame before its first
+            // iteration, so nothing draws from inside this assignment.
+            MenuTicks.Reevaluate();
         }
     }
 
@@ -389,9 +390,9 @@ public class Menu
 
     public float MenuItemsYOffset { get; private set; } = 0f;
 
-    public string CounterPreText { get; set; }
+    public string? CounterPreText { get; set; }
 
-    public Menu ParentMenu { get; internal set; } = null;
+    public Menu? ParentMenu { get; internal set; } = null;
 
     public int CurrentIndex { get { return index; } internal set { index = Math.Clamp(value, 0, Math.Max(0, Size - 1)); } }
 
@@ -468,14 +469,14 @@ public class Menu
     /// Creates a new <see cref="Menu"/>.
     /// </summary>
     /// <param name="name"></param>
-    public Menu(string name) : this(name, null) { }
+    public Menu(string? name) : this(name, null) { }
 
     /// <summary>
     /// Creates a new <see cref="Menu"/>.
     /// </summary>
     /// <param name="name"></param>
     /// <param name="subtitle"></param>
-    public Menu(string name, string subtitle)
+    public Menu(string? name, string? subtitle)
     {
         MenuTitle = name;
         MenuSubtitle = subtitle;
@@ -517,7 +518,7 @@ public class Menu
     /// Gets the currently selected (highlighted) menu item.
     /// </summary>
     /// <returns>Retuns the currently selected menu item. Or null if there are no menu items, or the current menu index is out of range.</returns>
-    public MenuItem GetCurrentMenuItem()
+    public MenuItem? GetCurrentMenuItem()
     {
         return GetMenuItems().ElementAtOrDefault(CurrentIndex);
     }
@@ -647,9 +648,14 @@ public class Menu
             item.Select();
             if (MenuController.MenuButtons.TryGetValue(item, out var value))
             {
-                // this updates the parent menu.
-                MenuController.AddSubmenu(MenuController.GetCurrentMenu(), value);
-                MenuController.GetCurrentMenu().CloseMenu();
+                // Read once. The old code asked for the current menu twice, so the second call could
+                // in principle land after an event handler had already closed it.
+                if (MenuController.GetCurrentMenu() is Menu currentMenu)
+                {
+                    // this updates the parent menu.
+                    MenuController.AddSubmenu(currentMenu, value);
+                    currentMenu.CloseMenu();
+                }
                 value.OpenMenu();
             }
         }
