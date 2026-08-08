@@ -145,7 +145,7 @@ _This function does not return anything_.
 
 Turns `menuItem` into a submenu button: pressing it closes `parentMenu` and opens `childMenu`. This also calls [AddSubmenu()](#addsubmenumenu-parent-menu-child) for you.
 
-Binding the same item again replaces the menu it was bound to.
+Binding the same item again replaces the menu it was bound to. The menu it used to open is removed for you, unless another button still opens it, because with nothing pointing at it nobody could ever get to it again.
 
 ##### Parameters
 
@@ -173,6 +173,63 @@ menu.AddMenuItem(submenuButton);
 
 // Registers `submenu`, sets its parent, and binds the button to it.
 MenuController.BindMenuItem(menu, submenu, submenuButton);
+```
+
+----
+
+#### RemoveMenu(Menu menu)
+
+Takes `menu` back out of MenuAPI again. Use it when a menu is finished with and you do not want it hanging around.
+
+It also removes every menu that could only be reached through one of `menu`'s buttons, all the way down. That sounds drastic, but think about it: if the only button that opened a submenu has just gone, there is no route to that submenu anymore, so keeping it would only waste memory.
+
+Along the way it closes the menu if it happens to be open, empties its buttons, and forgets every event handler you attached to it. Once that is done, the only thing still pointing at the menu is your own variable, so as soon as you stop using that variable the game can clean it up.
+
+If the menu was open when you removed it, the player is put back on its parent menu rather than being left staring at nothing.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|menu|[Menu](../menu/)|The menu to remove. Passing null does nothing.|
+
+##### Return value
+
+_This function does not return anything_.
+
+```cs
+Menu submenu = new Menu("Submenu");
+MenuItem button = new MenuItem("Open the submenu");
+menu.AddMenuItem(button);
+MenuController.BindMenuItem(menu, submenu, button);
+
+// Later on, when the submenu is no longer needed:
+MenuController.RemoveMenu(submenu);
+```
+
+:::note
+You rarely need to call this yourself for submenus. Removing the button that opens one, with [RemoveMenuItem()](../menu/#removemenuitemmenuitem-item) or [ClearMenuItems()](../menu/#clearmenuitems), already removes the menu behind it.
+:::
+
+----
+
+#### RemoveAllMenus()
+
+Removes every registered menu in one go, and empties everything MenuAPI was keeping track of: the menu list, the open menus, the submenu bindings and [MainMenu](#properties).
+
+This is the one to call when your resource is shutting down, or when you want to throw away your whole menu structure and build a fresh one from scratch.
+
+##### Parameters
+
+_This function does not have any parameters_.
+
+##### Return value
+
+_This function does not return anything_.
+
+```cs
+// Start over with a clean slate.
+MenuController.RemoveAllMenus();
 ```
 
 ----

@@ -265,6 +265,10 @@ _This function does not return anything_.
 
 Removes the item at the given index. The current index is corrected so the highlighted item does not jump around. Does nothing if the index is out of range.
 
+:::caution
+If the item is a submenu button, the menu it opened is removed too, because once the button is gone nothing can reach that menu anymore. To keep that menu, bind it to another button with [BindMenuItem()](../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem) before removing this one.
+:::
+
 ##### Parameters
 
 |Parameter|Type|Description|
@@ -279,7 +283,11 @@ _This function does not return anything_.
 
 #### RemoveMenuItem(MenuItem item)
 
-Removes the given item from this menu. Does nothing if the item is not in this menu.
+Removes the given item from this menu. Does nothing if the item is not in this menu. The item's `ParentMenu` is cleared, so afterwards it no longer belongs to any menu.
+
+:::caution
+If the item is a submenu button, the menu it opened is removed too, because once the button is gone nothing can reach that menu anymore. To keep that menu, bind it to another button with [BindMenuItem()](../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem) before removing this one.
+:::
 
 ##### Parameters
 
@@ -297,6 +305,8 @@ _This function does not return anything_.
 
 Removes all menu items and resets the index and scroll position.
 
+Any submenu that was only reachable through one of the removed buttons is removed as well, so rebuilding a menu over and over does not slowly fill memory with menus nobody can open.
+
 ##### Parameters
 
 _This function does not have any parameters_.
@@ -310,6 +320,8 @@ _This function does not return anything_.
 #### ClearMenuItems(bool dontResetIndex)
 
 Removes all menu items, optionally keeping the current index and scroll position. Useful when you rebuild the contents of a menu while it is open.
+
+Like [ClearMenuItems()](#clearmenuitems), any submenu that was only reachable through one of the removed buttons is removed with it.
 
 ##### Parameters
 

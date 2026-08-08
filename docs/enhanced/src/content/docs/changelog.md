@@ -10,6 +10,29 @@ title: "Changelog"
 These are the changes in the MenuAPI FiveM Enhanced alpha packages. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way. The final Enhanced release is not ready yet, so more of these can still show up.
 :::
 
+### Menus can be removed again
+
+Until now, anything you handed to MenuAPI stayed forever. There was no way to remove a menu, so a resource that rebuilt part of its menu structure while running slowly filled memory with menus nobody could open anymore. There are now two ways to clean up: `MenuController.RemoveMenu(menu)` for a single menu, and `MenuController.RemoveAllMenus()` for everything.
+
+Removing a menu closes it if it is open, empties its buttons, forgets the event handlers you attached to it, and takes it out of `MenuController.Menus`. After that your own variable is the only thing still pointing at it, so letting go of that variable is enough for the game to clean it up.
+
+The nice part is that you usually will not have to call any of this. Removing a button now takes the submenu behind it with it, because once the button is gone there is no way to reach that submenu. So `RemoveMenuItem()` and `ClearMenuItems()` clean up after themselves, which is exactly what a resource rebuilding a menu from live data was quietly leaking before.
+
+**Things you have to change in your own code:** nothing.
+
+**Things that just behave differently now:**
+
+- Removing or clearing a button that was bound with `BindMenuItem()` also removes the menu it opened, unless another button still opens that same menu. If you were deliberately keeping a menu alive by holding your own reference to it while removing its button, bind it to a new button before removing the old one.
+- Binding an already bound button to a different menu removes the menu it used to open, on the same "nothing points at it anymore" rule.
+- Removing a button clears its `ParentMenu`, so an item you have taken out of a menu reports `Index` as -1 instead of still pointing into the menu it used to be in.
+- `RemoveAllMenus()` clears `MainMenu` too, so register a menu again before expecting the toggle key to open anything.
+
+### Coloured subtitles actually come out coloured
+
+The subtitle and the counter are drawn in capitals, and MenuAPI was uppercasing the whole string to do it. The game's formatting tokens are lowercase, so `~r~` was going to the game as `~R~`, which it does not recognise, and the colour silently went missing. Uppercasing now skips whatever sits between a pair of tildes, so `menu.MenuSubtitle = "~r~Out of date"` renders red like it always should have.
+
+**Things you have to change in your own code:** nothing. If you were working around this, you can stop.
+
 ### Menus can be split into pages
 
 A menu can now hold thousands of items without the player having to scroll through all of them. Call `menu.SetPageSize(48)` and the menu is split into pages of 48, moved between with left and right. Everything is on the new [Pagination](reference/pagination/) page.

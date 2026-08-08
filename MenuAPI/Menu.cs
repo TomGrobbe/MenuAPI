@@ -738,7 +738,21 @@ public class Menu
     /// <summary>
     /// Removes all menu items.
     /// </summary>
+    /// <remarks>
+    /// A row that opened a menu takes that menu with it, because nothing can reach it once the row is
+    /// gone. Rebind the row to keep it.
+    /// </remarks>
     public void ClearMenuItems(bool dontResetIndex)
+    {
+        ClearMenuItems(dontResetIndex, null);
+    }
+
+    internal void ClearMenuItems(HashSet<Menu> removed)
+    {
+        ClearMenuItems(false, removed);
+    }
+
+    private void ClearMenuItems(bool dontResetIndex, HashSet<Menu>? removed)
     {
         if (!dontResetIndex)
         {
@@ -746,14 +760,64 @@ public class Menu
             ViewIndexOffset = 0;
             PageIndex = 0;
         }
+
+        // Over a snapshot, and only when some row somewhere opens a menu: unbinding cascades, and a
+        // menu bound in a loop back to this one would otherwise empty this list while it is walked.
+        foreach (var item in MenuController.HasBoundMenus ? MenuItems.ToArray() : [])
+        {
+            MenuController.Unbind(item, removed);
+        }
+
+        // The back reference is what would otherwise keep this whole menu alive off one stray row.
+        foreach (var item in MenuItems)
+        {
+            item.ParentMenu = null;
+        }
+
         MenuItems.Clear();
         FilterItems.Clear();
+
+        // Holds a copy of the rows, so leaving it would keep every one of them alive until something
+        // asked for a page again, which for a menu nobody opens is never.
+        pageItems.Clear();
 
         // Without this an emptied menu would keep reporting a filter that no longer has anything to
         // say, and stay stuck at Size 0 even after it was refilled.
         filterActive = false;
 
         InvalidatePage();
+    }
+
+    /// <summary>Lets go of everything this menu holds. Only <see cref="MenuController.RemoveMenu"/> calls it.</summary>
+    internal void Detach(HashSet<Menu> removed)
+    {
+        // The cached swatches belong to a row of this menu, which is about to go.
+        if (ReferenceEquals(_paletteItem?.ParentMenu, this))
+        {
+            _paletteItem = null;
+        }
+
+        ClearMenuItems(removed);
+
+        // A subscriber is usually the object that built the menu, and it keeps the menu alive through
+        // the delegate for as long as it stays subscribed.
+        OnItemSelect = null;
+        OnCheckboxChange = null;
+        OnListItemSelect = null;
+        OnListIndexChange = null;
+        OnMenuClose = null;
+        OnMenuOpen = null;
+        OnIndexChange = null;
+        OnSliderPositionChange = null;
+        OnSliderItemSelect = null;
+        OnDynamicListItemCurrentItemChange = null;
+        OnDynamicListItemSelect = null;
+        OnPageChange = null;
+
+        InstructionalButtons.Clear();
+        CustomInstructionalButtons.Clear();
+
+        ParentMenu = null;
     }
 
     /// <summary>
@@ -817,6 +881,11 @@ public class Menu
         // The filter keeps its own list, so leaving it in there would keep drawing an item the menu
         // no longer has.
         FilterItems.Remove(item);
+
+        // Nothing can reach the menu this row opened now that the row is gone.
+        MenuController.Unbind(item);
+
+        item.ParentMenu = null;
 
         InvalidatePage();
         ClampPageIndex();
@@ -1313,11 +1382,11 @@ public class Menu
             // Don't make the text blue if another color is used in the string.
             if (MenuSubtitle.Contains('~') || string.IsNullOrEmpty(MenuTitle))
             {
-                AddTextComponentSubstringPlayerName(MenuSubtitle.ToUpper());
+                AddTextComponentSubstringPlayerName(UpperCase(MenuSubtitle));
             }
             else
             {
-                AddTextComponentSubstringPlayerName("~HUD_COLOUR_FREEMODE~" + MenuSubtitle.ToUpper());
+                AddTextComponentSubstringPlayerName("~HUD_COLOUR_FREEMODE~" + UpperCase(MenuSubtitle));
             }
 
             if (LeftAligned)
@@ -1347,11 +1416,11 @@ public class Menu
             SetTextJustification(2);
             if ((MenuSubtitle ?? "").Contains('~') || (CounterPreText ?? "").Contains('~') || string.IsNullOrEmpty(MenuTitle))
             {
-                AddTextComponentSubstringPlayerName(counterText.ToUpper());
+                AddTextComponentSubstringPlayerName(UpperCase(counterText));
             }
             else
             {
-                AddTextComponentSubstringPlayerName("~HUD_COLOUR_FREEMODE~" + counterText.ToUpper());
+                AddTextComponentSubstringPlayerName("~HUD_COLOUR_FREEMODE~" + UpperCase(counterText));
             }
             if (LeftAligned)
             {
@@ -1372,6 +1441,41 @@ public class Menu
         }
         #endregion
         return menuItemsOffset;
+    }
+
+    /// <summary>
+    /// Uppercases display text, leaving whatever sits between a pair of tildes alone.
+    /// </summary>
+    /// <remarks>
+    /// The subtitle and the counter are drawn in capitals. The game's formatting tokens are lowercase
+    /// (<c>~r~</c>, <c>~s~</c>, ...), so uppercasing the whole string turns them into text the game
+    /// does not recognise and the colour silently goes missing.
+    /// </remarks>
+    private static string UpperCase(string text)
+    {
+        if (!text.Contains('~'))
+        {
+            return text.ToUpper();
+        }
+
+        var characters = text.ToCharArray();
+        var insideToken = false;
+
+        for (var i = 0; i < characters.Length; i++)
+        {
+            if (characters[i] == '~')
+            {
+                insideToken = !insideToken;
+                continue;
+            }
+
+            if (!insideToken)
+            {
+                characters[i] = char.ToUpperInvariant(characters[i]);
+            }
+        }
+
+        return new string(characters);
     }
 
     /// <summary>

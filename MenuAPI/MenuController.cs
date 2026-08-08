@@ -224,10 +224,15 @@ public class MenuController : IScript
     public static void BindMenuItem(Menu parentMenu, Menu childMenu, MenuItem menuItem)
     {
         AddSubmenu(parentMenu, childMenu);
-        if (!MenuButtons.TryAdd(menuItem, childMenu))
+
+        // Pointing the row at something else leaves whatever it opened before unreachable through it,
+        // so that one goes unless another row still opens it.
+        if (MenuButtons.TryGetValue(menuItem, out var previous) && !ReferenceEquals(previous, childMenu))
         {
-            MenuButtons[menuItem] = childMenu;
+            Unbind(menuItem);
         }
+
+        MenuButtons[menuItem] = childMenu;
     }
 
     /// <summary>
@@ -258,6 +263,123 @@ public class MenuController : IScript
 
         child.ParentMenu = parent;
     }
+
+    #region Removing menus
+
+    /// <summary>Whether any row anywhere opens a menu. Lets a menu with none skip the unbind pass.</summary>
+    internal static bool HasBoundMenus => MenuButtons.Count > 0;
+
+    /// <summary>
+    /// Takes <paramref name="menu"/> out of MenuAPI, along with every menu that could only be reached
+    /// through one of its rows.
+    /// </summary>
+    /// <remarks>
+    /// Everything MenuAPI held is let go: the menu leaves <see cref="Menus"/>, its rows are unbound and
+    /// detached from it, and its event subscribers are dropped. What the calling resource still holds is
+    /// then the only reference left, so letting go of that collects it.
+    /// </remarks>
+    public static void RemoveMenu(Menu menu)
+    {
+        if (menu is not null)
+        {
+            RemoveMenu(menu, []);
+        }
+    }
+
+    /// <summary>Drops every menu. For a resource shutting down, or rebuilding from scratch.</summary>
+    public static void RemoveAllMenus()
+    {
+        // Over a copy, because removing walks the list it is taking menus out of.
+        foreach (var menu in Menus.ToArray())
+        {
+            RemoveMenu(menu);
+        }
+
+        // A menu that was never added could not have been walked above, so its rows may still be in
+        // the bound table.
+        Menus.Clear();
+        VisibleMenus.Clear();
+        MenuButtons.Clear();
+        MainMenu = null;
+
+        MenuTicks.Reevaluate();
+    }
+
+    internal static void RemoveMenu(Menu menu, HashSet<Menu> removed)
+    {
+        // Added before anything cascades, so a menu bound in a loop back to this one stops here.
+        if (!removed.Add(menu))
+        {
+            return;
+        }
+
+        var parent = menu.ParentMenu;
+        var wasOpen = menu.Visible;
+
+        if (wasOpen)
+        {
+            // Through CloseMenu, so subscribers hear about it while they are still attached.
+            menu.CloseMenu();
+        }
+
+        Menus.Remove(menu);
+
+        // Clears the rows, which unbinds whatever they opened and cascades back into here.
+        menu.Detach(removed);
+
+        foreach (var other in Menus)
+        {
+            if (ReferenceEquals(other.ParentMenu, menu))
+            {
+                other.ParentMenu = null;
+            }
+        }
+
+        if (ReferenceEquals(MainMenu, menu))
+        {
+            MainMenu = Menus.Count > 0 ? Menus[0] : null;
+        }
+
+        // The player was looking at it, so put them somewhere rather than nowhere.
+        if (wasOpen && parent is not null && !removed.Contains(parent) && Menus.Contains(parent))
+        {
+            parent.OpenMenu();
+        }
+    }
+
+    /// <summary>
+    /// Forgets the menu <paramref name="item"/> opened, and removes that menu when no other row opens it.
+    /// </summary>
+    internal static void Unbind(MenuItem item, HashSet<Menu>? removed = null)
+    {
+        if (!MenuButtons.Remove(item, out var child))
+        {
+            return;
+        }
+
+        // Checked after the entry is gone, so a row bound twice to the same menu keeps it.
+        if (StillBound(child) || ReferenceEquals(MainMenu, child))
+        {
+            return;
+        }
+
+        RemoveMenu(child, removed ?? []);
+    }
+
+    private static bool StillBound(Menu menu)
+    {
+        foreach (var bound in MenuButtons.Values)
+        {
+            if (ReferenceEquals(bound, menu))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    #endregion
 
     /// <summary>
     /// Loads the texture dict for the common menu sprites.
