@@ -338,6 +338,10 @@ public class Menu
     // menu draw.
     private const float HeaderWidth = Width;
     private const float HeaderHeight = 110f;
+
+    // How far a left or right aligned title is kept off the banner's edge. Same gap the subtitle
+    // and the counter already sit at, so the two lines up.
+    private const float HeaderTextPadding = 10f;
     #endregion
 
     #region private variables
@@ -425,6 +429,38 @@ public class Menu
     public string? MenuSubtitle { get; set; }
 
     public KeyValuePair<string, string> HeaderTexture { get; set; } = new KeyValuePair<string, string>();
+
+    #region Menu title styling
+    // Nullable, and falling back to the matching MenuController.Default*, so a resource can style
+    // every menu it owns by setting the defaults once and still override a single menu afterwards.
+    // These only affect the title. The subtitle, the counter and the item rows are left alone.
+    //
+    // How big the title is drawn and where exactly it sits are deliberately not exposed. They are
+    // per font values that were picked by eye to sit correctly on the banner, and a menu whose title
+    // hangs off its own header helps nobody.
+
+    /// <summary>The font the title is drawn in. See <see cref="MenuFont"/>.</summary>
+    public int? MenuTitleFont { get; set; }
+
+    /// <summary>Where the title sits inside the header.</summary>
+    public TitleAlignmentOption? MenuTitleAlignment { get; set; }
+
+    public enum TitleAlignmentOption
+    {
+        Left,
+        Center,
+        Right
+    }
+
+    /// <summary>Whether GTA Online's moving header glow is drawn over the banner.</summary>
+    public bool? ShowHeaderGlare { get; set; }
+
+    private int ResolvedTitleFont => MenuTitleFont ?? MenuController.DefaultTitleFont;
+
+    private TitleAlignmentOption ResolvedTitleAlignment => MenuTitleAlignment ?? MenuController.DefaultTitleAlignment;
+
+    private bool ResolvedShowHeaderGlare => ShowHeaderGlare ?? MenuController.DefaultShowHeaderGlare;
+    #endregion
 
     public bool IgnoreDontOpenMenus { get; set; } = false;
 
@@ -1283,66 +1319,92 @@ public class Menu
     /// <returns>The new menuItemsOffset value</returns>
     private async Task<float> DrawHeader(float menuItemsOffset)
     {
-        if (!string.IsNullOrEmpty(MenuTitle))
+        if (string.IsNullOrEmpty(MenuTitle))
         {
-            #region Draw Header Background
-            SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            return menuItemsOffset;
+        }
 
-            float x = MenuLayout.RowCenterX;
-            float y = MenuLayout.HeaderHeightN / 2f;
-            float width = HeaderWidth / MenuLayout.ScreenWidth;
-            float height = HeaderHeight / MenuLayout.ScreenHeight;
+        #region Draw Header Background
+        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-            if (!string.IsNullOrEmpty(HeaderTexture.Key) && !string.IsNullOrEmpty(HeaderTexture.Value))
+        float x = MenuLayout.RowCenterX;
+        float y = MenuLayout.HeaderHeightN / 2f;
+        float width = HeaderWidth / MenuLayout.ScreenWidth;
+        float height = HeaderHeight / MenuLayout.ScreenHeight;
+
+        if (!string.IsNullOrEmpty(HeaderTexture.Key) && !string.IsNullOrEmpty(HeaderTexture.Value))
+        {
+            if (!HasStreamedTextureDictLoaded(HeaderTexture.Key))
             {
-                if (!HasStreamedTextureDictLoaded(HeaderTexture.Key))
+                RequestStreamedTextureDict(HeaderTexture.Key, false);
+                while (!HasStreamedTextureDictLoaded(HeaderTexture.Key))
                 {
-                    RequestStreamedTextureDict(HeaderTexture.Key, false);
-                    while (!HasStreamedTextureDictLoaded(HeaderTexture.Key))
-                    {
-                        await API.Delay(0);
-                    }
+                    await API.Delay(0);
                 }
-                DrawSprite(HeaderTexture.Key, HeaderTexture.Value, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
             }
-            else
-            {
-                DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
-            }
-
-            ResetScriptGfxAlign();
-            #endregion
-
-            #region Draw Header Menu Title
-            int font = 1;
-            float size = (45f * 27f) / MenuLayout.ScreenHeight;
-            SetScriptGfxAlign(76, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-
-            BeginTextCommandDisplayText("STRING");
-            SetTextFont(font);
-            SetTextColour(255, 255, 255, 255);
-            SetTextScale(size, size);
-            SetTextJustification(0);
-            AddTextComponentSubstringPlayerName(MenuTitle);
-            if (LeftAligned)
-            {
-                EndTextCommandDisplayText(((HeaderWidth / 2f) / MenuLayout.ScreenWidth), y - (GetTextScaleHeight(size, font) / 2f), 0);
-            }
-            else
-            {
-                EndTextCommandDisplayText(MenuLayout.RightHeaderCenterX, y - (GetTextScaleHeight(size, font) / 2f), 0);
-            }
-            ResetScriptGfxAlign();
-            menuItemsOffset = HeaderHeight;
-            #endregion
+            DrawSprite(HeaderTexture.Key, HeaderTexture.Value, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
         }
         else
         {
+            DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
         }
-        await Task.FromResult(0);
-        return menuItemsOffset;
+
+        ResetScriptGfxAlign();
+        #endregion
+
+        // Over the banner but under the title, which is where GTA Online puts it. Outside the gfx
+        // align block above on purpose: scaleform draws ignore it and take plain screen coordinates.
+        if (ResolvedShowHeaderGlare)
+        {
+            HeaderGlare.Draw(LeftAligned);
+        }
+
+        #region Draw Header Menu Title
+        int font = ResolvedTitleFont;
+        float size = MenuFont.DefaultSizeFor(font);
+
+        SetScriptGfxAlign(76, 84);
+        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+
+        BeginTextCommandDisplayText("STRING");
+        SetTextFont(font);
+        SetTextColour(255, 255, 255, 255);
+        SetTextScale(size, size);
+
+        float titleX;
+
+        switch (ResolvedTitleAlignment)
+        {
+            case TitleAlignmentOption.Left:
+                SetTextJustification(1);
+                titleX = LeftAligned ? (HeaderTextPadding / MenuLayout.ScreenWidth) : MenuLayout.RightTextMinX;
+                break;
+
+            case TitleAlignmentOption.Right:
+                // Right justified text is measured back from the wrap box's right edge and ignores
+                // the x it is drawn at, so the box is what places it. Same trick the counter uses.
+                SetTextJustification(2);
+                SetTextWrap(0f, LeftAligned ? ((HeaderWidth - HeaderTextPadding) / MenuLayout.ScreenWidth) : MenuLayout.RightTextMaxX);
+                titleX = 0f;
+                break;
+
+            default:
+                SetTextJustification(0);
+                titleX = LeftAligned ? MenuLayout.RowCenterX : MenuLayout.RightHeaderCenterX;
+                break;
+        }
+
+        AddTextComponentSubstringPlayerName(MenuTitle);
+        EndTextCommandDisplayText(
+            titleX,
+            y - (GetTextScaleHeight(size, font) / 2f) + (MenuFont.DefaultOffsetYFor(font) / MenuLayout.ScreenHeight),
+            0);
+
+        ResetScriptGfxAlign();
+        #endregion
+
+        return HeaderHeight;
     }
 
     /// <summary>

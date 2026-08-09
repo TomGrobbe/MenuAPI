@@ -10,6 +10,24 @@ title: "Changelog"
 These are the changes in the MenuAPI FiveM Enhanced alpha packages. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way. The final Enhanced release is not ready yet, so more of these can still show up.
 :::
 
+### Menu banners can have their own font, and GTA Online's glare
+
+The banner at the top of a menu used to be fixed. The only thing you could change about it was swapping the whole image out for your own. It now has three settings, all covered on the [Header styling](reference/menu/#header-styling) page.
+
+`MenuTitleFont` picks the font the title is drawn in, from the game's own set. `MenuFont` has names for the ones worth using, so `menu.MenuTitleFont = MenuFont.Pricedown` gets you the Grand Theft Auto logo font. Any font id the game knows works, including one your resource registered itself, so a custom font goes straight in. The size and the vertical position are worked out per font, because fonts disagree about both and a shared number would leave half of them sitting crooked.
+
+`MenuTitleAlignment` moves the title to the left, the centre or the right of the banner. This is separate from `MenuController.MenuAlignment`, which is about which side of the *screen* the menu is on.
+
+`ShowHeaderGlare` draws the soft moving glow GTA Online has behind its own pause menu title, the one that drifts as you turn the camera. It is the game's own `mp_menu_glare` scaleform, so nothing is streamed and no NUI is involved. It is loaded the first time a menu asks for it and released when every menu closes.
+
+All three exist twice: on a menu, where they are nullable, and on `MenuController` as `DefaultTitleFont`, `DefaultTitleAlignment` and `DefaultShowHeaderGlare`. Set the defaults once and every menu follows them, and any single menu can still say otherwise.
+
+**Things you have to change in your own code:** nothing. All three are opt in.
+
+**Things that just behave differently now:**
+
+- An untouched banner is drawn very slightly smaller than before. The title size was one hardcoded number picked for the default font, and it is now the measured size for that font, which came out a little lower. Nothing moves, it is the same font in the same place.
+
 ### Menus can be removed again
 
 Until now, anything you handed to MenuAPI stayed forever. There was no way to remove a menu, so a resource that rebuilt part of its menu structure while running slowly filled memory with menus nobody could open anymore. There are now two ways to clean up: `MenuController.RemoveMenu(menu)` for a single menu, and `MenuController.RemoveAllMenus()` for everything.

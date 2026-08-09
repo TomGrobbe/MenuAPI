@@ -110,6 +110,9 @@ Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
 |MenuTitle|string|-|The text displayed on the menu banner. If this is null or empty, no banner is drawn.|Yes|
 |MenuSubtitle|string|Null|The text displayed in the subtitle bar below the banner.|Yes|
 |HeaderTexture|KeyValuePair&lt;string,&nbsp;string&gt;|(empty)|A custom banner image. The `Key` is the streamed texture dictionary, the `Value` is the texture name. The texture dictionary is requested for you. When this is not set, the default banner is used.|Yes|
+|MenuTitleFont|int?|Null|The font the banner title is drawn in. See [Header styling](#header-styling). When this is null, [MenuController.DefaultTitleFont](../menucontroller/#properties) is used.|Yes|
+|MenuTitleAlignment|[TitleAlignmentOption](#header-styling)?|Null|Where the banner title sits inside the banner. See [Header styling](#header-styling). When this is null, [MenuController.DefaultTitleAlignment](../menucontroller/#properties) is used.|Yes|
+|ShowHeaderGlare|boolean?|Null|Whether GTA Online's moving glow is drawn over the banner. See [Header styling](#header-styling). When this is null, [MenuController.DefaultShowHeaderGlare](../menucontroller/#properties) is used.|Yes|
 |CounterPreText|string|Null|Text placed in front of the `current / total` counter in the top right of the subtitle bar. Setting this forces the counter to be shown, even when all items already fit on screen.|Yes|
 |Visible|boolean|false|Whether this menu is currently being drawn. Prefer [OpenMenu()](#openmenu) and [CloseMenu()](#closemenu), because those also trigger the open/close events.|Yes|
 |EnableInstructionalButtons|boolean|true|Whether the instructional buttons for this menu are drawn at the bottom of the screen.|Yes|
@@ -664,6 +667,71 @@ _This function does not return anything_.
 
 :::caution
 Call `SetVehicleStats()` **before** `SetVehicleUpgradeStats()`, for the same reason as the weapon stat functions above.
+:::
+
+----
+
+### Header styling
+
+The banner at the top of a menu, the one with the menu title on it, has three things you can change: the font the title is drawn in, where the title sits on the banner, and whether GTA Online's moving glow is drawn over it.
+
+Every one of these is a **nullable** property. Leaving it null means "use whatever [MenuController](../menucontroller/#header-styling-defaults) says", which is how you style a whole tree of menus by setting three values once. Setting it on a menu overrules that, for that one menu.
+
+None of this touches the subtitle bar, the counter or the menu items. It is the banner only.
+
+#### The title font
+
+`MenuTitleFont` is a plain `int`, because that is what the game's fonts are. The ones worth using have names in the `MenuFont` class:
+
+|Value|Font|
+|-|-|
+|MenuFont.ChaletLondon|`0`. The clean, slightly condensed font the menu items themselves use.|
+|MenuFont.HouseScript|`1`. The handwritten look GTA uses for its own menu banners. This is the default.|
+|MenuFont.Monospace|`2`. Every character the same width, like a terminal.|
+|MenuFont.ChaletComprimeCologne|`4`. Narrower than Chalet London, so long titles fit better.|
+|MenuFont.Pricedown|`7`. The Grand Theft Auto logo font.|
+
+```cs
+Menu menu = new Menu("Los Santos Customs", "Vehicle mods")
+{
+    MenuTitleFont = MenuFont.Pricedown
+};
+```
+
+You are not limited to that list. Any font id the game knows works, including one you registered yourself at runtime, so a custom font from your own resource can go straight in.
+
+Each font is drawn at the size and vertical position that suits it, worked out for you. That is why there is no size or offset property to set: fonts disagree about how big a given scale is and about where their baseline sits, so a single shared number would leave half of them sitting crooked on the banner. Fonts MenuAPI does not have measurements for, which means custom ones, get a sensible middle of the road size to start from.
+
+#### Where the title sits
+
+|Value|Description|
+|-|-|
+|Menu.TitleAlignmentOption.Left|The title starts at the left edge of the banner.|
+|Menu.TitleAlignmentOption.Center|The title is centred on the banner. This is the default.|
+|Menu.TitleAlignmentOption.Right|The title ends at the right edge of the banner.|
+
+This is about the title inside its banner, and has nothing to do with [MenuController.MenuAlignment](../menucontroller/#menu-alignment), which is about which side of the *screen* the whole menu is drawn on. The two work together: a right aligned menu with a left aligned title puts the title at the left edge of that menu's banner.
+
+```cs
+menu.MenuTitleAlignment = Menu.TitleAlignmentOption.Left;
+```
+
+#### The header glare
+
+`ShowHeaderGlare` draws the soft moving glow that GTA Online has behind its own pause menu title. It drifts as the player turns the camera.
+
+```cs
+Menu menu = new Menu("Nightclub", "Management")
+{
+    MenuTitleFont = MenuFont.Pricedown,
+    ShowHeaderGlare = true
+};
+```
+
+This is the game's own `mp_menu_glare` scaleform, so there is no NUI involved and nothing to stream. It animates itself: MenuAPI just tells it which way the camera is facing. It is loaded the first time a menu asks for it and released again as soon as every menu is closed, so a menu that never turns it on never pays for it.
+
+:::note
+The glare is positioned in plain screen coordinates rather than menu ones, because scaleforms ignore the graphics alignment MenuAPI uses everywhere else. It follows the left/right menu alignment, but a very unusual safezone setting can leave it slightly off centre on the banner.
 :::
 
 ----

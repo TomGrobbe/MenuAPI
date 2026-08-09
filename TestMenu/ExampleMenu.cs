@@ -459,6 +459,82 @@ public class ExampleMenu : IScript
         };
         menu.AddMenuItem(pagination);
         MenuController.BindMenuItem(menu, menu8, pagination);
+
+        // Header styling. Everything here is set on the menu itself, so the banner above the items
+        // is the thing that changes while you scroll through them.
+        Menu menu9 = new Menu("Header Styling", "Title font & glare")
+        {
+            MenuTitleFont = MenuFont.Pricedown,
+            ShowHeaderGlare = true
+        };
+
+        List<int> fontIds = new List<int>()
+        {
+            MenuFont.ChaletLondon,
+            MenuFont.HouseScript,
+            MenuFont.Monospace,
+            MenuFont.ChaletComprimeCologne,
+            MenuFont.Pricedown
+        };
+        List<string> fontNames = new List<string>()
+        {
+            "Chalet London",
+            "House Script",
+            "Monospace",
+            "Chalet Comprime Cologne",
+            "Pricedown"
+        };
+        MenuListItem titleFont = new MenuListItem(
+            "Title font",
+            fontNames,
+            fontIds.IndexOf(MenuFont.Pricedown),
+            "Sets MenuTitleFont. Each font is drawn at whatever size suits it, you do not have to tune that yourself."
+        );
+
+        MenuListItem titleAlignment = new MenuListItem(
+            "Title alignment",
+            new List<string>() { "Left", "Center", "Right" },
+            (int)MenuController.DefaultTitleAlignment,
+            "Sets MenuTitleAlignment, which moves the title within the banner."
+        );
+
+        MenuCheckboxItem headerGlare = new MenuCheckboxItem(
+            "Header glare",
+            "Sets ShowHeaderGlare. This is GTA Online's moving glow, drawn with the game's own scaleform. Turn the camera to see it move.",
+            true
+        );
+
+        menu9.AddMenuItem(titleFont);
+        menu9.AddMenuItem(titleAlignment);
+        menu9.AddMenuItem(headerGlare);
+
+        menu9.OnListIndexChange += (_menu, _listItem, _oldIndex, _newIndex, _itemIndex) =>
+        {
+            if (_listItem == titleFont)
+            {
+                _menu.MenuTitleFont = fontIds[_newIndex];
+            }
+            else if (_listItem == titleAlignment)
+            {
+                _menu.MenuTitleAlignment = (Menu.TitleAlignmentOption)_newIndex;
+            }
+        };
+
+        menu9.OnCheckboxChange += (_menu, _item, _index, _checked) =>
+        {
+            if (_item == headerGlare)
+            {
+                _menu.ShowHeaderGlare = _checked;
+            }
+        };
+
+        MenuController.AddSubmenu(menu, menu9);
+        MenuItem headerStyling = new MenuItem("Header styling", "Demo menu for the title font, the title alignment and the header glare.")
+        {
+            Label = "→→→"
+        };
+        menu.AddMenuItem(headerStyling);
+        MenuController.BindMenuItem(menu, menu9, headerStyling);
         /*--------------
          Event handlers
         --------------*/

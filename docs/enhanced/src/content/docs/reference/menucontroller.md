@@ -64,6 +64,9 @@ All properties are **static**.
 |MainMenu|Menu|Null|The menu that is opened when the user presses the [menu toggle key](#the-menu-toggle-key). This is set automatically to the first menu you register, but you can change it at any time. When it is null, the first registered menu is opened instead.|Yes|
 |Menus|List&lt;[Menu](../menu/)&gt;|(empty)|(Getter only) Every menu that has been registered with [AddMenu()](#addmenumenu-menu) or [AddSubmenu()](#addsubmenumenu-parent-menu-child).|Yes|
 |MenuAlignment|[MenuAlignmentOption](#menu-alignment)|MenuAlignmentOption.Left|Whether menus are drawn on the left or the right side of the screen. See [Menu alignment](#menu-alignment).|Yes|
+|DefaultTitleFont|int|MenuFont.HouseScript|The font every menu banner title is drawn in, unless that menu sets [MenuTitleFont](../menu/#header-styling) itself. See [Header styling defaults](#header-styling-defaults).|Yes|
+|DefaultTitleAlignment|[TitleAlignmentOption](../menu/#header-styling)|TitleAlignmentOption.Center|Where every menu banner title sits, unless that menu sets [MenuTitleAlignment](../menu/#header-styling) itself. See [Header styling defaults](#header-styling-defaults).|Yes|
+|DefaultShowHeaderGlare|boolean|false|Whether GTA Online's moving glow is drawn over every menu banner, unless that menu sets [ShowHeaderGlare](../menu/#header-styling) itself. See [Header styling defaults](#header-styling-defaults).|Yes|
 |MenuToggleKeyDefault|string|"M"|The key that opens the menu for players who have never rebound it themselves. Set it in your constructor. See [Changing the default toggle key](../keybindings/#changing-the-default-toggle-key).|Yes|
 |EnableMenuToggleKeyOnController|boolean|true|Whether the menu can also be toggled with a controller. The controller binding can not be changed: it is always the back/select button, held for 400ms. See [Key bindings](../keybindings/).|Yes|
 |DisableMenuButtons|boolean|false|When true, all menu controls are ignored. The menu stays on screen, it just does not respond to input. Useful while you are doing something that should not be interrupted.|Yes|
@@ -331,6 +334,32 @@ Right aligned menus are not supported on 17:9 and 21:9 aspect ratios. On those r
 :::note
 Menu alignment is only available in FiveM.
 :::
+
+----
+
+### Header styling defaults
+
+Every menu banner can have its own title font, its own title alignment and its own glare, and each of those is described in full under [Header styling](../menu/#header-styling). The three properties here are what a menu falls back to when it has not been told otherwise.
+
+That means you can set the look of your whole resource in one place. Do it before you build your menus and every one of them picks it up:
+
+```cs
+MenuController.DefaultTitleFont = MenuFont.Pricedown;
+MenuController.DefaultShowHeaderGlare = true;
+
+// Both of these get the Pricedown title and the glare, without asking for either.
+Menu main = new Menu("Los Santos Customs", "Vehicle mods");
+Menu wheels = new Menu("Wheels", "Pick a set");
+
+// And a single menu can still say no.
+Menu warning = new Menu("Are you sure?", "This cannot be undone")
+{
+    MenuTitleFont = MenuFont.ChaletLondon,
+    ShowHeaderGlare = false
+};
+```
+
+Changing a default at runtime affects every menu that has not overridden it, immediately, including menus you built earlier and menus that are on screen right now.
 
 ----
 

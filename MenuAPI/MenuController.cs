@@ -60,6 +60,21 @@ public class MenuController : IScript
     public static bool DisableBackButton { get; set; } = false;
     public static bool SetDrawOrder { get; set; } = true;
 
+    #region Menu title styling defaults
+    // What every menu falls back to when it has not been told otherwise, so a resource can set the
+    // look of its whole menu tree in one place. The defaults here are the values MenuAPI has always
+    // drawn with, so leaving them alone changes nothing.
+
+    /// <summary>The font menu titles are drawn in. See <see cref="MenuFont"/>.</summary>
+    public static int DefaultTitleFont { get; set; } = MenuFont.HouseScript;
+
+    /// <summary>Where menu titles sit inside the header.</summary>
+    public static Menu.TitleAlignmentOption DefaultTitleAlignment { get; set; } = Menu.TitleAlignmentOption.Center;
+
+    /// <summary>Whether GTA Online's moving header glow is drawn over menu banners.</summary>
+    public static bool DefaultShowHeaderGlare { get; set; } = false;
+    #endregion
+
     private static bool _dontOpenAnyMenu = false;
 
     // Backed by a field rather than an auto property because the controller toggle tick is gated on
@@ -168,7 +183,12 @@ public class MenuController : IScript
         MenuTicks.Register("Menu.Layout", MenuLayout.Refresh, MenuTickRate.Every(LayoutRefreshIntervalMs), IsAnyMenuOpen,
             onStarted: MenuLayout.Refresh);
 
-        MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame, IsAnyMenuOpen, onStopped: UnloadAssets);
+        MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame, IsAnyMenuOpen,
+            onStopped: () =>
+            {
+                UnloadAssets();
+                HeaderGlare.Dispose();
+            });
 
         MenuTicks.Register("Menu.InstructionalButtons", DrawInstructionalButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
             onStopped: DisposeInstructionalButtonsScaleform);
