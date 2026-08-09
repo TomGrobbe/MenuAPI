@@ -6,6 +6,8 @@ using CitizenFX.FiveM.Shared.Script;
 
 using MenuAPI;
 
+using static CitizenFX.FiveM.Client.Native;
+
 namespace TestMenu;
 
 public class ExampleMenu : IScript
@@ -504,9 +506,70 @@ public class ExampleMenu : IScript
             true
         );
 
+        MenuCheckboxItem glareRightAligned = new MenuCheckboxItem(
+            "Right aligned menu",
+            "Flips the whole menu over, so you can check the glare on both sides without leaving this menu.",
+            MenuController.MenuAlignment == MenuController.MenuAlignmentOption.Right
+        );
+
+        // Glare tuning rows. These nudge an offset on top of whatever MenuAPI works out on its own,
+        // so an offset left at zero means the placement already had that screen right, and one you
+        // had to move is the correction that screen needs. This is how the numbers in HeaderGlare
+        // were measured in the first place.
+        float[] nudgeSteps = new float[] { 0.0005f, 0.001f, 0.005f, 0.02f };
+        int nudgeStep = 1;
+
+        MenuCheckboxItem glarePinned = new MenuCheckboxItem(
+            "Hold the glare still",
+            "The glare normally sweeps sideways with the camera, which makes two screens impossible to compare. This pins it in place.",
+            GlareTuning.PinHeading
+        );
+        MenuListItem glareStep = new MenuListItem(
+            "Nudge step",
+            new List<string>() { "0.0005", "0.001", "0.005", "0.02" },
+            nudgeStep,
+            "How far one left or right press moves the glare."
+        );
+        MenuDynamicListItem glareX = new MenuDynamicListItem("Glare X offset", GlareTuning.XOffset.ToString("+0.0000;-0.0000; 0.0000"), (item, left) =>
+        {
+            GlareTuning.XOffset += left ? -nudgeSteps[nudgeStep] : nudgeSteps[nudgeStep];
+
+            return GlareTuning.XOffset.ToString("+0.0000;-0.0000; 0.0000");
+        }, "Slides the glare sideways, on top of the position MenuAPI worked out.");
+        MenuDynamicListItem glareY = new MenuDynamicListItem("Glare Y offset", GlareTuning.YOffset.ToString("+0.0000;-0.0000; 0.0000"), (item, left) =>
+        {
+            GlareTuning.YOffset += left ? -nudgeSteps[nudgeStep] : nudgeSteps[nudgeStep];
+
+            return GlareTuning.YOffset.ToString("+0.0000;-0.0000; 0.0000");
+        }, "Slides the glare up and down.");
+        MenuDynamicListItem glareWidth = new MenuDynamicListItem("Glare width offset", GlareTuning.WidthOffset.ToString("+0.0000;-0.0000; 0.0000"), (item, left) =>
+        {
+            GlareTuning.WidthOffset += left ? -nudgeSteps[nudgeStep] : nudgeSteps[nudgeStep];
+
+            return GlareTuning.WidthOffset.ToString("+0.0000;-0.0000; 0.0000");
+        }, "Stretches the movie sideways, which moves and resizes the glare inside it.");
+        MenuDynamicListItem glareHeight = new MenuDynamicListItem("Glare height offset", GlareTuning.HeightOffset.ToString("+0.0000;-0.0000; 0.0000"), (item, left) =>
+        {
+            GlareTuning.HeightOffset += left ? -nudgeSteps[nudgeStep] : nudgeSteps[nudgeStep];
+
+            return GlareTuning.HeightOffset.ToString("+0.0000;-0.0000; 0.0000");
+        }, "Stretches the movie vertically.");
+        MenuItem glareLog = new MenuItem(
+            "Log the glare numbers",
+            "Prints the screen, the offsets and the final numbers to the console. Do this once per resolution, per alignment."
+        );
+
         menu9.AddMenuItem(titleFont);
         menu9.AddMenuItem(titleAlignment);
         menu9.AddMenuItem(headerGlare);
+        menu9.AddMenuItem(glareRightAligned);
+        menu9.AddMenuItem(glarePinned);
+        menu9.AddMenuItem(glareStep);
+        menu9.AddMenuItem(glareX);
+        menu9.AddMenuItem(glareY);
+        menu9.AddMenuItem(glareWidth);
+        menu9.AddMenuItem(glareHeight);
+        menu9.AddMenuItem(glareLog);
 
         menu9.OnListIndexChange += (_menu, _listItem, _oldIndex, _newIndex, _itemIndex) =>
         {
@@ -518,6 +581,10 @@ public class ExampleMenu : IScript
             {
                 _menu.MenuTitleAlignment = (Menu.TitleAlignmentOption)_newIndex;
             }
+            else if (_listItem == glareStep)
+            {
+                nudgeStep = _newIndex;
+            }
         };
 
         menu9.OnCheckboxChange += (_menu, _item, _index, _checked) =>
@@ -525,6 +592,33 @@ public class ExampleMenu : IScript
             if (_item == headerGlare)
             {
                 _menu.ShowHeaderGlare = _checked;
+            }
+            else if (_item == glarePinned)
+            {
+                GlareTuning.PinHeading = _checked;
+            }
+            else if (_item == glareRightAligned)
+            {
+                MenuController.MenuAlignment = _checked
+                    ? MenuController.MenuAlignmentOption.Right
+                    : MenuController.MenuAlignmentOption.Left;
+            }
+        };
+
+        menu9.OnItemSelect += (_menu, _item, _index) =>
+        {
+            if (_item == glareLog)
+            {
+                GetActiveScreenResolution(out int screenWidth, out int screenHeight);
+
+                API.Log.Info(
+                    $"[glare] res={screenWidth}x{screenHeight} aspect={GetScreenAspectRatio(false):0.0000} " +
+                    $"safezone={GetSafeZoneSize():0.0000} " +
+                    $"aligned={(MenuController.MenuAlignment == MenuController.MenuAlignmentOption.Right ? "right" : "left")} " +
+                    $"dx={GlareTuning.XOffset:+0.0000;-0.0000; 0.0000} dy={GlareTuning.YOffset:+0.0000;-0.0000; 0.0000} " +
+                    $"dw={GlareTuning.WidthOffset:+0.0000;-0.0000; 0.0000} dh={GlareTuning.HeightOffset:+0.0000;-0.0000; 0.0000} " +
+                    $"final x={GlareTuning.DrawnX:0.0000} y={GlareTuning.DrawnY:0.0000} " +
+                    $"w={GlareTuning.DrawnWidth:0.0000} h={GlareTuning.DrawnHeight:0.0000}");
             }
         };
 
