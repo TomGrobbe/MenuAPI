@@ -1,3 +1,5 @@
+using CitizenFX.FiveM.Client;
+
 namespace MenuAPI;
 
 /// <summary>
@@ -155,8 +157,9 @@ public sealed class MenuTickHandle
             {
                 try
                 {
+                    Native.ProfilerEnterScope($"MenuAPI.Enhanced.{Name}");
                     await _handler();
-
+                    Native.ProfilerExitScope();
                     _failures = 0;
                 }
                 catch (Exception exception)
