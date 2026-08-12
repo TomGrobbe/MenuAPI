@@ -585,7 +585,7 @@ public class Menu
     {
         // The control to listen for.
         internal Control control = control;
-        // The type. 
+        // The type.
         internal ControlPressCheckType pressType = pressType;
         // The function to call when the control is triggered.
         internal Action<Menu, Control> function = function;
@@ -927,12 +927,19 @@ public class Menu
         ClampPageIndex();
     }
 
+    private static bool IsWeaponWheelActive => IsHudComponentActive(19);
+
     /// <summary>
     /// Triggers the <see cref="ItemSelectedEvent(MenuItem, int)"/> event function.
     /// </summary>
     /// <param name="index"></param>
     public void SelectItem(int index)
     {
+        if (IsWeaponWheelActive)
+        {
+            return;
+        }
+
         var items = ActiveItems;
 
         if (index > -1 && items.Count - 1 >= index)
@@ -947,7 +954,7 @@ public class Menu
     /// <param name="index"></param>
     public void SelectItem(MenuItem item)
     {
-        if (item == null)
+        if (item == null || IsWeaponWheelActive)
         {
             return;
         }
@@ -979,6 +986,11 @@ public class Menu
     /// </summary>
     public void GoBack()
     {
+        if (IsWeaponWheelActive)
+        {
+            return;
+        }
+
         PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         CloseMenu();
         ParentMenu?.OpenMenu();
@@ -1012,7 +1024,7 @@ public class Menu
     /// </summary>
     public void GoUp()
     {
-        if (!Visible || Size < 2)
+        if (!Visible || Size < 2 || IsWeaponWheelActive)
         {
             return;
         }
@@ -1047,7 +1059,7 @@ public class Menu
     /// </summary>
     public void GoDown()
     {
-        if (!Visible || Size < 2)
+        if (!Visible || Size < 2 || IsWeaponWheelActive)
         {
             return;
         }
@@ -1081,7 +1093,7 @@ public class Menu
     /// </summary>
     public void GoLeft()
     {
-        if (!MenuController.AreMenuButtonsEnabled)
+        if (!MenuController.AreMenuButtonsEnabled || IsWeaponWheelActive)
         {
             return;
         }
@@ -1109,7 +1121,7 @@ public class Menu
     /// </summary>
     public void GoRight()
     {
-        if (!MenuController.AreMenuButtonsEnabled)
+        if (!MenuController.AreMenuButtonsEnabled || IsWeaponWheelActive)
         {
             return;
         }
