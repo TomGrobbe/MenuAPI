@@ -4,10 +4,10 @@ title: "Changelog"
 
 ---------------
 
-## FiveM Enhanced alphas
+## FiveM Enhanced
 
 :::caution[Heads up]
-These are the changes in the MenuAPI FiveM Enhanced alpha packages. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way. The final Enhanced release is not ready yet, so more of these can still show up.
+These are the changes in MenuAPI for FiveM Enhanced. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way.
 :::
 
 ### Menu banners can have their own font, and GTA Online's glare

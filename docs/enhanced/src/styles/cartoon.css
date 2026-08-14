@@ -327,9 +327,9 @@ a.pagination-link:active {
   }
 }
 
-/* Site-wide "work in progress" banner (src/components/Banner.astro). Starlight's own .sl-banner
-   rule resolves to a transparent background here, which left the notice looking like stray text
-   above the page, so it is restyled to match the theme. */
+/* Starlight's banner, shown on a page that sets `banner` in its frontmatter. Starlight's own
+   .sl-banner rule resolves to a transparent background here, which left the notice looking like
+   stray text above the page, so it is restyled to match the theme. */
 .sl-banner {
   margin: 1rem 1.5rem 0;
   padding: 0.6rem 1rem;

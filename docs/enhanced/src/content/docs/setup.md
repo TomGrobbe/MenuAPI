@@ -6,10 +6,6 @@ title: "Setup"
 
 _Note, this is only for resource developers, don't install this on your server manually if you're not making a resource with it._
 
-:::caution[Pre-release]
-MenuAPI for FiveM Enhanced is a work in progress. Releases of `MenuAPI.FiveM.Enhanced` are published as **alpha pre-releases**, so enable "include prerelease" in your NuGet client, and expect breaking changes while it stabilises.
-:::
-
 You have 2 options:
 
 1. Download the latest release zip and include the DLL as a reference in your C# project, then add `using MenuAPI;` to each file where you need to use MenuAPI.

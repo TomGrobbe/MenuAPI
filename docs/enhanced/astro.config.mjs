@@ -24,10 +24,8 @@ export default defineConfig({
       // Point the header logo + title link at the MenuAPI chooser (see src/routeData.ts).
       routeMiddleware: './src/routeData.ts',
       // SocialIcons adds a "Back to all docs" pill into the header nav.
-      // Banner is overridden to always show a site-wide work-in-progress notice.
       components: {
         SocialIcons: './src/components/SocialIcons.astro',
-        Banner: './src/components/Banner.astro',
       },
       head: [
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
