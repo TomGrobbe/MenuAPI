@@ -158,8 +158,16 @@ public sealed class MenuTickHandle
                 try
                 {
                     Native.ProfilerEnterScope($"MenuAPI.Enhanced.{Name}");
-                    await _handler();
-                    Native.ProfilerExitScope();
+
+                    try
+                    {
+                        await _handler();
+                    }
+                    finally
+                    {
+                        Native.ProfilerExitScope();
+                    }
+
                     _failures = 0;
                 }
                 catch (Exception exception)
