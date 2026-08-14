@@ -15,6 +15,19 @@
     <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(NativeHooks)' == 'true'">
+    <PackageId>MenuAPI.FiveM.Enhanced.NativeHooks</PackageId>
+    <Description>Profiling build of MenuAPI for FiveM (Enhanced). Every native call is wrapped in a profiler scope, which costs performance. Never ship this, use MenuAPI.FiveM.Enhanced instead.</Description>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);AddNativeHooksToPackage</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <Target Name="AddNativeHooksToPackage" Condition="'$(NativeHooks)' == 'true'" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)"
+                            Condition="'%(Filename)%(Extension)' == 'MenuAPI.NativeHooks.dll'" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
     <Compile Include="..\shared\Controls.cs" Link="Controls.cs" />
   </ItemGroup>

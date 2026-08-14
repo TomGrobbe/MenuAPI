@@ -11,11 +11,28 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Configurations>Release;Debug</Configurations>
+    <Configurations>Release;Debug;NativeHooks</Configurations>
     <DebugType>embedded</DebugType>
 
     <Authors>Tom Grobbe</Authors>
     <Copyright>Copyright (C) 2018-2026 Tom Grobbe</Copyright>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'NativeHooks'">
+    <NativeHooks>true</NativeHooks>
+    <Optimize>true</Optimize>
+    <DefineConstants>$(DefineConstants);NATIVE_HOOKS</DefineConstants>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(NativeHooks)' == 'true'
+                        And '$(MSBuildProjectName)' != 'MenuAPI.NativeHooks'
+                        And '$(MSBuildProjectName)' != 'MenuAPI.NativeHooks.Generator'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)MenuAPI.NativeHooks.Generator\MenuAPI.NativeHooks.Generator.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)MenuAPI.NativeHooks\MenuAPI.NativeHooks.csproj"
+                      PrivateAssets="all" />
+  </ItemGroup>
 
 </Project>

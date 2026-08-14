@@ -1,4 +1,11 @@
 ﻿<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <BuildType Name="NativeHooks" />
+  </Configurations>
   <Project Path="MenuAPI/MenuAPI.csproj" />
+  <Project Path="MenuAPI.NativeHooks/MenuAPI.NativeHooks.csproj" />
+  <Project Path="MenuAPI.NativeHooks.Generator/MenuAPI.NativeHooks.Generator.csproj" />
   <Project Path="TestMenu/TestMenu.csproj" />
 </Solution>

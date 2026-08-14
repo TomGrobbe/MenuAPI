@@ -29,4 +29,19 @@
     <None Include="fxmanifest.lua" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!--
+    fxmanifest.lua only lists what every configuration produces. A NativeHooks build also
+    drops MenuAPI.NativeHooks.dll in the output, and FiveM loads nothing that the manifest
+    does not name, so the entry is added to the copy in the output folder. The source is
+    copied over first, otherwise a rebuild would append the same block a second time.
+  -->
+  <Target Name="AddNativeHooksToManifest" AfterTargets="Build" Condition="'$(NativeHooks)' == 'true'">
+    <ItemGroup>
+      <_NativeHooksManifestLine Include="-- Added by the NativeHooks build configuration." />
+      <_NativeHooksManifestLine Include="files { 'MenuAPI.NativeHooks.dll' }" />
+    </ItemGroup>
+    <Copy SourceFiles="fxmanifest.lua" DestinationFolder="$(OutDir)" />
+    <WriteLinesToFile File="$(OutDir)fxmanifest.lua" Lines="@(_NativeHooksManifestLine)" Overwrite="false" />
+  </Target>
+
 </Project>

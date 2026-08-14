@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Shared settings (framework, langversion, nullable, ...) live in ../Directory.Build.props. -->
+  <PropertyGroup>
+    <!-- Only ever built as part of the NativeHooks configuration, so nothing ships it. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CitizenFX.FiveM.Client" />
+  </ItemGroup>
+
+</Project>
