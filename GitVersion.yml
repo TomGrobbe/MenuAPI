@@ -1,20 +1,30 @@
-# GitVersion configuration
+# GitVersion configuration (Legacy branch)
 # Docs: https://gitversion.net/docs/reference/configuration
 #
-# Mode: Mainline — every commit to master auto-increments the patch version.
+# Mode: Mainline — every commit to legacy auto-increments the patch version.
 # Override the increment for a specific commit by including one of these
 # anywhere in the commit message:
 #   +semver: major   →  bumps major (e.g. 1.2.3 → 2.0.0)
 #   +semver: minor   →  bumps minor (e.g. 1.2.3 → 1.3.0)
 #   +semver: patch   →  bumps patch (e.g. 1.2.3 → 1.2.4)  ← default
 #   +semver: none    →  no bump on this commit
+#
+# Release tags on this line stay plain `v<version>`, which also keeps them apart
+# from the `enhanced-v<version>` tags the Enhanced branch uses.
 
 assembly-versioning-scheme: MajorMinorPatch
 assembly-file-versioning-scheme: MajorMinorPatch
 mode: Mainline
 
 branches:
-  master:
-    regex: '^master$'
+  legacy:
+    regex: '^legacy$'
     increment: Patch
     is-mainline: true
+    # An empty tag means no pre-release label, so builds are a plain 3.2.25. GitVersion
+    # ships defaults for a branch called master, not for one called legacy, and its
+    # fallback for an unknown branch is to use the branch name as the label. Without
+    # these two lines the version comes out as 3.2.25-legacy.1 and it fails outright
+    # looking for a parent branch to inherit a version from.
+    tag: ''
+    source-branches: []

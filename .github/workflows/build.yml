@@ -1,5 +1,25 @@
 name: CI/CD
 
+# ============================================================================
+# One pipeline, two product lines.
+#
+# MenuAPI lives on two long running branches that never merge into each other:
+#
+#   legacy          MenuAPI for FiveM and RedM on the old CitizenFX runtime (net452)
+#   fivem-enhanced  MenuAPI for FiveM Enhanced (net10.0)
+#
+# This exact file sits on both branches. A push to either one builds the tip of
+# BOTH branches and produces a single GitHub release carrying every zip and both
+# changelogs, so there is always one place to download the current version of
+# either line. Keep the two copies identical, or a push to one branch will behave
+# differently from a push to the other.
+#
+# Versions stay separate. Legacy keeps its plain v<version> tags, Enhanced keeps
+# enhanced-v<version>, and each line's number only moves when that line changes.
+# The release itself is attached to the Enhanced tag, so a push to legacy alone
+# updates the existing release in place rather than creating a new one.
+# ============================================================================
+
 on:
   push:
     branches:
@@ -16,10 +36,12 @@ on:
 permissions:
   contents: read
 
-# Cancel any in-progress run on the same branch
+# Pushes to either release branch end up writing the same tags and the same
+# release, so they all share one queue and are never cancelled halfway through.
+# Anything else is grouped per ref and cancels its own older runs.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ (github.event_name == 'push' && (github.ref == 'refs/heads/legacy' || github.ref == 'refs/heads/fivem-enhanced')) && 'combined-release' || github.ref }}
+  cancel-in-progress: ${{ !(github.event_name == 'push' && (github.ref == 'refs/heads/legacy' || github.ref == 'refs/heads/fivem-enhanced')) }}
 
 env:
   DOTNET_NOLOGO: true
@@ -27,10 +49,69 @@ env:
 
 jobs:
   # ============================================================
-  # VERSION — calculates the shared version number once
+  # PLAN — works out which lines to build and whether to release
   # ============================================================
-  version:
-    name: Calculate Version
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+
+    outputs:
+      release:        ${{ steps.plan.outputs.release }}
+      build_legacy:   ${{ steps.plan.outputs.build_legacy }}
+      build_enhanced: ${{ steps.plan.outputs.build_enhanced }}
+      legacy_ref:     ${{ steps.plan.outputs.legacy_ref }}
+      enhanced_ref:   ${{ steps.plan.outputs.enhanced_ref }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Decide what to build
+        id: plan
+        shell: bash
+        run: |
+          RELEASE=false
+          BUILD_LEGACY=false
+          BUILD_ENHANCED=false
+          LEGACY_REF=legacy
+          ENHANCED_REF=fivem-enhanced
+
+          if [ "$GITHUB_EVENT_NAME" = "push" ] && \
+             { [ "$GITHUB_REF" = "refs/heads/legacy" ] || [ "$GITHUB_REF" = "refs/heads/fivem-enhanced" ]; }; then
+            # Release run: build the tip of both branches so the release carries the
+            # current version of each line, whichever branch was actually pushed.
+            RELEASE=true
+            BUILD_LEGACY=true
+            BUILD_ENHANCED=true
+            echo "Release run, building the tip of both branches."
+          elif [ -f MenuAPI.slnx ]; then
+            # Side branch or pull request. Build only the line it belongs to, and build
+            # the pushed commit rather than a branch tip. Enhanced is the line with the
+            # .slnx solution file, legacy still uses MenuAPI.sln.
+            BUILD_ENHANCED=true
+            ENHANCED_REF="$GITHUB_SHA"
+            echo "Enhanced side branch, build only, no release."
+          else
+            BUILD_LEGACY=true
+            LEGACY_REF="$GITHUB_SHA"
+            echo "Legacy side branch, build only, no release."
+          fi
+
+          {
+            echo "release=$RELEASE"
+            echo "build_legacy=$BUILD_LEGACY"
+            echo "build_enhanced=$BUILD_ENHANCED"
+            echo "legacy_ref=$LEGACY_REF"
+            echo "enhanced_ref=$ENHANCED_REF"
+          } >> "$GITHUB_OUTPUT"
+
+  # ============================================================
+  # VERSION (LEGACY) — v<version>, calculated once for both legacy builds
+  # ============================================================
+  version-legacy:
+    name: Version (Legacy)
+    needs: plan
+    if: needs.plan.outputs.build_legacy == 'true'
     runs-on: windows-latest
 
     outputs:
@@ -42,16 +123,68 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ needs.plan.outputs.legacy_ref }}
           fetch-depth: 0
 
       - name: Install GitVersion
-        if: github.ref == 'refs/heads/master'
+        if: needs.plan.outputs.release == 'true'
         uses: gittools/actions/gitversion/setup@v3.0.0
         with:
           versionSpec: '5.x'
 
       - name: Execute GitVersion
-        if: github.ref == 'refs/heads/master'
+        if: needs.plan.outputs.release == 'true'
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.0.0
+
+      # Only a release run gets a real version. Everything else builds unversioned
+      # and names its zip after the run number instead.
+      - name: Set version outputs
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ needs.plan.outputs.release }}" = "true" ]; then
+            SEMVER="${{ steps.gitversion.outputs.semVer }}"
+            ASSEMBLY_VER="${{ steps.gitversion.outputs.assemblySemVer }}"
+          else
+            SEMVER=""
+            ASSEMBLY_VER=""
+          fi
+          echo "Legacy version: ${SEMVER:-<none, non-release build>}"
+          ZIP_PREFIX="MenuAPI-${SEMVER:-dev-${{ github.run_number }}}"
+          echo "semver=$SEMVER"             >> "$GITHUB_OUTPUT"
+          echo "assembly_ver=$ASSEMBLY_VER" >> "$GITHUB_OUTPUT"
+          echo "zip_prefix=$ZIP_PREFIX"     >> "$GITHUB_OUTPUT"
+
+  # ============================================================
+  # VERSION (ENHANCED) — enhanced-v<version>
+  # ============================================================
+  version-enhanced:
+    name: Version (Enhanced)
+    needs: plan
+    if: needs.plan.outputs.build_enhanced == 'true'
+    runs-on: windows-latest
+
+    outputs:
+      semver:       ${{ steps.version.outputs.semver }}
+      assembly_ver: ${{ steps.version.outputs.assembly_ver }}
+      zip_prefix:   ${{ steps.version.outputs.zip_prefix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.enhanced_ref }}
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        if: needs.plan.outputs.release == 'true'
+        uses: gittools/actions/gitversion/setup@v3.0.0
+        with:
+          versionSpec: '5.x'
+
+      - name: Execute GitVersion
+        if: needs.plan.outputs.release == 'true'
         id: gitversion
         uses: gittools/actions/gitversion/execute@v3.0.0
 
@@ -59,32 +192,36 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [ "$GITHUB_REF" = "refs/heads/master" ]; then
+          if [ "${{ needs.plan.outputs.release }}" = "true" ]; then
             SEMVER="${{ steps.gitversion.outputs.semVer }}"
             ASSEMBLY_VER="${{ steps.gitversion.outputs.assemblySemVer }}"
           else
             SEMVER=""
             ASSEMBLY_VER=""
           fi
+          echo "Enhanced version: ${SEMVER:-<none, non-release build>}"
           ZIP_PREFIX="MenuAPI-${SEMVER:-dev-${{ github.run_number }}}"
           echo "semver=$SEMVER"             >> "$GITHUB_OUTPUT"
           echo "assembly_ver=$ASSEMBLY_VER" >> "$GITHUB_OUTPUT"
           echo "zip_prefix=$ZIP_PREFIX"     >> "$GITHUB_OUTPUT"
 
   # ============================================================
-  # BUILD FIVEM
-  # Restores only the FiveM configuration to avoid CitizenFX
-  # NuGet package conflicting with the RedM local DLL.
+  # BUILD LEGACY / FIVEM
+  # Restores only the FiveM configuration to avoid the CitizenFX
+  # NuGet package conflicting with the RedM local DLL, which is why
+  # this is a separate job from the RedM one.
   # ============================================================
-  build-fivem:
-    name: Build FiveM
-    needs: version
+  build-legacy-fivem:
+    name: Build Legacy FiveM
+    needs: [plan, version-legacy]
+    if: needs.plan.outputs.build_legacy == 'true'
     runs-on: windows-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ needs.plan.outputs.legacy_ref }}
           fetch-depth: 0
 
       - name: Restore NuGet (FiveM only)
@@ -92,16 +229,16 @@ jobs:
         run: dotnet restore "MenuAPI/MenuAPI.csproj" "-p:Configuration=Release FiveM"
 
       - name: Build FiveM (versioned)
-        if: github.ref == 'refs/heads/master'
+        if: needs.plan.outputs.release == 'true'
         shell: bash
         run: |
           dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore \
-            -p:Version=${{ needs.version.outputs.semver }} \
-            -p:AssemblyVersion=${{ needs.version.outputs.assembly_ver }} \
-            -p:FileVersion=${{ needs.version.outputs.assembly_ver }}
+            -p:Version=${{ needs.version-legacy.outputs.semver }} \
+            -p:AssemblyVersion=${{ needs.version-legacy.outputs.assembly_ver }} \
+            -p:FileVersion=${{ needs.version-legacy.outputs.assembly_ver }}
 
       - name: Build FiveM
-        if: github.ref != 'refs/heads/master'
+        if: needs.plan.outputs.release != 'true'
         run: dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore
 
       - name: Package FiveM zip
@@ -109,47 +246,49 @@ jobs:
         run: |
           $outDir = 'MenuAPI/bin/Release FiveM/net452'
           Copy-Item README.md "$outDir/README.md" -Force
-          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version.outputs.zip_prefix }}-FiveM.zip" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version-legacy.outputs.zip_prefix }}-FiveM.zip" -Force
 
       - name: Upload FiveM zip
         uses: actions/upload-artifact@v4
         with:
-          name: zip-fivem
-          path: ${{ needs.version.outputs.zip_prefix }}-FiveM.zip
+          name: zip-legacy-fivem
+          path: ${{ needs.version-legacy.outputs.zip_prefix }}-FiveM.zip
 
       - name: Pack NuGet FiveM
-        if: github.ref == 'refs/heads/master'
+        if: needs.plan.outputs.release == 'true'
         run: >-
           dotnet pack MenuAPI/MenuAPI.csproj
           -c "Release FiveM"
           --no-restore
-          -p:PackageVersion=${{ needs.version.outputs.semver }}
+          -p:PackageVersion=${{ needs.version-legacy.outputs.semver }}
           -p:DefineConstants=FIVEM
           -p:PackageId=MenuAPI.FiveM
           -o nupkgs
 
       - name: Upload NuGet FiveM
-        if: github.ref == 'refs/heads/master'
+        if: needs.plan.outputs.release == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: nuget-fivem
+          name: nuget-legacy-fivem
           path: nupkgs/*.nupkg
 
   # ============================================================
-  # BUILD REDM
+  # BUILD LEGACY / REDM
   # Restores only the RedM configuration so the local
   # dependencies/RedM/CitizenFX.Core.dll is used, not the
   # FiveM NuGet package.
   # ============================================================
-  build-redm:
-    name: Build RedM
-    needs: version
+  build-legacy-redm:
+    name: Build Legacy RedM
+    needs: [plan, version-legacy]
+    if: needs.plan.outputs.build_legacy == 'true'
     runs-on: windows-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ needs.plan.outputs.legacy_ref }}
           fetch-depth: 0
 
       - name: Restore NuGet (RedM only)
@@ -157,16 +296,16 @@ jobs:
         run: dotnet restore "MenuAPI/MenuAPI.csproj" "-p:Configuration=Release RedM"
 
       - name: Build RedM (versioned)
-        if: github.ref == 'refs/heads/master'
+        if: needs.plan.outputs.release == 'true'
         shell: bash
         run: |
           dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore \
-            -p:Version=${{ needs.version.outputs.semver }} \
-            -p:AssemblyVersion=${{ needs.version.outputs.assembly_ver }} \
-            -p:FileVersion=${{ needs.version.outputs.assembly_ver }}
+            -p:Version=${{ needs.version-legacy.outputs.semver }} \
+            -p:AssemblyVersion=${{ needs.version-legacy.outputs.assembly_ver }} \
+            -p:FileVersion=${{ needs.version-legacy.outputs.assembly_ver }}
 
       - name: Build RedM
-        if: github.ref != 'refs/heads/master'
+        if: needs.plan.outputs.release != 'true'
         run: dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore
 
       - name: Package RedM zip
@@ -174,42 +313,138 @@ jobs:
         run: |
           $outDir = 'MenuAPI/bin/Release RedM/net452'
           Copy-Item README.md "$outDir/README.md" -Force
-          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version.outputs.zip_prefix }}-RedM.zip" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version-legacy.outputs.zip_prefix }}-RedM.zip" -Force
 
       - name: Upload RedM zip
         uses: actions/upload-artifact@v4
         with:
-          name: zip-redm
-          path: ${{ needs.version.outputs.zip_prefix }}-RedM.zip
+          name: zip-legacy-redm
+          path: ${{ needs.version-legacy.outputs.zip_prefix }}-RedM.zip
 
       - name: Pack NuGet RedM
-        if: github.ref == 'refs/heads/master'
+        if: needs.plan.outputs.release == 'true'
         run: >-
           dotnet pack MenuAPI/MenuAPI.csproj
           -c "Release RedM"
           --no-restore
-          -p:PackageVersion=${{ needs.version.outputs.semver }}
+          -p:PackageVersion=${{ needs.version-legacy.outputs.semver }}
           -p:DefineConstants=REDM
           -p:PackageId=MenuAPI.RedM
           -o nupkgs
 
       - name: Upload NuGet RedM
-        if: github.ref == 'refs/heads/master'
+        if: needs.plan.outputs.release == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: nuget-redm
+          name: nuget-legacy-redm
           path: nupkgs/*.nupkg
 
   # ============================================================
-  # RELEASE — master only, after both builds succeed
+  # BUILD ENHANCED (FiveM Enhanced)
+  # ============================================================
+  build-enhanced:
+    name: Build Enhanced
+    needs: [plan, version-enhanced]
+    if: needs.plan.outputs.build_enhanced == 'true'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.enhanced_ref }}
+          fetch-depth: 0
+
+      - name: Restore NuGet (FiveM only)
+        shell: bash
+        run: dotnet restore "MenuAPI/MenuAPI.csproj" -p:Configuration=Release
+
+      - name: Build FiveM (versioned)
+        if: needs.plan.outputs.release == 'true'
+        shell: bash
+        run: |
+          dotnet build MenuAPI/MenuAPI.csproj -c Release --no-restore \
+            -p:Version=${{ needs.version-enhanced.outputs.semver }} \
+            -p:AssemblyVersion=${{ needs.version-enhanced.outputs.assembly_ver }} \
+            -p:FileVersion=${{ needs.version-enhanced.outputs.assembly_ver }}
+
+      - name: Build FiveM
+        if: needs.plan.outputs.release != 'true'
+        run: dotnet build MenuAPI/MenuAPI.csproj -c Release --no-restore
+
+      - name: Package FiveM zip
+        shell: pwsh
+        run: |
+          $outDir = 'MenuAPI/bin/Release/net10.0'
+          Copy-Item README.md "$outDir/README.md" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version-enhanced.outputs.zip_prefix }}-FiveM-Enhanced.zip" -Force
+
+      - name: Upload FiveM zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip-enhanced
+          path: ${{ needs.version-enhanced.outputs.zip_prefix }}-FiveM-Enhanced.zip
+
+      - name: Pack NuGet FiveM
+        if: needs.plan.outputs.release == 'true'
+        run: >-
+          dotnet pack MenuAPI/MenuAPI.csproj
+          -c Release
+          --no-restore
+          -p:PackageVersion=${{ needs.version-enhanced.outputs.semver }}
+          -o nupkgs
+
+      - name: Upload NuGet FiveM
+        if: needs.plan.outputs.release == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-enhanced
+          path: nupkgs/*.nupkg
+
+      # ── NativeHooks profiling build ────────────────────────────────────────
+      # Wraps every native call in a profiler scope, which costs performance, so it is
+      # never pushed to nuget.org. It is packed anyway, under its own package id, so it
+      # can be installed from a local folder feed when something needs profiling. The
+      # zip keeps it out of the way of the assets people actually download.
+      - name: Restore NuGet (NativeHooks)
+        shell: bash
+        run: dotnet restore "MenuAPI/MenuAPI.csproj" -p:Configuration=NativeHooks
+
+      - name: Pack NuGet NativeHooks (versioned)
+        if: needs.plan.outputs.release == 'true'
+        shell: bash
+        run: |
+          dotnet pack MenuAPI/MenuAPI.csproj -c NativeHooks --no-restore \
+            -p:PackageVersion=${{ needs.version-enhanced.outputs.semver }} \
+            -p:Version=${{ needs.version-enhanced.outputs.semver }} \
+            -p:AssemblyVersion=${{ needs.version-enhanced.outputs.assembly_ver }} \
+            -p:FileVersion=${{ needs.version-enhanced.outputs.assembly_ver }} \
+            -o nupkgs-nativehooks
+
+      - name: Pack NuGet NativeHooks
+        if: needs.plan.outputs.release != 'true'
+        run: dotnet pack MenuAPI/MenuAPI.csproj -c NativeHooks --no-restore -o nupkgs-nativehooks
+
+      - name: Package NativeHooks zip
+        shell: pwsh
+        run: Compress-Archive -Path 'nupkgs-nativehooks/*.nupkg' -DestinationPath "${{ needs.version-enhanced.outputs.zip_prefix }}-NativeHooks-NuGet.zip" -Force
+
+      - name: Upload NativeHooks zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip-enhanced-nativehooks
+          path: ${{ needs.version-enhanced.outputs.zip_prefix }}-NativeHooks-NuGet.zip
+
+  # ============================================================
+  # RELEASE — one release for both lines, after every build succeeds
   # ============================================================
   release:
     name: Release
-    needs: [version, build-fivem, build-redm]
-    if: github.ref == 'refs/heads/master'
+    needs: [plan, version-legacy, version-enhanced, build-legacy-fivem, build-legacy-redm, build-enhanced]
+    if: needs.plan.outputs.release == 'true'
     runs-on: windows-latest
 
-    # contents: write for the git tag + GitHub release; id-token: write so NuGet
+    # contents: write for the git tags + GitHub release; id-token: write so NuGet
     # Trusted Publishing (OIDC) can mint a short-lived key (no API-key secret).
     permissions:
       contents: write
@@ -224,79 +459,162 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download FiveM zip
+      # The changelogs and the tags are both worked out across two branches, and a
+      # checkout only guarantees the history of the one ref it was given.
+      - name: Fetch both branches and all tags
+        shell: bash
+        run: git fetch origin --tags --prune "+refs/heads/*:refs/remotes/origin/*"
+
+      - name: Download Legacy FiveM zip
         uses: actions/download-artifact@v4
         with:
-          name: zip-fivem
+          name: zip-legacy-fivem
           path: release-assets
 
-      - name: Download RedM zip
+      - name: Download Legacy RedM zip
         uses: actions/download-artifact@v4
         with:
-          name: zip-redm
+          name: zip-legacy-redm
           path: release-assets
 
-      - name: Download NuGet FiveM
+      - name: Download Legacy NuGet FiveM
         uses: actions/download-artifact@v4
         with:
-          name: nuget-fivem
+          name: nuget-legacy-fivem
           path: release-assets
 
-      - name: Download NuGet RedM
+      - name: Download Legacy NuGet RedM
         uses: actions/download-artifact@v4
         with:
-          name: nuget-redm
+          name: nuget-legacy-redm
           path: release-assets
 
-      # Generate changelog BEFORE tagging so the range is correct
-      - name: Generate changelog
+      - name: Download Enhanced zip
+        uses: actions/download-artifact@v4
+        with:
+          name: zip-enhanced
+          path: release-assets
+
+      - name: Download Enhanced NuGet
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-enhanced
+          path: release-assets
+
+      - name: Download Enhanced NativeHooks zip
+        uses: actions/download-artifact@v4
+        with:
+          name: zip-enhanced-nativehooks
+          path: release-assets
+
+      # Generate the changelogs BEFORE tagging, so the ranges are correct.
+      #
+      # Each line's range starts at the newest tag on that line that is not already on
+      # the branch tip. When a line has moved, that is simply its previous release. When
+      # a line has NOT moved (a push to the other branch), its tip is still carrying its
+      # own tag, and skipping that tag gives back the changelog that produced the current
+      # version instead of an empty list.
+      - name: Generate changelogs
         shell: bash
         run: |
-          LAST_TAG=$(git tag --sort=-version:refname | head -n 1)
-          if [ -n "$LAST_TAG" ]; then
-            git log "$LAST_TAG..HEAD" --pretty=format:'- `%h` (%an) %s' > changelog.txt
-          else
-            git log --pretty=format:'- `%h` (%an) %s' > changelog.txt
-          fi
-          echo "Last tag used for changelog: ${LAST_TAG:-<none, full history>}"
-          cat changelog.txt
+          changelog() {
+            local glob="$1" ref="$2" out="$3"
+            local prev
+            prev=$(git tag --list "$glob" --sort=-version:refname --no-contains "$ref" | head -n 1)
+            if [ -n "$prev" ]; then
+              git log "$prev..$ref" --pretty=format:'- `%h` (%an) %s' > "$out"
+            else
+              git log "$ref" --pretty=format:'- `%h` (%an) %s' > "$out"
+            fi
+            echo "$glob range starts at: ${prev:-<none, full history>}"
+            cat "$out"
+            echo ""
+          }
 
-      - name: Create and push git tag
+          changelog 'v*'          origin/legacy         changelog-legacy.txt
+          changelog 'enhanced-v*' origin/fivem-enhanced changelog-enhanced.txt
+
+      # Each line is tagged on its own branch tip. A line that did not move this run is
+      # already carrying its tag, so creating it is skipped rather than failing the run.
+      - name: Create and push git tags
         shell: bash
         run: |
-          VERSION="${{ needs.version.outputs.semver }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
-          git tag "v$VERSION"
-          git push origin "v$VERSION"
 
-      - name: Create GitHub Release
+          tag_branch() {
+            local tag="$1" ref="$2"
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+              echo "Tag $tag already exists on origin, skipping."
+            else
+              git tag "$tag" "$ref"
+              git push origin "$tag"
+              echo "Pushed tag $tag."
+            fi
+          }
+
+          tag_branch "v${{ needs.version-legacy.outputs.semver }}"            origin/legacy
+          tag_branch "enhanced-v${{ needs.version-enhanced.outputs.semver }}" origin/fivem-enhanced
+
+      # The release hangs off the Enhanced tag. A push to legacy on its own does not move
+      # the Enhanced version, so that release already exists and gets updated in place
+      # with the new legacy assets, title and notes.
+      - name: Create or update GitHub Release
         id: create_release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ needs.version.outputs.semver }}"
+          LEGACY_VERSION="${{ needs.version-legacy.outputs.semver }}"
+          ENHANCED_VERSION="${{ needs.version-enhanced.outputs.semver }}"
+          TAG="enhanced-v$ENHANCED_VERSION"
+          TITLE="MenuAPI v$ENHANCED_VERSION (Enhanced) and v$LEGACY_VERSION (Legacy)"
+
           {
-            echo "MenuAPI release v${VERSION}. Download the **FiveM** or **RedM** versions below."
+            echo "One release, both versions of MenuAPI."
             echo ""
-            echo "## Changes"
-            cat changelog.txt
+            echo "| Version | For | Download |"
+            echo "| --- | --- | --- |"
+            echo "| **v$ENHANCED_VERSION** | FiveM Enhanced | \`MenuAPI-$ENHANCED_VERSION-FiveM-Enhanced.zip\` |"
+            echo "| **v$LEGACY_VERSION** | FiveM (legacy runtime) | \`MenuAPI-$LEGACY_VERSION-FiveM.zip\` |"
+            echo "| **v$LEGACY_VERSION** | RedM | \`MenuAPI-$LEGACY_VERSION-RedM.zip\` |"
             echo ""
-            echo "For more info, check the [docs](https://docs.vespura.com/mapi)."
+            echo "## Changes in Enhanced v$ENHANCED_VERSION"
+            cat changelog-enhanced.txt
+            echo ""
+            echo "## Changes in Legacy v$LEGACY_VERSION"
+            cat changelog-legacy.txt
+            echo ""
+            echo "## Notes"
+            echo "The NativeHooks zip is a profiling build of Enhanced, packed as a NuGet package you can install from a local folder feed. It wraps every native call in a profiler scope, so it is slower than the normal build and is not published to nuget.org. You do not need it unless you are profiling."
+            echo ""
+            echo "Docs: [Enhanced](https://docs.vespura.com/menuapi/enhanced), [Legacy and RedM](https://docs.vespura.com/mapi)."
           } > release_notes.md
 
-          RELEASE_URL=$(gh release create "v$VERSION" \
-            --title "MenuAPI v$VERSION" \
-            --notes-file release_notes.md \
-            "release-assets/MenuAPI-$VERSION-FiveM.zip" \
-            "release-assets/MenuAPI-$VERSION-RedM.zip")
+          ASSETS=(
+            "release-assets/MenuAPI-$ENHANCED_VERSION-FiveM-Enhanced.zip"
+            "release-assets/MenuAPI-$ENHANCED_VERSION-NativeHooks-NuGet.zip"
+            "release-assets/MenuAPI-$LEGACY_VERSION-FiveM.zip"
+            "release-assets/MenuAPI-$LEGACY_VERSION-RedM.zip"
+          )
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, updating it."
+            gh release edit "$TAG" --title "$TITLE" --notes-file release_notes.md
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+            RELEASE_URL=$(gh release view "$TAG" --json url --jq .url)
+          else
+            RELEASE_URL=$(gh release create "$TAG" \
+              --title "$TITLE" \
+              --notes-file release_notes.md \
+              "${ASSETS[@]}")
+          fi
 
           echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
 
       # NuGet Trusted Publishing (OIDC): exchange the GitHub Actions id-token for a
-      # short-lived NuGet API key, used for both packages. No NUGET_API_KEY secret.
+      # short-lived NuGet API key, used for every package. No NUGET_API_KEY secret.
       # Requires a matching trusted-publishing policy on nuget.org.
       - name: NuGet login (trusted publishing)
         uses: NuGet/login@v1
@@ -304,18 +622,30 @@ jobs:
         with:
           user: ${{ vars.NUGET_USER }}
 
-      - name: Publish NuGet (FiveM)
+      # Each package is named explicitly. The NativeHooks package is not in this list and
+      # stays inside its zip, so it cannot reach nuget.org by accident. A line that did not
+      # move this run republishes the same version, which --skip-duplicate turns into a
+      # no-op rather than a failure.
+      - name: Publish NuGet (Enhanced)
         run: >-
           dotnet nuget push
-          "release-assets/MenuAPI.FiveM.${{ needs.version.outputs.semver }}.nupkg"
+          "release-assets/MenuAPI.FiveM.Enhanced.${{ needs.version-enhanced.outputs.semver }}.nupkg"
           --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
 
-      - name: Publish NuGet (RedM)
+      - name: Publish NuGet (Legacy FiveM)
         run: >-
           dotnet nuget push
-          "release-assets/MenuAPI.RedM.${{ needs.version.outputs.semver }}.nupkg"
+          "release-assets/MenuAPI.FiveM.${{ needs.version-legacy.outputs.semver }}.nupkg"
+          --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+      - name: Publish NuGet (Legacy RedM)
+        run: >-
+          dotnet nuget push
+          "release-assets/MenuAPI.RedM.${{ needs.version-legacy.outputs.semver }}.nupkg"
           --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
@@ -325,7 +655,7 @@ jobs:
   # ============================================================
   notify:
     name: Discord Notification
-    needs: [version, build-fivem, build-redm, release]
+    needs: [plan, version-legacy, version-enhanced, build-legacy-fivem, build-legacy-redm, build-enhanced, release]
     if: always()
     runs-on: ubuntu-latest
 
@@ -340,22 +670,34 @@ jobs:
             exit 0
           fi
 
-          FIVEM_RESULT="${{ needs.build-fivem.result }}"
-          REDM_RESULT="${{ needs.build-redm.result }}"
+          LEGACY_FIVEM_RESULT="${{ needs.build-legacy-fivem.result }}"
+          LEGACY_REDM_RESULT="${{ needs.build-legacy-redm.result }}"
+          ENHANCED_RESULT="${{ needs.build-enhanced.result }}"
           RELEASE_RESULT="${{ needs.release.result }}"
-          VERSION="${{ needs.version.outputs.semver }}"
+          LEGACY_VERSION="${{ needs.version-legacy.outputs.semver }}"
+          ENHANCED_VERSION="${{ needs.version-enhanced.outputs.semver }}"
 
           # ── Status colour & label ──────────────────────────────────────────
-          if [ "$FIVEM_RESULT" = "cancelled" ] || [ "$REDM_RESULT" = "cancelled" ] || [ "$RELEASE_RESULT" = "cancelled" ]; then
+          # A line that was not part of this run is skipped, which is not a failure.
+          FAILED=false
+          CANCELLED=false
+          for RESULT in "$LEGACY_FIVEM_RESULT" "$LEGACY_REDM_RESULT" "$ENHANCED_RESULT" "$RELEASE_RESULT"; do
+            case "$RESULT" in
+              cancelled) CANCELLED=true ;;
+              success|skipped) ;;
+              *) FAILED=true ;;
+            esac
+          done
+
+          if [ "$CANCELLED" = "true" ]; then
             COLOR=16776960
             STATUS_TEXT="Build cancelled."
-          elif [ "$FIVEM_RESULT" = "success" ] && [ "$REDM_RESULT" = "success" ] && \
-               { [ "$RELEASE_RESULT" = "success" ] || [ "$RELEASE_RESULT" = "skipped" ]; }; then
-            COLOR=4502298
-            STATUS_TEXT="Build passed!"
-          else
+          elif [ "$FAILED" = "true" ]; then
             COLOR=13632027
             STATUS_TEXT="Build FAILED!"
+          else
+            COLOR=4502298
+            STATUS_TEXT="Build passed!"
           fi
 
           # ── Link field ─────────────────────────────────────────────────────
@@ -368,12 +710,23 @@ jobs:
             LINK_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           fi
 
-          DISPLAY_VERSION="${VERSION:-dev-${{ github.run_number }}}"
+          # ── Title ──────────────────────────────────────────────────────────
+          # Side branch runs have no version at all, so they fall back to the run number.
+          if [ -n "$ENHANCED_VERSION" ] && [ -n "$LEGACY_VERSION" ]; then
+            TITLE="MenuAPI (Enhanced v${ENHANCED_VERSION}, Legacy v${LEGACY_VERSION})"
+          elif [ -n "$ENHANCED_VERSION" ]; then
+            TITLE="MenuAPI Enhanced (v${ENHANCED_VERSION})"
+          elif [ -n "$LEGACY_VERSION" ]; then
+            TITLE="MenuAPI Legacy (v${LEGACY_VERSION})"
+          else
+            TITLE="MenuAPI (dev-${{ github.run_number }})"
+          fi
+
           SHA="${{ github.sha }}"
           SHORT_SHA="${SHA:0:7}"
 
           PAYLOAD=$(jq -n \
-            --arg  title       "MenuAPI (v${DISPLAY_VERSION})" \
+            --arg  title       "$TITLE" \
             --arg  desc        "$STATUS_TEXT" \
             --argjson color    "$COLOR" \
             --arg  actor       "${{ github.actor }}" \
