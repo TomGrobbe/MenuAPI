@@ -547,6 +547,15 @@ public class Menu
 
     private bool filterActive = false;
 
+    // What GetDescriptionLineCount last measured, and everything that measurement depended on.
+    private string? measuredDescription;
+    private float measuredDescriptionMinX;
+    private float measuredDescriptionMaxX;
+    private float measuredDescriptionY;
+    private float measuredDescriptionTextSize;
+    private int measuredDescriptionFont;
+    private int measuredDescriptionLineCount;
+
     public bool ShowSelectInstructionalButton { get; set; } = true;
     public bool ShowBackInstructionalButton { get; set; } = true;
 
@@ -1715,30 +1724,7 @@ public class Menu
 
             Native.ResetScriptGfxAlign();
 
-            Native.SetScriptGfxAlign(76, 84);
-            Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-
-            Native.BeginTextCommandLineCount("CELL_EMAIL_BCON");
-            Native.SetTextScale(textSize, textSize);
-            Native.SetTextJustification(1);
-            Native.SetTextFont(font);
-            int lineCount;
-            foreach (string s in SplitString(text))
-            {
-                Native.AddTextComponentSubstringPlayerName(s);
-            }
-            if (LeftAligned)
-            {
-                Native.SetTextWrap(textMinX, textMaxX);
-                lineCount = Native.GetTextScreenLineCount(textMinX, textY);
-            }
-            else
-            {
-                Native.SetTextWrap(textMinX, textMaxX);
-                lineCount = Native.GetTextScreenLineCount(textMinX, textY);
-            }
-
-            Native.ResetScriptGfxAlign();
+            int lineCount = GetDescriptionLineCount(text, textMinX, textMaxX, textY, textSize, font);
             #endregion
             #region background
             float descWidth = Width / MenuLayout.ScreenWidth;
@@ -1762,6 +1748,52 @@ public class Menu
             descriptionYOffset += menuItemsOffset / MenuLayout.ScreenHeight + (2f / MenuLayout.ScreenHeight) + descriptionYOffset;
         }
         return descriptionYOffset;
+    }
+
+    /// <summary>
+    /// How many lines the current description wraps into, asked of the game only when it can have changed.
+    /// </summary>
+    // Asking costs a whole text command plus GetTextScreenLineCount, and the description behind it only
+    // changes when the player moves to another item or the menu is drawn somewhere else on the screen.
+    // The kept answer is thrown away as soon as any of the values it was measured with differ, so a
+    // resolution or safe zone change measures again on the next frame.
+    private int GetDescriptionLineCount(string text, float minX, float maxX, float y, float textSize, int font)
+    {
+        if (measuredDescription == text
+            && measuredDescriptionMinX == minX
+            && measuredDescriptionMaxX == maxX
+            && measuredDescriptionY == y
+            && measuredDescriptionTextSize == textSize
+            && measuredDescriptionFont == font)
+        {
+            return measuredDescriptionLineCount;
+        }
+
+        Native.SetScriptGfxAlign(76, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+
+        Native.BeginTextCommandLineCount("CELL_EMAIL_BCON");
+        Native.SetTextScale(textSize, textSize);
+        Native.SetTextJustification(1);
+        Native.SetTextFont(font);
+        foreach (string s in SplitString(text))
+        {
+            Native.AddTextComponentSubstringPlayerName(s);
+        }
+        Native.SetTextWrap(minX, maxX);
+        int lineCount = Native.GetTextScreenLineCount(minX, y);
+
+        Native.ResetScriptGfxAlign();
+
+        measuredDescription = text;
+        measuredDescriptionMinX = minX;
+        measuredDescriptionMaxX = maxX;
+        measuredDescriptionY = y;
+        measuredDescriptionTextSize = textSize;
+        measuredDescriptionFont = font;
+        measuredDescriptionLineCount = lineCount;
+
+        return lineCount;
     }
 
     /// <summary>
