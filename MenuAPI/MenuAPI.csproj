@@ -6,7 +6,7 @@
 
     <AssemblyTitle>MenuAPI FiveM Enhanced</AssemblyTitle>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Description>An advanced Menu API for FiveM (Enhanced) C# resources. Work in progress (alpha).</Description>
+    <Description>An advanced Menu API for FiveM (Enhanced) C# resources.</Description>
     <PackageId>MenuAPI.FiveM.Enhanced</PackageId>
     <PackageTags>FiveM Enhanced MenuAPI</PackageTags>
     <PackageProjectUrl>https://github.com/tomgrobbe/menuapi/</PackageProjectUrl>
