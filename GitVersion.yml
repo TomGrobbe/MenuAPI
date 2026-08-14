@@ -30,8 +30,15 @@ mode: Mainline
 tag-prefix: 'enhanced-v'
 
 branches:
-  fivem-enhanced:
-    regex: '^fivem-enhanced$'
+  # Both release branch names match on purpose, even though this file is only ever read
+  # from fivem-enhanced. The GitHub Actions runner tells GitVersion which branch it is on
+  # through GITHUB_REF, and GitVersion trusts that over the branch actually checked out.
+  # The combined pipeline checks out the OTHER branch to version it, so a run triggered
+  # from legacy would otherwise find no matching entry here, fall back to the default
+  # config and label the build 1.0.1-legacy.0. Matching both names makes the answer
+  # depend on the repository being read rather than on which branch triggered the run.
+  mainline:
+    regex: '^(fivem-enhanced|legacy)$'
     increment: Patch
     is-mainline: true
     # An empty tag means no pre-release label, so builds are a plain 1.0.0 instead of
