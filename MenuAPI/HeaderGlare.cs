@@ -1,8 +1,6 @@
 using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Shared.Data;
 
-using static CitizenFX.FiveM.Client.Native;
-
 namespace MenuAPI;
 
 /// <summary>
@@ -51,11 +49,11 @@ internal static class HeaderGlare
     /// <summary>Draws the glare for this frame. Silently does nothing until the movie has loaded.</summary>
     internal static void Draw(bool leftAligned)
     {
-        if (!HasScaleformMovieLoaded(_handle))
+        if (!Native.HasScaleformMovieLoaded(_handle))
         {
-            _handle = RequestScaleformMovie(ScaleformName);
+            _handle = Native.RequestScaleformMovie(ScaleformName);
 
-            if (!HasScaleformMovieLoaded(_handle))
+            if (!Native.HasScaleformMovieLoaded(_handle))
             {
                 return;
             }
@@ -63,15 +61,15 @@ internal static class HeaderGlare
 
         float heading = GlareTuning.PinHeading
             ? GlareTuning.PinnedHeading
-            : Wrap(GetFinalRenderedCamRot(2).Z);
+            : Wrap(Native.GetFinalRenderedCamRot(2).Z);
 
         if (Math.Abs(_direction - heading) > RotationTolerance)
         {
             _direction = heading;
 
-            BeginScaleformMovieMethod(_handle, "SET_DATA_SLOT");
-            ScaleformMovieMethodAddParamFloat(_direction);
-            EndScaleformMovieMethod();
+            Native.BeginScaleformMovieMethod(_handle, "SET_DATA_SLOT");
+            Native.ScaleformMovieMethodAddParamFloat(_direction);
+            Native.EndScaleformMovieMethod();
         }
 
         float aspect = MenuLayout.AspectRatio;
@@ -89,7 +87,7 @@ internal static class HeaderGlare
         GlareTuning.DrawnWidth = MovieWidth + GlareTuning.WidthOffset;
         GlareTuning.DrawnHeight = MovieHeight + GlareTuning.HeightOffset;
 
-        DrawScaleformMovie(
+        Native.DrawScaleformMovie(
             _handle,
             GlareTuning.DrawnX,
             GlareTuning.DrawnY,
@@ -102,9 +100,9 @@ internal static class HeaderGlare
     /// <summary>Releases the movie. Called when the last menu closes.</summary>
     internal static void Dispose()
     {
-        if (HasScaleformMovieLoaded(_handle))
+        if (Native.HasScaleformMovieLoaded(_handle))
         {
-            SetScaleformMovieAsNoLongerNeeded(new Ref<int>(ref _handle));
+            Native.SetScaleformMovieAsNoLongerNeeded(new Ref<int>(ref _handle));
         }
 
         // The movie starts its fade in from scratch next time, so the angle it was last told about

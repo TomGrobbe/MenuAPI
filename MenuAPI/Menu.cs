@@ -1,8 +1,6 @@
 using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Client.Extensions;
 
-using static CitizenFX.FiveM.Client.Native;
-
 namespace MenuAPI;
 
 public class Menu
@@ -419,8 +417,8 @@ public class Menu
     // with fifty menus was asking the game for a hundred scaleform movies and holding them all for
     // the lifetime of the resource. Still requested up front, because loading them on first use was
     // what gave the glitchy results the original comment here warned about.
-    private static readonly int ColorPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_02");
-    private static readonly int OpacityPanelScaleform = RequestScaleformMovie("COLOUR_SWITCHER_01");
+    private static readonly int ColorPanelScaleform = Native.RequestScaleformMovie("COLOUR_SWITCHER_02");
+    private static readonly int OpacityPanelScaleform = Native.RequestScaleformMovie("COLOUR_SWITCHER_01");
     #endregion
 
     #region Public Variables
@@ -552,8 +550,8 @@ public class Menu
     public bool ShowSelectInstructionalButton { get; set; } = true;
     public bool ShowBackInstructionalButton { get; set; } = true;
 
-    public string SelectButtonText { get; set; } = GetLabelText("HUD_INPUT28");
-    public string BackButtonText { get; set; } = GetLabelText("HUD_INPUT53");
+    public string SelectButtonText { get; set; } = Native.GetLabelText("HUD_INPUT28");
+    public string BackButtonText { get; set; } = Native.GetLabelText("HUD_INPUT53");
 
     /// <summary>Only ever drawn when the menu is paginated, whatever this is set to.</summary>
     public bool ShowPageInstructionalButtons { get; set; } = true;
@@ -718,7 +716,7 @@ public class Menu
         // on the page before.
         RefreshIndex(0, 0);
 
-        PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+        Native.PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         PageChangeEvent(this, oldPage, PageIndex, wrapped);
 
         return true;
@@ -927,7 +925,7 @@ public class Menu
         ClampPageIndex();
     }
 
-    private static bool IsWeaponWheelActive => IsHudComponentActive(19);
+    private static bool IsWeaponWheelActive => Native.IsHudComponentActive(19);
 
     /// <summary>
     /// Triggers the <see cref="ItemSelectedEvent(MenuItem, int)"/> event function.
@@ -960,11 +958,11 @@ public class Menu
         }
         if (!item.Enabled)
         {
-            PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            Native.PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
         else
         {
-            PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            Native.PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
             item.Select();
             if (MenuController.MenuButtons.TryGetValue(item, out var value))
             {
@@ -991,7 +989,7 @@ public class Menu
             return;
         }
 
-        PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+        Native.PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         CloseMenu();
         ParentMenu?.OpenMenu();
     }
@@ -1051,7 +1049,7 @@ public class Menu
         }
 
         IndexChangeEvent(this, oldItem, currItem, oldItem.Index, CurrentIndex);
-        PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+        Native.PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
     }
 
     /// <summary>
@@ -1085,7 +1083,7 @@ public class Menu
             }
         }
         IndexChangeEvent(this, oldItem, currItem, oldItem.Index, CurrentIndex);
-        PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+        Native.PlaySoundFrontend(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
     }
 
     /// <summary>
@@ -1283,34 +1281,34 @@ public class Menu
                 {
                     if (handler.disableControl)
                     {
-                        DisableControlAction(0, (int)handler.control, false);
+                        Native.DisableControlAction(0, (int)handler.control, false);
                     }
 
                     switch (handler.pressType)
                     {
                         case ControlPressCheckType.JUST_PRESSED:
-                            if (IsControlJustPressed(0, (int)handler.control) || IsDisabledControlJustPressed(0, (int)handler.control))
+                            if (Native.IsControlJustPressed(0, (int)handler.control) || Native.IsDisabledControlJustPressed(0, (int)handler.control))
                             {
                                 handler.function.Invoke(this, handler.control);
                             }
 
                             break;
                         case ControlPressCheckType.JUST_RELEASED:
-                            if (IsControlJustReleased(0, (int)handler.control) || IsDisabledControlJustReleased(0, (int)handler.control))
+                            if (Native.IsControlJustReleased(0, (int)handler.control) || Native.IsDisabledControlJustReleased(0, (int)handler.control))
                             {
                                 handler.function.Invoke(this, handler.control);
                             }
 
                             break;
                         case ControlPressCheckType.PRESSED:
-                            if (IsControlPressed(0, (int)handler.control) || IsDisabledControlPressed(0, (int)handler.control))
+                            if (Native.IsControlPressed(0, (int)handler.control) || Native.IsDisabledControlPressed(0, (int)handler.control))
                             {
                                 handler.function.Invoke(this, handler.control);
                             }
 
                             break;
                         case ControlPressCheckType.RELEASED:
-                            if (!IsControlPressed(0, (int)handler.control) && !IsDisabledControlPressed(0, (int)handler.control))
+                            if (!Native.IsControlPressed(0, (int)handler.control) && !Native.IsDisabledControlPressed(0, (int)handler.control))
                             {
                                 handler.function.Invoke(this, handler.control);
                             }
@@ -1337,8 +1335,8 @@ public class Menu
         }
 
         #region Draw Header Background
-        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+        Native.SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
         float x = MenuLayout.RowCenterX;
         float y = MenuLayout.HeaderHeightN / 2f;
@@ -1347,22 +1345,22 @@ public class Menu
 
         if (!string.IsNullOrEmpty(HeaderTexture.Key) && !string.IsNullOrEmpty(HeaderTexture.Value))
         {
-            if (!HasStreamedTextureDictLoaded(HeaderTexture.Key))
+            if (!Native.HasStreamedTextureDictLoaded(HeaderTexture.Key))
             {
-                RequestStreamedTextureDict(HeaderTexture.Key, false);
-                while (!HasStreamedTextureDictLoaded(HeaderTexture.Key))
+                Native.RequestStreamedTextureDict(HeaderTexture.Key, false);
+                while (!Native.HasStreamedTextureDictLoaded(HeaderTexture.Key))
                 {
                     await API.Delay(0);
                 }
             }
-            DrawSprite(HeaderTexture.Key, HeaderTexture.Value, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
+            Native.DrawSprite(HeaderTexture.Key, HeaderTexture.Value, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
         }
         else
         {
-            DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
+            Native.DrawSprite(MenuController._texture_dict, MenuController._header_texture, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
         }
 
-        ResetScriptGfxAlign();
+        Native.ResetScriptGfxAlign();
         #endregion
 
         // Over the banner but under the title, which is where GTA Online puts it. Outside the gfx
@@ -1376,44 +1374,44 @@ public class Menu
         int font = ResolvedTitleFont;
         float size = MenuFont.DefaultSizeFor(font);
 
-        SetScriptGfxAlign(76, 84);
-        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+        Native.SetScriptGfxAlign(76, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-        BeginTextCommandDisplayText("STRING");
-        SetTextFont(font);
-        SetTextColour(255, 255, 255, 255);
-        SetTextScale(size, size);
+        Native.BeginTextCommandDisplayText("STRING");
+        Native.SetTextFont(font);
+        Native.SetTextColour(255, 255, 255, 255);
+        Native.SetTextScale(size, size);
 
         float titleX;
 
         switch (ResolvedTitleAlignment)
         {
             case TitleAlignmentOption.Left:
-                SetTextJustification(1);
+                Native.SetTextJustification(1);
                 titleX = LeftAligned ? (HeaderTextPadding / MenuLayout.ScreenWidth) : MenuLayout.RightTextMinX;
                 break;
 
             case TitleAlignmentOption.Right:
                 // Right justified text is measured back from the wrap box's right edge and ignores
                 // the x it is drawn at, so the box is what places it. Same trick the counter uses.
-                SetTextJustification(2);
-                SetTextWrap(0f, LeftAligned ? ((HeaderWidth - HeaderTextPadding) / MenuLayout.ScreenWidth) : MenuLayout.RightTextMaxX);
+                Native.SetTextJustification(2);
+                Native.SetTextWrap(0f, LeftAligned ? ((HeaderWidth - HeaderTextPadding) / MenuLayout.ScreenWidth) : MenuLayout.RightTextMaxX);
                 titleX = 0f;
                 break;
 
             default:
-                SetTextJustification(0);
+                Native.SetTextJustification(0);
                 titleX = LeftAligned ? MenuLayout.RowCenterX : MenuLayout.RightHeaderCenterX;
                 break;
         }
 
-        AddTextComponentSubstringPlayerName(MenuTitle);
-        EndTextCommandDisplayText(
+        Native.AddTextComponentSubstringPlayerName(MenuTitle);
+        Native.EndTextCommandDisplayText(
             titleX,
-            y - (GetTextScaleHeight(size, font) / 2f) + (MenuFont.DefaultOffsetYFor(font) / MenuLayout.ScreenHeight),
+            y - (Native.GetTextScaleHeight(size, font) / 2f) + (MenuFont.DefaultOffsetYFor(font) / MenuLayout.ScreenHeight),
             0);
 
-        ResetScriptGfxAlign();
+        Native.ResetScriptGfxAlign();
         #endregion
 
         return HeaderHeight;
@@ -1427,8 +1425,8 @@ public class Menu
     private float DrawSubtitle(float menuItemsOffset)
     {
         #region draw subtitle background
-        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+        Native.SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
         float bgHeight = 38f;
 
@@ -1437,8 +1435,8 @@ public class Menu
         float width = HeaderWidth / MenuLayout.ScreenWidth;
         float height = bgHeight / MenuLayout.ScreenHeight;
 
-        DrawRect(x, y, width, height, 0, 0, 0, 250, false);
-        ResetScriptGfxAlign();
+        Native.DrawRect(x, y, width, height, 0, 0, 0, 250, false);
+        Native.ResetScriptGfxAlign();
         #endregion
         #region draw subtitle text
         if (!string.IsNullOrEmpty(MenuSubtitle))
@@ -1446,32 +1444,32 @@ public class Menu
             int font = 0;
             float size = MenuLayout.ItemTextSize;
 
-            SetScriptGfxAlign(76, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            Native.SetScriptGfxAlign(76, 84);
+            Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-            BeginTextCommandDisplayText("STRING");
-            SetTextFont(font);
-            SetTextScale(size, size);
-            SetTextJustification(1);
+            Native.BeginTextCommandDisplayText("STRING");
+            Native.SetTextFont(font);
+            Native.SetTextScale(size, size);
+            Native.SetTextJustification(1);
             // Don't make the text blue if another color is used in the string.
             if (MenuSubtitle.Contains('~') || string.IsNullOrEmpty(MenuTitle))
             {
-                AddTextComponentSubstringPlayerName(UpperCase(MenuSubtitle));
+                Native.AddTextComponentSubstringPlayerName(UpperCase(MenuSubtitle));
             }
             else
             {
-                AddTextComponentSubstringPlayerName("~HUD_COLOUR_FREEMODE~" + UpperCase(MenuSubtitle));
+                Native.AddTextComponentSubstringPlayerName("~HUD_COLOUR_FREEMODE~" + UpperCase(MenuSubtitle));
             }
 
             if (LeftAligned)
             {
-                EndTextCommandDisplayText(10f / MenuLayout.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
+                Native.EndTextCommandDisplayText(10f / MenuLayout.ScreenWidth, y - (Native.GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
             }
             else
             {
-                EndTextCommandDisplayText(MenuLayout.RightHeaderTextX, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
+                Native.EndTextCommandDisplayText(MenuLayout.RightHeaderTextX, y - (Native.GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
             }
-            ResetScriptGfxAlign();
+            Native.ResetScriptGfxAlign();
         }
         #endregion
         #region draw counter + pre-counter text
@@ -1481,33 +1479,33 @@ public class Menu
             int font = 0;
             float size = MenuLayout.ItemTextSize;
 
-            SetScriptGfxAlign(76, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            Native.SetScriptGfxAlign(76, 84);
+            Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-            BeginTextCommandDisplayText("STRING");
-            SetTextFont(font);
-            SetTextScale(size, size);
-            SetTextJustification(2);
+            Native.BeginTextCommandDisplayText("STRING");
+            Native.SetTextFont(font);
+            Native.SetTextScale(size, size);
+            Native.SetTextJustification(2);
             if ((MenuSubtitle ?? "").Contains('~') || (CounterPreText ?? "").Contains('~') || string.IsNullOrEmpty(MenuTitle))
             {
-                AddTextComponentSubstringPlayerName(UpperCase(counterText));
+                Native.AddTextComponentSubstringPlayerName(UpperCase(counterText));
             }
             else
             {
-                AddTextComponentSubstringPlayerName("~HUD_COLOUR_FREEMODE~" + UpperCase(counterText));
+                Native.AddTextComponentSubstringPlayerName("~HUD_COLOUR_FREEMODE~" + UpperCase(counterText));
             }
             if (LeftAligned)
             {
-                SetTextWrap(0f, (485f / MenuLayout.ScreenWidth));
-                EndTextCommandDisplayText(10f / MenuLayout.ScreenWidth, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
+                Native.SetTextWrap(0f, (485f / MenuLayout.ScreenWidth));
+                Native.EndTextCommandDisplayText(10f / MenuLayout.ScreenWidth, y - (Native.GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
             }
             else
             {
-                SetTextWrap(0f, MenuLayout.RightTextMaxX);
-                EndTextCommandDisplayText(0f, y - (GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
+                Native.SetTextWrap(0f, MenuLayout.RightTextMaxX);
+                Native.EndTextCommandDisplayText(0f, y - (Native.GetTextScaleHeight(size, font) / 2f + (4f / MenuLayout.ScreenHeight)), 0);
             }
 
-            ResetScriptGfxAlign();
+            Native.ResetScriptGfxAlign();
         }
         if (!string.IsNullOrEmpty(MenuSubtitle) || (CounterPreText != null || MaxItemsOnScreen < Size))
         {
@@ -1563,17 +1561,17 @@ public class Menu
         {
             return menuItemsOffset;
         }
-        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+        Native.SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
         float bgHeight = 38f * Math.Clamp(Size, 0, MaxItemsOnScreen);
         float x = MenuLayout.RowCenterX;
         float y = ((menuItemsOffset + ((bgHeight + 1f) / 2f)) / MenuLayout.ScreenHeight);
         float width = HeaderWidth / MenuLayout.ScreenWidth;
         float height = (bgHeight + 1f) / MenuLayout.ScreenHeight;
 
-        DrawRect(x, y, width, height, 0, 0, 0, 180, false);
+        Native.DrawRect(x, y, width, height, 0, 0, 0, 180, false);
         menuItemsOffset += bgHeight - 1f;
-        ResetScriptGfxAlign();
+        Native.ResetScriptGfxAlign();
         return menuItemsOffset;
     }
 
@@ -1609,61 +1607,61 @@ public class Menu
         float x = MenuLayout.RowCenterX;
         float y = (MenuItemsYOffset / MenuLayout.ScreenHeight) + (height / 2f) + (6f / MenuLayout.ScreenHeight);
 
-        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+        Native.SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-        DrawRect(x, y, width, height, 0, 0, 0, 180, false);
+        Native.DrawRect(x, y, width, height, 0, 0, 0, 180, false);
         descriptionYOffset = height;
-        ResetScriptGfxAlign();
+        Native.ResetScriptGfxAlign();
         #endregion
 
         #region up/down icons
-        SetScriptGfxAlign(76, 84);
-        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+        Native.SetScriptGfxAlign(76, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
         float xMin = 0f;
         float xMax = Width / MenuLayout.ScreenWidth;
         float xCenter = 250f / MenuLayout.ScreenWidth;
         float yTop = y - (20f / MenuLayout.ScreenHeight);
         float yBottom = y - (10f / MenuLayout.ScreenHeight);
 
-        BeginTextCommandDisplayText("STRING");
-        AddTextComponentSubstringPlayerName("↑");
+        Native.BeginTextCommandDisplayText("STRING");
+        Native.AddTextComponentSubstringPlayerName("↑");
 
-        SetTextFont(0);
-        SetTextScale(1f, MenuLayout.ItemTextSize);
-        SetTextJustification(0);
+        Native.SetTextFont(0);
+        Native.SetTextScale(1f, MenuLayout.ItemTextSize);
+        Native.SetTextJustification(0);
         if (LeftAligned)
         {
-            SetTextWrap(xMin, xMax);
-            EndTextCommandDisplayText(xCenter, yTop, 0);
+            Native.SetTextWrap(xMin, xMax);
+            Native.EndTextCommandDisplayText(xCenter, yTop, 0);
         }
         else
         {
             xMin = MenuLayout.RightTextMinX;
             xMax = MenuLayout.RightTextMaxX;
             xCenter = MenuLayout.RightDescriptionCenterX;
-            SetTextWrap(xMin, xMax);
-            EndTextCommandDisplayText(xCenter, yTop, 0);
+            Native.SetTextWrap(xMin, xMax);
+            Native.EndTextCommandDisplayText(xCenter, yTop, 0);
         }
 
-        BeginTextCommandDisplayText("STRING");
-        AddTextComponentSubstringPlayerName("↓");
+        Native.BeginTextCommandDisplayText("STRING");
+        Native.AddTextComponentSubstringPlayerName("↓");
 
-        SetTextFont(0);
-        SetTextScale(1f, MenuLayout.ItemTextSize);
-        SetTextJustification(0);
+        Native.SetTextFont(0);
+        Native.SetTextScale(1f, MenuLayout.ItemTextSize);
+        Native.SetTextJustification(0);
         if (LeftAligned)
         {
-            SetTextWrap(xMin, xMax);
-            EndTextCommandDisplayText(xCenter, yBottom, 0);
+            Native.SetTextWrap(xMin, xMax);
+            Native.EndTextCommandDisplayText(xCenter, yBottom, 0);
         }
         else
         {
-            SetTextWrap(xMin, xMax);
-            EndTextCommandDisplayText(xCenter, yBottom, 0);
+            Native.SetTextWrap(xMin, xMax);
+            Native.EndTextCommandDisplayText(xCenter, yBottom, 0);
         }
 
-        ResetScriptGfxAlign();
+        Native.ResetScriptGfxAlign();
         #endregion
         return descriptionYOffset;
     }
@@ -1689,58 +1687,58 @@ public class Menu
             float textMinX = 0f + (10f / MenuLayout.ScreenWidth);
             float textMaxX = Width / MenuLayout.ScreenWidth - (10f / MenuLayout.ScreenWidth);
             float textY = menuItemsOffset / MenuLayout.ScreenHeight + (16f / MenuLayout.ScreenHeight) + descriptionYOffset;
-            SetScriptGfxAlign(76, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            Native.SetScriptGfxAlign(76, 84);
+            Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-            BeginTextCommandDisplayText("CELL_EMAIL_BCON");
-            SetTextFont(font);
-            SetTextScale(textSize, textSize);
-            SetTextJustification(1);
+            Native.BeginTextCommandDisplayText("CELL_EMAIL_BCON");
+            Native.SetTextFont(font);
+            Native.SetTextScale(textSize, textSize);
+            Native.SetTextJustification(1);
             string text = currentMenuItem.Description;
             foreach (string s in SplitString(text))
             {
-                AddTextComponentSubstringPlayerName(s);
+                Native.AddTextComponentSubstringPlayerName(s);
             }
-            float textHeight = GetTextScaleHeight(textSize, font);
+            float textHeight = Native.GetTextScaleHeight(textSize, font);
             if (LeftAligned)
             {
-                SetTextWrap(textMinX, textMaxX);
-                EndTextCommandDisplayText(textMinX, textY, 0);
+                Native.SetTextWrap(textMinX, textMaxX);
+                Native.EndTextCommandDisplayText(textMinX, textY, 0);
             }
             else
             {
                 textMinX = MenuLayout.RightTextMinX;
                 textMaxX = MenuLayout.RightTextMaxX;
-                SetTextWrap(textMinX, textMaxX);
-                EndTextCommandDisplayText(textMinX, textY, 0);
+                Native.SetTextWrap(textMinX, textMaxX);
+                Native.EndTextCommandDisplayText(textMinX, textY, 0);
             }
 
-            ResetScriptGfxAlign();
+            Native.ResetScriptGfxAlign();
 
-            SetScriptGfxAlign(76, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            Native.SetScriptGfxAlign(76, 84);
+            Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-            BeginTextCommandLineCount("CELL_EMAIL_BCON");
-            SetTextScale(textSize, textSize);
-            SetTextJustification(1);
-            SetTextFont(font);
+            Native.BeginTextCommandLineCount("CELL_EMAIL_BCON");
+            Native.SetTextScale(textSize, textSize);
+            Native.SetTextJustification(1);
+            Native.SetTextFont(font);
             int lineCount;
             foreach (string s in SplitString(text))
             {
-                AddTextComponentSubstringPlayerName(s);
+                Native.AddTextComponentSubstringPlayerName(s);
             }
             if (LeftAligned)
             {
-                SetTextWrap(textMinX, textMaxX);
-                lineCount = GetTextScreenLineCount(textMinX, textY);
+                Native.SetTextWrap(textMinX, textMaxX);
+                lineCount = Native.GetTextScreenLineCount(textMinX, textY);
             }
             else
             {
-                SetTextWrap(textMinX, textMaxX);
-                lineCount = GetTextScreenLineCount(textMinX, textY);
+                Native.SetTextWrap(textMinX, textMaxX);
+                lineCount = Native.GetTextScreenLineCount(textMinX, textY);
             }
 
-            ResetScriptGfxAlign();
+            Native.ResetScriptGfxAlign();
             #endregion
             #region background
             float descWidth = Width / MenuLayout.ScreenWidth;
@@ -1748,13 +1746,13 @@ public class Menu
             float descX = MenuLayout.RowCenterX;
             float descY = textY - (6f / MenuLayout.ScreenHeight) + (descHeight / 2f);
 
-            SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            Native.SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+            Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
-            DrawRect(descX, descY - (descHeight / 2f) + (2f / MenuLayout.ScreenHeight), descWidth, 4f / MenuLayout.ScreenHeight, 0, 0, 0, 200, false);
-            DrawRect(descX, descY, descWidth, descHeight, 0, 0, 0, 180, false);
+            Native.DrawRect(descX, descY - (descHeight / 2f) + (2f / MenuLayout.ScreenHeight), descWidth, 4f / MenuLayout.ScreenHeight, 0, 0, 0, 200, false);
+            Native.DrawRect(descX, descY, descWidth, descHeight, 0, 0, 0, 180, false);
 
-            ResetScriptGfxAlign();
+            Native.ResetScriptGfxAlign();
             #endregion
 
             descriptionYOffset += descY + (descHeight / 2f) - (4f / MenuLayout.ScreenHeight);
@@ -1804,10 +1802,10 @@ public class Menu
         }
 
         #region background
-        SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-        DrawRect(x, y, width, height, 0, 0, 0, 180, false);
-        ResetScriptGfxAlign();
+        Native.SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+        Native.DrawRect(x, y, width, height, 0, 0, 0, 180, false);
+        Native.ResetScriptGfxAlign();
         #endregion
 
         float bgStatBarWidth = (Width / 2f) / MenuLayout.ScreenWidth;
@@ -1846,15 +1844,15 @@ public class Menu
                 barX = (barWidth * 1.5f) - bgStatBarWidth - (10f / MenuLayout.ScreenWidth);
                 componentBarX = (componentBarWidth * 1.5f) - bgStatBarWidth - (10f / MenuLayout.ScreenWidth);
             }
-            SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            Native.SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+            Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
             // bar bg
-            DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180, false);
+            Native.DrawRect(bgStatBarX, barY, bgStatBarWidth, bgStatBarHeight, 100, 100, 100, 180, false);
             // component stats
-            DrawRect(componentBarX, barY, componentBarWidth, bgStatBarHeight, color[0], color[1], color[2], 255, false);
+            Native.DrawRect(componentBarX, barY, componentBarWidth, bgStatBarHeight, color[0], color[1], color[2], 255, false);
             // real bar
-            DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255, false);
-            ResetScriptGfxAlign();
+            Native.DrawRect(barX, barY, barWidth, bgStatBarHeight, 255, 255, 255, 255, false);
+            Native.ResetScriptGfxAlign();
             barY += 30f / MenuLayout.ScreenHeight;
         }
 
@@ -1864,14 +1862,14 @@ public class Menu
 
         for (int i = 0; i < 4; i++)
         {
-            SetScriptGfxAlign(76, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-            BeginTextCommandDisplayText(ShowWeaponStatsPanel ? weaponStatNames[i] : vehicleStatNames[i]);
-            SetTextJustification(1);
-            SetTextScale(textSize, textSize);
+            Native.SetScriptGfxAlign(76, 84);
+            Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            Native.BeginTextCommandDisplayText(ShowWeaponStatsPanel ? weaponStatNames[i] : vehicleStatNames[i]);
+            Native.SetTextJustification(1);
+            Native.SetTextScale(textSize, textSize);
 
-            EndTextCommandDisplayText(textX, textY, 0);
-            ResetScriptGfxAlign();
+            Native.EndTextCommandDisplayText(textX, textY, 0);
+            Native.ResetScriptGfxAlign();
             textY += 30f / MenuLayout.ScreenHeight;
         }
         #endregion
@@ -1897,11 +1895,11 @@ public class Menu
             // OPACITY PANEL
             if (listItem.ShowOpacityPanel)
             {
-                BeginScaleformMovieMethod(OpacityPanelScaleform, "SET_TITLE");
-                PushScaleformMovieMethodParameterString("Opacity");
-                PushScaleformMovieMethodParameterString("");
-                ScaleformMovieMethodAddParamInt(listItem.ListIndex * 10); // opacity percent
-                EndScaleformMovieMethod();
+                Native.BeginScaleformMovieMethod(OpacityPanelScaleform, "SET_TITLE");
+                Native.PushScaleformMovieMethodParameterString("Opacity");
+                Native.PushScaleformMovieMethodParameterString("");
+                Native.ScaleformMovieMethodAddParamInt(listItem.ListIndex * 10); // opacity percent
+                Native.EndScaleformMovieMethod();
 
                 float width = Width / MenuLayout.ScreenWidth;
                 float height = ((700f / 500f) * Width) / MenuLayout.ScreenHeight;
@@ -1912,24 +1910,24 @@ public class Menu
                     y -= (30f / MenuLayout.ScreenHeight);
                 }
 
-                SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-                SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                DrawScaleformMovie(OpacityPanelScaleform, x, y, width, height, 255, 255, 255, 255, 0);
-                ResetScriptGfxAlign();
+                Native.SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                Native.DrawScaleformMovie(OpacityPanelScaleform, x, y, width, height, 255, 255, 255, 255, 0);
+                Native.ResetScriptGfxAlign();
             }
 
             // COLOR PALLETE
             else if (listItem.ShowColorPanel)
             {
-                BeginScaleformMovieMethod(ColorPanelScaleform, "SET_TITLE");
-                PushScaleformMovieMethodParameterString("Opacity");
-                BeginTextCommandScaleformString("FACE_COLOUR");
-                AddTextComponentInteger(listItem.ListIndex + 1);
-                AddTextComponentInteger(listItem.ItemsCount);
-                EndTextCommandScaleformString();
-                ScaleformMovieMethodAddParamInt(0); // opacity percent unused
-                ScaleformMovieMethodAddParamBool(true);
-                EndScaleformMovieMethod();
+                Native.BeginScaleformMovieMethod(ColorPanelScaleform, "SET_TITLE");
+                Native.PushScaleformMovieMethodParameterString("Opacity");
+                Native.BeginTextCommandScaleformString("FACE_COLOUR");
+                Native.AddTextComponentInteger(listItem.ListIndex + 1);
+                Native.AddTextComponentInteger(listItem.ItemsCount);
+                Native.EndTextCommandScaleformString();
+                Native.ScaleformMovieMethodAddParamInt(0); // opacity percent unused
+                Native.ScaleformMovieMethodAddParamBool(true);
+                Native.EndScaleformMovieMethod();
 
                 // The swatches themselves only change when the palette does, but filling them costs
                 // 64 colour lookups and 64 scaleform calls. The scaleform keeps what it was given,
@@ -1941,8 +1939,8 @@ public class Menu
                     _paletteItem = listItem;
                     _paletteType = listItem.ColorPanelColorType;
 
-                    BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT_EMPTY");
-                    EndScaleformMovieMethod();
+                    Native.BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT_EMPTY");
+                    Native.EndScaleformMovieMethod();
 
                     for (int i = 0; i < 64; i++)
                     {
@@ -1951,33 +1949,33 @@ public class Menu
                         int b;
                         if (listItem.ColorPanelColorType == MenuListItem.ColorPanelType.Hair)
                         {
-                            GetHairRgbColor(i, out r, out g, out b); // _GetHairRgbColor
+                            Native.GetHairRgbColor(i, out r, out g, out b); // _GetHairRgbColor
                         }
                         else
                         {
-                            GetMakeupRgbColor(i, out r, out g, out b); // _GetMakeupRgbColor
+                            Native.GetMakeupRgbColor(i, out r, out g, out b); // _GetMakeupRgbColor
                         }
 
-                        BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT");
-                        ScaleformMovieMethodAddParamInt(i); // index
-                        ScaleformMovieMethodAddParamInt(r); // r
-                        ScaleformMovieMethodAddParamInt(g); // g
-                        ScaleformMovieMethodAddParamInt(b); // b
-                        EndScaleformMovieMethod();
+                        Native.BeginScaleformMovieMethod(ColorPanelScaleform, "SET_DATA_SLOT");
+                        Native.ScaleformMovieMethodAddParamInt(i); // index
+                        Native.ScaleformMovieMethodAddParamInt(r); // r
+                        Native.ScaleformMovieMethodAddParamInt(g); // g
+                        Native.ScaleformMovieMethodAddParamInt(b); // b
+                        Native.EndScaleformMovieMethod();
                     }
 
-                    BeginScaleformMovieMethod(ColorPanelScaleform, "DISPLAY_VIEW");
-                    EndScaleformMovieMethod();
+                    Native.BeginScaleformMovieMethod(ColorPanelScaleform, "DISPLAY_VIEW");
+                    Native.EndScaleformMovieMethod();
                 }
 
-                BeginScaleformMovieMethod(ColorPanelScaleform, "SET_HIGHLIGHT");
-                ScaleformMovieMethodAddParamInt(listItem.ListIndex);
-                EndScaleformMovieMethod();
+                Native.BeginScaleformMovieMethod(ColorPanelScaleform, "SET_HIGHLIGHT");
+                Native.ScaleformMovieMethodAddParamInt(listItem.ListIndex);
+                Native.EndScaleformMovieMethod();
 
-                BeginScaleformMovieMethod(ColorPanelScaleform, "SHOW_OPACITY");
-                ScaleformMovieMethodAddParamBool(false);
-                ScaleformMovieMethodAddParamBool(true);
-                EndScaleformMovieMethod();
+                Native.BeginScaleformMovieMethod(ColorPanelScaleform, "SHOW_OPACITY");
+                Native.ScaleformMovieMethodAddParamBool(false);
+                Native.ScaleformMovieMethodAddParamBool(true);
+                Native.EndScaleformMovieMethod();
 
                 float width = Width / MenuLayout.ScreenWidth;
                 float height = ((700f / 500f) * Width) / MenuLayout.ScreenHeight;
@@ -1988,10 +1986,10 @@ public class Menu
                     y -= (30f / MenuLayout.ScreenHeight);
                 }
 
-                SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
-                SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-                DrawScaleformMovie(ColorPanelScaleform, x, y, width, height, 255, 255, 255, 255, 0);
-                ResetScriptGfxAlign();
+                Native.SetScriptGfxAlign(LeftAligned ? 76 : 82, 84);
+                Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+                Native.DrawScaleformMovie(ColorPanelScaleform, x, y, width, height, 255, 255, 255, 255, 0);
+                Native.ResetScriptGfxAlign();
             }
         }
     }
@@ -2009,7 +2007,7 @@ public class Menu
         MenuItemsYOffset = 0f;
         if (MenuController.SetDrawOrder)
         {
-            SetScriptGfxDrawOrder(1);
+            Native.SetScriptGfxDrawOrder(1);
         }
 
         MenuItemsYOffset = await DrawHeader(MenuItemsYOffset);
@@ -2025,7 +2023,7 @@ public class Menu
         DrawColorAndOpacityPanel(descriptionYOffset);
         if (MenuController.SetDrawOrder)
         {
-            SetScriptGfxDrawOrder(0);
+            Native.SetScriptGfxDrawOrder(0);
         }
     }
     #endregion

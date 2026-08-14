@@ -1,4 +1,4 @@
-﻿using static CitizenFX.FiveM.Client.Native;
+﻿using CitizenFX.FiveM.Client;
 
 namespace MenuAPI;
 
@@ -589,8 +589,8 @@ public class MenuItem
         // parameters, so the set and reset in between were four rounds of nothing changing. The
         // background keeps its own block because that is the one that aligns differently when the
         // menu sits on the right. Draw order inside is unchanged.
-        SetScriptGfxAlign(76, 84);
-        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+        Native.SetScriptGfxAlign(76, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
         textXOffset = DrawLeftIcon(parent, selected, textXOffset, y);
         rightTextIconOffset = DrawRightIcon(parent, selected, rightTextIconOffset, y);
@@ -602,7 +602,7 @@ public class MenuItem
         DrawLabelText(parent, selected, rightTextIconOffset, font, textSize, textColor, textY);
         DrawItemText(parent, selected, font, textSize, textColor, textMinX, textMaxX, textY, textXOffset);
 
-        ResetScriptGfxAlign();
+        Native.ResetScriptGfxAlign();
     }
 
     /// <summary>
@@ -617,26 +617,26 @@ public class MenuItem
     /// <param name="textXOffset"></param>
     private void DrawItemText(Menu parent, bool selected, int font, float textSize, int textColor, float textMinX, float textMaxX, float textY, float textXOffset)
     {
-        SetTextFont(font);
-        SetTextScale(textSize, textSize);
-        SetTextJustification(1);
-        BeginTextCommandDisplayText("STRING");
-        AddTextComponentSubstringPlayerName(Text ?? "N/A");
+        Native.SetTextFont(font);
+        Native.SetTextScale(textSize, textSize);
+        Native.SetTextJustification(1);
+        Native.BeginTextCommandDisplayText("STRING");
+        Native.AddTextComponentSubstringPlayerName(Text ?? "N/A");
         if (selected || !Enabled)
         {
-            SetTextColour(textColor, textColor, textColor, 255);
+            Native.SetTextColour(textColor, textColor, textColor, 255);
         }
         if (parent.LeftAligned)
         {
-            SetTextWrap(textMinX, textMaxX);
-            EndTextCommandDisplayText(textMinX, textY, 0);
+            Native.SetTextWrap(textMinX, textMaxX);
+            Native.EndTextCommandDisplayText(textMinX, textY, 0);
         }
         else
         {
             textMinX = (textXOffset / MenuLayout.ScreenWidth) + MenuLayout.RightTextMinX;
             textMaxX = MenuLayout.RightTextMaxX;
-            SetTextWrap(textMinX, textMaxX);
-            EndTextCommandDisplayText(textMinX, textY, 0);
+            Native.SetTextWrap(textMinX, textMaxX);
+            Native.EndTextCommandDisplayText(textMinX, textY, 0);
         }
     }
 
@@ -655,24 +655,24 @@ public class MenuItem
             return;
         }
 
-        BeginTextCommandDisplayText("STRING");
-        SetTextFont(font);
-        SetTextScale(textSize, textSize);
-        SetTextJustification(2);
-        AddTextComponentSubstringPlayerName(Label);
+        Native.BeginTextCommandDisplayText("STRING");
+        Native.SetTextFont(font);
+        Native.SetTextScale(textSize, textSize);
+        Native.SetTextJustification(2);
+        Native.AddTextComponentSubstringPlayerName(Label);
         if (selected || !Enabled)
         {
-            SetTextColour(textColor, textColor, textColor, 255);
+            Native.SetTextColour(textColor, textColor, textColor, 255);
         }
         if (parent.LeftAligned)
         {
-            SetTextWrap(0f, ((490f - rightTextIconOffset) / MenuLayout.ScreenWidth));
-            EndTextCommandDisplayText((10f + rightTextIconOffset) / MenuLayout.ScreenWidth, textY, 0);
+            Native.SetTextWrap(0f, ((490f - rightTextIconOffset) / MenuLayout.ScreenWidth));
+            Native.EndTextCommandDisplayText((10f + rightTextIconOffset) / MenuLayout.ScreenWidth, textY, 0);
         }
         else
         {
-            SetTextWrap(0f, MenuLayout.SafeZone - ((10f + rightTextIconOffset) / MenuLayout.ScreenWidth));
-            EndTextCommandDisplayText(0f, textY, 0);
+            Native.SetTextWrap(0f, MenuLayout.SafeZone - ((10f + rightTextIconOffset) / MenuLayout.ScreenWidth));
+            Native.EndTextCommandDisplayText(0f, textY, 0);
         }
     }
 
@@ -697,7 +697,7 @@ public class MenuItem
         float spriteWidth = GetSpriteSize(RightIcon, true);
         var spriteColor = GetSpriteColour(RightIcon, selected);
         string textureDictionary = GetSpriteDictionary(RightIcon);
-        DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor.R, spriteColor.G, spriteColor.B, 255, false, false);
+        Native.DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor.R, spriteColor.G, spriteColor.B, 255, false, false);
         return rightTextIconOffset;
     }
 
@@ -723,7 +723,7 @@ public class MenuItem
         var spriteColor = GetSpriteColour(LeftIcon, selected);
         string textureDictionary = GetSpriteDictionary(LeftIcon);
 
-        DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor.R, spriteColor.G, spriteColor.B, 255, false, false);
+        Native.DrawSprite(textureDictionary, name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, spriteColor.R, spriteColor.G, spriteColor.B, 255, false, false);
         return textXOffset;
     }
 
@@ -743,10 +743,10 @@ public class MenuItem
         {
             float width = MenuLayout.MenuWidthN;
             float height = MenuLayout.RowHeightN;
-            SetScriptGfxAlign(parent.LeftAligned ? 76 : 82, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-            DrawRect(x, y, width, height, 255, 255, 255, 225, false);
-            ResetScriptGfxAlign();
+            Native.SetScriptGfxAlign(parent.LeftAligned ? 76 : 82, 84);
+            Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            Native.DrawRect(x, y, width, height, 255, 255, 255, 225, false);
+            Native.ResetScriptGfxAlign();
         }
     }
 }

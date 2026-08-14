@@ -3,8 +3,6 @@ using CitizenFX.FiveM.Client.Extensions;
 using CitizenFX.FiveM.Shared.Data;
 using CitizenFX.FiveM.Shared.Script;
 
-using static CitizenFX.FiveM.Client.Native;
-
 namespace MenuAPI;
 
 public class MenuController : IScript
@@ -36,7 +34,7 @@ public class MenuController : IScript
     // to be often enough that the menu has settled by the time they look at it again.
     private const long LayoutRefreshIntervalMs = 500;
 
-    private static float AspectRatio => GetScreenAspectRatio(false);
+    private static float AspectRatio => Native.GetScreenAspectRatio(false);
     public static float ScreenWidth => 1080 * AspectRatio;
     public static float ScreenHeight => 1080;
     public static bool DisableMenuButtons { get; set; } = false;
@@ -44,13 +42,13 @@ public class MenuController : IScript
     // Control 360 is a control that is rarely used, no other scripts should be disabling
     // it randomly (I hope). It gets disabled when the console (F8) is opened, so we
     // can use that to guess if the console is open or not by checking if the control is enabled.
-    private static bool IsF8ConsoleLikelyOpen => !IsControlEnabled(0, 360);
+    private static bool IsF8ConsoleLikelyOpen => !Native.IsControlEnabled(0, 360);
 
     public static bool AreMenuButtonsEnabled =>
         IsAnyMenuOpen() &&
-        !IsPauseMenuActive() &&
-        IsScreenFadedIn() &&
-        !IsPlayerSwitchInProgress() &&
+        !Native.IsPauseMenuActive() &&
+        Native.IsScreenFadedIn() &&
+        !Native.IsPlayerSwitchInProgress() &&
         !DisableMenuButtons &&
         !API.Players.Local.IsDead &&
         !IsF8ConsoleLikelyOpen;
@@ -123,7 +121,7 @@ public class MenuController : IScript
 
     public static Menu? MainMenu { get; set; } = null;
 
-    internal static int _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
+    internal static int _scale = Native.RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
 
     // Whether the mouse button was pressed down while a menu was open, see IsMouseButtonUsed.
     private static bool mouseSelectArmed = false;
@@ -153,7 +151,7 @@ public class MenuController : IScript
                 // In case the value was being changed to be right aligned, notify the user properly.
                 if (value == MenuAlignmentOption.Right)
                 {
-                    API.Log.Error($"[MenuAPI ({GetCurrentResourceName()})] Right aligned menus are not supported for aspect ratios 17:9 or 21:9, left aligned will be used instead.");
+                    API.Log.Error($"[MenuAPI ({Native.GetCurrentResourceName()})] Right aligned menus are not supported for aspect ratios 17:9 or 21:9, left aligned will be used instead.");
                 }
             }
         }
@@ -412,12 +410,12 @@ public class MenuController : IScript
 
         menuTextureAssets.ForEach(asset =>
         {
-            if (!HasStreamedTextureDictLoaded(asset))
+            if (!Native.HasStreamedTextureDictLoaded(asset))
             {
-                RequestStreamedTextureDict(asset, false);
+                Native.RequestStreamedTextureDict(asset, false);
             }
         });
-        while (menuTextureAssets.Any(asset => { return !HasStreamedTextureDictLoaded(asset); }))
+        while (menuTextureAssets.Any(asset => { return !Native.HasStreamedTextureDictLoaded(asset); }))
         {
             // The menu closing already ran UnloadAssets, so waiting out the rest of the stream would
             // leave dicts requested that nothing is going to release.
@@ -443,9 +441,9 @@ public class MenuController : IScript
         {
             if (!string.IsNullOrEmpty(asset))
             {
-                if (HasStreamedTextureDictLoaded(asset))
+                if (Native.HasStreamedTextureDictLoaded(asset))
                 {
-                    SetStreamedTextureDictAsNoLongerNeeded(asset);
+                    Native.SetStreamedTextureDictAsNoLongerNeeded(asset);
                 }
             }
         });
@@ -483,7 +481,7 @@ public class MenuController : IScript
         bool selectPressed = MenuKeyBindings.ConsumeSelect();
         bool backPressed = MenuKeyBindings.ConsumeBack();
 
-        if (IsPauseMenuActive())
+        if (Native.IsPauseMenuActive())
         {
             return;
         }
@@ -492,7 +490,7 @@ public class MenuController : IScript
         {
             return;
         }
-        DisableControlAction(0, (int)Control.MultiplayerInfo, false);
+        Native.DisableControlAction(0, (int)Control.MultiplayerInfo, false);
         HandlePreventExit();
         if (!currentMenu.Visible || !AreMenuButtonsEnabled)
         {
@@ -503,7 +501,7 @@ public class MenuController : IScript
 
     private static async Task HandleMainNavigationButtons(Menu currentMenu, bool selectPressed, bool backPressed)
     {
-        bool onController = !IsUsingKeyboardAndMouse(2);
+        bool onController = !Native.IsUsingKeyboardAndMouse(2);
 
         // On keyboard the mouse buttons are the only polled part left, everything else comes from the
         // key mappings. The controller controls are gated so a keyboard press is not counted twice.
@@ -513,12 +511,12 @@ public class MenuController : IScript
         if (onController)
         {
             select = select ||
-                IsDisabledControlJustReleased(0, (int)Control.FrontendAccept) ||
-                IsControlJustReleased(0, (int)Control.FrontendAccept);
+                Native.IsDisabledControlJustReleased(0, (int)Control.FrontendAccept) ||
+                Native.IsControlJustReleased(0, (int)Control.FrontendAccept);
 
             back = back ||
-                IsDisabledControlJustReleased(0, (int)Control.PhoneCancel) ||
-                IsControlJustReleased(0, (int)Control.PhoneCancel);
+                Native.IsDisabledControlJustReleased(0, (int)Control.PhoneCancel) ||
+                Native.IsControlJustReleased(0, (int)Control.PhoneCancel);
         }
 
         // Select / Enter
@@ -551,12 +549,12 @@ public class MenuController : IScript
     /// </summary>
     private static bool IsMouseButtonUsed(Control control, ref bool armed)
     {
-        if (IsDisabledControlJustPressed(0, (int)control) || IsControlJustPressed(0, (int)control))
+        if (Native.IsDisabledControlJustPressed(0, (int)control) || Native.IsControlJustPressed(0, (int)control))
         {
             armed = true;
         }
 
-        if (!armed || !(IsDisabledControlJustReleased(0, (int)control) || IsControlJustReleased(0, (int)control)))
+        if (!armed || !(Native.IsDisabledControlJustReleased(0, (int)control) || Native.IsControlJustReleased(0, (int)control)))
         {
             return false;
         }
@@ -569,8 +567,8 @@ public class MenuController : IScript
     {
         if (PreventExitingMenu)
         {
-            DisableControlAction(0, (int)Control.FrontendPause, false);
-            DisableControlAction(0, (int)Control.FrontendPauseAlternate, false);
+            Native.DisableControlAction(0, (int)Control.FrontendPause, false);
+            Native.DisableControlAction(0, (int)Control.FrontendPauseAlternate, false);
         }
     }
 
@@ -584,11 +582,11 @@ public class MenuController : IScript
         {
             return false;
         }
-        if (!IsControlPressed(0, (int)Control.SelectWeapon))
+        if (!Native.IsControlPressed(0, (int)Control.SelectWeapon))
         {
             return false;
         }
-        return IsControlPressed(0, (int)Control.SelectNextWeapon) || IsControlPressed(0, (int)Control.SelectPrevWeapon);
+        return Native.IsControlPressed(0, (int)Control.SelectNextWeapon) || Native.IsControlPressed(0, (int)Control.SelectPrevWeapon);
     }
 
     /// <summary>
@@ -606,16 +604,16 @@ public class MenuController : IScript
             return true;
         }
         if (!IsUsingWeaponWheel() && (
-            IsControlPressed(0, (int)Control.PhoneScrollBackward) ||
-            IsDisabledControlPressed(0, (int)Control.PhoneScrollBackward)))
+            Native.IsControlPressed(0, (int)Control.PhoneScrollBackward) ||
+            Native.IsDisabledControlPressed(0, (int)Control.PhoneScrollBackward)))
         {
             return true;
         }
         // Only on a controller, otherwise a keyboard press would count twice: once through the key
         // mapping and once here.
-        return !IsUsingKeyboardAndMouse(2) && (
-            IsControlPressed(0, (int)Control.FrontendUp) ||
-            IsDisabledControlPressed(0, (int)Control.FrontendUp));
+        return !Native.IsUsingKeyboardAndMouse(2) && (
+            Native.IsControlPressed(0, (int)Control.FrontendUp) ||
+            Native.IsDisabledControlPressed(0, (int)Control.FrontendUp));
     }
 
     /// <summary>
@@ -633,14 +631,14 @@ public class MenuController : IScript
             return true;
         }
         if (!IsUsingWeaponWheel() && (
-            IsControlPressed(0, (int)Control.PhoneScrollForward) ||
-            IsDisabledControlPressed(0, (int)Control.PhoneScrollForward)))
+            Native.IsControlPressed(0, (int)Control.PhoneScrollForward) ||
+            Native.IsDisabledControlPressed(0, (int)Control.PhoneScrollForward)))
         {
             return true;
         }
-        return !IsUsingKeyboardAndMouse(2) && (
-            IsControlPressed(0, (int)Control.FrontendDown) ||
-            IsDisabledControlPressed(0, (int)Control.FrontendDown));
+        return !Native.IsUsingKeyboardAndMouse(2) && (
+            Native.IsControlPressed(0, (int)Control.FrontendDown) ||
+            Native.IsDisabledControlPressed(0, (int)Control.FrontendDown));
     }
 
     /// <summary>
@@ -657,9 +655,9 @@ public class MenuController : IScript
         {
             return true;
         }
-        return !IsUsingKeyboardAndMouse(2) && (
-            IsControlPressed(0, (int)Control.PhoneLeft) ||
-            IsDisabledControlPressed(0, (int)Control.PhoneLeft));
+        return !Native.IsUsingKeyboardAndMouse(2) && (
+            Native.IsControlPressed(0, (int)Control.PhoneLeft) ||
+            Native.IsDisabledControlPressed(0, (int)Control.PhoneLeft));
     }
 
     /// <summary>
@@ -676,9 +674,9 @@ public class MenuController : IScript
         {
             return true;
         }
-        return !IsUsingKeyboardAndMouse(2) && (
-            IsControlPressed(0, (int)Control.PhoneRight) ||
-            IsDisabledControlPressed(0, (int)Control.PhoneRight));
+        return !Native.IsUsingKeyboardAndMouse(2) && (
+            Native.IsControlPressed(0, (int)Control.PhoneRight) ||
+            Native.IsDisabledControlPressed(0, (int)Control.PhoneRight));
     }
 
     /// <summary>
@@ -695,7 +693,7 @@ public class MenuController : IScript
             return;
         }
 
-        if (IsPauseMenuActive() || IsPauseMenuRestarting() || !IsScreenFadedIn() || IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
+        if (Native.IsPauseMenuActive() || Native.IsPauseMenuRestarting() || !Native.IsScreenFadedIn() || Native.IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
         {
             return;
         }
@@ -723,12 +721,12 @@ public class MenuController : IScript
     /// </summary>
     private static async Task ProcessControllerToggle()
     {
-        if (IsUsingKeyboardAndMouse(2))
+        if (Native.IsUsingKeyboardAndMouse(2))
         {
             return;
         }
 
-        if (IsPauseMenuActive() || IsPauseMenuRestarting() || !IsScreenFadedIn() || IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
+        if (Native.IsPauseMenuActive() || Native.IsPauseMenuRestarting() || !Native.IsScreenFadedIn() || Native.IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
         {
             return;
         }
@@ -816,7 +814,7 @@ public class MenuController : IScript
         }
 
         currentMenu.GoRight();
-        var time = GetGameTimer();
+        var time = Native.GetGameTimer();
         var times = 0;
         var delay = paging ? PageRepeatFirstDelay : 200;
         while (IsRightPressed(AreMenuButtonsEnabled))
@@ -828,7 +826,7 @@ public class MenuController : IScript
                 break;
             }
             currentMenu = openMenu;
-            if (GetGameTimer() - time > delay)
+            if (Native.GetGameTimer() - time > delay)
             {
                 times++;
                 if (paging)
@@ -855,7 +853,7 @@ public class MenuController : IScript
                     }
                 }
                 currentMenu.GoRight();
-                time = GetGameTimer();
+                time = Native.GetGameTimer();
             }
             await API.Delay(0);
         }
@@ -873,7 +871,7 @@ public class MenuController : IScript
         }
 
         currentMenu.GoLeft();
-        var time = GetGameTimer();
+        var time = Native.GetGameTimer();
         var times = 0;
         var delay = paging ? PageRepeatFirstDelay : 200;
         while (IsLeftPressed(AreMenuButtonsEnabled))
@@ -885,7 +883,7 @@ public class MenuController : IScript
                 break;
             }
             currentMenu = openMenu;
-            if (GetGameTimer() - time > delay)
+            if (Native.GetGameTimer() - time > delay)
             {
                 times++;
                 if (paging)
@@ -912,7 +910,7 @@ public class MenuController : IScript
                     }
                 }
                 currentMenu.GoLeft();
-                time = GetGameTimer();
+                time = Native.GetGameTimer();
             }
             await API.Delay(0);
         }
@@ -922,7 +920,7 @@ public class MenuController : IScript
     {
         currentMenu.GoDown();
 
-        var time = GetGameTimer();
+        var time = Native.GetGameTimer();
         var times = 0;
         var delay = 200;
         while (IsDownPressed(AreMenuButtonsEnabled))
@@ -934,7 +932,7 @@ public class MenuController : IScript
                 break;
             }
             currentMenu = openMenu;
-            if (GetGameTimer() - time > delay)
+            if (Native.GetGameTimer() - time > delay)
             {
                 times++;
                 if (times > 2)
@@ -956,7 +954,7 @@ public class MenuController : IScript
 
                 currentMenu.GoDown();
 
-                time = GetGameTimer();
+                time = Native.GetGameTimer();
             }
             await API.Delay(0);
         }
@@ -968,10 +966,10 @@ public class MenuController : IScript
     /// </summary>
     private static async Task HandleMenuToggleKeyForController()
     {
-        int tmpTimer = GetGameTimer();
-        while ((IsControlPressed(0, (int)Control.InteractionMenu) || IsDisabledControlPressed(0, (int)Control.InteractionMenu)) && !IsPauseMenuActive() && IsScreenFadedIn() && !API.Players.Local.IsDead && !IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
+        int tmpTimer = Native.GetGameTimer();
+        while ((Native.IsControlPressed(0, (int)Control.InteractionMenu) || Native.IsDisabledControlPressed(0, (int)Control.InteractionMenu)) && !Native.IsPauseMenuActive() && Native.IsScreenFadedIn() && !API.Players.Local.IsDead && !Native.IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
         {
-            if (GetGameTimer() - tmpTimer > 400)
+            if (Native.GetGameTimer() - tmpTimer > 400)
             {
                 OpenMainMenu();
                 break;
@@ -986,7 +984,7 @@ public class MenuController : IScript
         currentMenu.GoUp();
 
         // Get the current game time.
-        var time = GetGameTimer();
+        var time = Native.GetGameTimer();
         var times = 0;
         var delay = 200;
 
@@ -1002,7 +1000,7 @@ public class MenuController : IScript
             currentMenu = openMenu;
 
             // Check if the game time has changed by "delay" amount.
-            if (GetGameTimer() - time > delay)
+            if (Native.GetGameTimer() - time > delay)
             {
                 // Increment the "changed indexes" counter
                 times++;
@@ -1029,7 +1027,7 @@ public class MenuController : IScript
                 currentMenu.GoUp();
 
                 // Reset the time to the current game timer.
-                time = GetGameTimer();
+                time = Native.GetGameTimer();
             }
 
             // Wait for the next game tick.
@@ -1039,7 +1037,7 @@ public class MenuController : IScript
 
     private static async Task MenuButtonsDisableChecks()
     {
-        static bool isInputVisible() => UpdateOnscreenKeyboard() == 0;
+        static bool isInputVisible() => Native.UpdateOnscreenKeyboard() == 0;
         if (isInputVisible())
         {
             bool buttonsState = DisableMenuButtons;
@@ -1048,8 +1046,8 @@ public class MenuController : IScript
                 await API.Delay(0);
                 DisableMenuButtons = true;
             }
-            int timer = GetGameTimer();
-            while (GetGameTimer() - timer < 300)
+            int timer = Native.GetGameTimer();
+            while (Native.GetGameTimer() - timer < 300)
             {
                 await API.Delay(0);
                 DisableMenuButtons = true;
@@ -1098,14 +1096,14 @@ public class MenuController : IScript
 
         // Both the default 'M' toggle key and the controller toggle button sit on this control, so
         // the game must not react to it while a menu is open.
-        DisableControlAction(0, (int)Control.InteractionMenu, false);
+        Native.DisableControlAction(0, (int)Control.InteractionMenu, false);
 
         // When in a vehicle
         if (API.Players.Local.Ped.IsPedInAnyVehicle())
         {
-            DisableControlAction(0, (int)Control.VehicleSelectNextWeapon, false);
-            DisableControlAction(0, (int)Control.VehicleSelectPrevWeapon, false);
-            DisableControlAction(0, (int)Control.VehicleCinCam, false);
+            Native.DisableControlAction(0, (int)Control.VehicleSelectNextWeapon, false);
+            Native.DisableControlAction(0, (int)Control.VehicleSelectPrevWeapon, false);
+            Native.DisableControlAction(0, (int)Control.VehicleCinCam, false);
         }
     }
 
@@ -1116,29 +1114,29 @@ public class MenuController : IScript
     private static void DisableGenericControls(Menu currMenu)
     {
         // Disable Gamepad/Controller Specific controls:
-        if (!IsUsingKeyboardAndMouse(2))
+        if (!Native.IsUsingKeyboardAndMouse(2))
         {
-            DisableControlAction(0, (int)Control.MultiplayerInfo, false);
+            Native.DisableControlAction(0, (int)Control.MultiplayerInfo, false);
             // when in a vehicle.
             if (API.Players.Local.Ped.IsPedInAnyVehicle())
             {
-                DisableControlAction(0, (int)Control.VehicleHeadlight, false);
-                DisableControlAction(0, (int)Control.VehicleDuck, false);
+                Native.DisableControlAction(0, (int)Control.VehicleHeadlight, false);
+                Native.DisableControlAction(0, (int)Control.VehicleDuck, false);
 
                 // toggles boost in some dlc vehicles, hence it's disabled for controllers only (pressing select in the menu would trigger this).
-                DisableControlAction(0, (int)Control.VehicleFlyTransform, false);
+                Native.DisableControlAction(0, (int)Control.VehicleFlyTransform, false);
             }
         }
         else // when not using a controller.
         {
-            DisableControlAction(0, (int)Control.FrontendPauseAlternate, false); // disable the escape key opening the pause menu, pressing P still works.
+            Native.DisableControlAction(0, (int)Control.FrontendPauseAlternate, false); // disable the escape key opening the pause menu, pressing P still works.
 
             // Disable the scrollwheel button changing weapons while the menu is open.
             // Only if you press TAB (to show the weapon wheel) then it will allow you to change weapons.
-            if (!IsControlPressed(0, (int)Control.SelectWeapon))
+            if (!Native.IsControlPressed(0, (int)Control.SelectWeapon))
             {
-                DisableControlAction(24, (int)Control.SelectNextWeapon, false);
-                DisableControlAction(24, (int)Control.SelectPrevWeapon, false);
+                Native.DisableControlAction(24, (int)Control.SelectNextWeapon, false);
+                Native.DisableControlAction(24, (int)Control.SelectPrevWeapon, false);
             }
         }
         var currentItem = currMenu.GetCurrentMenuItem();
@@ -1148,9 +1146,9 @@ public class MenuController : IScript
             {
                 // Controller only. Disabling it on keyboard would break the TAB + scrollwheel weapon
                 // wheel check, because a disabled control never reads as pressed.
-                if (!IsUsingKeyboardAndMouse(2))
+                if (!Native.IsUsingKeyboardAndMouse(2))
                 {
-                    DisableControlAction(0, (int)Control.SelectWeapon, false);
+                    Native.DisableControlAction(0, (int)Control.SelectWeapon, false);
                 }
             }
         }
@@ -1161,24 +1159,24 @@ public class MenuController : IScript
     /// </summary>
     private static void DisableAttackControls()
     {
-        DisableControlAction(0, (int)Control.Attack, false);
-        DisableControlAction(0, (int)Control.Attack2, false);
-        DisableControlAction(0, (int)Control.MeleeAttack1, false);
-        DisableControlAction(0, (int)Control.MeleeAttack2, false);
-        DisableControlAction(0, (int)Control.MeleeAttackAlternate, false);
-        DisableControlAction(0, (int)Control.MeleeAttackHeavy, false);
-        DisableControlAction(0, (int)Control.MeleeAttackLight, false);
-        DisableControlAction(0, (int)Control.VehicleAttack, false);
-        DisableControlAction(0, (int)Control.VehicleAttack2, false);
-        DisableControlAction(0, (int)Control.VehicleFlyAttack, false);
-        DisableControlAction(0, (int)Control.VehiclePassengerAttack, false);
-        DisableControlAction(0, (int)Control.Aim, false);
+        Native.DisableControlAction(0, (int)Control.Attack, false);
+        Native.DisableControlAction(0, (int)Control.Attack2, false);
+        Native.DisableControlAction(0, (int)Control.MeleeAttack1, false);
+        Native.DisableControlAction(0, (int)Control.MeleeAttack2, false);
+        Native.DisableControlAction(0, (int)Control.MeleeAttackAlternate, false);
+        Native.DisableControlAction(0, (int)Control.MeleeAttackHeavy, false);
+        Native.DisableControlAction(0, (int)Control.MeleeAttackLight, false);
+        Native.DisableControlAction(0, (int)Control.VehicleAttack, false);
+        Native.DisableControlAction(0, (int)Control.VehicleAttack2, false);
+        Native.DisableControlAction(0, (int)Control.VehicleFlyAttack, false);
+        Native.DisableControlAction(0, (int)Control.VehiclePassengerAttack, false);
+        Native.DisableControlAction(0, (int)Control.Aim, false);
         // fires vehicle specific weapons when using right click on the mouse sometimes.
-        DisableControlAction(0, (int)Control.VehicleAim, false);
+        Native.DisableControlAction(0, (int)Control.VehicleAim, false);
 
         // Scroll wheel for changing weapons
-        DisableControlAction(0, 16, false);
-        DisableControlAction(0, 17, false);
+        Native.DisableControlAction(0, 16, false);
+        Native.DisableControlAction(0, 17, false);
     }
 
     /// <summary>
@@ -1186,11 +1184,11 @@ public class MenuController : IScript
     /// </summary>
     private static void DisablePhoneAndArrowKeysInputs()
     {
-        DisableControlAction(0, (int)Control.Phone, false);
-        DisableControlAction(0, (int)Control.PhoneCancel, false);
-        DisableControlAction(0, (int)Control.PhoneDown, false);
-        DisableControlAction(0, (int)Control.PhoneLeft, false);
-        DisableControlAction(0, (int)Control.PhoneRight, false);
+        Native.DisableControlAction(0, (int)Control.Phone, false);
+        Native.DisableControlAction(0, (int)Control.PhoneCancel, false);
+        Native.DisableControlAction(0, (int)Control.PhoneDown, false);
+        Native.DisableControlAction(0, (int)Control.PhoneLeft, false);
+        Native.DisableControlAction(0, (int)Control.PhoneRight, false);
     }
 
     /// <summary>
@@ -1198,11 +1196,11 @@ public class MenuController : IScript
     /// </summary>
     private static void DisableRadioInputs()
     {
-        DisableControlAction(0, (int)Control.RadioWheelLeftRight, false);
-        DisableControlAction(0, (int)Control.RadioWheelUpDown, false);
-        DisableControlAction(0, (int)Control.VehicleNextRadio, false);
-        DisableControlAction(0, (int)Control.VehicleRadioWheel, false);
-        DisableControlAction(0, (int)Control.VehiclePrevRadio, false);
+        Native.DisableControlAction(0, (int)Control.RadioWheelLeftRight, false);
+        Native.DisableControlAction(0, (int)Control.RadioWheelUpDown, false);
+        Native.DisableControlAction(0, (int)Control.VehicleNextRadio, false);
+        Native.DisableControlAction(0, (int)Control.VehicleRadioWheel, false);
+        Native.DisableControlAction(0, (int)Control.VehiclePrevRadio, false);
     }
 
     /// <summary>
@@ -1237,10 +1235,10 @@ public class MenuController : IScript
 
     /// <summary>The game states that stop a menu being drawn, none of which announce a change.</summary>
     private static bool CanDraw() =>
-        IsScreenFadedIn() &&
-        !IsPauseMenuActive() &&
+        Native.IsScreenFadedIn() &&
+        !Native.IsPauseMenuActive() &&
         !API.Players.Local.IsDead &&
-        !IsPlayerSwitchInProgress();
+        !Native.IsPlayerSwitchInProgress();
 
     private static async Task DrawMenus()
     {
@@ -1267,11 +1265,11 @@ public class MenuController : IScript
         // Whether a menu is open is the tick's own condition. What is left is volatile game state
         // that changes every frame, so it stays inline.
         if (
-            IsPlayerSwitchInProgress() ||
+            Native.IsPlayerSwitchInProgress() ||
             API.Players.Local.IsDead ||
-            !IsScreenFadedIn() ||
-            IsWarningMessageActive() ||
-            UpdateOnscreenKeyboard() == 0
+            !Native.IsScreenFadedIn() ||
+            Native.IsWarningMessageActive() ||
+            Native.UpdateOnscreenKeyboard() == 0
         )
         {
             DisposeInstructionalButtonsScaleform();
@@ -1283,19 +1281,19 @@ public class MenuController : IScript
             DisposeInstructionalButtonsScaleform();
             return;
         }
-        if (!HasScaleformMovieLoaded(_scale))
+        if (!Native.HasScaleformMovieLoaded(_scale))
         {
-            _scale = RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
+            _scale = Native.RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
         }
-        while (!HasScaleformMovieLoaded(_scale))
+        while (!Native.HasScaleformMovieLoaded(_scale))
         {
             await API.Delay(0);
         }
 
-        DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 0, 0);
+        Native.DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 0, 0);
 
-        BeginScaleformMovieMethod(_scale, "CLEAR_ALL");
-        EndScaleformMovieMethod();
+        Native.BeginScaleformMovieMethod(_scale, "CLEAR_ALL");
+        Native.EndScaleformMovieMethod();
 
 
         int slot = 0;
@@ -1320,7 +1318,7 @@ public class MenuController : IScript
         // time, so indexing it in a loop re-walked the whole thing once per button, every frame.
         foreach (KeyValuePair<Control, string> button in menu.InstructionalButtons)
         {
-            SetInstructionalButtonSlot(slot++, GetControlInstructionalButton(0, (int)button.Key, true), button.Value);
+            SetInstructionalButtonSlot(slot++, Native.GetControlInstructionalButton(0, (int)button.Key, true), button.Value);
         }
 
         for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)
@@ -1329,27 +1327,27 @@ public class MenuController : IScript
             SetInstructionalButtonSlot(slot++, button.controlString, button.instructionText);
         }
 
-        BeginScaleformMovieMethod(_scale, "DRAW_INSTRUCTIONAL_BUTTONS");
-        ScaleformMovieMethodAddParamInt(0);
-        EndScaleformMovieMethod();
+        Native.BeginScaleformMovieMethod(_scale, "DRAW_INSTRUCTIONAL_BUTTONS");
+        Native.ScaleformMovieMethodAddParamInt(0);
+        Native.EndScaleformMovieMethod();
 
-        DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
+        Native.DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
     }
 
     private static void SetInstructionalButtonSlot(int slot, string buttonString, string text)
     {
-        BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
-        ScaleformMovieMethodAddParamInt(slot);
-        PushScaleformMovieMethodParameterString(buttonString);
-        PushScaleformMovieMethodParameterString(text);
-        EndScaleformMovieMethod();
+        Native.BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
+        Native.ScaleformMovieMethodAddParamInt(slot);
+        Native.PushScaleformMovieMethodParameterString(buttonString);
+        Native.PushScaleformMovieMethodParameterString(text);
+        Native.EndScaleformMovieMethod();
     }
 
     private static void DisposeInstructionalButtonsScaleform()
     {
-        if (HasScaleformMovieLoaded(_scale))
+        if (Native.HasScaleformMovieLoaded(_scale))
         {
-            SetScaleformMovieAsNoLongerNeeded(new Ref<int>(ref _scale));
+            Native.SetScaleformMovieAsNoLongerNeeded(new Ref<int>(ref _scale));
         }
     }
 }

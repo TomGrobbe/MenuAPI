@@ -1,8 +1,6 @@
 using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Shared;
 
-using static CitizenFX.FiveM.Client.Native;
-
 namespace MenuAPI;
 
 /// <summary>
@@ -15,7 +13,7 @@ internal static class MenuKeyBindings
     // Command names are global across every resource, so they carry the resource name to stop two
     // resources that both ship MenuAPI from fighting over the same commands. Lowercased because the
     // hash the instructional buttons are looked up by is case sensitive, see BindingControl.
-    internal static readonly string Prefix = $"menuapi:{GetCurrentResourceName().ToLower()}:";
+    internal static readonly string Prefix = $"menuapi:{Native.GetCurrentResourceName().ToLower()}:";
 
     private static readonly string Toggle = $"{Prefix}toggle";
     private static readonly string Up = $"{Prefix}up";
@@ -60,7 +58,7 @@ internal static class MenuKeyBindings
         }
 
         SharedAPI.Commands.RegisterCommand(Toggle, false, new Action(() => togglePressed = true));
-        RegisterKeyMapping(Toggle, "Open / close menu", "keyboard", toggleKey);
+        Native.RegisterKeyMapping(Toggle, "Open / close menu", "keyboard", toggleKey);
 
         RegisterHold(Up, "Menu up", "UP", (held) => UpHeld = held);
         RegisterHold(Down, "Menu down", "DOWN", (held) => DownHeld = held);
@@ -92,7 +90,7 @@ internal static class MenuKeyBindings
     {
         SharedAPI.Commands.RegisterCommand($"+{command}", false, new Action(() => setHeld(true)));
         SharedAPI.Commands.RegisterCommand($"-{command}", false, new Action(() => setHeld(false)));
-        RegisterKeyMapping($"+{command}", description, "keyboard", defaultKey);
+        Native.RegisterKeyMapping($"+{command}", description, "keyboard", defaultKey);
     }
 
     /// <summary>
@@ -141,16 +139,16 @@ internal static class MenuKeyBindings
     }
 
     internal static string GetSelectButton() =>
-        GetControlInstructionalButton(0, IsUsingKeyboardAndMouse(2) ? SelectControl : (int)Control.FrontendAccept, true);
+        Native.GetControlInstructionalButton(0, Native.IsUsingKeyboardAndMouse(2) ? SelectControl : (int)Control.FrontendAccept, true);
 
     internal static string GetBackButton() =>
-        GetControlInstructionalButton(0, IsUsingKeyboardAndMouse(2) ? BackControl : (int)Control.FrontendCancel, true);
+        Native.GetControlInstructionalButton(0, Native.IsUsingKeyboardAndMouse(2) ? BackControl : (int)Control.FrontendCancel, true);
 
     internal static string GetLeftButton() =>
-        GetControlInstructionalButton(0, IsUsingKeyboardAndMouse(2) ? LeftControl : (int)Control.PhoneLeft, true);
+        Native.GetControlInstructionalButton(0, Native.IsUsingKeyboardAndMouse(2) ? LeftControl : (int)Control.PhoneLeft, true);
 
     internal static string GetRightButton() =>
-        GetControlInstructionalButton(0, IsUsingKeyboardAndMouse(2) ? RightControl : (int)Control.PhoneRight, true);
+        Native.GetControlInstructionalButton(0, Native.IsUsingKeyboardAndMouse(2) ? RightControl : (int)Control.PhoneRight, true);
 
     /// <summary>
     /// The control id FiveM uses for a key mapping, so the game's own control functions resolve it to

@@ -1,4 +1,4 @@
-using static CitizenFX.FiveM.Client.Native;
+using CitizenFX.FiveM.Client;
 
 namespace MenuAPI;
 
@@ -61,10 +61,10 @@ internal static class MenuLayout
     /// <summary>Reads the screen values back from the game and works the rest out from them.</summary>
     internal static void Refresh()
     {
-        AspectRatio = GetScreenAspectRatio(false);
+        AspectRatio = Native.GetScreenAspectRatio(false);
         ScreenWidth = 1080f * AspectRatio;
         ScreenHeight = 1080f;
-        SafeZone = GetSafeZoneSize();
+        SafeZone = Native.GetSafeZoneSize();
 
         MenuWidthN = Menu.Width / ScreenWidth;
         HeaderHeightN = HeaderHeight / ScreenHeight;

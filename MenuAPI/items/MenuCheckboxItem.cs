@@ -1,4 +1,4 @@
-﻿using static CitizenFX.FiveM.Client.Native;
+﻿using CitizenFX.FiveM.Client;
 
 namespace MenuAPI;
 
@@ -111,8 +111,8 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
             return;
         }
 
-        SetScriptGfxAlign(76, 84);
-        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+        Native.SetScriptGfxAlign(76, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
         int index = Index;
         bool selected = parent.CurrentIndex == index;
@@ -125,8 +125,8 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
         float spriteHeight = 45f / MenuLayout.ScreenHeight;
         float spriteWidth = 45f / MenuLayout.ScreenWidth;
         int color = GetSpriteColour();
-        DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255, false, false);
-        ResetScriptGfxAlign();
+        Native.DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255, false, false);
+        Native.ResetScriptGfxAlign();
     }
 
     internal override void GoRight()

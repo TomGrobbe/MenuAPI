@@ -1,4 +1,4 @@
-﻿using static CitizenFX.FiveM.Client.Native;
+﻿using CitizenFX.FiveM.Client;
 
 namespace MenuAPI;
 
@@ -78,7 +78,7 @@ public class MenuListItem(string text, List<string> items, int index, string? de
                 parent.ListItemIndexChangeEvent(parent, this, oldIndex, newIndex, Index);
             }
 
-            PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            Native.PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
     }
 
@@ -103,7 +103,7 @@ public class MenuListItem(string text, List<string> items, int index, string? de
                 parent.ListItemIndexChangeEvent(parent, this, oldIndex, newIndex, Index);
             }
 
-            PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            Native.PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
     }
 

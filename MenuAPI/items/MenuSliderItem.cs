@@ -1,4 +1,4 @@
-﻿using static CitizenFX.FiveM.Client.Native;
+﻿using CitizenFX.FiveM.Client;
 
 namespace MenuAPI;
 
@@ -70,35 +70,35 @@ public class MenuSliderItem(string name, string? description, int min, int max, 
 
             var leftColor = GetSpriteColour(SliderLeftIcon, selected);
 
-            SetScriptGfxAlign(parent.LeftAligned ? 76 : 82, 84);
-            SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+            Native.SetScriptGfxAlign(parent.LeftAligned ? 76 : 82, 84);
+            Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
 
             string textureDictionary = GetSpriteDictionary(SliderLeftIcon);
 
             if (parent.LeftAligned)
             {
                 // left sprite left aligned.
-                DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, selected), x - (width / 2f + (4f / MenuLayout.ScreenWidth)) - (GetSpriteSize(SliderLeftIcon, true) / 2f), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor.R, leftColor.G, leftColor.B, 255, false, false);
+                Native.DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, selected), x - (width / 2f + (4f / MenuLayout.ScreenWidth)) - (GetSpriteSize(SliderLeftIcon, true) / 2f), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor.R, leftColor.G, leftColor.B, 255, false, false);
 
                 // right sprite is managed by the regular function in MenuItem that handles the right icon.
             }
             else
             {
                 // left sprite right aligned.
-                DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, selected), x - (width + (4f / MenuLayout.ScreenWidth)) - GetSpriteSize(SliderLeftIcon, true) - (20f / MenuLayout.ScreenWidth), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor.R, leftColor.G, leftColor.B, 255, false, false);
+                Native.DrawSprite(textureDictionary, GetSpriteName(SliderLeftIcon, selected), x - (width + (4f / MenuLayout.ScreenWidth)) - GetSpriteSize(SliderLeftIcon, true) - (20f / MenuLayout.ScreenWidth), y, GetSpriteSize(SliderLeftIcon, true), GetSpriteSize(SliderLeftIcon, false), 0f, leftColor.R, leftColor.G, leftColor.B, 255, false, false);
 
                 // right sprite is managed by the regular function in MenuItem that handles the right icon.
             }
 
-            ResetScriptGfxAlign();
+            Native.ResetScriptGfxAlign();
         }
 
-        SetScriptGfxAlign(parent.LeftAligned ? 76 : 82, 84);
-        SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
+        Native.SetScriptGfxAlign(parent.LeftAligned ? 76 : 82, 84);
+        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
         #region drawing background bar and foreground bar
 
         // background
-        DrawRect(x, y, width, height, BackgroundColor.R, BackgroundColor.G, BackgroundColor.B, BackgroundColor.A, false);
+        Native.DrawRect(x, y, width, height, BackgroundColor.R, BackgroundColor.G, BackgroundColor.B, BackgroundColor.A, false);
 
         float xOffset = Map(
             (float)Position,
@@ -112,11 +112,11 @@ public class MenuSliderItem(string name, string? description, int min, int max, 
         // bar (foreground)
         if (!parent.LeftAligned)
         {
-            DrawRect(x - (width / 2f) + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A, false);
+            Native.DrawRect(x - (width / 2f) + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A, false);
         }
         else
         {
-            DrawRect(x + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A, false);
+            Native.DrawRect(x + xOffset, y, width / 2f, height, BarColor.R, BarColor.G, BarColor.B, BarColor.A, false);
         }
 
         #endregion
@@ -126,15 +126,15 @@ public class MenuSliderItem(string name, string? description, int min, int max, 
         {
             if (!parent.LeftAligned)
             {
-                DrawRect(x - width + (4f / MenuLayout.ScreenWidth), y, 4f / MenuLayout.ScreenWidth, RowHeight / MenuLayout.ScreenHeight / 2f, 255, 255, 255, 255, false);
+                Native.DrawRect(x - width + (4f / MenuLayout.ScreenWidth), y, 4f / MenuLayout.ScreenWidth, RowHeight / MenuLayout.ScreenHeight / 2f, 255, 255, 255, 255, false);
             }
             else
             {
-                DrawRect(x + (2f / MenuLayout.ScreenWidth), y, 4f / MenuLayout.ScreenWidth, RowHeight / MenuLayout.ScreenHeight / 2f, 255, 255, 255, 255, false);
+                Native.DrawRect(x + (2f / MenuLayout.ScreenWidth), y, 4f / MenuLayout.ScreenWidth, RowHeight / MenuLayout.ScreenHeight / 2f, 255, 255, 255, 255, false);
             }
         }
         #endregion
-        ResetScriptGfxAlign();
+        Native.ResetScriptGfxAlign();
     }
 
     internal override void GoRight()
@@ -146,11 +146,11 @@ public class MenuSliderItem(string name, string? description, int min, int max, 
             {
                 parent.SliderItemChangedEvent(parent, this, Position - 1, Position, Index);
             }
-            PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            Native.PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
         else
         {
-            PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            Native.PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
     }
 
@@ -163,11 +163,11 @@ public class MenuSliderItem(string name, string? description, int min, int max, 
             {
                 parent.SliderItemChangedEvent(parent, this, Position + 1, Position, Index);
             }
-            PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            Native.PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
         else
         {
-            PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+            Native.PlaySoundFrontend(-1, "ERROR", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using static CitizenFX.FiveM.Client.Native;
+﻿using CitizenFX.FiveM.Client;
 
 namespace MenuAPI;
 
@@ -37,7 +37,7 @@ public class MenuDynamicListItem(string text, string? initialValue, MenuDynamicL
             parent.DynamicListItemCurrentItemChanged(parent, this, oldValue, newSelectedItem);
         }
 
-        PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+        Native.PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
     }
 
     internal override void GoLeft()
@@ -51,7 +51,7 @@ public class MenuDynamicListItem(string text, string? initialValue, MenuDynamicL
             parent.DynamicListItemCurrentItemChanged(parent, this, oldValue, newSelectedItem);
         }
 
-        PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
+        Native.PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
     }
 
     internal override void Select()
