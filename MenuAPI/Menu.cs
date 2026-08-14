@@ -1354,13 +1354,9 @@ public class Menu
 
         if (!string.IsNullOrEmpty(HeaderTexture.Key) && !string.IsNullOrEmpty(HeaderTexture.Value))
         {
-            if (!Native.HasStreamedTextureDictLoaded(HeaderTexture.Key))
+            while (!TextureDictionaries.Request(HeaderTexture.Key))
             {
-                Native.RequestStreamedTextureDict(HeaderTexture.Key, false);
-                while (!Native.HasStreamedTextureDictLoaded(HeaderTexture.Key))
-                {
-                    await API.Delay(0);
-                }
+                await API.Delay(0);
             }
             Native.DrawSprite(HeaderTexture.Key, HeaderTexture.Value, x, y, width, height, 0f, 255, 255, 255, 255, false, false);
         }

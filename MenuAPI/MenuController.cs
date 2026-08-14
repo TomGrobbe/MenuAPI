@@ -412,14 +412,7 @@ public class MenuController : IScript
     {
         var waited = false;
 
-        menuTextureAssets.ForEach(asset =>
-        {
-            if (!Native.HasStreamedTextureDictLoaded(asset))
-            {
-                Native.RequestStreamedTextureDict(asset, false);
-            }
-        });
-        while (menuTextureAssets.Any(asset => { return !Native.HasStreamedTextureDictLoaded(asset); }))
+        while (!TextureDictionaries.RequestAll(menuTextureAssets))
         {
             // The menu closing already ran UnloadAssets, so waiting out the rest of the stream would
             // leave dicts requested that nothing is going to release.
@@ -441,16 +434,7 @@ public class MenuController : IScript
     /// </summary>
     private static void UnloadAssets()
     {
-        menuTextureAssets.ForEach(asset =>
-        {
-            if (!string.IsNullOrEmpty(asset))
-            {
-                if (Native.HasStreamedTextureDictLoaded(asset))
-                {
-                    Native.SetStreamedTextureDictAsNoLongerNeeded(asset);
-                }
-            }
-        });
+        TextureDictionaries.ReleaseAll(menuTextureAssets);
     }
 
     /// <summary>
