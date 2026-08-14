@@ -189,7 +189,11 @@ public class MenuController : IScript
             });
 
         MenuTicks.Register("Menu.InstructionalButtons", DrawInstructionalButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
-            onStopped: DisposeInstructionalButtonsScaleform);
+            onStopped: () =>
+            {
+                DisposeInstructionalButtonsScaleform();
+                InstructionalButtonIcons.Clear();
+            });
 
         MenuTicks.Register("Menu.Select", ProcessMainButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
             // Nothing drains input while every menu is closed, so a menu has to open from a clean
@@ -1295,6 +1299,8 @@ public class MenuController : IScript
         Native.BeginScaleformMovieMethod(_scale, "CLEAR_ALL");
         Native.EndScaleformMovieMethod();
 
+        // Once here rather than at each icon below, and the only place that has to run every frame.
+        InstructionalButtonIcons.Refresh();
 
         int slot = 0;
 
@@ -1318,7 +1324,7 @@ public class MenuController : IScript
         // time, so indexing it in a loop re-walked the whole thing once per button, every frame.
         foreach (KeyValuePair<Control, string> button in menu.InstructionalButtons)
         {
-            SetInstructionalButtonSlot(slot++, Native.GetControlInstructionalButton(0, (int)button.Key, true), button.Value);
+            SetInstructionalButtonSlot(slot++, InstructionalButtonIcons.For((int)button.Key), button.Value);
         }
 
         for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)

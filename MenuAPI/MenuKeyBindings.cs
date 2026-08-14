@@ -139,16 +139,16 @@ internal static class MenuKeyBindings
     }
 
     internal static string GetSelectButton() =>
-        Native.GetControlInstructionalButton(0, Native.IsUsingKeyboardAndMouse(2) ? SelectControl : (int)Control.FrontendAccept, true);
+        InstructionalButtonIcons.For(InstructionalButtonIcons.UsingKeyboard ? SelectControl : (int)Control.FrontendAccept);
 
     internal static string GetBackButton() =>
-        Native.GetControlInstructionalButton(0, Native.IsUsingKeyboardAndMouse(2) ? BackControl : (int)Control.FrontendCancel, true);
+        InstructionalButtonIcons.For(InstructionalButtonIcons.UsingKeyboard ? BackControl : (int)Control.FrontendCancel);
 
     internal static string GetLeftButton() =>
-        Native.GetControlInstructionalButton(0, Native.IsUsingKeyboardAndMouse(2) ? LeftControl : (int)Control.PhoneLeft, true);
+        InstructionalButtonIcons.For(InstructionalButtonIcons.UsingKeyboard ? LeftControl : (int)Control.PhoneLeft);
 
     internal static string GetRightButton() =>
-        Native.GetControlInstructionalButton(0, Native.IsUsingKeyboardAndMouse(2) ? RightControl : (int)Control.PhoneRight, true);
+        InstructionalButtonIcons.For(InstructionalButtonIcons.UsingKeyboard ? RightControl : (int)Control.PhoneRight);
 
     /// <summary>
     /// The control id FiveM uses for a key mapping, so the game's own control functions resolve it to
