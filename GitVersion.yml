@@ -1,27 +1,41 @@
 # GitVersion configuration (FiveM Enhanced branch)
 # Docs: https://gitversion.net/docs/reference/configuration
 #
-# The Enhanced branch publishes auto-incrementing alpha pre-releases in the
-# format 0.1.0-alpha.1, 0.1.0-alpha.2, ... The trailing number bumps by one for
-# each tagged release: the next commit after tag enhanced-v0.1.0-alpha.N builds
-# as 0.1.0-alpha.(N+1) (ContinuousDelivery). Release tags are prefixed
-# `enhanced-v` so they stay separate from the legacy `v` tags on master. Move the
-# base version (0.1.0) up with `next-version` below, or bump it on a single commit
-# with a message trailer:  +semver: major | minor | patch | none
+# Mode: Mainline — every commit to fivem-enhanced auto-increments the patch
+# version, the same way the Legacy branch works. Override the increment for a
+# specific commit by including one of these anywhere in the commit message:
+#   +semver: major   →  bumps major (e.g. 1.2.3 → 2.0.0)
+#   +semver: minor   →  bumps minor (e.g. 1.2.3 → 1.3.0)
+#   +semver: patch   →  bumps patch (e.g. 1.2.3 → 1.2.4)  ← default
+#   +semver: none    →  no bump on this commit
 #
-# NOTE: the first alpha shipped as 0.1.0 (not 0.0.1), so the base is pinned to
-# 0.1.0 here to keep the published series consistent going forward.
+# Release tags are prefixed `enhanced-v` so they stay separate from the plain `v`
+# tags on the Legacy branch. That prefix also stops GitVersion from reading the
+# legacy versions as this line's own history.
+#
+# The Enhanced line shipped 0.1.0-alpha.1 through 0.1.0-alpha.22 while it was in
+# development. It is stable now, so the alpha pre-release label is gone and builds
+# are plain 1.0.0, 1.0.1, and so on.
+#
+# The jump from 0.1.0 to 1.0.0 is made by the `+semver: major` trailer on the commit
+# that introduces this config, NOT by a next-version setting here. next-version acts
+# as a floor rather than a starting point: with next-version 1.0.0 in place, the
+# commit after tag enhanced-v1.0.0 still calculates as 1.0.0 and the version never
+# moves again. The trailer only affects its own commit, so the series is free to
+# carry on from the 1.0.0 tag by itself.
 
 assembly-versioning-scheme: MajorMinorPatch
 assembly-file-versioning-scheme: MajorMinorPatch
-mode: ContinuousDelivery
+mode: Mainline
 tag-prefix: 'enhanced-v'
-next-version: 0.1.0
 
 branches:
   fivem-enhanced:
     regex: '^fivem-enhanced$'
-    tag: alpha
     increment: Patch
+    is-mainline: true
+    # An empty tag means no pre-release label, so builds are a plain 1.0.0 instead of
+    # the old 1.0.0-alpha.N. GitVersion falls back to using the branch name as the
+    # label for a branch it does not recognise, which would give 1.0.0-fivem-enhanced.1.
+    tag: ''
     source-branches: []
-    is-mainline: false
