@@ -1103,12 +1103,15 @@ namespace MenuAPI
 
             DrawBackground(indexOffset, yOffset, out float x, out float y);
 
-            float textMinX = (textXOffset / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
             float textMaxX = (Width - 10f) / MenuController.ScreenWidth;
             float textY = y - ((30f / 2f) / MenuController.ScreenHeight);
 
             textXOffset = DrawLeftIcon(textXOffset, y);
             rightTextIconOffset = DrawRightIcon(rightTextIconOffset, y);
+
+            // must be calculated after DrawLeftIcon, otherwise the left icon offset is not taken into account
+            // and the item text will be drawn on top of the icon.
+            float textMinX = (textXOffset / MenuController.ScreenWidth) + (10f / MenuController.ScreenWidth);
 #if FIVEM
             DrawLabelText(textXOffset, rightTextIconOffset, y, font, textSize, textColor, textY);
 #endif
