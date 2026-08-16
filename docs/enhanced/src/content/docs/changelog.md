@@ -10,6 +10,24 @@ title: "Changelog"
 These are the changes in MenuAPI for FiveM Enhanced. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way.
 :::
 
+### Menus can be split into groups with a heading
+
+There is a new item type, [SeparatorMenuItem](reference/menuitems/separatormenuitem/). It is a heading that labels the rows underneath it, so a long menu can be broken into readable groups without pushing anything into a submenu.
+
+The text is centred properly, using the game's own text justification, and it sits on exactly the same baseline as the rows around it. `ShowArrows` is on by default and draws it as `↓ Protection ↓`, and turning it off leaves just the centred word.
+
+The cursor scrolls onto a separator like any other row, and it highlights like any other row. What it will not do is act: select, left and right are all ignored, and without the error sound a disabled row would have made, because scrolling onto a label is not a mistake. Give it a description and that gets shown too, which is a free place to say what the whole group below is for.
+
+Scrolling deliberately does not skip over them. A cursor that jumped rows feels like the menu is eating key presses, and it is worse to use than the row it was trying to save you from.
+
+This is the thing people were building by hand: a disabled item whose text had been padded with spaces until it looked roughly centred. That never actually lined up, the padding had to be recalculated for the text, and pressing it gave you an error sound.
+
+**Things you have to change in your own code:** nothing, `SeparatorMenuItem` is a new type. Nothing about how menus scroll or count their rows has changed.
+
+**Things that just behave differently now:**
+
+- If you were faking a heading with a space padded disabled `MenuItem`, swap it for a `SeparatorMenuItem` and drop both the padding and the arrows you were typing into the text yourself. Do not swap it if you were using that trick as a "there is nothing here" message in an otherwise empty menu, since a real heading is not what that is. Keep a disabled plain item for that.
+
 ### Menu banners can have their own font, and GTA Online's glare
 
 The banner at the top of a menu used to be fixed. The only thing you could change about it was swapping the whole image out for your own. It now has three settings, all covered on the [Header styling](reference/menu/#header-styling) page.

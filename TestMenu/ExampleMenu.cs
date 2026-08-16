@@ -437,6 +437,8 @@ public class ExampleMenu : IScript
         menu8.AddMenuItem(aSlider);
         menu8.AddMenuItem(lockedButton);
 
+        menu8.AddMenuItem(new SeparatorMenuItem("The numbered ones"));
+
         for (int i = 1; i <= 45; i++)
         {
             menu8.AddMenuItem(new MenuItem($"Item #{i}", $"Item number {i} of 45. Press left or right to turn the page.")
@@ -629,6 +631,48 @@ public class ExampleMenu : IScript
         };
         menu.AddMenuItem(headerStyling);
         MenuController.BindMenuItem(menu, menu9, headerStyling);
+
+        // Separators. Long enough to scroll, so you can check the centring holds as rows move under it.
+        Menu menu10 = new Menu("Separators", "Grouped rows");
+
+        SeparatorMenuItem firstGroup = new SeparatorMenuItem("First group", "Scroll onto me and press select. Nothing happens, and there is no error sound either.");
+
+        menu10.AddMenuItem(firstGroup);
+        menu10.AddMenuItem(new MenuItem("First row", "A normal button."));
+        menu10.AddMenuItem(new MenuCheckboxItem("A checkbox", "Separators sit between whatever item types you like.", true));
+        menu10.AddMenuItem(new MenuItem("Another row"));
+
+        MenuCheckboxItem arrows = new MenuCheckboxItem(
+            "Arrows on the first heading",
+            "Sets ShowArrows on the heading at the top. Off draws the text on its own.",
+            true
+        );
+        menu10.AddMenuItem(arrows);
+
+        menu10.AddMenuItem(new SeparatorMenuItem("Second group", false));
+
+        for (int i = 1; i < 9; i++)
+        {
+            menu10.AddMenuItem(new MenuItem($"Row {i}", "Scroll through the headings, they behave like any other row."));
+        }
+
+        menu10.AddMenuItem(new SeparatorMenuItem("Nothing below here"));
+
+        menu10.OnCheckboxChange += (_menu, _item, _index, _checked) =>
+        {
+            if (_item == arrows)
+            {
+                firstGroup.ShowArrows = _checked;
+            }
+        };
+
+        MenuController.AddSubmenu(menu, menu10);
+        MenuItem separators = new MenuItem("Separators", "Demo menu for SeparatorMenuItem, the centred heading that does nothing when pressed.")
+        {
+            Label = "→→→"
+        };
+        menu.AddMenuItem(separators);
+        MenuController.BindMenuItem(menu, menu10, separators);
         /*--------------
          Event handlers
         --------------*/

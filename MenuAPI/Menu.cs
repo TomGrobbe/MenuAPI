@@ -741,7 +741,17 @@ public class Menu
             return;
         }
 
-        PageIndex = Math.Clamp(PageIndex, 0, PageCount - 1);
+        var target = Math.Clamp(PageIndex, 0, PageCount - 1);
+
+        if (target == PageIndex)
+        {
+            return;
+        }
+
+        PageIndex = target;
+
+        // The cached slice is of the page just left.
+        InvalidatePage();
     }
 
     /// <summary>
@@ -962,6 +972,12 @@ public class Menu
     public void SelectItem(MenuItem item)
     {
         if (item == null || IsWeaponWheelActive)
+        {
+            return;
+        }
+        // Before the Enabled branch, which would otherwise answer with the error sound. A separator
+        // is a label, not a row that was taken away.
+        if (item is SeparatorMenuItem)
         {
             return;
         }
@@ -1478,9 +1494,11 @@ public class Menu
         }
         #endregion
         #region draw counter + pre-counter text
-        string counterText = $"{CounterPreText ?? ""}{CurrentIndex + 1} / {Size}";
         if (!string.IsNullOrEmpty(CounterPreText) || MaxItemsOnScreen < Size)
         {
+            // Inside the check: above it this was built every frame for menus that never draw it.
+            string counterText = $"{CounterPreText ?? ""}{CurrentIndex + 1} / {Size}";
+
             int font = 0;
             float size = MenuLayout.ItemTextSize;
 

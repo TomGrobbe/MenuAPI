@@ -4,7 +4,7 @@ title: "MenuItems"
 
 ## Menu items
 
-Menu items are the rows inside a [Menu](../menu/). There are five types, and all of them inherit the standard [MenuItem](menuitem/) class, so everything on that page (text, description, icons, enabled state, `ItemData`, …) applies to every item type.
+Menu items are the rows inside a [Menu](../menu/). There are six types, and all of them inherit the standard [MenuItem](menuitem/) class, so everything on that page (text, description, icons, enabled state, `ItemData`, …) applies to every item type.
 
 Adding an item to a menu is always the same:
 
@@ -23,6 +23,7 @@ menu.AddMenuItem(item);
 |[MenuListItem](menulistitem/)|Picks one value out of a fixed list of strings.|Moves through the list (wraps around).|
 |[MenuDynamicListItem](menudynamiclistitem/)|Like a list item, but a callback decides what the next value is. Use this for endless or expensive-to-build lists.|Calls your callback for the new value.|
 |[MenuSliderItem](menuslideritem/)|A slider with a minimum and maximum position.|Moves the slider (does not wrap).|
+|[SeparatorMenuItem](separatormenuitem/)|A centred heading that labels the rows under it. Pressing it does nothing.|Nothing.|
 
 :::note
 `RightIcon` and `Label` are unavailable on the item types that use the right side of the row themselves. Each page lists its own limitations.
@@ -66,6 +67,9 @@ menu.AddMenuItem(new MenuDynamicListItem("Dynamic list", "0", new MenuDynamicLis
 
 // A slider.
 menu.AddMenuItem(new MenuSliderItem("Slider", 0, 10, 5, true));
+
+// A centred heading for whatever rows come after it. Pressing it does nothing.
+menu.AddMenuItem(new SeparatorMenuItem("Section heading"));
 ```
 
 ----
