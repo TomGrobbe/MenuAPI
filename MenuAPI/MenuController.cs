@@ -1337,7 +1337,7 @@ public class MenuController : IScript
     {
         if (Native.HasScaleformMovieLoaded(_scale))
         {
-            Native.SetScaleformMovieAsNoLongerNeeded(new Ref<int>(ref _scale));
+            Native.SetScaleformMovieAsNoLongerNeeded(ref _scale);
         }
     }
 }

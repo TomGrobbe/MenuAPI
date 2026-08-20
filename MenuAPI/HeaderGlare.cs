@@ -102,7 +102,7 @@ internal static class HeaderGlare
     {
         if (Native.HasScaleformMovieLoaded(_handle))
         {
-            Native.SetScaleformMovieAsNoLongerNeeded(new Ref<int>(ref _handle));
+            Native.SetScaleformMovieAsNoLongerNeeded(ref _handle);
         }
 
         // The movie starts its fade in from scratch next time, so the angle it was last told about
