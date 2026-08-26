@@ -691,6 +691,15 @@ None of this touches the subtitle bar, the counter or the menu items. It is the 
 |MenuFont.ChaletComprimeCologne|`4`. Narrower than Chalet London, so long titles fit better.|
 |MenuFont.Pricedown|`7`. The Grand Theft Auto logo font.|
 
+:::note
+Those descriptions are the game's own fonts, which is what you get in the native render mode. The NUI
+renderer is a web page, so it can only use fonts that are allowed to be shipped with MenuAPI. Chalet
+London and Pricedown are the real thing, House Script is drawn in Dancing Script instead, Chalet
+Comprime Cologne is drawn in Antonio, and Monospace is drawn in Bebas Neue, in capitals, which is how
+the game draws that one too. A title picks the same font id either way, it just looks a little
+different in NUI mode.
+:::
+
 ```cs
 Menu menu = new Menu("Los Santos Customs", "Vehicle mods")
 {
