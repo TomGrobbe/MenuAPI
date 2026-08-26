@@ -47,6 +47,7 @@ export default defineConfig({
       sidebar: [
         { label: 'Basic Info', link: '/' },
         { label: 'Setup', link: '/setup/' },
+        { label: 'Migration guide', link: '/migration/' },
         {
           label: 'API Reference',
           items: [
