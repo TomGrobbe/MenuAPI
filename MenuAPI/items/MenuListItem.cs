@@ -45,6 +45,16 @@ public class MenuListItem(string text, List<string> items, int index, string? de
     private bool _showColorPanel = false;
     private ColorPanelType _colorPanelColorType = ColorPanelType.Hair;
 
+    private int opacityPercent;
+
+    public int OpacityPercent
+    {
+        get => opacityPercent;
+        set => MenuNui.Change(ref opacityPercent, Math.Clamp(value, 0, 100));
+    }
+
+    internal int ResolvedOpacityPercent =>
+        ShowColorPanel ? OpacityPercent : Math.Clamp(ListIndex * 10, 0, 100);
     public enum ColorPanelType
     {
         Hair,

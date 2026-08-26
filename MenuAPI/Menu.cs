@@ -2096,7 +2096,7 @@ public class Menu
                 Native.BeginScaleformMovieMethod(OpacityPanelScaleform, "SET_TITLE");
                 Native.PushScaleformMovieMethodParameterString("Opacity");
                 Native.PushScaleformMovieMethodParameterString("");
-                Native.ScaleformMovieMethodAddParamInt(listItem.ListIndex * 10); // opacity percent
+                Native.ScaleformMovieMethodAddParamInt(listItem.ResolvedOpacityPercent);
                 Native.EndScaleformMovieMethod();
 
                 float width = Width / MenuLayout.ScreenWidth;

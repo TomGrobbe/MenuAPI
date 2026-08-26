@@ -146,9 +146,30 @@ public class ExampleMenu : IScript
             ShowOpacityPanel = true
         };
 
+        List<string> combinedList = new List<string>();
+        for (var i = 0; i < 64; i++)
+        {
+            combinedList.Add($"Color #{i}");
+        }
+        MenuListItem combined = new MenuListItem("Color + Opacity", combinedList, 0, "Left and right move the colour. The bar above it is its own value, driven by the Opacity Panel row.")
+        {
+            ShowColorPanel = true,
+            ShowOpacityPanel = true,
+            OpacityPercent = 0
+        };
+
+        menu.OnListIndexChange += (_menu, _item, _oldIndex, _newIndex, _itemIndex) =>
+        {
+            if (_item == opacity)
+            {
+                combined.OpacityPercent = _newIndex * 10;
+            }
+        };
+
         menu.AddMenuItem(hairColors);
         menu.AddMenuItem(makeupColors);
         menu.AddMenuItem(opacity);
+        menu.AddMenuItem(combined);
         // Normal
         List<string> normalList = new List<string>() { "Item #1", "Item #2", "Item #3" };
         MenuListItem normalListItem = new MenuListItem(
