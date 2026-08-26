@@ -1,4 +1,6 @@
-﻿namespace MenuAPI;
+﻿using CitizenFX.FiveM.Client;
+
+namespace MenuAPI;
 
 /// <summary>
 /// Everything about the screen that the drawing code needs, worked out once instead of per draw call.

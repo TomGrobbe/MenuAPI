@@ -1,4 +1,6 @@
-﻿namespace MenuAPI;
+﻿using CitizenFX.FiveM.Client;
+
+namespace MenuAPI;
 
 /// <summary>
 /// Creates a new <see cref="MenuCheckboxItem"/> with all parameters set.

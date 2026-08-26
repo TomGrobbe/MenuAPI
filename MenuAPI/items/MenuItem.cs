@@ -1,4 +1,6 @@
-﻿namespace MenuAPI;
+﻿using CitizenFX.FiveM.Client;
+
+namespace MenuAPI;
 
 public class MenuItem
 {

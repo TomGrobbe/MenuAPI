@@ -1,4 +1,6 @@
-﻿namespace MenuAPI;
+﻿using CitizenFX.FiveM.Client;
+
+namespace MenuAPI;
 
 public class MenuListItem(string text, List<string> items, int index, string? description) : MenuItem(text, description)
 {

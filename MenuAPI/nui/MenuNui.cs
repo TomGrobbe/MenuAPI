@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 
+using CitizenFX.FiveM.Client;
+
 namespace MenuAPI;
 
 internal static class MenuNui
