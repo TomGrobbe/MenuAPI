@@ -1,5 +1,3 @@
-using CitizenFX.FiveM.Client;
-
 namespace MenuAPI;
 
 /// <summary>
