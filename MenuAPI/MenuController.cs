@@ -9,19 +9,9 @@ public class MenuController : IScript
     internal static HashSet<Menu> VisibleMenus { get; } = new HashSet<Menu>();
     public const string _texture_dict = "commonmenu";
     public const string _header_texture = "interaction_bgd";
-    private static readonly List<string> menuTextureAssets = new()
-    {
-        "commonmenu",
-        "commonmenutu",
-        "mpleaderboard",
-        "mphud",
-        "mpshopsale",
-        "mpinventory",
-        "mprankbadge",
-        "mpcarhud",
-        "mpcarhud2",
-        "shared"
-    };
+    // Derived from the sprites the menu can actually draw, so an icon added to a dictionary that is
+    // not in this list cannot go missing because someone forgot to add the dictionary too.
+    private static List<string> MenuTextureAssets => SpriteManifest.Dictionaries;
 
     // How often the controller toggle button is checked while no menu is open. The gesture is a 400ms
     // hold, so this is well inside it: once the button is actually down the hold is timed per frame.
@@ -209,6 +199,8 @@ public class MenuController : IScript
     public void Initialize()
     {
         MenuTicks.Initialize();
+
+        SpritePreload.Initialize();
 
         RegisterKeyBindings();
 
@@ -460,7 +452,7 @@ public class MenuController : IScript
     {
         var waited = false;
 
-        while (!TextureDictionaries.RequestAll(menuTextureAssets))
+        while (!TextureDictionaries.RequestAll(MenuTextureAssets))
         {
             // The menu closing already ran UnloadAssets, so waiting out the rest of the stream would
             // leave dicts requested that nothing is going to release.
@@ -482,7 +474,7 @@ public class MenuController : IScript
     /// </summary>
     private static void UnloadAssets()
     {
-        TextureDictionaries.ReleaseAll(menuTextureAssets);
+        TextureDictionaries.ReleaseAll(MenuTextureAssets);
     }
 
     /// <summary>
@@ -1316,7 +1308,12 @@ public class MenuController : IScript
 
     private static void RefreshTextures()
     {
-        TextureDictionaries.RequestAll(menuTextureAssets);
+        // Once the page holds its own copies, the only thing left to stream is a texture a resource
+        // set itself, which asks for its dictionary through the pending list below.
+        if (RenderMode == MenuRenderMode.Native || !SpritePreload.Cached)
+        {
+            TextureDictionaries.RequestAll(MenuTextureAssets);
+        }
 
         MenuNui.RequestPendingTextures();
     }

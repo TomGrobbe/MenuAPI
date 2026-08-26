@@ -195,12 +195,13 @@ internal static class MenuNui
 
         var custom = !string.IsNullOrEmpty(menu.HeaderTexture.Key) && !string.IsNullOrEmpty(menu.HeaderTexture.Value);
         var dictionary = custom ? menu.HeaderTexture.Key : MenuController._texture_dict;
+        var texture = custom ? menu.HeaderTexture.Value : MenuController._header_texture;
 
-        if (TextureReady(dictionary))
+        if (SpriteReady(dictionary, texture))
         {
             json.Object("texture")
                 .Prop("dict", dictionary)
-                .Prop("name", custom ? menu.HeaderTexture.Value : MenuController._header_texture)
+                .Prop("name", texture)
                 .EndObject();
         }
         else
@@ -259,13 +260,18 @@ internal static class MenuNui
 
             switch (item)
             {
-                case MenuCheckboxItem checkbox when TextureReady(MenuController._texture_dict):
-                    json.Object("checkbox")
-                        .Prop("dict", MenuController._texture_dict)
-                        .Prop("name", checkbox.GetSpriteName(selected))
-                        .Prop("size", MenuCheckboxItem.SpriteSizePx)
-                        .Prop("shade", checkbox.Enabled ? 255 : 109)
-                        .EndObject();
+                case MenuCheckboxItem checkbox:
+                    var box = checkbox.GetSpriteName(selected);
+
+                    if (SpriteReady(MenuController._texture_dict, box))
+                    {
+                        json.Object("checkbox")
+                            .Prop("dict", MenuController._texture_dict)
+                            .Prop("name", box)
+                            .Prop("size", MenuCheckboxItem.SpriteSizePx)
+                            .Prop("shade", checkbox.Enabled ? 255 : 109)
+                            .EndObject();
+                    }
 
                     break;
 
@@ -296,6 +302,11 @@ internal static class MenuNui
         json.EndArray();
     }
 
+    // The page keeps its own copy of every sprite it was preloaded with, so those need nothing from
+    // the game at all. Anything else, a header texture a resource set itself, still has to stream in.
+    private static bool SpriteReady(string dict, string name) =>
+        SpritePreload.IsCached(dict, name) || TextureReady(dict);
+
     private static bool TextureReady(string dict)
     {
         if (TextureDictionaries.Request(dict))
@@ -321,8 +332,9 @@ internal static class MenuNui
         }
 
         var dictionary = item.GetSpriteDictionary(icon);
+        var texture = item.GetSpriteName(icon, selected);
 
-        if (!TextureReady(dictionary))
+        if (!SpriteReady(dictionary, texture))
         {
             json.Null(name);
 
@@ -333,7 +345,7 @@ internal static class MenuNui
 
         json.Object(name)
             .Prop("dict", dictionary)
-            .Prop("name", item.GetSpriteName(icon, selected))
+            .Prop("name", texture)
             .Prop("size", MenuItem.GetSpriteSizePx(icon))
             .Prop("r", colour.R)
             .Prop("g", colour.G)

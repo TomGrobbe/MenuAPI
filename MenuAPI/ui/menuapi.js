@@ -22,6 +22,11 @@
     const SPRITE_RETRY_MS = 200;
 
     function spriteReady(url) {
+        // Preloaded sprites are already bytes in this page, there is nothing left to wait for.
+        if (url.startsWith("blob:") || url.startsWith("data:")) {
+            return true;
+        }
+
         const state = sprites.get(url);
 
         if (state) {
