@@ -1,0 +1,196 @@
+/* Everything is in the scaleform's own units. --u is a plain number that scales the whole component. */
+
+.gcl {
+  --u: 1;
+
+  --bg: rgba(0, 0, 0, 0.73);
+  --accent: 240, 240, 240;
+  --text: #f0f0f0;
+
+  --palette-offset: 0;
+
+  position: relative;
+  width: calc(288px * var(--u));
+  font-family: "Chalet London 1960", "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+  user-select: none;
+}
+
+.gcl__title {
+  position: relative;
+  height: calc(50px * var(--u));
+  background: var(--bg);
+}
+
+.gcl__title[hidden] {
+  display: none;
+}
+
+.gcl__label,
+.gcl__min,
+.gcl__max {
+  position: absolute;
+  font-size: calc(13px * var(--u));
+  line-height: calc(20px * var(--u));
+  white-space: nowrap;
+}
+
+.gcl__label {
+  left: calc(7px * var(--u));
+  top: calc(6px * var(--u));
+}
+
+.gcl__min,
+.gcl__max {
+  top: calc(36px * var(--u));
+  font-size: calc(9px * var(--u));
+  line-height: calc(13px * var(--u));
+  opacity: 0.7;
+}
+
+.gcl__min {
+  left: calc(7px * var(--u));
+}
+
+.gcl__max {
+  right: calc(7px * var(--u));
+}
+
+.gcl__bar {
+  position: absolute;
+  left: calc(7px * var(--u));
+  top: calc(30px * var(--u));
+  width: calc(274px * var(--u));
+  height: calc(6px * var(--u));
+}
+
+.gcl__bar-black,
+.gcl__bar-alpha,
+.gcl__bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+}
+
+.gcl__bar-black {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.gcl__bar-alpha {
+  width: 100%;
+  background: rgba(var(--accent), 0.3);
+}
+
+.gcl__bar-fill {
+  width: 0;
+  background: rgb(var(--accent));
+}
+
+.gcl__palette {
+  position: relative;
+  height: calc(74px * var(--u));
+  background: var(--bg);
+  top: calc(1px * var(--palette-offset) * var(--u));
+}
+
+.gcl__palette[hidden] {
+  display: none;
+}
+
+.gcl__strip {
+  position: absolute;
+  left: calc(9px * var(--u));
+  top: 0;
+  width: calc(270px * var(--u));
+  height: calc(35px * var(--u));
+}
+
+.gcl__swatch {
+  --sw: 30;
+  position: absolute;
+  top: 0;
+  width: calc(1px * var(--sw) * var(--u));
+  height: calc(35px * var(--u));
+}
+
+.gcl__swatch[hidden] {
+  display: none;
+}
+
+.gcl__highlight {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: calc(5px * var(--u));
+  background: #fff;
+  clip-path: polygon(
+    0 0,
+    calc(50% - 5px * var(--u)) 0,
+    50% 100%,
+    calc(50% + 5px * var(--u)) 0,
+    100% 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+.gcl__highlight[hidden] {
+  display: none;
+}
+
+.gcl__colour {
+  position: absolute;
+  left: 0;
+  top: calc(5px * var(--u));
+  width: 100%;
+  height: calc(30px * var(--u));
+  background: #888;
+}
+
+.gcl--pc .gcl__colour {
+  cursor: pointer;
+}
+
+.gcl__name {
+  position: absolute;
+  left: calc(9px * var(--u));
+  top: calc(41px * var(--u));
+  font-size: calc(12px * var(--u));
+  line-height: calc(18px * var(--u));
+  white-space: nowrap;
+}
+
+.gcl__arrow {
+  position: absolute;
+  top: calc(14.6px * var(--u));
+  width: calc(15.5px * var(--u));
+  height: calc(13.75px * var(--u));
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  background-image: url("assets/arrow.svg");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.gcl__arrow[hidden] {
+  display: none;
+}
+
+.gcl__arrow--left {
+  left: calc(7.35px * var(--u));
+}
+
+.gcl__arrow--right {
+  left: calc(282px * var(--u));
+  transform: scaleX(-1);
+  transform-origin: left center;
+}
+
+.gcl__arrow:hover {
+  filter: brightness(1.4);
+}

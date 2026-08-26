@@ -1,6 +1,4 @@
-using CitizenFX.FiveM.Client;
-using CitizenFX.FiveM.Client.Extensions;
-using CitizenFX.FiveM.Shared.Data;
+﻿using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Shared.Script;
 
 namespace MenuAPI;
@@ -34,6 +32,10 @@ public class MenuController : IScript
     // to be often enough that the menu has settled by the time they look at it again.
     private const long LayoutRefreshIntervalMs = 500;
 
+    private const long TextureRefreshIntervalMs = 250;
+
+    private const long InstructionalButtonsConfigureIntervalMs = 300;
+
     private static float AspectRatio => Native.GetScreenAspectRatio(false);
     public static float ScreenWidth => 1080 * AspectRatio;
     public static float ScreenHeight => 1080;
@@ -46,11 +48,11 @@ public class MenuController : IScript
 
     public static bool AreMenuButtonsEnabled =>
         IsAnyMenuOpen() &&
-        !Native.IsPauseMenuActive() &&
-        Native.IsScreenFadedIn() &&
-        !Native.IsPlayerSwitchInProgress() &&
+        !FrameState.IsPauseMenuActive &&
+        FrameState.IsScreenFadedIn &&
+        !FrameState.IsPlayerSwitchInProgress &&
         !DisableMenuButtons &&
-        !API.Players.Local.IsDead &&
+        !FrameState.IsDead &&
         !IsF8ConsoleLikelyOpen;
 
     public static bool NavigateMenuUsingArrows { get; set; } = true;
@@ -64,14 +66,50 @@ public class MenuController : IScript
     // drawn with, so leaving them alone changes nothing.
 
     /// <summary>The font menu titles are drawn in. See <see cref="MenuFont"/>.</summary>
-    public static int DefaultTitleFont { get; set; } = MenuFont.HouseScript;
+    public static int DefaultTitleFont
+    {
+        get => _defaultTitleFont;
+        set => MenuNui.Change(ref _defaultTitleFont, value);
+    }
+
+    private static int _defaultTitleFont = MenuFont.HouseScript;
 
     /// <summary>Where menu titles sit inside the header.</summary>
-    public static Menu.TitleAlignmentOption DefaultTitleAlignment { get; set; } = Menu.TitleAlignmentOption.Center;
+    public static Menu.TitleAlignmentOption DefaultTitleAlignment
+    {
+        get => _defaultTitleAlignment;
+        set => MenuNui.Change(ref _defaultTitleAlignment, value);
+    }
+
+    private static Menu.TitleAlignmentOption _defaultTitleAlignment = Menu.TitleAlignmentOption.Center;
 
     /// <summary>Whether GTA Online's moving header glow is drawn over menu banners.</summary>
-    public static bool DefaultShowHeaderGlare { get; set; } = false;
+    public static bool DefaultShowHeaderGlare
+    {
+        get => _defaultShowHeaderGlare;
+        set => MenuNui.Change(ref _defaultShowHeaderGlare, value);
+    }
+
+    private static bool _defaultShowHeaderGlare = false;
     #endregion
+
+    private static MenuRenderMode _renderMode = MenuRenderMode.Native;
+
+    public static MenuRenderMode RenderMode
+    {
+        get => _renderMode;
+        set
+        {
+            if (_renderMode == value)
+            {
+                return;
+            }
+
+            _renderMode = value;
+
+            MenuTicks.Reevaluate();
+        }
+    }
 
     private static bool _dontOpenAnyMenu = false;
 
@@ -123,6 +161,8 @@ public class MenuController : IScript
 
     internal static int _scale = Native.RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
 
+    private static Menu? _instructionalButtonsMenu;
+
     // Whether the mouse button was pressed down while a menu was open, see IsMouseButtonUsed.
     private static bool mouseSelectArmed = false;
     private static bool mouseBackArmed = false;
@@ -139,14 +179,14 @@ public class MenuController : IScript
             if (AspectRatio < 1.888888888888889f)
             {
                 // alignment can be whatever the resource wants it to be because this aspect ratio is supported.
-                _alignment = value;
+                MenuNui.Change(ref _alignment, value);
             }
             // right aligned menus are not supported for aspect ratios 17:9 or 21:9.
             else
             {
                 // no matter what the new value would've been, the aspect ratio does not support right aligned menus,
                 // so (re)set it to be left aligned.
-                _alignment = MenuAlignmentOption.Left;
+                MenuNui.Change(ref _alignment, MenuAlignmentOption.Left);
 
                 // In case the value was being changed to be right aligned, notify the user properly.
                 if (value == MenuAlignmentOption.Right)
@@ -181,12 +221,17 @@ public class MenuController : IScript
         MenuTicks.Register("Menu.Layout", MenuLayout.Refresh, MenuTickRate.Every(LayoutRefreshIntervalMs), IsAnyMenuOpen,
             onStarted: MenuLayout.Refresh);
 
-        MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame, IsAnyMenuOpen,
-            onStopped: () =>
-            {
-                UnloadAssets();
-                HeaderGlare.Dispose();
-            });
+        MenuTicks.Register("Menu.Textures", RefreshTextures,
+            MenuTickRate.Every(TextureRefreshIntervalMs), IsAnyMenuOpen,
+            onStopped: UnloadAssets);
+
+        MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame,
+            () => IsAnyMenuOpen() && RenderMode == MenuRenderMode.Native,
+            onStopped: HeaderGlare.Dispose);
+
+        MenuTicks.Register("Menu.DrawNui", ProcessMenusNui, MenuTickRate.PerFrame,
+            () => IsAnyMenuOpen() && RenderMode == MenuRenderMode.Nui,
+            onStopped: MenuNui.Hide);
 
         MenuTicks.Register("Menu.InstructionalButtons", DrawInstructionalButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
             onStopped: () =>
@@ -194,6 +239,9 @@ public class MenuController : IScript
                 DisposeInstructionalButtonsScaleform();
                 InstructionalButtonIcons.Clear();
             });
+
+        MenuTicks.Register("Menu.InstructionalButtonsData", ConfigureInstructionalButtons,
+            MenuTickRate.Every(InstructionalButtonsConfigureIntervalMs), IsAnyMenuOpen);
 
         MenuTicks.Register("Menu.Select", ProcessMainButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
             // Nothing drains input while every menu is closed, so a menu has to open from a clean
@@ -456,7 +504,6 @@ public class MenuController : IScript
     /// <returns></returns>
     public static bool IsAnyMenuOpen() => VisibleMenus.Count != 0;
 
-
     #region Process Menu Buttons
     /// <summary>
     /// Process the select & go back/cancel buttons.
@@ -469,7 +516,7 @@ public class MenuController : IScript
         bool selectPressed = MenuKeyBindings.ConsumeSelect();
         bool backPressed = MenuKeyBindings.ConsumeBack();
 
-        if (Native.IsPauseMenuActive())
+        if (FrameState.IsPauseMenuActive)
         {
             return;
         }
@@ -566,7 +613,7 @@ public class MenuController : IScript
     /// </summary>
     private static bool IsUsingWeaponWheel()
     {
-        if (API.Players.Local.Ped.IsPedInAnyVehicle())
+        if (FrameState.IsInVehicle)
         {
             return false;
         }
@@ -681,7 +728,7 @@ public class MenuController : IScript
             return;
         }
 
-        if (Native.IsPauseMenuActive() || Native.IsPauseMenuRestarting() || !Native.IsScreenFadedIn() || Native.IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
+        if (FrameState.IsPauseMenuActive || Native.IsPauseMenuRestarting() || !FrameState.IsScreenFadedIn || FrameState.IsPlayerSwitchInProgress || FrameState.IsDead || DisableMenuButtons)
         {
             return;
         }
@@ -714,7 +761,7 @@ public class MenuController : IScript
             return;
         }
 
-        if (Native.IsPauseMenuActive() || Native.IsPauseMenuRestarting() || !Native.IsScreenFadedIn() || Native.IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
+        if (FrameState.IsPauseMenuActive || Native.IsPauseMenuRestarting() || !FrameState.IsScreenFadedIn || FrameState.IsPlayerSwitchInProgress || FrameState.IsDead || DisableMenuButtons)
         {
             return;
         }
@@ -955,7 +1002,7 @@ public class MenuController : IScript
     private static async Task HandleMenuToggleKeyForController()
     {
         int tmpTimer = Native.GetGameTimer();
-        while ((Native.IsControlPressed(0, (int)Control.InteractionMenu) || Native.IsDisabledControlPressed(0, (int)Control.InteractionMenu)) && !Native.IsPauseMenuActive() && Native.IsScreenFadedIn() && !API.Players.Local.IsDead && !Native.IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
+        while ((Native.IsControlPressed(0, (int)Control.InteractionMenu) || Native.IsDisabledControlPressed(0, (int)Control.InteractionMenu)) && !FrameState.IsPauseMenuActive && FrameState.IsScreenFadedIn && !FrameState.IsDead && !FrameState.IsPlayerSwitchInProgress && !DontOpenAnyMenu)
         {
             if (Native.GetGameTimer() - tmpTimer > 400)
             {
@@ -1025,7 +1072,7 @@ public class MenuController : IScript
 
     private static async Task MenuButtonsDisableChecks()
     {
-        static bool isInputVisible() => Native.UpdateOnscreenKeyboard() == 0;
+        static bool isInputVisible() => FrameState.OnscreenKeyboard == 0;
         if (isInputVisible())
         {
             bool buttonsState = DisableMenuButtons;
@@ -1070,7 +1117,7 @@ public class MenuController : IScript
             return;
         }
 
-        if (API.Players.Local.IsDead)
+        if (FrameState.IsDead)
         {
             // Close all menus when the player dies.
             CloseAllMenus();
@@ -1087,7 +1134,7 @@ public class MenuController : IScript
         Native.DisableControlAction(0, (int)Control.InteractionMenu, false);
 
         // When in a vehicle
-        if (API.Players.Local.Ped.IsPedInAnyVehicle())
+        if (FrameState.IsInVehicle)
         {
             Native.DisableControlAction(0, (int)Control.VehicleSelectNextWeapon, false);
             Native.DisableControlAction(0, (int)Control.VehicleSelectPrevWeapon, false);
@@ -1106,7 +1153,7 @@ public class MenuController : IScript
         {
             Native.DisableControlAction(0, (int)Control.MultiplayerInfo, false);
             // when in a vehicle.
-            if (API.Players.Local.Ped.IsPedInAnyVehicle())
+            if (FrameState.IsInVehicle)
             {
                 Native.DisableControlAction(0, (int)Control.VehicleHeadlight, false);
                 Native.DisableControlAction(0, (int)Control.VehicleDuck, false);
@@ -1221,12 +1268,69 @@ public class MenuController : IScript
         await DrawMenus();
     }
 
+    private static void ProcessMenusNui()
+    {
+        MenuLayout.EnsureComputed();
+
+        if (!CanDraw())
+        {
+            MenuNui.Hide();
+
+            return;
+        }
+
+        DisableControls();
+
+        Menu? menu = GetCurrentMenu();
+
+        if (menu == null)
+        {
+            MenuNui.Hide();
+
+            return;
+        }
+
+        if (DontOpenAnyMenu)
+        {
+            if (menu.Visible && !menu.IgnoreDontOpenMenus)
+            {
+                menu.CloseMenu();
+            }
+
+            MenuNui.Hide();
+
+            return;
+        }
+
+        if (!menu.Visible)
+        {
+            MenuNui.Hide();
+
+            return;
+        }
+
+        menu.ProcessButtonPressHandlers();
+
+        MenuNui.SendChanges(menu);
+    }
+
+    private static void RefreshTextures()
+    {
+        TextureDictionaries.RequestAll(menuTextureAssets);
+
+        MenuNui.RequestPendingTextures();
+    }
+
+    // For the one thing that cannot say so itself: something the description is built from that
+    // MenuAPI does not own, such as a label you resolve yourself.
+    public static void RefreshNui() => MenuNui.Invalidate();
+
     /// <summary>The game states that stop a menu being drawn, none of which announce a change.</summary>
     private static bool CanDraw() =>
-        Native.IsScreenFadedIn() &&
-        !Native.IsPauseMenuActive() &&
-        !API.Players.Local.IsDead &&
-        !Native.IsPlayerSwitchInProgress();
+        FrameState.IsScreenFadedIn &&
+        !FrameState.IsPauseMenuActive &&
+        !FrameState.IsDead &&
+        !FrameState.IsPlayerSwitchInProgress;
 
     private static async Task DrawMenus()
     {
@@ -1248,42 +1352,65 @@ public class MenuController : IScript
         }
     }
 
-    internal static async Task DrawInstructionalButtons()
+    internal static void DrawInstructionalButtons()
     {
-        // Whether a menu is open is the tick's own condition. What is left is volatile game state
-        // that changes every frame, so it stays inline.
-        if (
-            Native.IsPlayerSwitchInProgress() ||
-            API.Players.Local.IsDead ||
-            !Native.IsScreenFadedIn() ||
-            Native.IsWarningMessageActive() ||
-            Native.UpdateOnscreenKeyboard() == 0
-        )
-        {
-            DisposeInstructionalButtonsScaleform();
-            return;
-        }
         Menu? menu = GetCurrentMenu();
-        if (menu == null || !menu.Visible || !menu.EnableInstructionalButtons)
+
+        if (menu == null || !CanShowInstructionalButtons(menu) || !Native.HasScaleformMovieLoaded(_scale))
         {
-            DisposeInstructionalButtonsScaleform();
             return;
         }
+
+        if (!ReferenceEquals(menu, _instructionalButtonsMenu))
+        {
+            FillInstructionalButtonSlots(menu);
+        }
+
+        Native.DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
+    }
+
+    // On a slow loop: what an icon looks like only changes when the player swaps between keyboard
+    // and controller or rebinds a key. Drawing the bar still has to happen every frame.
+    internal static async Task ConfigureInstructionalButtons()
+    {
+        Menu? menu = GetCurrentMenu();
+
+        if (menu == null || !CanShowInstructionalButtons(menu))
+        {
+            DisposeInstructionalButtonsScaleform();
+
+            return;
+        }
+
         if (!Native.HasScaleformMovieLoaded(_scale))
         {
             _scale = Native.RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
-        }
-        while (!Native.HasScaleformMovieLoaded(_scale))
-        {
-            await API.Delay(0);
+
+            while (!Native.HasScaleformMovieLoaded(_scale))
+            {
+                await API.Delay(0);
+            }
         }
 
-        Native.DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 0, 0);
+        FillInstructionalButtonSlots(menu);
+    }
 
+    private static bool CanShowInstructionalButtons(Menu menu)
+    {
+        return menu.Visible &&
+            menu.EnableInstructionalButtons &&
+            !FrameState.IsPlayerSwitchInProgress &&
+            !FrameState.IsDead &&
+            FrameState.IsScreenFadedIn &&
+            !Native.IsWarningMessageActive() &&
+            FrameState.OnscreenKeyboard != 0;
+    }
+
+    private static void FillInstructionalButtonSlots(Menu menu)
+    {
         Native.BeginScaleformMovieMethod(_scale, "CLEAR_ALL");
         Native.EndScaleformMovieMethod();
 
-        // Once here rather than at each icon below, and the only place that has to run every frame.
         InstructionalButtonIcons.Refresh();
 
         int slot = 0;
@@ -1305,7 +1432,6 @@ public class MenuController : IScript
         }
 
         // Enumerated rather than indexed: ElementAt on a dictionary walks it from the start every
-        // time, so indexing it in a loop re-walked the whole thing once per button, every frame.
         foreach (KeyValuePair<Control, string> button in menu.InstructionalButtons)
         {
             SetInstructionalButtonSlot(slot++, InstructionalButtonIcons.For((int)button.Key), button.Value);
@@ -1321,7 +1447,7 @@ public class MenuController : IScript
         Native.ScaleformMovieMethodAddParamInt(0);
         Native.EndScaleformMovieMethod();
 
-        Native.DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
+        _instructionalButtonsMenu = menu;
     }
 
     private static void SetInstructionalButtonSlot(int slot, string buttonString, string text)
@@ -1339,5 +1465,7 @@ public class MenuController : IScript
         {
             Native.SetScaleformMovieAsNoLongerNeeded(ref _scale);
         }
+
+        _instructionalButtonsMenu = null;
     }
 }

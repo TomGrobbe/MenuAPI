@@ -37,6 +37,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="ui/**/*"
+          TargetPath="menuapi/%(RecursiveDir)%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest"
+          Pack="true"
+          PackagePath="contentFiles/any/net10.0/menuapi/"
+          PackageCopyToOutput="true" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />
     <!-- LGPL-3.0 is written as a set of additional permissions on top of the GPL-3.0, so both texts ship. -->
     <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />

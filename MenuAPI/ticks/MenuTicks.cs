@@ -1,4 +1,4 @@
-using CitizenFX.FiveM.Client;
+﻿using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Shared;
 
 namespace MenuAPI;
@@ -66,6 +66,8 @@ public static class MenuTicks
 
     private static void Flush()
     {
+        FrameState.Invalidate();
+
         if (!_reevaluatePending)
         {
             return;

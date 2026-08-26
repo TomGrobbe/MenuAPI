@@ -4,12 +4,59 @@ namespace MenuAPI;
 
 public class MenuListItem(string text, List<string> items, int index, string? description) : MenuItem(text, description)
 {
-    public int ListIndex { get; set; } = index;
-    public List<string> ListItems { get; set; } = items;
-    public bool HideArrowsWhenNotSelected { get; set; } = false;
-    public bool ShowOpacityPanel { get; set; } = false;
-    public bool ShowColorPanel { get; set; } = false;
-    public ColorPanelType ColorPanelColorType = ColorPanelType.Hair;
+    public int ListIndex
+    {
+        get => _listIndex;
+        set => MenuNui.Change(ref _listIndex, value);
+    }
+
+    public MenuItemList ListItems
+    {
+        get => _listItems;
+        set => MenuNui.Change(ref _listItems, value ?? new MenuItemList());
+    }
+
+    public bool HideArrowsWhenNotSelected
+    {
+        get => _hideArrowsWhenNotSelected;
+        set => MenuNui.Change(ref _hideArrowsWhenNotSelected, value);
+    }
+
+    public bool ShowOpacityPanel
+    {
+        get => _showOpacityPanel;
+        set => MenuNui.Change(ref _showOpacityPanel, value);
+    }
+
+    public bool ShowColorPanel
+    {
+        get => _showColorPanel;
+        set => MenuNui.Change(ref _showColorPanel, value);
+    }
+
+    public ColorPanelType ColorPanelColorType
+    {
+        get => _colorPanelColorType;
+        set => MenuNui.Change(ref _colorPanelColorType, value);
+    }
+
+    private int _listIndex = index;
+    private MenuItemList _listItems = new(items);
+    private bool _hideArrowsWhenNotSelected = false;
+    private bool _showOpacityPanel = false;
+    private bool _showColorPanel = false;
+    private ColorPanelType _colorPanelColorType = ColorPanelType.Hair;
+
+    private int opacityPercent;
+
+    public int OpacityPercent
+    {
+        get => opacityPercent;
+        set => MenuNui.Change(ref opacityPercent, Math.Clamp(value, 0, 100));
+    }
+
+    internal int ResolvedOpacityPercent =>
+        ShowColorPanel ? OpacityPercent : Math.Clamp(ListIndex * 10, 0, 100);
     public enum ColorPanelType
     {
         Hair,
@@ -28,7 +75,7 @@ public class MenuListItem(string text, List<string> items, int index, string? de
 
     public MenuListItem(string text, List<string> items, int index) : this(text, items, index, null) { }
 
-    internal override void Draw(int indexOffset)
+    internal override void PrepareForDisplay()
     {
         if (ItemsCount < 1)
         {
@@ -54,8 +101,6 @@ public class MenuListItem(string text, List<string> items, int index, string? de
         {
             Label = $"~s~← {GetCurrentSelection() ?? "~r~N/A~s~"} ~s~→";
         }
-
-        base.Draw(indexOffset);
     }
 
     internal override void GoRight()

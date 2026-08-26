@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>MenuAPI NUI preview</title>
+    <link rel="stylesheet" href="menuapi/colour-list.css">
+    <link rel="stylesheet" href="menuapi/menuapi.css">
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: #4a5a3a;
+            background-image:
+                linear-gradient(45deg, rgb(0 0 0 / 18%) 25%, transparent 25%, transparent 75%, rgb(0 0 0 / 18%) 75%),
+                linear-gradient(45deg, rgb(0 0 0 / 18%) 25%, transparent 25%, transparent 75%, rgb(0 0 0 / 18%) 75%);
+            background-size: 64px 64px;
+            background-position: 0 0, 32px 32px;
+        }
+    </style>
+</head>
+
+<!-- Preview of the NUI renderer outside the game. Serve over http, or the browser refuses the fonts: npx serve tools/preview -->
+
+<body>
+
+    <div id="menuapi"></div>
+
+    <script>
+        // No game here to serve a nui-img url, so every icon becomes a plain shape at the right size.
+        window.MENUAPI_SPRITE_URL = (dict, name) => {
+            const svg = name === "interaction_bgd" || dict.startsWith("shopui_title")
+                ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 110"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#0d3c73"/><stop offset="1" stop-color="#3d7fd0"/></linearGradient></defs><rect width="500" height="110" fill="url(#g)"/></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="10" y="10" width="44" height="44" rx="8" fill="#fff"/></svg>';
+
+            return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+        };
+    </script>
+    <script src="menuapi/glare.js"></script>
+    <script src="menuapi/colour-list.js"></script>
+    <script src="menuapi/menuapi.js"></script>
+    <script src="snapshot.js"></script>
+    <script>
+        window.postMessage(SNAPSHOT, "*");
+
+        window.postMessage({
+            type: "menuapi:palette",
+            colours: Array.from({ length: 64 }, (_, i) => {
+                const h = ((i * 47) % 64) / 64 * 360;
+                const k = (n) => (n + h / 60) % 6;
+                const c = (n) => Math.round(255 * (0.6 - 0.45 * Math.max(-1, Math.min(k(n) - 3, Math.min(5 - k(n), 1)))));
+                return [c(5), c(3), c(1)];
+            })
+        }, "*");
+    </script>
+</body>
+
+</html>

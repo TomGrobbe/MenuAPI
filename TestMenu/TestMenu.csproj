@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <None Include="fxmanifest.lua" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="index.html" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!--

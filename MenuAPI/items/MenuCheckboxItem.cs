@@ -10,8 +10,20 @@ namespace MenuAPI;
 /// <param name="_checked"></param>
 public class MenuCheckboxItem(string text, string? description, bool _checked) : MenuItem(text, description)
 {
-    public bool Checked { get; set; } = _checked;
-    public CheckboxStyle Style { get; set; } = CheckboxStyle.Tick;
+    public bool Checked
+    {
+        get => _isChecked;
+        set => MenuNui.Change(ref _isChecked, value);
+    }
+
+    public CheckboxStyle Style
+    {
+        get => _style;
+        set => MenuNui.Change(ref _style, value);
+    }
+
+    private bool _isChecked = _checked;
+    private CheckboxStyle _style = CheckboxStyle.Tick;
     public enum CheckboxStyle
     {
         Cross,
@@ -41,7 +53,9 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
         return Enabled ? 255 : 109;
     }
 
-    private string GetSpriteName(bool selected)
+    internal const float SpriteSizePx = 45f;
+
+    internal string GetSpriteName(bool selected)
     {
         if (Checked)
         {
@@ -100,10 +114,14 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
         }
     }
 
-    internal override void Draw(int offset)
+    internal override void PrepareForDisplay()
     {
         RightIcon = Icon.NONE;
         Label = null;
+    }
+
+    internal override void Draw(int offset)
+    {
         base.Draw(offset);
 
         if (ParentMenu is not Menu parent)
@@ -122,8 +140,8 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
 
         float spriteY = (((index - offset) * RowHeight) + 20f + yOffset) / MenuLayout.ScreenHeight;
         float spriteX = GetSpriteX(parent);
-        float spriteHeight = 45f / MenuLayout.ScreenHeight;
-        float spriteWidth = 45f / MenuLayout.ScreenWidth;
+        float spriteHeight = SpriteSizePx / MenuLayout.ScreenHeight;
+        float spriteWidth = SpriteSizePx / MenuLayout.ScreenWidth;
         int color = GetSpriteColour();
         Native.DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255, false, false);
         Native.ResetScriptGfxAlign();

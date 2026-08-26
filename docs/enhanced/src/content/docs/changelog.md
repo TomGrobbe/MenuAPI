@@ -10,6 +10,34 @@ title: "Changelog"
 These are the changes in MenuAPI for FiveM Enhanced. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way.
 :::
 
+### The menu is drawn without describing it sixty times a second
+
+The NUI renderer used to build a full description of the open menu on every single frame, purely to
+find out whether anything about it had changed. Nothing usually had, so almost all of that work, and
+the few kilobytes of garbage that came with it, was thrown straight away again.
+
+Now every property that is on screen says so when you write to it, and the description is only built
+when something actually said it changed. A menu nobody is touching costs nothing at all beyond the
+draw itself.
+
+**Things you have to change in your own code:**
+
+- `MenuListItem.ListItems` is now a `MenuItemList` instead of a `List<string>`. It is used the same
+  way, and a `List<string>` can still be assigned straight to it, so most code needs no change. The
+  two things that do: a variable typed `List<string> values = item.ListItems;` has to become
+  `MenuItemList` (or call `.ToList()`), and the list you pass to the constructor is now **copied**,
+  so change the values through `item.ListItems` rather than through your own copy of the list. See
+  the [Migration guide](migration/).
+
+**Things that just behave differently now:**
+
+- If you build part of a row's text from something MenuAPI does not own, such as a label you resolve
+  yourself, call `MenuController.RefreshNui()` when it changes. Everything MenuAPI owns already says
+  so on its own.
+- The instructional buttons bar fills its slots a few times a second instead of every frame. Swapping
+  between keyboard and controller still changes the icons, it just no longer costs a dozen scaleform
+  calls per frame to notice.
+
 ### Menus can be split into groups with a heading
 
 There is a new item type, [SeparatorMenuItem](reference/menuitems/separatormenuitem/). It is a heading that labels the rows underneath it, so a long menu can be broken into readable groups without pushing anything into a submenu.

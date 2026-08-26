@@ -2,6 +2,8 @@
 fx_version 'cerulean'
 games { 'gta5' }
 
+ui_page 'index.html'
+
 -- Resource stuff
 name 'MenuAPI TestMenu'
 description 'Example resource that exercises every MenuAPI menu item type. Not shipped, for testing only.'
@@ -21,6 +23,9 @@ files {
     'Microsoft.NET.StringTools.dll',
 
     'MenuAPI.dll',
+
+    'index.html',
+    'menuapi/**/*',
 }
 
 -- Client assembly

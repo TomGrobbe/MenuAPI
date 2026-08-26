@@ -33,7 +33,7 @@ internal static class InstructionalButtonIcons
         // The key mapping settings live in the pause menu, so a rebind is always followed by the pause
         // menu closing. Catching that edge is what keeps a rebound key's icon from staying wrong for as
         // long as the menu is open.
-        bool pauseMenuActive = Native.IsPauseMenuActive();
+        bool pauseMenuActive = FrameState.IsPauseMenuActive;
         bool leftPauseMenu = pauseMenuWasActive && !pauseMenuActive;
         pauseMenuWasActive = pauseMenuActive;
 
