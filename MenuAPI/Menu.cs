@@ -1,5 +1,4 @@
-using CitizenFX.FiveM.Client;
-using CitizenFX.FiveM.Client.Extensions;
+﻿using CitizenFX.FiveM.Client;
 
 namespace MenuAPI;
 
@@ -1227,10 +1226,10 @@ public class Menu
     {
         WeaponStats = new float[4]
         {
-            Math.Clamp(damage, 0f, 1f),
-            Math.Clamp(fireRate, 0f, 1f),
-            Math.Clamp(accuracy, 0f, 1f),
-            Math.Clamp(range, 0f, 1f)
+            ClampStat(damage),
+            ClampStat(fireRate),
+            ClampStat(accuracy),
+            ClampStat(range)
         };
     }
 
@@ -1245,10 +1244,10 @@ public class Menu
     {
         WeaponComponentStats = new float[4]
         {
-            Math.Clamp(WeaponStats[0] + damage, 0f, 1f),
-            Math.Clamp(WeaponStats[1] + fireRate, 0f, 1f),
-            Math.Clamp(WeaponStats[2] + accuracy, 0f, 1f),
-            Math.Clamp(WeaponStats[3] + range, 0f, 1f)
+            ClampStat(WeaponStats[0] + damage),
+            ClampStat(WeaponStats[1] + fireRate),
+            ClampStat(WeaponStats[2] + accuracy),
+            ClampStat(WeaponStats[3] + range)
         };
     }
 
@@ -1263,10 +1262,10 @@ public class Menu
     {
         VehicleStats = new float[4]
         {
-            Math.Clamp(topSpeed, 0f, 1f),
-            Math.Clamp(acceleration, 0f, 1f),
-            Math.Clamp(braking, 0f, 1f),
-            Math.Clamp(traction, 0f, 1f)
+            ClampStat(topSpeed),
+            ClampStat(acceleration),
+            ClampStat(braking),
+            ClampStat(traction)
         };
     }
 
@@ -1284,12 +1283,14 @@ public class Menu
     {
         VehicleUpgradeStats = new float[4]
         {
-            Math.Clamp(VehicleStats[0] + topSpeed, 0f, 1f),
-            Math.Clamp(VehicleStats[1] + acceleration, 0f, 1f),
-            Math.Clamp(VehicleStats[2] + braking, 0f, 1f),
-            Math.Clamp(VehicleStats[3] + traction, 0f, 1f)
+            ClampStat(VehicleStats[0] + topSpeed),
+            ClampStat(VehicleStats[1] + acceleration),
+            ClampStat(VehicleStats[2] + braking),
+            ClampStat(VehicleStats[3] + traction)
         };
     }
+
+    private static float ClampStat(float value) => float.IsFinite(value) ? Math.Clamp(value, 0f, 1f) : 0f;
     #endregion
 
     #region internal/private task functions
