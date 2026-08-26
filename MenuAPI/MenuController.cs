@@ -32,6 +32,8 @@ public class MenuController : IScript
     // to be often enough that the menu has settled by the time they look at it again.
     private const long LayoutRefreshIntervalMs = 500;
 
+    private const long TextureRefreshIntervalMs = 250;
+
     private const long InstructionalButtonsConfigureIntervalMs = 300;
 
     private static float AspectRatio => Native.GetScreenAspectRatio(false);
@@ -64,14 +66,50 @@ public class MenuController : IScript
     // drawn with, so leaving them alone changes nothing.
 
     /// <summary>The font menu titles are drawn in. See <see cref="MenuFont"/>.</summary>
-    public static int DefaultTitleFont { get; set; } = MenuFont.HouseScript;
+    public static int DefaultTitleFont
+    {
+        get => _defaultTitleFont;
+        set => MenuNui.Change(ref _defaultTitleFont, value);
+    }
+
+    private static int _defaultTitleFont = MenuFont.HouseScript;
 
     /// <summary>Where menu titles sit inside the header.</summary>
-    public static Menu.TitleAlignmentOption DefaultTitleAlignment { get; set; } = Menu.TitleAlignmentOption.Center;
+    public static Menu.TitleAlignmentOption DefaultTitleAlignment
+    {
+        get => _defaultTitleAlignment;
+        set => MenuNui.Change(ref _defaultTitleAlignment, value);
+    }
+
+    private static Menu.TitleAlignmentOption _defaultTitleAlignment = Menu.TitleAlignmentOption.Center;
 
     /// <summary>Whether GTA Online's moving header glow is drawn over menu banners.</summary>
-    public static bool DefaultShowHeaderGlare { get; set; } = false;
+    public static bool DefaultShowHeaderGlare
+    {
+        get => _defaultShowHeaderGlare;
+        set => MenuNui.Change(ref _defaultShowHeaderGlare, value);
+    }
+
+    private static bool _defaultShowHeaderGlare = false;
     #endregion
+
+    private static MenuRenderMode _renderMode = MenuRenderMode.Native;
+
+    public static MenuRenderMode RenderMode
+    {
+        get => _renderMode;
+        set
+        {
+            if (_renderMode == value)
+            {
+                return;
+            }
+
+            _renderMode = value;
+
+            MenuTicks.Reevaluate();
+        }
+    }
 
     private static bool _dontOpenAnyMenu = false;
 
@@ -141,14 +179,14 @@ public class MenuController : IScript
             if (AspectRatio < 1.888888888888889f)
             {
                 // alignment can be whatever the resource wants it to be because this aspect ratio is supported.
-                _alignment = value;
+                MenuNui.Change(ref _alignment, value);
             }
             // right aligned menus are not supported for aspect ratios 17:9 or 21:9.
             else
             {
                 // no matter what the new value would've been, the aspect ratio does not support right aligned menus,
                 // so (re)set it to be left aligned.
-                _alignment = MenuAlignmentOption.Left;
+                MenuNui.Change(ref _alignment, MenuAlignmentOption.Left);
 
                 // In case the value was being changed to be right aligned, notify the user properly.
                 if (value == MenuAlignmentOption.Right)
@@ -183,12 +221,17 @@ public class MenuController : IScript
         MenuTicks.Register("Menu.Layout", MenuLayout.Refresh, MenuTickRate.Every(LayoutRefreshIntervalMs), IsAnyMenuOpen,
             onStarted: MenuLayout.Refresh);
 
-        MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame, IsAnyMenuOpen,
-            onStopped: () =>
-            {
-                UnloadAssets();
-                HeaderGlare.Dispose();
-            });
+        MenuTicks.Register("Menu.Textures", RefreshTextures,
+            MenuTickRate.Every(TextureRefreshIntervalMs), IsAnyMenuOpen,
+            onStopped: UnloadAssets);
+
+        MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame,
+            () => IsAnyMenuOpen() && RenderMode == MenuRenderMode.Native,
+            onStopped: HeaderGlare.Dispose);
+
+        MenuTicks.Register("Menu.DrawNui", ProcessMenusNui, MenuTickRate.PerFrame,
+            () => IsAnyMenuOpen() && RenderMode == MenuRenderMode.Nui,
+            onStopped: MenuNui.Hide);
 
         MenuTicks.Register("Menu.InstructionalButtons", DrawInstructionalButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
             onStopped: () =>
@@ -460,7 +503,6 @@ public class MenuController : IScript
     /// </summary>
     /// <returns></returns>
     public static bool IsAnyMenuOpen() => VisibleMenus.Count != 0;
-
 
     #region Process Menu Buttons
     /// <summary>
@@ -1225,6 +1267,63 @@ public class MenuController : IScript
         DisableControls();
         await DrawMenus();
     }
+
+    private static void ProcessMenusNui()
+    {
+        MenuLayout.EnsureComputed();
+
+        if (!CanDraw())
+        {
+            MenuNui.Hide();
+
+            return;
+        }
+
+        DisableControls();
+
+        Menu? menu = GetCurrentMenu();
+
+        if (menu == null)
+        {
+            MenuNui.Hide();
+
+            return;
+        }
+
+        if (DontOpenAnyMenu)
+        {
+            if (menu.Visible && !menu.IgnoreDontOpenMenus)
+            {
+                menu.CloseMenu();
+            }
+
+            MenuNui.Hide();
+
+            return;
+        }
+
+        if (!menu.Visible)
+        {
+            MenuNui.Hide();
+
+            return;
+        }
+
+        menu.ProcessButtonPressHandlers();
+
+        MenuNui.SendChanges(menu);
+    }
+
+    private static void RefreshTextures()
+    {
+        TextureDictionaries.RequestAll(menuTextureAssets);
+
+        MenuNui.RequestPendingTextures();
+    }
+
+    // For the one thing that cannot say so itself: something the description is built from that
+    // MenuAPI does not own, such as a label you resolve yourself.
+    public static void RefreshNui() => MenuNui.Invalidate();
 
     /// <summary>The game states that stop a menu being drawn, none of which announce a change.</summary>
     private static bool CanDraw() =>

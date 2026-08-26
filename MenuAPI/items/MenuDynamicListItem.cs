@@ -1,11 +1,21 @@
-﻿using CitizenFX.FiveM.Client;
-
-namespace MenuAPI;
+﻿namespace MenuAPI;
 
 public class MenuDynamicListItem(string text, string? initialValue, MenuDynamicListItem.ChangeItemCallback callback, string? description) : MenuItem(text, description)
 {
-    public bool HideArrowsWhenNotSelected { get; set; } = false;
-    public string? CurrentItem { get; set; } = initialValue;
+    public bool HideArrowsWhenNotSelected
+    {
+        get => _hideArrowsWhenNotSelected;
+        set => MenuNui.Change(ref _hideArrowsWhenNotSelected, value);
+    }
+
+    public string? CurrentItem
+    {
+        get => _currentItem;
+        set => MenuNui.Change(ref _currentItem, value);
+    }
+
+    private bool _hideArrowsWhenNotSelected = false;
+    private string? _currentItem = initialValue;
 
     public delegate string ChangeItemCallback(MenuDynamicListItem item, bool left);
 
@@ -13,7 +23,7 @@ public class MenuDynamicListItem(string text, string? initialValue, MenuDynamicL
 
     public MenuDynamicListItem(string text, string? initialValue, ChangeItemCallback callback) : this(text, initialValue, callback, null) { }
 
-    internal override void Draw(int indexOffset)
+    internal override void PrepareForDisplay()
     {
         if (HideArrowsWhenNotSelected && !Selected)
         {
@@ -23,7 +33,6 @@ public class MenuDynamicListItem(string text, string? initialValue, MenuDynamicL
         {
             Label = $"~s~← {CurrentItem ?? "~r~N/A~s~"} ~s~→";
         }
-        base.Draw(indexOffset);
     }
 
     internal override void GoRight()

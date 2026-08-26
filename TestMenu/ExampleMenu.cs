@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-using CitizenFX.FiveM.Client;
+﻿using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Shared.Script;
 
 using MenuAPI;
@@ -12,8 +9,12 @@ namespace TestMenu;
 
 public class ExampleMenu : IScript
 {
+    private static MenuCheckboxItem? renderModeBox;
+
     public ExampleMenu()
     {
+        RegisterRenderModeToggle();
+
         // Setting the menu alignment to be right aligned. This can be changed at any time and it'll update instantly.
         // To test this, checkout one of the checkbox items in this example menu. Clicking it will toggle the menu alignment.
         MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
@@ -673,6 +674,146 @@ public class ExampleMenu : IScript
         };
         menu.AddMenuItem(separators);
         MenuController.BindMenuItem(menu, menu10, separators);
+        Menu menu11 = new Menu("Render Mode", "Native vs NUI");
+
+        renderModeBox = new MenuCheckboxItem(
+            "Draw with NUI",
+            "Off draws the menu with the game's own natives, on draws it as a web page. F7 does the same thing without moving your selection, which is what you want when comparing the two.",
+            MenuController.RenderMode == MenuRenderMode.Nui
+        );
+        menu11.AddMenuItem(renderModeBox);
+
+        menu11.AddMenuItem(new MenuItem("A normal row", "Something to look at while you flick between the two."));
+        menu11.AddMenuItem(new MenuCheckboxItem("A checkbox", "Ticked, so the box sprite is on screen too.", true));
+        menu11.AddMenuItem(new MenuItem("A row with an icon", "So an icon's tint can be compared as well.") { LeftIcon = MenuItem.Icon.STAR });
+        menu11.AddMenuItem(new MenuItem("A disabled row", "Greyed out, so the disabled colour is on screen too.") { Enabled = false });
+
+        menu11.OnCheckboxChange += (_menu, _item, _index, _checked) =>
+        {
+            if (_item == renderModeBox)
+            {
+                MenuController.RenderMode = _checked ? MenuRenderMode.Nui : MenuRenderMode.Native;
+            }
+        };
+
+        MenuController.AddSubmenu(menu, menu11);
+        MenuItem renderMode = new MenuItem("Render mode", "Switch between drawing the menu with game natives and drawing it as a web page.")
+        {
+            Label = "→→→"
+        };
+        menu.AddMenuItem(renderMode);
+        MenuController.BindMenuItem(menu, menu11, renderMode);
+
+        Menu menu12 = new Menu("NUI Text", "Weight & size");
+
+        List<string> weightNames = new List<string>() { "Default", "Geometric precision", "Supersampled" };
+
+        MenuListItem weightMode = new MenuListItem(
+            "Stem treatment",
+            weightNames,
+            0,
+            "How the page is asked for a thinner stem. Flip to native with F7 after each one and see which matches."
+        );
+        menu12.AddMenuItem(weightMode);
+
+        MenuDynamicListItem textSize = new MenuDynamicListItem(
+            "Text size",
+            NuiTuning.TextSize.ToString("0.##"),
+            (item, left) =>
+            {
+                NuiTuning.TextSize += left ? -0.5f : 0.5f;
+
+                return NuiTuning.TextSize.ToString("0.##");
+            },
+            "Pixels at 1080p. The rows measured the same height as the game's at the value it starts on."
+        );
+        menu12.AddMenuItem(textSize);
+
+        MenuDynamicListItem textBrightness = new MenuDynamicListItem(
+            "Text brightness",
+            NuiTuning.TextBrightness.ToString(),
+            (item, left) =>
+            {
+                NuiTuning.TextBrightness += left ? -5 : 5;
+
+                return NuiTuning.TextBrightness.ToString();
+            },
+            "0 to 255. The game's own white menu text peaks at the value this starts on, not at 255."
+        );
+        menu12.AddMenuItem(textBrightness);
+
+        menu12.AddMenuItem(new MenuItem("Print the values", "Writes what everything is set to into the console, so it can be pasted back."));
+        menu12.AddMenuItem(new MenuItem("Reset", "Puts every knob back to what the renderer ships with."));
+
+        menu12.AddMenuItem(new SeparatorMenuItem("Something to look at"));
+        menu12.AddMenuItem(new MenuItem("Handgun ammunition", "A row with descenders and round letters in it."));
+        menu12.AddMenuItem(new MenuItem("Vehicles Menu", "The same words the weight was measured against."));
+        menu12.AddMenuItem(new MenuItem("A disabled row") { Enabled = false });
+
+        menu12.OnListIndexChange += (_menu, _item, _oldIndex, _newIndex, _itemIndex) =>
+        {
+            if (_item == weightMode)
+            {
+                NuiTuning.TextWeight = (NuiTuning.TextWeightMode)_newIndex;
+            }
+        };
+
+        menu12.OnItemSelect += (_menu, _item, _index) =>
+        {
+            if (_item.Text == "Print the values")
+            {
+                API.Log.Info($"[TestMenu] NUI text: {NuiTuning.Describe()}");
+            }
+            else if (_item.Text == "Reset")
+            {
+                NuiTuning.Reset();
+
+                weightMode.ListIndex = 0;
+                textSize.CurrentItem = NuiTuning.TextSize.ToString("0.##");
+                textBrightness.CurrentItem = NuiTuning.TextBrightness.ToString();
+            }
+        };
+
+        MenuController.AddSubmenu(menu, menu12);
+        MenuItem nuiText = new MenuItem("NUI text", "Nudge the size, the brightness and the stem treatment of the NUI renderer's text, live.")
+        {
+            Label = "\u2192\u2192\u2192"
+        };
+        menu.AddMenuItem(nuiText);
+        MenuController.BindMenuItem(menu, menu12, nuiText);
+
+        Menu menu13 = new Menu("NUI Sprites", "Icons & tints")
+        {
+            HeaderTexture = new KeyValuePair<string, string>("shopui_title_barber", "shopui_title_barber")
+        };
+
+        menu13.AddMenuItem(new SeparatorMenuItem("White with an alpha channel"));
+        menu13.AddMenuItem(new MenuItem("Lock", "Scroll onto me. Selected turns the tint black, so a lost alpha channel shows up as a filled square instead of a lock.") { LeftIcon = MenuItem.Icon.LOCK });
+        menu13.AddMenuItem(new MenuItem("Tick", "The same again at a different size.") { LeftIcon = MenuItem.Icon.TICK });
+
+        menu13.AddMenuItem(new SeparatorMenuItem("Carries its own colours"));
+        menu13.AddMenuItem(new MenuItem("Star", "Gold. If it comes out flat white then the texture's own colours are being lost.") { LeftIcon = MenuItem.Icon.STAR });
+        menu13.AddMenuItem(new MenuItem("Gold medal", "Another one with colour in the texture rather than in the tint.") { LeftIcon = MenuItem.Icon.MEDAL_GOLD });
+        menu13.AddMenuItem(new MenuItem("Pegassi badge", "Fine detail, so it shows any loss of sharpness.") { LeftIcon = MenuItem.Icon.BRAND_PEGASSI });
+
+        menu13.AddMenuItem(new SeparatorMenuItem("Tinted by the menu"));
+        menu13.AddMenuItem(new MenuItem("Blue globe", "White texture, blue tint. Wrong alpha turns this into a blue block.") { LeftIcon = MenuItem.Icon.GLOBE_BLUE });
+        menu13.AddMenuItem(new MenuItem("Green globe") { LeftIcon = MenuItem.Icon.GLOBE_GREEN });
+        menu13.AddMenuItem(new MenuItem("Disabled, greyed out", "The tint drops to 109 grey.") { LeftIcon = MenuItem.Icon.STAR, Enabled = false });
+
+        menu13.AddMenuItem(new SeparatorMenuItem("Other dictionaries"));
+        menu13.AddMenuItem(new MenuItem("Male", "From mpleaderboard.") { LeftIcon = MenuItem.Icon.MALE });
+        menu13.AddMenuItem(new MenuItem("Info", "From shared.") { LeftIcon = MenuItem.Icon.INFO });
+        menu13.AddMenuItem(new MenuCheckboxItem("A ticked checkbox", "Its box has the tick drawn into the texture rather than the alpha, so it is the one most likely to break.", true));
+
+        MenuController.AddSubmenu(menu, menu13);
+        MenuItem nuiSprites = new MenuItem("NUI sprites", "Every icon type in one place, plus a banner from a dictionary MenuAPI does not otherwise touch.")
+        {
+            Label = "\u2192\u2192\u2192"
+        };
+        menu.AddMenuItem(nuiSprites);
+        MenuController.BindMenuItem(menu, menu13, nuiSprites);
+
         /*--------------
          Event handlers
         --------------*/
@@ -754,5 +895,26 @@ public class ExampleMenu : IScript
             // Code in here would get executed whenever a dynamic list item is pressed.
             API.Log.Info($"OnDynamicListItemSelect: [{_menu}, {_dynamicListItem}, {_currentItem}]");
         };
+    }
+
+    private static void RegisterRenderModeToggle()
+    {
+        const string command = "menuapi_testmenu_rendermode";
+
+        CitizenFX.FiveM.Shared.SharedAPI.Commands.RegisterCommand(command, false, new Action(() =>
+        {
+            MenuController.RenderMode = MenuController.RenderMode == MenuRenderMode.Native
+                ? MenuRenderMode.Nui
+                : MenuRenderMode.Native;
+
+            if (renderModeBox != null)
+            {
+                renderModeBox.Checked = MenuController.RenderMode == MenuRenderMode.Nui;
+            }
+
+            API.Log.Info($"[TestMenu] render mode is now {MenuController.RenderMode}.");
+        }));
+
+        RegisterKeyMapping(command, "Toggle NUI menu rendering", "keyboard", "F7");
     }
 }

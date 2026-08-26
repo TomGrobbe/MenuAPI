@@ -1,5 +1,3 @@
-using CitizenFX.FiveM.Client;
-
 namespace MenuAPI;
 
 /// <summary>
@@ -29,6 +27,9 @@ internal static class TextureDictionaries
         }
 
         Loaded.Add(dict);
+
+        MenuNui.Invalidate();
+
         return true;
     }
 

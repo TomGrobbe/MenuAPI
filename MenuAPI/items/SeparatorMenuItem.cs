@@ -1,5 +1,3 @@
-using CitizenFX.FiveM.Client;
-
 namespace MenuAPI;
 
 /// <summary>
@@ -17,7 +15,13 @@ public class SeparatorMenuItem : MenuItem
     private const int TextOnHighlight = 0;
 
     /// <summary>Draws the text as <c>↓ Text ↓</c>. On by default.</summary>
-    public bool ShowArrows { get; set; } = true;
+    public bool ShowArrows
+    {
+        get => _showArrows;
+        set => MenuNui.Change(ref _showArrows, value);
+    }
+
+    private bool _showArrows = true;
 
     /// <summary>
     /// Creates a <see cref="SeparatorMenuItem"/> with the down arrows around its text.

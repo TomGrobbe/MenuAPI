@@ -1,6 +1,4 @@
-﻿using CitizenFX.FiveM.Client;
-
-namespace MenuAPI;
+﻿namespace MenuAPI;
 
 public class MenuItem
 {
@@ -187,22 +185,47 @@ public class MenuItem
         BRAND_ZIRCONIUM,
         INFO
     }
-    public string Text { get; set; }
-    public string? Label { get; set; }
-    public Icon LeftIcon { get; set; }
-    public Icon RightIcon { get; set; }
-    public bool Enabled { get; set; } = true;
+    public string Text
+    {
+        get => _text;
+        set => MenuNui.Change(ref _text, value);
+    }
+
+    public string? Label
+    {
+        get => _label;
+        set => MenuNui.Change(ref _label, value);
+    }
+
+    public Icon LeftIcon
+    {
+        get => _leftIcon;
+        set => MenuNui.Change(ref _leftIcon, value);
+    }
+
+    public Icon RightIcon
+    {
+        get => _rightIcon;
+        set => MenuNui.Change(ref _rightIcon, value);
+    }
+
+    public bool Enabled
+    {
+        get => _enabled;
+        set => MenuNui.Change(ref _enabled, value);
+    }
+
     public string? Description
     {
-        get
-        {
-            return _description;
-        }
-        set
-        {
-            _description = value;
-        }
+        get => _description;
+        set => MenuNui.Change(ref _description, value);
     }
+
+    private string _text = "";
+    private string? _label;
+    private Icon _leftIcon;
+    private Icon _rightIcon;
+    private bool _enabled = true;
     private string? _description;
     public int Index => ParentMenu?.IndexOf(this) ?? -1;
     public bool Selected { get { if (ParentMenu != null) { return ParentMenu.CurrentIndex == Index; } return false; } }
@@ -236,7 +259,7 @@ public class MenuItem
     /// </summary>
     /// <param name="icon"></param>
     /// <returns></returns>
-    protected string GetSpriteDictionary(Icon icon)
+    protected internal string GetSpriteDictionary(Icon icon)
     {
         return icon switch
         {
@@ -259,7 +282,7 @@ public class MenuItem
     /// <param name="icon"></param>
     /// <param name="selected"></param>
     /// <returns></returns>
-    protected string GetSpriteName(Icon icon, bool selected)
+    protected internal string GetSpriteName(Icon icon, bool selected)
     {
         switch (icon)
         {
@@ -455,14 +478,17 @@ public class MenuItem
     /// <param name="icon"></param>
     /// <param name="width"></param>
     /// <returns></returns>
-    protected float GetSpriteSize(Icon icon, bool width)
+    protected float GetSpriteSize(Icon icon, bool width) =>
+        GetSpriteSizePx(icon) / (width ? MenuLayout.ScreenWidth : MenuLayout.ScreenHeight);
+
+    protected internal static float GetSpriteSizePx(Icon icon)
     {
         return icon switch
         {
-            Icon.CASH or Icon.COKE or Icon.CROWN or Icon.HEROIN or Icon.METH or Icon.WEED or Icon.ADVERSARY or Icon.BASE_JUMPING or Icon.BRIEFCASE or Icon.MISSION_STAR or Icon.DEATHMATCH or Icon.CASTLE or Icon.TROPHY or Icon.RACE_FLAG or Icon.RACE_FLAG_PLANE or Icon.RACE_FLAG_BICYCLE or Icon.RACE_FLAG_PERSON or Icon.RACE_FLAG_CAR or Icon.RACE_FLAG_BOAT_ANCHOR or Icon.ROCKSTAR or Icon.STUNT or Icon.STUNT_PREMIUM or Icon.RACE_FLAG_STUNT_JUMP or Icon.SHIELD or Icon.TEAM_DEATHMATCH or Icon.VEHICLE_DEATHMATCH or Icon.AUDIO_MUTE or Icon.AUDIO_INACTIVE or Icon.AUDIO_VOL1 or Icon.AUDIO_VOL2 or Icon.AUDIO_VOL3 or Icon.BRAND_ALBANY or Icon.BRAND_ANNIS or Icon.BRAND_BANSHEE or Icon.BRAND_BENEFACTOR or Icon.BRAND_BF or Icon.BRAND_BOLLOKAN or Icon.BRAND_BRAVADO or Icon.BRAND_BRUTE or Icon.BRAND_BUCKINGHAM or Icon.BRAND_CANIS or Icon.BRAND_CHARIOT or Icon.BRAND_CHEVAL or Icon.BRAND_CLASSIQUE or Icon.BRAND_COIL or Icon.BRAND_DECLASSE or Icon.BRAND_DEWBAUCHEE or Icon.BRAND_DILETTANTE or Icon.BRAND_DINKA or Icon.BRAND_DUNDREARY or Icon.BRAND_EMPORER or Icon.BRAND_ENUS or Icon.BRAND_FATHOM or Icon.BRAND_GALIVANTER or Icon.BRAND_GROTTI or Icon.BRAND_HIJAK or Icon.BRAND_HVY or Icon.BRAND_IMPONTE or Icon.BRAND_INVETERO or Icon.BRAND_JACKSHEEPE or Icon.BRAND_JOBUILT or Icon.BRAND_KARIN or Icon.BRAND_LAMPADATI or Icon.BRAND_MAIBATSU or Icon.BRAND_MAMMOTH or Icon.BRAND_MTL or Icon.BRAND_NAGASAKI or Icon.BRAND_OBEY or Icon.BRAND_OCELOT or Icon.BRAND_OVERFLOD or Icon.BRAND_PED or Icon.BRAND_PEGASSI or Icon.BRAND_PFISTER or Icon.BRAND_PRINCIPE or Icon.BRAND_PROGEN or Icon.BRAND_SCHYSTER or Icon.BRAND_SHITZU or Icon.BRAND_SPEEDOPHILE or Icon.BRAND_STANLEY or Icon.BRAND_TRUFFADE or Icon.BRAND_UBERMACHT or Icon.BRAND_VAPID or Icon.BRAND_VULCAR or Icon.BRAND_WEENY or Icon.BRAND_WESTERN or Icon.BRAND_WESTERNMOTORCYCLE or Icon.BRAND_WILLARD or Icon.BRAND_ZIRCONIUM or Icon.BRAND_GROTTI2 or Icon.BRAND_LCC or Icon.BRAND_PROGEN2 or Icon.BRAND_RUNE or Icon.COUNTRY_USA or Icon.COUNTRY_UK or Icon.COUNTRY_SWEDEN or Icon.COUNTRY_KOREA or Icon.COUNTRY_JAPAN or Icon.COUNTRY_ITALY or Icon.COUNTRY_GERMANY or Icon.COUNTRY_FRANCE => 30f / (width ? MenuLayout.ScreenWidth : MenuLayout.ScreenHeight),
-            Icon.STAR or Icon.LOCK_ARENA => 52f / (width ? MenuLayout.ScreenWidth : MenuLayout.ScreenHeight),
-            Icon.MEDAL_SILVER or Icon.MP_AMMO_PICKUP or Icon.MP_AMMO or Icon.MP_CASH or Icon.MP_RP or Icon.GLOBE_WHITE or Icon.GLOBE_BLUE or Icon.GLOBE_GREEN or Icon.GLOBE_ORANGE or Icon.GLOBE_RED or Icon.GLOBE_YELLOW or Icon.INV_ARM_WRESTLING or Icon.INV_BASEJUMP or Icon.INV_MISSION or Icon.INV_DARTS or Icon.INV_DEATHMATCH or Icon.INV_DRUG or Icon.INV_CASTLE or Icon.INV_GOLF or Icon.INV_BIKE or Icon.INV_BOAT or Icon.INV_ANCHOR or Icon.INV_CAR or Icon.INV_DOLLAR or Icon.INV_COKE or Icon.INV_KEY or Icon.INV_DATA or Icon.INV_HELI or Icon.INV_HEORIN or Icon.INV_KEYCARD or Icon.INV_METH or Icon.INV_BRIEFCASE or Icon.INV_LINK or Icon.INV_PERSON or Icon.INV_PLANE or Icon.INV_PLANE2 or Icon.INV_QUESTIONMARK or Icon.INV_REMOTE or Icon.INV_SAFE or Icon.INV_STEER_WHEEL or Icon.INV_WEAPON or Icon.INV_WEED or Icon.INV_RACE_FLAG_PLANE or Icon.INV_RACE_FLAG_BICYCLE or Icon.INV_RACE_FLAG_BOAT_ANCHOR or Icon.INV_RACE_FLAG_PERSON or Icon.INV_RACE_FLAG_CAR or Icon.INV_RACE_FLAG_HELMET or Icon.INV_SHOOTING_RANGE or Icon.INV_SURVIVAL or Icon.INV_TEAM_DEATHMATCH or Icon.INV_TENNIS or Icon.INV_VEHICLE_DEATHMATCH => 22f / (width ? MenuLayout.ScreenWidth : MenuLayout.ScreenHeight),
-            _ => 38f / (width ? MenuLayout.ScreenWidth : MenuLayout.ScreenHeight),
+            Icon.CASH or Icon.COKE or Icon.CROWN or Icon.HEROIN or Icon.METH or Icon.WEED or Icon.ADVERSARY or Icon.BASE_JUMPING or Icon.BRIEFCASE or Icon.MISSION_STAR or Icon.DEATHMATCH or Icon.CASTLE or Icon.TROPHY or Icon.RACE_FLAG or Icon.RACE_FLAG_PLANE or Icon.RACE_FLAG_BICYCLE or Icon.RACE_FLAG_PERSON or Icon.RACE_FLAG_CAR or Icon.RACE_FLAG_BOAT_ANCHOR or Icon.ROCKSTAR or Icon.STUNT or Icon.STUNT_PREMIUM or Icon.RACE_FLAG_STUNT_JUMP or Icon.SHIELD or Icon.TEAM_DEATHMATCH or Icon.VEHICLE_DEATHMATCH or Icon.AUDIO_MUTE or Icon.AUDIO_INACTIVE or Icon.AUDIO_VOL1 or Icon.AUDIO_VOL2 or Icon.AUDIO_VOL3 or Icon.BRAND_ALBANY or Icon.BRAND_ANNIS or Icon.BRAND_BANSHEE or Icon.BRAND_BENEFACTOR or Icon.BRAND_BF or Icon.BRAND_BOLLOKAN or Icon.BRAND_BRAVADO or Icon.BRAND_BRUTE or Icon.BRAND_BUCKINGHAM or Icon.BRAND_CANIS or Icon.BRAND_CHARIOT or Icon.BRAND_CHEVAL or Icon.BRAND_CLASSIQUE or Icon.BRAND_COIL or Icon.BRAND_DECLASSE or Icon.BRAND_DEWBAUCHEE or Icon.BRAND_DILETTANTE or Icon.BRAND_DINKA or Icon.BRAND_DUNDREARY or Icon.BRAND_EMPORER or Icon.BRAND_ENUS or Icon.BRAND_FATHOM or Icon.BRAND_GALIVANTER or Icon.BRAND_GROTTI or Icon.BRAND_HIJAK or Icon.BRAND_HVY or Icon.BRAND_IMPONTE or Icon.BRAND_INVETERO or Icon.BRAND_JACKSHEEPE or Icon.BRAND_JOBUILT or Icon.BRAND_KARIN or Icon.BRAND_LAMPADATI or Icon.BRAND_MAIBATSU or Icon.BRAND_MAMMOTH or Icon.BRAND_MTL or Icon.BRAND_NAGASAKI or Icon.BRAND_OBEY or Icon.BRAND_OCELOT or Icon.BRAND_OVERFLOD or Icon.BRAND_PED or Icon.BRAND_PEGASSI or Icon.BRAND_PFISTER or Icon.BRAND_PRINCIPE or Icon.BRAND_PROGEN or Icon.BRAND_SCHYSTER or Icon.BRAND_SHITZU or Icon.BRAND_SPEEDOPHILE or Icon.BRAND_STANLEY or Icon.BRAND_TRUFFADE or Icon.BRAND_UBERMACHT or Icon.BRAND_VAPID or Icon.BRAND_VULCAR or Icon.BRAND_WEENY or Icon.BRAND_WESTERN or Icon.BRAND_WESTERNMOTORCYCLE or Icon.BRAND_WILLARD or Icon.BRAND_ZIRCONIUM or Icon.BRAND_GROTTI2 or Icon.BRAND_LCC or Icon.BRAND_PROGEN2 or Icon.BRAND_RUNE or Icon.COUNTRY_USA or Icon.COUNTRY_UK or Icon.COUNTRY_SWEDEN or Icon.COUNTRY_KOREA or Icon.COUNTRY_JAPAN or Icon.COUNTRY_ITALY or Icon.COUNTRY_GERMANY or Icon.COUNTRY_FRANCE => 30f,
+            Icon.STAR or Icon.LOCK_ARENA => 52f,
+            Icon.MEDAL_SILVER or Icon.MP_AMMO_PICKUP or Icon.MP_AMMO or Icon.MP_CASH or Icon.MP_RP or Icon.GLOBE_WHITE or Icon.GLOBE_BLUE or Icon.GLOBE_GREEN or Icon.GLOBE_ORANGE or Icon.GLOBE_RED or Icon.GLOBE_YELLOW or Icon.INV_ARM_WRESTLING or Icon.INV_BASEJUMP or Icon.INV_MISSION or Icon.INV_DARTS or Icon.INV_DEATHMATCH or Icon.INV_DRUG or Icon.INV_CASTLE or Icon.INV_GOLF or Icon.INV_BIKE or Icon.INV_BOAT or Icon.INV_ANCHOR or Icon.INV_CAR or Icon.INV_DOLLAR or Icon.INV_COKE or Icon.INV_KEY or Icon.INV_DATA or Icon.INV_HELI or Icon.INV_HEORIN or Icon.INV_KEYCARD or Icon.INV_METH or Icon.INV_BRIEFCASE or Icon.INV_LINK or Icon.INV_PERSON or Icon.INV_PLANE or Icon.INV_PLANE2 or Icon.INV_QUESTIONMARK or Icon.INV_REMOTE or Icon.INV_SAFE or Icon.INV_STEER_WHEEL or Icon.INV_WEAPON or Icon.INV_WEED or Icon.INV_RACE_FLAG_PLANE or Icon.INV_RACE_FLAG_BICYCLE or Icon.INV_RACE_FLAG_BOAT_ANCHOR or Icon.INV_RACE_FLAG_PERSON or Icon.INV_RACE_FLAG_CAR or Icon.INV_RACE_FLAG_HELMET or Icon.INV_SHOOTING_RANGE or Icon.INV_SURVIVAL or Icon.INV_TEAM_DEATHMATCH or Icon.INV_TENNIS or Icon.INV_VEHICLE_DEATHMATCH => 22f,
+            _ => 38f,
         };
     }
 
@@ -472,7 +498,7 @@ public class MenuItem
     /// <param name="icon"></param>
     /// <param name="selected"></param>
     /// <returns></returns>
-    protected (int R, int G, int B) GetSpriteColour(Icon icon, bool selected)
+    protected internal (int R, int G, int B) GetSpriteColour(Icon icon, bool selected)
     {
         return icon switch
         {
@@ -553,6 +579,8 @@ public class MenuItem
         ParentMenu?.ItemSelectedEvent(this, Index);
     }
 
+    internal virtual void PrepareForDisplay() { }
+
     /// <summary>How far down the menu the first row starts. Identical for every row in a menu.</summary>
     internal static float RowYOffset(Menu parent) =>
         parent.MenuItemsYOffset + 1f - (RowHeight * Math.Clamp(parent.Size, 0, parent.MaxItemsOnScreen));
@@ -562,6 +590,8 @@ public class MenuItem
     /// </summary>
     internal virtual void Draw(int indexOffset)
     {
+        PrepareForDisplay();
+
         if (ParentMenu is not Menu parent)
         {
             return;

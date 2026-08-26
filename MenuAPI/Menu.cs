@@ -345,11 +345,29 @@ public class Menu
 
     private int index = 0;
 
+    private int viewIndexOffset = 0;
+
+    private int pageIndex = 0;
+
     private bool visible = false;
 
-    public int ViewIndexOffset { get; private set; } = 0;
+    public int ViewIndexOffset
+    {
+        get => viewIndexOffset;
+        private set
+        {
+            if (viewIndexOffset == value)
+            {
+                return;
+            }
 
-    private List<MenuItem> VisibleMenuItems
+            viewIndexOffset = value;
+
+            MenuNui.Invalidate();
+        }
+    }
+
+    internal List<MenuItem> VisibleMenuItems
     {
         get
         {
@@ -405,7 +423,12 @@ public class Menu
     private bool pageItemsDirty = true;
 
     /// <summary>Anything that changes what belongs on the current page calls this.</summary>
-    private void InvalidatePage() => pageItemsDirty = true;
+    private void InvalidatePage()
+    {
+        pageItemsDirty = true;
+
+        MenuNui.Invalidate();
+    }
 
     // What is currently loaded into ColorPanelScaleform, so the 64 swatches are only re-sent when
     // they would actually differ. See DrawColorAndOpacityPanel. Static because the scaleform is.
@@ -421,11 +444,29 @@ public class Menu
     #endregion
 
     #region Public Variables
-    public string? MenuTitle { get; set; }
+    public string? MenuTitle
+    {
+        get => _menuTitle;
+        set => MenuNui.Change(ref _menuTitle, value);
+    }
 
-    public string? MenuSubtitle { get; set; }
+    private string? _menuTitle;
 
-    public KeyValuePair<string, string> HeaderTexture { get; set; } = new KeyValuePair<string, string>();
+    public string? MenuSubtitle
+    {
+        get => _menuSubtitle;
+        set => MenuNui.Change(ref _menuSubtitle, value);
+    }
+
+    private string? _menuSubtitle;
+
+    public KeyValuePair<string, string> HeaderTexture
+    {
+        get => _headerTexture;
+        set => MenuNui.Change(ref _headerTexture, value);
+    }
+
+    private KeyValuePair<string, string> _headerTexture = new KeyValuePair<string, string>();
 
     #region Menu title styling
     // Nullable, and falling back to the matching MenuController.Default*, so a resource can style
@@ -437,10 +478,22 @@ public class Menu
     // hangs off its own header helps nobody.
 
     /// <summary>The font the title is drawn in. See <see cref="MenuFont"/>.</summary>
-    public int? MenuTitleFont { get; set; }
+    public int? MenuTitleFont
+    {
+        get => _menuTitleFont;
+        set => MenuNui.Change(ref _menuTitleFont, value);
+    }
+
+    private int? _menuTitleFont;
 
     /// <summary>Where the title sits inside the header.</summary>
-    public TitleAlignmentOption? MenuTitleAlignment { get; set; }
+    public TitleAlignmentOption? MenuTitleAlignment
+    {
+        get => _menuTitleAlignment;
+        set => MenuNui.Change(ref _menuTitleAlignment, value);
+    }
+
+    private TitleAlignmentOption? _menuTitleAlignment;
 
     public enum TitleAlignmentOption
     {
@@ -450,18 +503,30 @@ public class Menu
     }
 
     /// <summary>Whether GTA Online's moving header glow is drawn over the banner.</summary>
-    public bool? ShowHeaderGlare { get; set; }
+    public bool? ShowHeaderGlare
+    {
+        get => _showHeaderGlare;
+        set => MenuNui.Change(ref _showHeaderGlare, value);
+    }
 
-    private int ResolvedTitleFont => MenuTitleFont ?? MenuController.DefaultTitleFont;
+    private bool? _showHeaderGlare;
 
-    private TitleAlignmentOption ResolvedTitleAlignment => MenuTitleAlignment ?? MenuController.DefaultTitleAlignment;
+    internal int ResolvedTitleFont => MenuTitleFont ?? MenuController.DefaultTitleFont;
 
-    private bool ResolvedShowHeaderGlare => ShowHeaderGlare ?? MenuController.DefaultShowHeaderGlare;
+    internal TitleAlignmentOption ResolvedTitleAlignment => MenuTitleAlignment ?? MenuController.DefaultTitleAlignment;
+
+    internal bool ResolvedShowHeaderGlare => ShowHeaderGlare ?? MenuController.DefaultShowHeaderGlare;
     #endregion
 
     public bool IgnoreDontOpenMenus { get; set; } = false;
 
-    public int MaxItemsOnScreen { get; internal set; } = 10;
+    public int MaxItemsOnScreen
+    {
+        get => _maxItemsOnScreen;
+        internal set => MenuNui.Change(ref _maxItemsOnScreen, value);
+    }
+
+    private int _maxItemsOnScreen = 10;
 
     public int Size => ActiveItems.Count;
 
@@ -472,7 +537,21 @@ public class Menu
     public bool Paginated => PageSize > 0;
 
     /// <summary>The page currently being shown, counting from 0.</summary>
-    public int PageIndex { get; private set; } = 0;
+    public int PageIndex
+    {
+        get => pageIndex;
+        private set
+        {
+            if (pageIndex == value)
+            {
+                return;
+            }
+
+            pageIndex = value;
+
+            MenuNui.Invalidate();
+        }
+    }
 
     /// <summary>Always at least 1, so an empty paginated menu still reads as "page 1 of 1".</summary>
     public int PageCount => Paginated ? Math.Max(1, (SourceItems.Count + PageSize - 1) / PageSize) : 1;
@@ -498,6 +577,8 @@ public class Menu
             }
             visible = value;
 
+            MenuNui.Invalidate();
+
             // The single funnel for OpenMenu, CloseMenu, GoBack and CloseAllMenus, so every one of
             // MenuAPI's ticks learns about a menu opening or closing from right here. Safe to call
             // from a setter: it only starts a loop, and a loop always waits a frame before its first
@@ -513,33 +594,94 @@ public class Menu
 
     public float MenuItemsYOffset { get; private set; } = 0f;
 
-    public string? CounterPreText { get; set; }
+    public string? CounterPreText
+    {
+        get => _counterPreText;
+        set => MenuNui.Change(ref _counterPreText, value);
+    }
+
+    private string? _counterPreText;
 
     public Menu? ParentMenu { get; internal set; } = null;
 
-    public int CurrentIndex { get { return index; } internal set { index = Math.Clamp(value, 0, Math.Max(0, Size - 1)); } }
+    public int CurrentIndex
+    {
+        get => index;
+        internal set
+        {
+            var clamped = Math.Clamp(value, 0, Math.Max(0, Size - 1));
+
+            if (index == clamped)
+            {
+                return;
+            }
+
+            index = clamped;
+
+            MenuNui.Invalidate();
+        }
+    }
 
     public bool EnableInstructionalButtons { get; set; } = true;
 
     /// <summary>
     /// Should contain 4 floats.
     /// </summary>
-    public float[] WeaponStats { get; private set; } = new float[4] { 0f, 0f, 0f, 0f };
-    /// <summary>
-    /// Should contain 4 floats.
-    /// </summary>
-    public float[] WeaponComponentStats { get; private set; } = new float[4] { 0f, 0f, 0f, 0f };
-    /// <summary>
-    /// Should contain 4 floats.
-    /// </summary>
-    public float[] VehicleStats { get; private set; } = new float[4] { 0f, 0f, 0f, 0f };
-    /// <summary>
-    /// Should contain 4 floats.
-    /// </summary>
-    public float[] VehicleUpgradeStats { get; private set; } = new float[4] { 0f, 0f, 0f, 0f };
+    public float[] WeaponStats
+    {
+        get => _weaponStats;
+        private set => MenuNui.Change(ref _weaponStats, value);
+    }
 
-    public bool ShowWeaponStatsPanel { get; set; } = false;
-    public bool ShowVehicleStatsPanel { get; set; } = false;
+    private float[] _weaponStats = new float[4] { 0f, 0f, 0f, 0f };
+    /// <summary>
+    /// Should contain 4 floats.
+    /// </summary>
+    public float[] WeaponComponentStats
+    {
+        get => _weaponComponentStats;
+        private set => MenuNui.Change(ref _weaponComponentStats, value);
+    }
+
+    private float[] _weaponComponentStats = new float[4] { 0f, 0f, 0f, 0f };
+    /// <summary>
+    /// Should contain 4 floats.
+    /// </summary>
+    public float[] VehicleStats
+    {
+        get => _vehicleStats;
+        private set => MenuNui.Change(ref _vehicleStats, value);
+    }
+
+    private float[] _vehicleStats = new float[4] { 0f, 0f, 0f, 0f };
+    /// <summary>
+    /// Should contain 4 floats.
+    /// </summary>
+    public float[] VehicleUpgradeStats
+    {
+        get => _vehicleUpgradeStats;
+        private set => MenuNui.Change(ref _vehicleUpgradeStats, value);
+    }
+
+    private float[] _vehicleUpgradeStats = new float[4] { 0f, 0f, 0f, 0f };
+
+    public bool ShowWeaponStatsPanel
+    {
+        get => _showWeaponStatsPanel;
+        set => MenuNui.Change(ref _showWeaponStatsPanel, value);
+    }
+
+    public bool ShowVehicleStatsPanel
+    {
+        get => _showVehicleStatsPanel;
+        set => MenuNui.Change(ref _showVehicleStatsPanel, value);
+    }
+
+    private bool _showWeaponStatsPanel = false;
+    private bool _showVehicleStatsPanel = false;
+
+    internal string StatLabelKey(int index) =>
+        ShowWeaponStatsPanel ? weaponStatNames[index] : vehicleStatNames[index];
 
     private readonly string[] weaponStatNames = new string[4] { "PM_DAMAGE", "PM_FIRERATE", "PM_ACCURACY", "PM_RANGE" };
     private readonly string[] vehicleStatNames = new string[4] { "FMMC_VEHST_0", "FMMC_VEHST_1", "FMMC_VEHST_2", "FMMC_VEHST_3" };
@@ -988,6 +1130,8 @@ public class Menu
         {
             Native.PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false);
             item.Select();
+
+            MenuNui.Invalidate();
             if (MenuController.MenuButtons.TryGetValue(item, out var value))
             {
                 // Read once. The old code asked for the current menu twice, so the second call could
@@ -1130,6 +1274,8 @@ public class Menu
         if (item != null)
         {
             item.GoLeft();
+
+            MenuNui.Invalidate();
         }
         // If the item is not any of the above, return to parent menu.
         else if (MenuController.NavigateMenuUsingArrows && !MenuController.DisableBackButton && !(MenuController.PreventExitingMenu && ParentMenu == null))
@@ -1155,7 +1301,12 @@ public class Menu
             return;
         }
 
-        item?.GoRight();
+        if (item != null)
+        {
+            item.GoRight();
+
+            MenuNui.Invalidate();
+        }
     }
 
     /// <summary>
@@ -1297,7 +1448,7 @@ public class Menu
     /// <summary>
     /// Processes any custom button press handlers for this menu.
     /// </summary>
-    private void ProcessButtonPressHandlers()
+    internal void ProcessButtonPressHandlers()
     {
         if (ButtonPressHandlers.Count != 0)
         {

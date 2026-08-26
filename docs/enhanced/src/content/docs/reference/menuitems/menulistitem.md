@@ -63,12 +63,24 @@ The list wraps around: pressing right on the last value goes back to the first o
 
 #### Changing the values later
 
-`ListItems` is a normal `List<string>`, so you can change it at any time. Remember to keep `ListIndex` in range when you do.
+`ListItems` is a `MenuItemList`, which is used exactly like a `List<string>`: add to it, index into
+it, loop over it, ask it for its `Count`. The difference is that it tells the menu when it changes,
+so the row redraws as soon as you touch it. Remember to keep `ListIndex` in range when you do.
 
 ```cs
+item.ListItems.Add("Option 4");
+item.ListItems.RemoveAt(0);
+
+// Or replace the lot. A List<string> can be assigned straight to it.
 item.ListItems = newValues;
 item.ListIndex = 0;
 ```
+
+:::caution
+The list you hand to the constructor is **copied**, so changing your own copy afterwards does not
+reach the item. Change it through `item.ListItems` instead. See the [Migration guide](/migration/)
+if you are moving a resource over from the older MenuAPI.
+:::
 
 :::caution
 Never leave a list item with an empty `ListItems` list. If the list is empty, MenuAPI inserts a single `"N/A"` value to keep the menu from freezing, and the item's value will read `N/A`.
@@ -119,7 +131,7 @@ The MenuItem properties **RightIcon** and **Label** are not available for MenuLi
 |Property|Type|Default value|Description|Optional|
 |---|---|---|---|---|
 |ListIndex|int|0|The currently selected list index.|**No**|
-|ListItems|List&lt;string&gt;|-|A list holding a collection of strings which can be selected through this menu list item. At least one string must be present in this list.|**No**|
+|ListItems|MenuItemList|-|A list holding a collection of strings which can be selected through this menu list item. At least one string must be present in this list. Used exactly like a `List<string>`, and one can be assigned straight to it.|**No**|
 |HideArrowsWhenNotSelected|boolean|false|Hides the left & right arrows when the menu list item is not currently highlighted.|Yes|
 |ShowOpacityPanel|boolean|false|Shows the Opacity Panel.|Yes|
 |ShowColorPanel|boolean|false|Shows the Color Panel.|Yes|
