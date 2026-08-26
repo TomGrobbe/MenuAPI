@@ -46,11 +46,11 @@ public class MenuController : IScript
 
     public static bool AreMenuButtonsEnabled =>
         IsAnyMenuOpen() &&
-        !Native.IsPauseMenuActive() &&
-        Native.IsScreenFadedIn() &&
-        !Native.IsPlayerSwitchInProgress() &&
+        !FrameState.IsPauseMenuActive &&
+        FrameState.IsScreenFadedIn &&
+        !FrameState.IsPlayerSwitchInProgress &&
         !DisableMenuButtons &&
-        !API.Players.Local.IsDead &&
+        !FrameState.IsDead &&
         !IsF8ConsoleLikelyOpen;
 
     public static bool NavigateMenuUsingArrows { get; set; } = true;
@@ -469,7 +469,7 @@ public class MenuController : IScript
         bool selectPressed = MenuKeyBindings.ConsumeSelect();
         bool backPressed = MenuKeyBindings.ConsumeBack();
 
-        if (Native.IsPauseMenuActive())
+        if (FrameState.IsPauseMenuActive)
         {
             return;
         }
@@ -566,7 +566,7 @@ public class MenuController : IScript
     /// </summary>
     private static bool IsUsingWeaponWheel()
     {
-        if (API.Players.Local.Ped.IsPedInAnyVehicle())
+        if (FrameState.IsInVehicle)
         {
             return false;
         }
@@ -681,7 +681,7 @@ public class MenuController : IScript
             return;
         }
 
-        if (Native.IsPauseMenuActive() || Native.IsPauseMenuRestarting() || !Native.IsScreenFadedIn() || Native.IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
+        if (FrameState.IsPauseMenuActive || Native.IsPauseMenuRestarting() || !FrameState.IsScreenFadedIn || FrameState.IsPlayerSwitchInProgress || FrameState.IsDead || DisableMenuButtons)
         {
             return;
         }
@@ -714,7 +714,7 @@ public class MenuController : IScript
             return;
         }
 
-        if (Native.IsPauseMenuActive() || Native.IsPauseMenuRestarting() || !Native.IsScreenFadedIn() || Native.IsPlayerSwitchInProgress() || API.Players.Local.IsDead || DisableMenuButtons)
+        if (FrameState.IsPauseMenuActive || Native.IsPauseMenuRestarting() || !FrameState.IsScreenFadedIn || FrameState.IsPlayerSwitchInProgress || FrameState.IsDead || DisableMenuButtons)
         {
             return;
         }
@@ -955,7 +955,7 @@ public class MenuController : IScript
     private static async Task HandleMenuToggleKeyForController()
     {
         int tmpTimer = Native.GetGameTimer();
-        while ((Native.IsControlPressed(0, (int)Control.InteractionMenu) || Native.IsDisabledControlPressed(0, (int)Control.InteractionMenu)) && !Native.IsPauseMenuActive() && Native.IsScreenFadedIn() && !API.Players.Local.IsDead && !Native.IsPlayerSwitchInProgress() && !DontOpenAnyMenu)
+        while ((Native.IsControlPressed(0, (int)Control.InteractionMenu) || Native.IsDisabledControlPressed(0, (int)Control.InteractionMenu)) && !FrameState.IsPauseMenuActive && FrameState.IsScreenFadedIn && !FrameState.IsDead && !FrameState.IsPlayerSwitchInProgress && !DontOpenAnyMenu)
         {
             if (Native.GetGameTimer() - tmpTimer > 400)
             {
@@ -1025,7 +1025,7 @@ public class MenuController : IScript
 
     private static async Task MenuButtonsDisableChecks()
     {
-        static bool isInputVisible() => Native.UpdateOnscreenKeyboard() == 0;
+        static bool isInputVisible() => FrameState.OnscreenKeyboard == 0;
         if (isInputVisible())
         {
             bool buttonsState = DisableMenuButtons;
@@ -1070,7 +1070,7 @@ public class MenuController : IScript
             return;
         }
 
-        if (API.Players.Local.IsDead)
+        if (FrameState.IsDead)
         {
             // Close all menus when the player dies.
             CloseAllMenus();
@@ -1087,7 +1087,7 @@ public class MenuController : IScript
         Native.DisableControlAction(0, (int)Control.InteractionMenu, false);
 
         // When in a vehicle
-        if (API.Players.Local.Ped.IsPedInAnyVehicle())
+        if (FrameState.IsInVehicle)
         {
             Native.DisableControlAction(0, (int)Control.VehicleSelectNextWeapon, false);
             Native.DisableControlAction(0, (int)Control.VehicleSelectPrevWeapon, false);
@@ -1106,7 +1106,7 @@ public class MenuController : IScript
         {
             Native.DisableControlAction(0, (int)Control.MultiplayerInfo, false);
             // when in a vehicle.
-            if (API.Players.Local.Ped.IsPedInAnyVehicle())
+            if (FrameState.IsInVehicle)
             {
                 Native.DisableControlAction(0, (int)Control.VehicleHeadlight, false);
                 Native.DisableControlAction(0, (int)Control.VehicleDuck, false);
@@ -1223,10 +1223,10 @@ public class MenuController : IScript
 
     /// <summary>The game states that stop a menu being drawn, none of which announce a change.</summary>
     private static bool CanDraw() =>
-        Native.IsScreenFadedIn() &&
-        !Native.IsPauseMenuActive() &&
-        !API.Players.Local.IsDead &&
-        !Native.IsPlayerSwitchInProgress();
+        FrameState.IsScreenFadedIn &&
+        !FrameState.IsPauseMenuActive &&
+        !FrameState.IsDead &&
+        !FrameState.IsPlayerSwitchInProgress;
 
     private static async Task DrawMenus()
     {
