@@ -1,6 +1,4 @@
-using CitizenFX.FiveM.Client;
-using CitizenFX.FiveM.Client.Extensions;
-using CitizenFX.FiveM.Shared.Data;
+﻿using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Shared.Script;
 
 namespace MenuAPI;
@@ -33,6 +31,8 @@ public class MenuController : IScript
     // the pause menu and a resolution change is not something a player does mid menu, so this only has
     // to be often enough that the menu has settled by the time they look at it again.
     private const long LayoutRefreshIntervalMs = 500;
+
+    private const long InstructionalButtonsConfigureIntervalMs = 300;
 
     private static float AspectRatio => Native.GetScreenAspectRatio(false);
     public static float ScreenWidth => 1080 * AspectRatio;
@@ -123,6 +123,8 @@ public class MenuController : IScript
 
     internal static int _scale = Native.RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
 
+    private static Menu? _instructionalButtonsMenu;
+
     // Whether the mouse button was pressed down while a menu was open, see IsMouseButtonUsed.
     private static bool mouseSelectArmed = false;
     private static bool mouseBackArmed = false;
@@ -194,6 +196,9 @@ public class MenuController : IScript
                 DisposeInstructionalButtonsScaleform();
                 InstructionalButtonIcons.Clear();
             });
+
+        MenuTicks.Register("Menu.InstructionalButtonsData", ConfigureInstructionalButtons,
+            MenuTickRate.Every(InstructionalButtonsConfigureIntervalMs), IsAnyMenuOpen);
 
         MenuTicks.Register("Menu.Select", ProcessMainButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
             // Nothing drains input while every menu is closed, so a menu has to open from a clean
@@ -1248,42 +1253,65 @@ public class MenuController : IScript
         }
     }
 
-    internal static async Task DrawInstructionalButtons()
+    internal static void DrawInstructionalButtons()
     {
-        // Whether a menu is open is the tick's own condition. What is left is volatile game state
-        // that changes every frame, so it stays inline.
-        if (
-            Native.IsPlayerSwitchInProgress() ||
-            API.Players.Local.IsDead ||
-            !Native.IsScreenFadedIn() ||
-            Native.IsWarningMessageActive() ||
-            Native.UpdateOnscreenKeyboard() == 0
-        )
-        {
-            DisposeInstructionalButtonsScaleform();
-            return;
-        }
         Menu? menu = GetCurrentMenu();
-        if (menu == null || !menu.Visible || !menu.EnableInstructionalButtons)
+
+        if (menu == null || !CanShowInstructionalButtons(menu) || !Native.HasScaleformMovieLoaded(_scale))
         {
-            DisposeInstructionalButtonsScaleform();
             return;
         }
+
+        if (!ReferenceEquals(menu, _instructionalButtonsMenu))
+        {
+            FillInstructionalButtonSlots(menu);
+        }
+
+        Native.DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
+    }
+
+    // On a slow loop: what an icon looks like only changes when the player swaps between keyboard
+    // and controller or rebinds a key. Drawing the bar still has to happen every frame.
+    internal static async Task ConfigureInstructionalButtons()
+    {
+        Menu? menu = GetCurrentMenu();
+
+        if (menu == null || !CanShowInstructionalButtons(menu))
+        {
+            DisposeInstructionalButtonsScaleform();
+
+            return;
+        }
+
         if (!Native.HasScaleformMovieLoaded(_scale))
         {
             _scale = Native.RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
-        }
-        while (!Native.HasScaleformMovieLoaded(_scale))
-        {
-            await API.Delay(0);
+
+            while (!Native.HasScaleformMovieLoaded(_scale))
+            {
+                await API.Delay(0);
+            }
         }
 
-        Native.DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 0, 0);
+        FillInstructionalButtonSlots(menu);
+    }
 
+    private static bool CanShowInstructionalButtons(Menu menu)
+    {
+        return menu.Visible &&
+            menu.EnableInstructionalButtons &&
+            !FrameState.IsPlayerSwitchInProgress &&
+            !FrameState.IsDead &&
+            FrameState.IsScreenFadedIn &&
+            !Native.IsWarningMessageActive() &&
+            FrameState.OnscreenKeyboard != 0;
+    }
+
+    private static void FillInstructionalButtonSlots(Menu menu)
+    {
         Native.BeginScaleformMovieMethod(_scale, "CLEAR_ALL");
         Native.EndScaleformMovieMethod();
 
-        // Once here rather than at each icon below, and the only place that has to run every frame.
         InstructionalButtonIcons.Refresh();
 
         int slot = 0;
@@ -1305,7 +1333,6 @@ public class MenuController : IScript
         }
 
         // Enumerated rather than indexed: ElementAt on a dictionary walks it from the start every
-        // time, so indexing it in a loop re-walked the whole thing once per button, every frame.
         foreach (KeyValuePair<Control, string> button in menu.InstructionalButtons)
         {
             SetInstructionalButtonSlot(slot++, InstructionalButtonIcons.For((int)button.Key), button.Value);
@@ -1321,7 +1348,7 @@ public class MenuController : IScript
         Native.ScaleformMovieMethodAddParamInt(0);
         Native.EndScaleformMovieMethod();
 
-        Native.DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
+        _instructionalButtonsMenu = menu;
     }
 
     private static void SetInstructionalButtonSlot(int slot, string buttonString, string text)
@@ -1339,5 +1366,7 @@ public class MenuController : IScript
         {
             Native.SetScaleformMovieAsNoLongerNeeded(ref _scale);
         }
+
+        _instructionalButtonsMenu = null;
     }
 }
