@@ -517,22 +517,55 @@ jobs:
       - name: Generate changelogs
         shell: bash
         run: |
-          changelog() {
-            local glob="$1" ref="$2" out="$3"
+          range_for() {
+            local glob="$1" ref="$2"
             local prev
             prev=$(git tag --list "$glob" --sort=-version:refname --no-contains "$ref" | head -n 1)
+            echo "$glob range starts at: ${prev:-<none, full history>}" >&2
             if [ -n "$prev" ]; then
-              git log "$prev..$ref" --pretty=format:'- `%h` (%an) %s' > "$out"
+              echo "$prev..$ref"
             else
-              git log "$ref" --pretty=format:'- `%h` (%an) %s' > "$out"
+              echo "$ref"
             fi
-            echo "$glob range starts at: ${prev:-<none, full history>}"
+          }
+
+          changelog() {
+            git log "$1" --pretty=format:'- `%h` (%an) %s' > "$2"
+            cat "$2"
+            echo ""
+          }
+
+          breaking() {
+            local range="$1" out="$2"
+            local sha subject note
+            : > "$out"
+            for sha in $(git log "$range" --format='%H'); do
+              subject=$(git log -1 "$sha" --format='%s')
+              note=$(git log -1 "$sha" --format='%b' \
+                | awk '/^BREAKING[ -]CHANGE:/ { flag = 1; sub(/^BREAKING[ -]CHANGE:[[:space:]]*/, "") } flag' \
+                | paste -sd ' ' - \
+                | sed 's/[[:space:]]*$//')
+              if [ -z "$note" ] && ! echo "$subject" | grep -qE '^[a-zA-Z]+(\([^)]*\))?!:'; then
+                continue
+              fi
+              echo "- \`$(git log -1 "$sha" --format='%h')\` $subject" >> "$out"
+              if [ -n "$note" ]; then
+                echo "  $note" >> "$out"
+              fi
+            done
+            echo "breaking changes in $range:"
             cat "$out"
             echo ""
           }
 
-          changelog 'v*'          origin/legacy         changelog-legacy.txt
-          changelog 'enhanced-v*' origin/fivem-enhanced changelog-enhanced.txt
+          LEGACY_RANGE=$(range_for 'v*'          origin/legacy)
+          ENHANCED_RANGE=$(range_for 'enhanced-v*' origin/fivem-enhanced)
+
+          changelog "$LEGACY_RANGE"   changelog-legacy.txt
+          changelog "$ENHANCED_RANGE" changelog-enhanced.txt
+
+          breaking  "$LEGACY_RANGE"   breaking-legacy.txt
+          breaking  "$ENHANCED_RANGE" breaking-enhanced.txt
 
       # Each line is tagged on its own branch tip. A line that did not move this run is
       # already carrying its tag, so creating it is skipped rather than failing the run.
@@ -572,6 +605,27 @@ jobs:
           TITLE="MenuAPI v$ENHANCED_VERSION (Enhanced) and v$LEGACY_VERSION (Legacy)"
 
           {
+            if [ -s breaking-enhanced.txt ] || [ -s breaking-legacy.txt ]; then
+              echo "> [!WARNING]"
+              echo "> **This release contains breaking changes.** Read these before updating."
+
+              if [ -s breaking-enhanced.txt ]; then
+                echo ">"
+                echo "> **Enhanced v$ENHANCED_VERSION**"
+                echo ">"
+                sed 's/^/> /' breaking-enhanced.txt
+              fi
+
+              if [ -s breaking-legacy.txt ]; then
+                echo ">"
+                echo "> **Legacy v$LEGACY_VERSION**"
+                echo ">"
+                sed 's/^/> /' breaking-legacy.txt
+              fi
+
+              echo ""
+            fi
+
             echo "One release, both versions of MenuAPI."
             echo ""
             echo "| Version | For | Download |"
