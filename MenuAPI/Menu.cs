@@ -468,6 +468,18 @@ public class Menu
 
     private KeyValuePair<string, string> _headerTexture = new KeyValuePair<string, string>();
 
+    /// <summary>
+    /// Banner image from the resource's <c>menuapi-banners</c> folder, without the extension.
+    /// Wins over <see cref="HeaderTexture"/>, falls back to it when missing. NUI render mode only.
+    /// </summary>
+    public string? HeaderImage
+    {
+        get => _headerImage;
+        set => MenuNui.Change(ref _headerImage, value);
+    }
+
+    private string? _headerImage;
+
     #region Menu title styling
     // Nullable, and falling back to the matching MenuController.Default*, so a resource can style
     // every menu it owns by setting the defaults once and still override a single menu afterwards.

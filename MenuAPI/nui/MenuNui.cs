@@ -204,17 +204,17 @@ internal static class MenuNui
         var dictionary = custom ? menu.HeaderTexture.Key : MenuController._texture_dict;
         var texture = custom ? menu.HeaderTexture.Value : MenuController._header_texture;
 
-        if (SpriteReady(dictionary, texture))
+        if (!string.IsNullOrEmpty(menu.HeaderImage))
         {
-            json.Object("texture")
-                .Prop("dict", dictionary)
-                .Prop("name", texture)
-                .EndObject();
+            json.Prop("image", menu.HeaderImage);
         }
-        else
-        {
-            json.Null("texture");
-        }
+
+        // Sent even when not streamed in, the page may have a file replacing it.
+        json.Object("texture")
+            .Prop("dict", dictionary)
+            .Prop("name", texture)
+            .Prop("ready", SpriteReady(dictionary, texture))
+            .EndObject();
 
         json.EndObject();
     }

@@ -64,6 +64,47 @@
         probe.src = url;
     }
 
+    const BANNER_FOLDER = "menuapi-banners";
+    const BANNER_EXTENSIONS = ["png", "jpg", "webp"];
+    const BANNER_HAS_EXTENSION = /\.(png|jpe?g|webp)$/i;
+
+    const bannerFiles = new Map();
+
+    function bannerFile(key) {
+        if (bannerFiles.has(key)) {
+            return bannerFiles.get(key);
+        }
+
+        bannerFiles.set(key, null);
+
+        const candidates = BANNER_HAS_EXTENSION.test(key)
+            ? [`${BANNER_FOLDER}/${key}`]
+            : BANNER_EXTENSIONS.map(extension => `${BANNER_FOLDER}/${key}.${extension}`);
+
+        let index = 0;
+
+        const attempt = () => {
+            if (index >= candidates.length) {
+                return;
+            }
+
+            const url = candidates[index++];
+            const probe = new Image();
+
+            probe.onload = () => {
+                bannerFiles.set(key, url);
+                applyBanner();
+            };
+
+            probe.onerror = attempt;
+            probe.src = url;
+        };
+
+        attempt();
+
+        return null;
+    }
+
     function showSprite(url) {
         for (const node of root.querySelectorAll(".menuapi-icon")) {
             if (node.dataset.sprite === url) {
@@ -139,6 +180,7 @@
     header.append(headerBg, headerGlare, headerTitle);
 
     let bannerUrl = null;
+    let banner = null;
     subtitle.append(subtitleText, subtitleCounter);
     overflow.append(text("↑"), text("↓"));
     root.append(header, subtitle, rows, overflow, description, panel, stats);
@@ -241,18 +283,44 @@
 
         header.hidden = false;
 
-        bannerUrl = data.texture ? spriteUrl(data.texture.dict, data.texture.name) : null;
-        headerBg.hidden = !bannerUrl || !spriteReady(bannerUrl);
+        banner = data.texture ? { image: data.image, texture: data.texture } : null;
 
-        if (!headerBg.hidden) {
-            headerBg.src = bannerUrl;
-        }
+        applyBanner();
 
         headerTitle.dataset.align = data.titleAlign;
         headerTitle.dataset.font = data.font;
         headerTitle.replaceChildren(markup(data.title));
 
         setGlare(!!data.glare);
+    }
+
+    function applyBanner() {
+        if (!banner) {
+            bannerUrl = null;
+            headerBg.hidden = true;
+
+            return;
+        }
+
+        const texture = banner.texture;
+
+        const file = (banner.image ? bannerFile(banner.image) : null)
+            ?? bannerFile(`${texture.dict}/${texture.name}`);
+
+        if (file) {
+            bannerUrl = file;
+            headerBg.src = file;
+            headerBg.hidden = false;
+
+            return;
+        }
+
+        bannerUrl = texture.ready === false ? null : spriteUrl(texture.dict, texture.name);
+        headerBg.hidden = !bannerUrl || !spriteReady(bannerUrl);
+
+        if (!headerBg.hidden) {
+            headerBg.src = bannerUrl;
+        }
     }
 
     function renderSubtitle(data) {
@@ -520,6 +588,8 @@
 
         applyText(data.text);
     }
+
+    bannerFile("commonmenu/interaction_bgd");
 
     window.addEventListener("message", event => {
         let data = event.data;
