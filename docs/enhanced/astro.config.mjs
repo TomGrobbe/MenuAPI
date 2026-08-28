@@ -47,6 +47,7 @@ export default defineConfig({
       sidebar: [
         { label: 'Basic Info', link: '/' },
         { label: 'Setup', link: '/setup/' },
+        { label: 'NUI render mode', link: '/nui/' },
         { label: 'Migration guide', link: '/migration/' },
         {
           label: 'API Reference',
@@ -56,6 +57,7 @@ export default defineConfig({
             { label: 'MenuController', link: '/reference/menucontroller/' },
             { label: 'Pagination', link: '/reference/pagination/' },
             { label: 'Key bindings', link: '/reference/keybindings/' },
+            { label: 'Theming and banners', link: '/reference/theming/' },
             {
               label: 'Menu Items',
               items: [

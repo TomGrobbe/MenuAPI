@@ -10,14 +10,54 @@ title: "Changelog"
 These are the changes in MenuAPI for FiveM Enhanced. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way.
 :::
 
+### Themes, custom banners, and smaller downloads
+
+:::danger[Breaking change]
+The NUI css and js are minified and renamed with `.min`, and only the minified files ship. Using NUI
+render mode means updating the six paths in your `index.html`. See the
+[Migration guide](../migration/#the-nui-web-files-are-minified-and-renamed). Native mode is
+unaffected.
+:::
+
+Three changes to the page NUI render mode draws. All of it is NUI only, native mode has nothing to
+attach a stylesheet or an image to.
+
+**Minified assets.** 64 KB down to 40 KB shipped. Readable sources stay in the repository.
+
+**Themes.** A stylesheet you ship, layered over the default one, covering colours, radius, shadow
+and font. Anything you leave alone keeps the default. Register by name, swap at any time, an open
+menu changes on the next frame.
+
+```cs
+NuiTuning.RegisterTheme("midnight", "themes/midnight.css");
+
+NuiTuning.SetTheme("midnight");
+NuiTuning.SetTheme(null);
+```
+
+**Custom banners,** two routes, both from a `menuapi-banners` folder in your resource. Name a file
+after the game sprite it replaces and every menu drawing that sprite picks it up, no API call. Or
+name it freely and point one menu at it with the new `Menu.HeaderImage`.
+
+```cs
+// menuapi-banners/outlaw.png
+menu.HeaderImage = "outlaw";
+```
+
+`HeaderImage` wins over a sprite replacement, and a missing file falls through rather than leaving
+an empty header.
+
+NUI render mode now has [a setup page](../nui/), and both features are documented in
+[Theming and banners](../reference/theming/).
+
 ### Controllers and the mouse are rebindable too
 
 :::danger[Breaking change]
 `Menu.ButtonPressHandlers`, `Menu.ButtonPressHandler`, `Menu.ControlPressCheckType` and the
 `Menu.InstructionalButtons` dictionary have been **removed**. Every one of them was built around a fixed
 `Control`, which is exactly what this change is getting rid of. Use
-[Menu.AddKeyBinding()](reference/menu/#addkeybinding) instead, and see the
-[Migration guide](migration/#custom-controls-are-key-bindings-now).
+[Menu.AddKeyBinding()](../reference/menu/#addkeybinding) instead, and see the
+[Migration guide](../migration/#custom-controls-are-key-bindings-now).
 :::
 
 
@@ -43,9 +83,9 @@ button is the game's own interaction menu.
 
 Lists, dynamic lists and sliders now get their own hint too. Whenever one of those rows is highlighted, a
 left/right hint appears next to select and back, so it is obvious that the row has a value to change. Its text
-is [ChangeValueButtonText](reference/menu/#properties) and it can be turned off per menu.
+is [ChangeValueButtonText](../reference/menu/#properties) and it can be turned off per menu.
 
-See [Key bindings](reference/keybindings/) for the full list.
+See [Key bindings](../reference/keybindings/) for the full list.
 
 ### The menu is drawn without describing it sixty times a second
 
@@ -64,7 +104,7 @@ draw itself.
   two things that do: a variable typed `List<string> values = item.ListItems;` has to become
   `MenuItemList` (or call `.ToList()`), and the list you pass to the constructor is now **copied**,
   so change the values through `item.ListItems` rather than through your own copy of the list. See
-  the [Migration guide](migration/).
+  the [Migration guide](../migration/).
 
 **Things that just behave differently now:**
 
@@ -77,7 +117,7 @@ draw itself.
 
 ### Menus can be split into groups with a heading
 
-There is a new item type, [SeparatorMenuItem](reference/menuitems/separatormenuitem/). It is a heading that labels the rows underneath it, so a long menu can be broken into readable groups without pushing anything into a submenu.
+There is a new item type, [SeparatorMenuItem](../reference/menuitems/separatormenuitem/). It is a heading that labels the rows underneath it, so a long menu can be broken into readable groups without pushing anything into a submenu.
 
 The text is centred properly, using the game's own text justification, and it sits on exactly the same baseline as the rows around it. `ShowArrows` is on by default and draws it as `↓ Protection ↓`, and turning it off leaves just the centred word.
 
@@ -95,7 +135,7 @@ This is the thing people were building by hand: a disabled item whose text had b
 
 ### Menu banners can have their own font, and GTA Online's glare
 
-The banner at the top of a menu used to be fixed. The only thing you could change about it was swapping the whole image out for your own. It now has three settings, all covered on the [Header styling](reference/menu/#header-styling) page.
+The banner at the top of a menu used to be fixed. The only thing you could change about it was swapping the whole image out for your own. It now has three settings, all covered on the [Header styling](../reference/menu/#header-styling) page.
 
 `MenuTitleFont` picks the font the title is drawn in, from the game's own set. `MenuFont` has names for the ones worth using, so `menu.MenuTitleFont = MenuFont.Pricedown` gets you the Grand Theft Auto logo font. Any font id the game knows works, including one your resource registered itself, so a custom font goes straight in. The size and the vertical position are worked out per font, because fonts disagree about both and a shared number would leave half of them sitting crooked.
 
@@ -136,7 +176,7 @@ The subtitle and the counter are drawn in capitals, and MenuAPI was uppercasing 
 
 ### Menus can be split into pages
 
-A menu can now hold thousands of items without the player having to scroll through all of them. Call `menu.SetPageSize(48)` and the menu is split into pages of 48, moved between with left and right. Everything is on the new [Pagination](reference/pagination/) page.
+A menu can now hold thousands of items without the player having to scroll through all of them. Call `menu.SetPageSize(48)` and the menu is split into pages of 48, moved between with left and right. Everything is on the new [Pagination](../reference/pagination/) page.
 
 **Things you have to change in your own code:**
 
@@ -152,7 +192,7 @@ A menu can now hold thousands of items without the player having to scroll throu
 
 MenuAPI used to run seven loops that never stopped. Four of them did real work on every single frame even with every menu closed, which added up to roughly 24 wasted calls into the game per frame, forever. All of that work now sits behind a small scheduler, and a loop that is switched off genuinely **ends** instead of running and immediately returning. With no menu open, MenuAPI does almost nothing at all.
 
-You can see this for yourself. Type `menuapi:yourresourcename:ticks` in the console and it prints every loop and whether it is running. You can also read the same thing from code through the new [MenuTicks](reference/ticks/) class, which is handy if your resource has its own debug overlay.
+You can see this for yourself. Type `menuapi:yourresourcename:ticks` in the console and it prints every loop and whether it is running. You can also read the same thing from code through the new [MenuTicks](../reference/ticks/) class, which is handy if your resource has its own debug overlay.
 
 **Things you have to change in your own code:**
 
@@ -167,7 +207,7 @@ You can see this for yourself. Type `menuapi:yourresourcename:ticks` in the cons
 
 ### Keyboard controls are now FiveM key bindings
 
-Every keyboard menu control is registered as a proper FiveM key mapping, so players can rebind all of them from their own **Settings, Key Bindings** screen. Full details on the [Key bindings](reference/keybindings/) page.
+Every keyboard menu control is registered as a proper FiveM key mapping, so players can rebind all of them from their own **Settings, Key Bindings** screen. Full details on the [Key bindings](../reference/keybindings/) page.
 
 **Things you have to change in your own code:**
 

@@ -6,7 +6,7 @@ title: "Migration guide"
 
 Moving a resource from the older (v3, non Enhanced) MenuAPI to the Enhanced one. This page is just
 the things that stop compiling or stop behaving the way they used to, with a before and after for
-each. The [Changelog](changelog/) explains why each of them changed.
+each. The [Changelog](../changelog/) explains why each of them changed.
 
 Everything not listed here still works the way it always did.
 
@@ -31,7 +31,7 @@ MenuController.MenuToggleKeyDefault = "M";
 
 `Menu.ButtonPressHandlers`, `Menu.ButtonPressHandler`, `Menu.ControlPressCheckType` and the
 `Menu.InstructionalButtons` dictionary are gone. A menu's own keys are registered with
-[AddKeyBinding()](reference/menu/#addkeybinding) instead, which registers a real FiveM key mapping, so
+[AddKeyBinding()](../reference/menu/#addkeybinding) instead, which registers a real FiveM key mapping, so
 the player can rebind it and the instructional button follows whatever they picked.
 
 ```cs
@@ -80,7 +80,7 @@ Your own extra buttons still go in `Menu.InstructionalButtons` exactly as before
 ### List item values are a MenuItemList
 
 `MenuListItem.ListItems` used to be a plain `List<string>` that you handed over and kept a reference
-to. It is now a [MenuItemList](reference/menuitems/menulistitem/#changing-the-values-later), which
+to. It is now a [MenuItemList](../reference/menuitems/menulistitem/#changing-the-values-later), which
 works the same way but tells the menu when it changes, so the row redraws the moment you add or
 remove a value.
 
@@ -134,3 +134,31 @@ MenuAPI is built with nullable reference types on, so things that can be null no
 Nothing breaks. If your resource has nullable switched on too you may get new warnings, and each one
 is pointing at a crash that could already happen today, so they are worth fixing rather than
 silencing.
+
+----
+
+### The NUI web files are minified and renamed
+
+[NUI render mode](../nui/) only. The shipped css and js are minified and carry `.min` in their names,
+so update the six paths in your `index.html`.
+
+```html
+<!-- Before -->
+<link rel="stylesheet" href="menuapi/colour-list.css">
+<link rel="stylesheet" href="menuapi/menuapi.css">
+<script src="menuapi/sprite-cache.js"></script>
+<script src="menuapi/glare.js"></script>
+<script src="menuapi/colour-list.js"></script>
+<script src="menuapi/menuapi.js"></script>
+
+<!-- After -->
+<link rel="stylesheet" href="menuapi/colour-list.min.css">
+<link rel="stylesheet" href="menuapi/menuapi.min.css">
+<script src="menuapi/sprite-cache.min.js"></script>
+<script src="menuapi/glare.min.js"></script>
+<script src="menuapi/colour-list.min.js"></script>
+<script src="menuapi/menuapi.min.js"></script>
+```
+
+Same files, same order, same behaviour. Readable sources are in the
+[repository](https://github.com/TomGrobbe/MenuAPI/tree/fivem-enhanced/MenuAPI/ui).
