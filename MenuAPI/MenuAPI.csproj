@@ -37,13 +37,45 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MenuApiUiSource Include="ui/*.css;ui/*.js" />
+    <MenuApiUiOutput Include="@(MenuApiUiSource->'ui-dist/%(Filename).min%(Extension)')" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="ui/**/*"
+          Exclude="@(MenuApiUiSource)"
           TargetPath="menuapi/%(RecursiveDir)%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest"
           Pack="true"
           PackagePath="contentFiles/any/net10.0/menuapi/"
           PackageCopyToOutput="true" />
+
+    <!-- Named, not globbed: globs expand before any target runs, so ui-dist would be empty. -->
+    <None Include="@(MenuApiUiOutput)"
+          TargetPath="menuapi/%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest"
+          Pack="true"
+          PackagePath="contentFiles/any/net10.0/menuapi/"
+          PackageCopyToOutput="true" />
   </ItemGroup>
+
+  <Target Name="MinifyUiAssets"
+          BeforeTargets="AssignTargetPaths;_GetPackageFiles"
+          Inputs="@(MenuApiUiSource);$(MSBuildThisFileDirectory)../tools/minify-ui.mjs"
+          Outputs="@(MenuApiUiOutput)">
+    <Exec Command="node &quot;$(MSBuildThisFileDirectory)../tools/minify-ui.mjs&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory).."
+          ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="MinifyUiExitCode" />
+    </Exec>
+
+    <Warning Condition="'$(MinifyUiExitCode)' != '0'"
+             Text="Could not run tools/minify-ui.mjs, shipping the unminified web files instead. Install Node and run 'npm ci' for smaller files." />
+
+    <Copy Condition="'$(MinifyUiExitCode)' != '0'"
+          SourceFiles="@(MenuApiUiSource)"
+          DestinationFiles="@(MenuApiUiOutput)" />
+  </Target>
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />

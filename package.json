@@ -1,0 +1,13 @@
+{
+  "name": "menuapi-build",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Build tooling for the MenuAPI NUI assets. Not published, not shipped.",
+  "scripts": {
+    "build:ui": "node tools/minify-ui.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10"
+  }
+}

@@ -355,6 +355,16 @@ jobs:
           ref: ${{ needs.plan.outputs.enhanced_ref }}
           fetch-depth: 0
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install web build tooling
+        shell: bash
+        run: npm ci
+
       - name: Restore NuGet (FiveM only)
         shell: bash
         run: dotnet restore "MenuAPI/MenuAPI.csproj" -p:Configuration=Release
