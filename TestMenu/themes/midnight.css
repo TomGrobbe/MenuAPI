@@ -1,0 +1,29 @@
+/* Example theme: rounded, blue, shadowed. */
+
+#menuapi {
+  --menuapi-radius: 8px;
+  --menuapi-shadow: 0 3px 12px rgb(0 0 0 / 55%);
+
+  --menuapi-subtitle-bg: rgb(12 18 38 / 96%);
+
+  --menuapi-rows-bg: rgb(12 18 38 / 82%);
+  --menuapi-row-text: rgb(214 226 255);
+  --menuapi-row-selected-bg: rgb(84 148 255 / 92%);
+  --menuapi-row-selected-text: rgb(255 255 255);
+  --menuapi-row-disabled-text: rgb(96 112 148);
+  --menuapi-row-selected-disabled-text: rgb(180 200 235);
+
+  --menuapi-header-text: rgb(226 236 255);
+  --menuapi-slider-divider: rgb(84 148 255);
+
+  --menuapi-overflow-bg: rgb(12 18 38 / 82%);
+  --menuapi-desc-bg: rgb(12 18 38 / 82%);
+  --menuapi-desc-rule: rgb(84 148 255 / 70%);
+
+  --menuapi-stats-bg: rgb(12 18 38 / 82%);
+  --menuapi-stat-track: rgb(52 68 104 / 80%);
+  --menuapi-stat-value: rgb(84 148 255);
+
+  --menuapi-panel-bg: rgb(12 18 38 / 88%);
+  --menuapi-panel-text: rgb(214 226 255);
+}

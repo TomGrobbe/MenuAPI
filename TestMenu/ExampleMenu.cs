@@ -11,9 +11,18 @@ public class ExampleMenu : IScript
 {
     private static MenuCheckboxItem? renderModeBox;
 
+    private static readonly List<string> themeNames = new List<string>() { "Default", "Red Dead", "Midnight", "Sunset" };
+    private static readonly List<string?> themeBanners = new List<string?>() { null, "red-dead", "midnight", "sunset" };
+
+    private const int startingTheme = 1;
+
     public ExampleMenu()
     {
         RegisterRenderModeToggle();
+
+        MenuController.RenderMode = MenuRenderMode.Nui;
+
+        MenuController.DefaultTitleAlignment = Menu.TitleAlignmentOption.Left;
 
         // Setting the menu alignment to be right aligned. This can be changed at any time and it'll update instantly.
         // To test this, checkout one of the checkbox items in this example menu. Clicking it will toggle the menu alignment.
@@ -182,6 +191,27 @@ public class ExampleMenu : IScript
         // Adding the lists to the menu.
         menu.AddMenuItem(normalListItem);
 
+        NuiTuning.RegisterTheme("Red Dead", "themes/red-dead.css");
+        NuiTuning.RegisterTheme("Midnight", "themes/midnight.css");
+        NuiTuning.RegisterTheme("Sunset", "themes/sunset.css");
+
+        MenuListItem themePicker = new MenuListItem(
+            "Theme",
+            themeNames,
+            startingTheme,
+            "Scroll left and right to restyle every menu and swap its banner. Only does anything in NUI render mode."
+        );
+
+        menu.AddMenuItem(themePicker);
+
+        menu.OnListIndexChange += (_menu, _item, _oldIndex, _newIndex, _itemIndex) =>
+        {
+            if (_item == themePicker)
+            {
+                ApplyTheme(_newIndex);
+            }
+        };
+
         // Creating a submenu, adding it to the menus list, and creating and binding a button for it.
         Menu submenu = new Menu("Submenu", "Secondary Menu");
         MenuController.AddSubmenu(menu, submenu);
@@ -240,7 +270,7 @@ public class ExampleMenu : IScript
         menu3.AddMenuItem(new MenuItem("Nothing here!"));
         menu3.AddMenuItem(new MenuItem("Nothing here!") { LeftIcon = MenuItem.Icon.TICK });
 
-        for (var i = 0; i < 10; i++)
+        for (var i = 0; i < 3; i++)
         {
             menu.AddMenuItem(new MenuItem($"Item #{i + 1}.", "With an invisible description."));
         }
@@ -910,6 +940,18 @@ public class ExampleMenu : IScript
             // Code in here would get executed whenever a dynamic list item is pressed.
             API.Log.Info($"OnDynamicListItemSelect: [{_menu}, {_dynamicListItem}, {_currentItem}]");
         };
+
+        ApplyTheme(startingTheme);
+    }
+
+    private static void ApplyTheme(int index)
+    {
+        NuiTuning.SetTheme(index == 0 ? null : themeNames[index]);
+
+        foreach (Menu other in MenuController.Menus)
+        {
+            other.HeaderImage = themeBanners[index];
+        }
     }
 
     private static void RegisterRenderModeToggle()

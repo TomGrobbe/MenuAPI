@@ -1,0 +1,37 @@
+/* Example theme: Red Dead Redemption 2 flavoured. */
+
+#menuapi {
+  --menuapi-font: Georgia, "Times New Roman", "Book Antiqua", serif;
+
+  --menuapi-radius: 0px;
+  --menuapi-shadow: 0 2px 10px rgb(0 0 0 / 60%);
+
+  --menuapi-subtitle-bg: rgb(14 9 8 / 97%);
+  --menuapi-subtitle-text: rgb(226 205 168);
+  --menuapi-freemode: rgb(214 178 116);
+
+  --menuapi-rows-bg: rgb(14 9 8 / 84%);
+  --menuapi-row-text: rgb(232 219 196);
+  --menuapi-row-selected-bg: rgb(146 27 23 / 94%);
+  --menuapi-row-selected-text: rgb(246 234 212);
+  --menuapi-row-disabled-text: rgb(122 104 86);
+  --menuapi-row-selected-disabled-text: rgb(198 160 148);
+
+  --menuapi-header-text: rgb(244 231 206);
+  --menuapi-slider-divider: rgb(226 205 168);
+
+  --menuapi-overflow-bg: rgb(14 9 8 / 84%);
+  --menuapi-desc-bg: rgb(14 9 8 / 84%);
+  --menuapi-desc-rule: rgb(146 27 23 / 85%);
+
+  --menuapi-stats-bg: rgb(14 9 8 / 84%);
+  --menuapi-stat-track: rgb(62 46 38 / 85%);
+  --menuapi-stat-value: rgb(196 62 44);
+  --menuapi-stat-upgrade: rgb(214 178 116);
+  --menuapi-stat-upgrade-reduced: rgb(120 22 18);
+
+  --menuapi-panel-bg: rgb(14 9 8 / 92%);
+  --menuapi-panel-text: rgb(232 219 196);
+  --menuapi-panel-swatch-selected: rgb(244 231 206);
+  --menuapi-panel-opacity-bar: rgb(88 66 54);
+}

@@ -28,6 +28,8 @@
   <ItemGroup>
     <None Include="fxmanifest.lua" CopyToOutputDirectory="PreserveNewest" />
     <None Include="index.html" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="themes/**/*" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="menuapi-banners/**/*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!--

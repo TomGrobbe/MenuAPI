@@ -1,0 +1,16 @@
+/* Example theme: warm, square edged, sets only a handful of tokens. */
+
+#menuapi {
+  --menuapi-font: "Bebas Neue", "Arial Narrow", Arial, sans-serif;
+
+  --menuapi-subtitle-bg: rgb(38 12 8 / 96%);
+
+  --menuapi-rows-bg: rgb(38 12 8 / 80%);
+  --menuapi-row-selected-bg: rgb(240 138 58 / 92%);
+  --menuapi-row-selected-text: rgb(32 12 4);
+
+  --menuapi-desc-bg: rgb(38 12 8 / 80%);
+  --menuapi-desc-rule: rgb(240 138 58 / 70%);
+
+  --menuapi-stat-value: rgb(240 138 58);
+}

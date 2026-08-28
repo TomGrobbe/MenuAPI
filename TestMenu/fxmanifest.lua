@@ -26,6 +26,9 @@ files {
 
     'index.html',
     'menuapi/**/*',
+
+    'themes/**/*',
+    'menuapi-banners/**/*',
 }
 
 -- Client assembly
