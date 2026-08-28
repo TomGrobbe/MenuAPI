@@ -709,6 +709,11 @@ public class Menu
     public string PreviousPageButtonText { get; set; } = "Previous page";
     public string NextPageButtonText { get; set; } = "Next page";
 
+    /// <summary>Only drawn while the highlighted row is a list or a slider.</summary>
+    public bool ShowChangeValueInstructionalButton { get; set; } = true;
+
+    public string ChangeValueButtonText { get; set; } = "Change";
+
     public List<InstructionalButton> CustomInstructionalButtons = new();
 
     public struct InstructionalButton(string controlString, string instructionText)

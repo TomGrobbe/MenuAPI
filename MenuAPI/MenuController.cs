@@ -116,6 +116,10 @@ public class MenuController : IScript
 
     private static Menu? _instructionalButtonsMenu;
 
+    private static MenuItem? _instructionalButtonsItem;
+
+    private const string IconSeparator = "%b_998%";
+
     private static MenuAlignmentOption _alignment = MenuAlignmentOption.Left;
     public static MenuAlignmentOption MenuAlignment
     {
@@ -1149,7 +1153,8 @@ public class MenuController : IScript
             return;
         }
 
-        if (!ReferenceEquals(menu, _instructionalButtonsMenu))
+        if (!ReferenceEquals(menu, _instructionalButtonsMenu) ||
+            !ReferenceEquals(menu.GetCurrentMenuItem(), _instructionalButtonsItem))
         {
             FillInstructionalButtonSlots(menu);
         }
@@ -1212,8 +1217,17 @@ public class MenuController : IScript
             SetInstructionalButtonSlot(slot++, MenuInput.GetBackButton(), menu.BackButtonText);
         }
 
+        MenuItem? currentItem = menu.GetCurrentMenuItem();
+
+        if (menu.ShowChangeValueInstructionalButton && ChangesValueWithLeftRight(currentItem))
+        {
+            SetInstructionalButtonSlot(
+                slot++,
+                $"{MenuInput.GetLeftButton()}{IconSeparator}{MenuInput.GetRightButton()}",
+                menu.ChangeValueButtonText);
+        }
         // Only worth a hint when there is more than one page to move between.
-        if (menu.Paginated && menu.ShowPageInstructionalButtons && menu.PageCount > 1)
+        else if (menu.Paginated && menu.ShowPageInstructionalButtons && menu.PageCount > 1)
         {
             SetInstructionalButtonSlot(slot++, MenuInput.GetLeftButton(), menu.PreviousPageButtonText);
             SetInstructionalButtonSlot(slot++, MenuInput.GetRightButton(), menu.NextPageButtonText);
@@ -1240,7 +1254,11 @@ public class MenuController : IScript
         Native.EndScaleformMovieMethod();
 
         _instructionalButtonsMenu = menu;
+        _instructionalButtonsItem = currentItem;
     }
+
+    private static bool ChangesValueWithLeftRight(MenuItem? item) =>
+        item is MenuListItem or MenuSliderItem or MenuDynamicListItem && item.Enabled;
 
     private static void SetInstructionalButtonSlot(int slot, string buttonString, string text)
     {
