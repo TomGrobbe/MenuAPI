@@ -259,7 +259,7 @@
         subtitle.classList.toggle("menuapi-subtitle--freemode", !!data.freemode);
 
         if (data.colour) {
-            root.style.setProperty("--menuapi-freemode", data.colour);
+            root.style.setProperty("--menuapi-hud-freemode", data.colour);
         }
         subtitleText.replaceChildren(markup(data.text));
         subtitleCounter.replaceChildren(markup(data.counter));
@@ -435,7 +435,50 @@
         }));
     }
 
+    let themeUrl = null;
+    let themeLink = null;
+
+    function applyTheme(url) {
+        url = url || null;
+
+        if (url === themeUrl) {
+            return;
+        }
+
+        themeUrl = url;
+
+        const previous = themeLink;
+
+        if (!url) {
+            themeLink = null;
+            previous?.remove();
+
+            return;
+        }
+
+        const link = document.createElement("link");
+
+        link.rel = "stylesheet";
+        link.id = "menuapi-theme";
+        link.href = url;
+
+        const drop = () => {
+            if (previous !== themeLink) {
+                previous?.remove();
+            }
+        };
+
+        link.addEventListener("load", drop, { once: true });
+        link.addEventListener("error", drop, { once: true });
+
+        themeLink = link;
+
+        document.head.append(link);
+    }
+
     function render(data) {
+        applyTheme(data.theme);
+
         if (!data.visible) {
             root.hidden = true;
             setGlare(false);
@@ -472,8 +515,8 @@
         renderPanel(data.panel);
         renderStats(data.stats);
 
-        root.style.setProperty("--menuapi-panel-bg", data.panelBackground);
-        root.style.setProperty("--menuapi-panel-accent", data.panelAccent);
+        root.style.setProperty("--menuapi-hud-panel-bg", data.panelBackground);
+        root.style.setProperty("--menuapi-hud-panel-accent", data.panelAccent);
 
         applyText(data.text);
     }

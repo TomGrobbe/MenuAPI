@@ -89,7 +89,7 @@
   --menuapi-scale: 1;
   --menuapi-aspect: 1.7777778;
 
-  --menuapi-freemode: rgb(255 255 255);
+  --menuapi-freemode: var(--menuapi-hud-freemode, rgb(255 255 255));
 
   /* The game insets text from where it is told to draw it and CSS does not. Both measured. */
   --menuapi-text-inset: 2.5px;
@@ -98,6 +98,43 @@
 
   /* 225, not 255: measured off the game's own white menu text. */
   --menuapi-text: rgb(var(--menuapi-text-rgb, 225 225 225));
+
+
+  --menuapi-font: "GTA Chalet", "Helvetica Neue", Arial, sans-serif;
+
+  --menuapi-radius: 0px;
+  --menuapi-shadow: none;
+
+  --menuapi-subtitle-bg: rgb(0 0 0 / 98%);
+  --menuapi-subtitle-text: var(--menuapi-text);
+
+  --menuapi-rows-bg: rgb(0 0 0 / 70.5%);
+  --menuapi-row-text: var(--menuapi-text);
+  --menuapi-row-selected-bg: rgb(255 255 255 / 88%);
+  --menuapi-row-selected-text: rgb(0 0 0);
+  --menuapi-row-disabled-text: rgb(109 109 109);
+  --menuapi-row-selected-disabled-text: rgb(50 50 50);
+
+  --menuapi-header-text: var(--menuapi-text);
+  --menuapi-slider-divider: rgb(255 255 255);
+
+  --menuapi-overflow-bg: rgb(0 0 0 / 70.5%);
+  --menuapi-desc-bg: rgb(0 0 0 / 70.5%);
+  --menuapi-desc-rule: rgb(0 0 0 / 78%);
+
+  --menuapi-stats-bg: rgb(0 0 0 / 70.5%);
+  --menuapi-stat-track: rgb(100 100 100 / 70.5%);
+  --menuapi-stat-value: rgb(255 255 255);
+  --menuapi-stat-upgrade: rgb(93 182 229);
+  --menuapi-stat-upgrade-reduced: rgb(224 50 50);
+
+
+  /* The page writes --menuapi-hud-* inline, which outranks any stylesheet, so themes layer here. */
+  --menuapi-panel-bg: var(--menuapi-hud-panel-bg, rgb(0 0 0 / 73%));
+  --menuapi-panel-accent: var(--menuapi-hud-panel-accent, 240, 240, 240);
+  --menuapi-panel-text: var(--menuapi-text);
+  --menuapi-panel-swatch-selected: rgb(255 255 255);
+  --menuapi-panel-opacity-bar: rgb(136 136 136);
 
   font-size: calc(var(--menuapi-text-size, 21) * 1px);
 
@@ -111,7 +148,7 @@
 
   pointer-events: none;
 
-  font-family: "GTA Chalet", "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--menuapi-font);
 
   line-height: 1;
   color: var(--menuapi-text);
@@ -140,6 +177,7 @@
   position: relative;
   width: 500px;
   height: 110px;
+  box-shadow: var(--menuapi-shadow);
 }
 
 .menuapi-header__bg {
@@ -148,6 +186,7 @@
   width: 100%;
   height: 100%;
   object-fit: fill;
+  border-radius: var(--menuapi-radius) var(--menuapi-radius) 0 0;
 }
 
 /* Taller than the header on purpose: half the light bar's glow belongs below the lower edge. */
@@ -165,7 +204,7 @@
   display: flex;
   align-items: center;
   padding: 0 calc(10px + var(--menuapi-text-inset)) 0 calc(10px + var(--menuapi-title-inset));
-  color: var(--menuapi-text);
+  color: var(--menuapi-header-text);
   transform: translateY(var(--menuapi-title-nudge, 0px));
 }
 
@@ -219,7 +258,9 @@
   justify-content: space-between;
   height: 38px;
   padding: 0 calc(10px + var(--menuapi-text-inset));
-  background: rgb(0 0 0 / 98%);
+  background: var(--menuapi-subtitle-bg);
+  color: var(--menuapi-subtitle-text);
+  box-shadow: var(--menuapi-shadow);
 
   text-transform: uppercase;
 }
@@ -229,26 +270,28 @@
 }
 
 .menuapi-rows {
-  background: rgb(0 0 0 / 70.5%);
+  background: var(--menuapi-rows-bg);
+  box-shadow: var(--menuapi-shadow);
+  border-radius: 0 0 var(--menuapi-radius) var(--menuapi-radius);
 }
 
 .menuapi-row {
   position: relative;
   height: 38px;
-  color: var(--menuapi-text);
+  color: var(--menuapi-row-text);
 }
 
 .menuapi-row--selected {
-  background: rgb(255 255 255 / 88%);
-  color: #000;
+  background: var(--menuapi-row-selected-bg);
+  color: var(--menuapi-row-selected-text);
 }
 
 .menuapi-row--disabled {
-  color: rgb(109 109 109);
+  color: var(--menuapi-row-disabled-text);
 }
 
 .menuapi-row--selected.menuapi-row--disabled {
-  color: rgb(50 50 50);
+  color: var(--menuapi-row-selected-disabled-text);
 }
 
 .menuapi-row--separator {
@@ -257,11 +300,11 @@
 }
 
 .menuapi-row--separator.menuapi-row--disabled {
-  color: var(--menuapi-text);
+  color: var(--menuapi-row-text);
 }
 
 .menuapi-row--separator.menuapi-row--selected {
-  color: #000;
+  color: var(--menuapi-row-selected-text);
 }
 
 .menuapi-row__text {
@@ -360,7 +403,7 @@
   left: 77px;
   width: 4px;
   height: 19px;
-  background: #fff;
+  background: var(--menuapi-slider-divider);
   transform: translate(-50%, -50%);
 }
 
@@ -376,8 +419,10 @@
   justify-content: center;
   height: calc(60px / var(--menuapi-aspect));
   margin-top: 4px;
-  background: rgb(0 0 0 / 70.5%);
-  color: var(--menuapi-text);
+  background: var(--menuapi-overflow-bg);
+  box-shadow: var(--menuapi-shadow);
+  color: var(--menuapi-row-text);
+  border-radius: var(--menuapi-radius);
 }
 
 .menuapi-overflow > span {
@@ -388,7 +433,9 @@
   position: relative;
   padding: 8px calc(10px + var(--menuapi-text-inset)) 2.5px;
   margin-top: 8px;
-  background: rgb(0 0 0 / 70.5%);
+  background: var(--menuapi-desc-bg);
+  box-shadow: var(--menuapi-shadow);
+  border-radius: var(--menuapi-radius);
 
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -406,7 +453,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: rgb(0 0 0 / 78%);
+  background: var(--menuapi-desc-rule);
 }
 
 .menuapi-panel {
@@ -414,10 +461,10 @@
 
   margin-top: 4px;
 
-  --bg: var(--menuapi-panel-bg, rgb(0 0 0 / 73%));
-  --accent: var(--menuapi-panel-accent, 240, 240, 240);
+  --bg: var(--menuapi-panel-bg);
+  --accent: var(--menuapi-panel-accent);
 
-  --text: var(--menuapi-text);
+  --text: var(--menuapi-panel-text);
 
   font-family: inherit;
 }
@@ -473,7 +520,9 @@
   height: 130px;
   padding-top: 10px;
   margin-top: 4px;
-  background: rgb(0 0 0 / 70.5%);
+  background: var(--menuapi-stats-bg);
+  box-shadow: var(--menuapi-shadow);
+  border-radius: var(--menuapi-radius);
 }
 
 #menuapi.menuapi--overflow .menuapi-stats {
@@ -504,7 +553,7 @@
   right: 10px;
   width: 250px;
   height: 10px;
-  background: rgb(100 100 100 / 70.5%);
+  background: var(--menuapi-stat-track);
 }
 
 .menuapi-stat__upgrade,
@@ -516,13 +565,13 @@
 }
 
 .menuapi-stat__upgrade {
-  background: rgb(93 182 229);
+  background: var(--menuapi-stat-upgrade);
 }
 
 .menuapi-stat__upgrade--reduced {
-  background: rgb(224 50 50);
+  background: var(--menuapi-stat-upgrade-reduced);
 }
 
 .menuapi-stat__value {
-  background: #fff;
+  background: var(--menuapi-stat-value);
 }

@@ -139,6 +139,13 @@ internal static class MenuNui
         json.Prop("panelBackground", PanelBackground())
             .Prop("panelAccent", PanelAccent());
 
+        var theme = NuiTuning.ThemeUrl;
+
+        if (theme is not null)
+        {
+            json.Prop("theme", theme);
+        }
+
         json.Object("text")
             .Prop("size", NuiTuning.TextSize)
             .Prop("brightness", NuiTuning.TextBrightness)

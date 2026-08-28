@@ -5,7 +5,7 @@
 
   --bg: rgba(0, 0, 0, 0.73);
   --accent: 240, 240, 240;
-  --text: #f0f0f0;
+  --text: var(--menuapi-panel-text, #f0f0f0);
 
   --palette-offset: 0;
 
@@ -125,7 +125,7 @@
   top: 0;
   width: 100%;
   height: calc(5px * var(--u));
-  background: #fff;
+  background: var(--menuapi-panel-swatch-selected, #fff);
   clip-path: polygon(
     0 0,
     calc(50% - 5px * var(--u)) 0,
@@ -147,7 +147,7 @@
   top: calc(5px * var(--u));
   width: 100%;
   height: calc(30px * var(--u));
-  background: #888;
+  background: var(--menuapi-panel-opacity-bar, #888);
 }
 
 .gcl--pc .gcl__colour {
