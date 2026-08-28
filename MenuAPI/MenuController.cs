@@ -13,10 +13,6 @@ public class MenuController : IScript
     // not in this list cannot go missing because someone forgot to add the dictionary too.
     private static List<string> MenuTextureAssets => SpriteManifest.Dictionaries;
 
-    // How often the controller toggle button is checked while no menu is open. The gesture is a 400ms
-    // hold, so this is well inside it: once the button is actually down the hold is timed per frame.
-    private const long ControllerPollIntervalMs = 100;
-
     // How often the cached screen values are re-read while a menu is open. The safe zone slider is in
     // the pause menu and a resolution change is not something a player does mid menu, so this only has
     // to be often enough that the menu has settled by the time they look at it again.
@@ -101,42 +97,9 @@ public class MenuController : IScript
         }
     }
 
-    private static bool _dontOpenAnyMenu = false;
+    public static bool DontOpenAnyMenu { get; set; } = false;
 
-    // Backed by a field rather than an auto property because the controller toggle tick is gated on
-    // it, and a tick's condition is only re-run when something asks for it.
-    public static bool DontOpenAnyMenu
-    {
-        get => _dontOpenAnyMenu;
-        set
-        {
-            if (_dontOpenAnyMenu == value)
-            {
-                return;
-            }
-
-            _dontOpenAnyMenu = value;
-            MenuTicks.Reevaluate();
-        }
-    }
-
-    private static bool _enableMenuToggleKeyOnController = true;
-
-    // Same as DontOpenAnyMenu: gates a tick, so a change has to re-run the conditions.
-    public static bool EnableMenuToggleKeyOnController
-    {
-        get => _enableMenuToggleKeyOnController;
-        set
-        {
-            if (_enableMenuToggleKeyOnController == value)
-            {
-                return;
-            }
-
-            _enableMenuToggleKeyOnController = value;
-            MenuTicks.Reevaluate();
-        }
-    }
+    public static bool EnableMenuToggleKeyOnController { get; set; } = true;
 
     /// <summary>
     /// The key the menu toggle is bound to for players who have never rebound it themselves. Must be
@@ -152,10 +115,6 @@ public class MenuController : IScript
     internal static int _scale = Native.RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
 
     private static Menu? _instructionalButtonsMenu;
-
-    // Whether the mouse button was pressed down while a menu was open, see IsMouseButtonUsed.
-    private static bool mouseSelectArmed = false;
-    private static bool mouseBackArmed = false;
 
     private static MenuAlignmentOption _alignment = MenuAlignmentOption.Left;
     public static MenuAlignmentOption MenuAlignment
@@ -240,16 +199,13 @@ public class MenuController : IScript
             // slate rather than acting on presses that arrived when there was nothing to act on.
             onStarted: () =>
             {
-                MenuKeyBindings.ClearPending();
-                MenuKeyBindings.ClearHeld();
+                MenuInput.ClearPending();
+                MenuInput.ClearHeld();
             },
             onStopped: () =>
             {
-                MenuKeyBindings.ClearHeld();
-                // Disarming here is what stops a mouse button that was already down before the menu
-                // opened from selecting or going back the moment it is released.
-                mouseSelectArmed = false;
-                mouseBackArmed = false;
+                MenuInput.ClearHeld();
+                MenuInput.ClearPending();
             });
 
         // Separate from Menu.Select rather than merged: this one blocks inside its hold to repeat
@@ -261,12 +217,6 @@ public class MenuController : IScript
         // The only always on tick. It has to notice the toggle key with everything closed, but it
         // reads a flag the key mapping sets rather than polling, so an idle frame costs no natives.
         MenuTicks.Register("Menu.Toggle", ProcessToggleMenuButton, MenuTickRate.PerFrame);
-
-        // Polling is the only way to see a held controller button, so this one cannot be event
-        // driven. The gesture is a 400ms hold, so checking ten times a second still opens the menu at
-        // the same moment while costing a sixth of what a per frame check did.
-        MenuTicks.Register("Menu.ToggleController", ProcessControllerToggle, MenuTickRate.Every(ControllerPollIntervalMs),
-            condition: () => !IsAnyMenuOpen() && EnableMenuToggleKeyOnController && !DontOpenAnyMenu);
     }
 
     // Waits a frame before registering. Every IScript is constructed before the first tick runs, so
@@ -275,7 +225,7 @@ public class MenuController : IScript
     static async void RegisterKeyBindings()
     {
         await API.Delay(0);
-        MenuKeyBindings.Register();
+        MenuInput.Register();
     }
     /// <summary>
     /// This binds the <paramref name="childMenu"/> menu to the <paramref name="menuItem"/> and sets the menu's parent to <paramref name="parentMenu"/>.
@@ -505,8 +455,8 @@ public class MenuController : IScript
     {
         // Always drained, so a press that arrived while the menu could not act on it is dropped
         // instead of firing later.
-        bool selectPressed = MenuKeyBindings.ConsumeSelect();
-        bool backPressed = MenuKeyBindings.ConsumeBack();
+        bool selectPressed = MenuInput.ConsumeSelect();
+        bool backPressed = MenuInput.ConsumeBack();
 
         if (FrameState.IsPauseMenuActive)
         {
@@ -526,26 +476,8 @@ public class MenuController : IScript
         await HandleMainNavigationButtons(currentMenu, selectPressed, backPressed);
     }
 
-    private static async Task HandleMainNavigationButtons(Menu currentMenu, bool selectPressed, bool backPressed)
+    private static async Task HandleMainNavigationButtons(Menu currentMenu, bool select, bool back)
     {
-        bool onController = !Native.IsUsingKeyboardAndMouse(2);
-
-        // On keyboard the mouse buttons are the only polled part left, everything else comes from the
-        // key mappings. The controller controls are gated so a keyboard press is not counted twice.
-        bool select = selectPressed || (!onController && IsMouseButtonUsed(Control.VehicleMouseControlOverride, ref mouseSelectArmed));
-        bool back = backPressed || (!onController && IsMouseButtonUsed(Control.Aim, ref mouseBackArmed));
-
-        if (onController)
-        {
-            select = select ||
-                Native.IsDisabledControlJustReleased(0, (int)Control.FrontendAccept) ||
-                Native.IsControlJustReleased(0, (int)Control.FrontendAccept);
-
-            back = back ||
-                Native.IsDisabledControlJustReleased(0, (int)Control.PhoneCancel) ||
-                Native.IsControlJustReleased(0, (int)Control.PhoneCancel);
-        }
-
         // Select / Enter
         if (select)
         {
@@ -569,27 +501,6 @@ public class MenuController : IScript
         }
     }
 
-    /// <summary>
-    /// Acts on a mouse button release, but only when the press that goes with it also happened while
-    /// the menu was open. Without that, aiming and then opening the menu would go back as soon as the
-    /// right mouse button is let go.
-    /// </summary>
-    private static bool IsMouseButtonUsed(Control control, ref bool armed)
-    {
-        if (Native.IsDisabledControlJustPressed(0, (int)control) || Native.IsControlJustPressed(0, (int)control))
-        {
-            armed = true;
-        }
-
-        if (!armed || !(Native.IsDisabledControlJustReleased(0, (int)control) || Native.IsControlJustReleased(0, (int)control)))
-        {
-            return false;
-        }
-
-        armed = false;
-        return true;
-    }
-
     private static void HandlePreventExit()
     {
         if (PreventExitingMenu)
@@ -599,112 +510,13 @@ public class MenuController : IScript
         }
     }
 
-    /// <summary>
-    /// Returns true when the scrollwheel should be ignored because the player is picking a weapon
-    /// with it (holding TAB, on foot).
-    /// </summary>
-    private static bool IsUsingWeaponWheel()
-    {
-        if (FrameState.IsInVehicle)
-        {
-            return false;
-        }
-        if (!Native.IsControlPressed(0, (int)Control.SelectWeapon))
-        {
-            return false;
-        }
-        return Native.IsControlPressed(0, (int)Control.SelectNextWeapon) || Native.IsControlPressed(0, (int)Control.SelectPrevWeapon);
-    }
+    private static bool IsUpPressed(bool buttonsEnabled) => buttonsEnabled && MenuInput.UpHeld;
 
-    /// <summary>
-    /// Returns true when one of the 'up' controls is currently pressed, only if the button can be active according to some conditions.
-    /// </summary>
-    /// <returns></returns>
-    private static bool IsUpPressed(bool buttonsEnabled)
-    {
-        if (!buttonsEnabled)
-        {
-            return false;
-        }
-        if (MenuKeyBindings.UpHeld)
-        {
-            return true;
-        }
-        if (!IsUsingWeaponWheel() && (
-            Native.IsControlPressed(0, (int)Control.PhoneScrollBackward) ||
-            Native.IsDisabledControlPressed(0, (int)Control.PhoneScrollBackward)))
-        {
-            return true;
-        }
-        // Only on a controller, otherwise a keyboard press would count twice: once through the key
-        // mapping and once here.
-        return !Native.IsUsingKeyboardAndMouse(2) && (
-            Native.IsControlPressed(0, (int)Control.FrontendUp) ||
-            Native.IsDisabledControlPressed(0, (int)Control.FrontendUp));
-    }
+    private static bool IsDownPressed(bool buttonsEnabled) => buttonsEnabled && MenuInput.DownHeld;
 
-    /// <summary>
-    /// Returns true when one of the 'down' controls is currently pressed, only if the button can be active according to some conditions.
-    /// </summary>
-    /// <returns></returns>
-    private static bool IsDownPressed(bool buttonsEnabled)
-    {
-        if (!buttonsEnabled)
-        {
-            return false;
-        }
-        if (MenuKeyBindings.DownHeld)
-        {
-            return true;
-        }
-        if (!IsUsingWeaponWheel() && (
-            Native.IsControlPressed(0, (int)Control.PhoneScrollForward) ||
-            Native.IsDisabledControlPressed(0, (int)Control.PhoneScrollForward)))
-        {
-            return true;
-        }
-        return !Native.IsUsingKeyboardAndMouse(2) && (
-            Native.IsControlPressed(0, (int)Control.FrontendDown) ||
-            Native.IsDisabledControlPressed(0, (int)Control.FrontendDown));
-    }
+    private static bool IsLeftPressed(bool buttonsEnabled) => buttonsEnabled && MenuInput.LeftHeld;
 
-    /// <summary>
-    /// Returns true when one of the 'left' controls is currently pressed, only if the button can be active according to some conditions.
-    /// </summary>
-    /// <returns></returns>
-    private static bool IsLeftPressed(bool buttonsEnabled)
-    {
-        if (!buttonsEnabled)
-        {
-            return false;
-        }
-        if (MenuKeyBindings.LeftHeld)
-        {
-            return true;
-        }
-        return !Native.IsUsingKeyboardAndMouse(2) && (
-            Native.IsControlPressed(0, (int)Control.PhoneLeft) ||
-            Native.IsDisabledControlPressed(0, (int)Control.PhoneLeft));
-    }
-
-    /// <summary>
-    /// Returns true when one of the 'right' controls is currently pressed, only if the button can be active according to some conditions.
-    /// </summary>
-    /// <returns></returns>
-    private static bool IsRightPressed(bool buttonsEnabled)
-    {
-        if (!buttonsEnabled)
-        {
-            return false;
-        }
-        if (MenuKeyBindings.RightHeld)
-        {
-            return true;
-        }
-        return !Native.IsUsingKeyboardAndMouse(2) && (
-            Native.IsControlPressed(0, (int)Control.PhoneRight) ||
-            Native.IsDisabledControlPressed(0, (int)Control.PhoneRight));
-    }
+    private static bool IsRightPressed(bool buttonsEnabled) => buttonsEnabled && MenuInput.RightHeld;
 
     /// <summary>
     /// Processes the menu toggle button to check if the menu should open or close.
@@ -712,10 +524,12 @@ public class MenuController : IScript
     /// <returns></returns>
     private static void ProcessToggleMenuButton()
     {
+        MenuInput.PollControllerToggleHold(EnableMenuToggleKeyOnController);
+
         // Drained every frame, so a press from while the menu could not open does not open it later.
         // Checked before anything else so an idle frame costs nothing: with no press the game state
         // below could not have changed the outcome anyway.
-        if (!MenuKeyBindings.ConsumeToggle())
+        if (!MenuInput.ConsumeToggle())
         {
             return;
         }
@@ -743,25 +557,6 @@ public class MenuController : IScript
     }
 
     /// <summary>
-    /// The controller half of the toggle. Only registered while every menu is closed, so it does not
-    /// need to check for that itself.
-    /// </summary>
-    private static async Task ProcessControllerToggle()
-    {
-        if (Native.IsUsingKeyboardAndMouse(2))
-        {
-            return;
-        }
-
-        if (FrameState.IsPauseMenuActive || Native.IsPauseMenuRestarting() || !FrameState.IsScreenFadedIn || FrameState.IsPlayerSwitchInProgress || FrameState.IsDead || DisableMenuButtons)
-        {
-            return;
-        }
-
-        await HandleMenuToggleKeyForController();
-    }
-
-    /// <summary>
     /// Opens <see cref="MainMenu"/>, or the first registered menu when no main menu is set.
     /// </summary>
     private static void OpenMainMenu()
@@ -786,6 +581,9 @@ public class MenuController : IScript
         // a frame with nothing pressed evaluated the same seven conditions five times over.
         var buttonsEnabled = AreMenuButtonsEnabled;
 
+        int scrollUp = MenuInput.ConsumeScrollUp();
+        int scrollDown = MenuInput.ConsumeScrollDown();
+
         if (!buttonsEnabled)
         {
             return;
@@ -798,6 +596,17 @@ public class MenuController : IScript
         {
             return;
         }
+
+        for (; scrollUp > 0; scrollUp--)
+        {
+            currentMenu.GoUp();
+        }
+
+        for (; scrollDown > 0; scrollDown--)
+        {
+            currentMenu.GoDown();
+        }
+
         if (IsUpPressed(buttonsEnabled))
         {
             await HandleUpNavigation(currentMenu);
@@ -982,24 +791,6 @@ public class MenuController : IScript
                 currentMenu.GoDown();
 
                 time = Native.GetGameTimer();
-            }
-            await API.Delay(0);
-        }
-    }
-
-    /// <summary>
-    /// The controller toggle is deliberately not a key mapping: it stays the back/select button, held
-    /// for 400ms, and can not be rebound.
-    /// </summary>
-    private static async Task HandleMenuToggleKeyForController()
-    {
-        int tmpTimer = Native.GetGameTimer();
-        while ((Native.IsControlPressed(0, (int)Control.InteractionMenu) || Native.IsDisabledControlPressed(0, (int)Control.InteractionMenu)) && !FrameState.IsPauseMenuActive && FrameState.IsScreenFadedIn && !FrameState.IsDead && !FrameState.IsPlayerSwitchInProgress && !DontOpenAnyMenu)
-        {
-            if (Native.GetGameTimer() - tmpTimer > 400)
-            {
-                OpenMainMenu();
-                break;
             }
             await API.Delay(0);
         }
@@ -1301,7 +1092,7 @@ public class MenuController : IScript
             return;
         }
 
-        menu.ProcessButtonPressHandlers();
+        menu.ProcessKeyBindings();
 
         MenuNui.SendChanges(menu);
     }
@@ -1414,24 +1205,28 @@ public class MenuController : IScript
 
         if (menu.ShowSelectInstructionalButton)
         {
-            SetInstructionalButtonSlot(slot++, MenuKeyBindings.GetSelectButton(), menu.SelectButtonText);
+            SetInstructionalButtonSlot(slot++, MenuInput.GetSelectButton(), menu.SelectButtonText);
         }
         if (menu.ShowBackInstructionalButton)
         {
-            SetInstructionalButtonSlot(slot++, MenuKeyBindings.GetBackButton(), menu.BackButtonText);
+            SetInstructionalButtonSlot(slot++, MenuInput.GetBackButton(), menu.BackButtonText);
         }
 
         // Only worth a hint when there is more than one page to move between.
         if (menu.Paginated && menu.ShowPageInstructionalButtons && menu.PageCount > 1)
         {
-            SetInstructionalButtonSlot(slot++, MenuKeyBindings.GetLeftButton(), menu.PreviousPageButtonText);
-            SetInstructionalButtonSlot(slot++, MenuKeyBindings.GetRightButton(), menu.NextPageButtonText);
+            SetInstructionalButtonSlot(slot++, MenuInput.GetLeftButton(), menu.PreviousPageButtonText);
+            SetInstructionalButtonSlot(slot++, MenuInput.GetRightButton(), menu.NextPageButtonText);
         }
 
-        // Enumerated rather than indexed: ElementAt on a dictionary walks it from the start every
-        foreach (KeyValuePair<Control, string> button in menu.InstructionalButtons)
+        for (int i = 0; i < menu.KeyBindingHandlers.Count; i++)
         {
-            SetInstructionalButtonSlot(slot++, InstructionalButtonIcons.For((int)button.Key), button.Value);
+            Menu.KeyBindingHandler entry = menu.KeyBindingHandlers[i];
+
+            if (!string.IsNullOrEmpty(entry.ButtonText))
+            {
+                SetInstructionalButtonSlot(slot++, entry.Binding.Icon, entry.ButtonText);
+            }
         }
 
         for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)

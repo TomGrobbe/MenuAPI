@@ -211,20 +211,14 @@ public class ExampleMenu : IScript
 
             submenu.AddMenuItem(tmpItem);
         }
-        submenu.ButtonPressHandlers.Add(
-            new Menu.ButtonPressHandler(Control.FrontendSocialClubSecondary,
-            Menu.ControlPressCheckType.JUST_RELEASED,
-            new Action<Menu, Control>((m, c) =>
-            {
-                m.GetMenuItems().ForEach(a => a.Enabled = !a.Enabled);
-            }), true)
-        );
-        // Instructional buttons setup for the second (submenu) menu.
-        submenu.InstructionalButtons.Add(Control.CharacterWheel, "Right?!");
-        submenu.InstructionalButtons.Add(Control.CursorScrollDown, "Cool");
-        submenu.InstructionalButtons.Add(Control.CreatorDelete, "Out!");
-        submenu.InstructionalButtons.Add(Control.Cover, "This");
-        submenu.InstructionalButtons.Add(Control.Context, "Check");
+        submenu.AddKeyBinding(
+            "toggleitems",
+            "Example: toggle every item",
+            "K",
+            "R1_INDEX",
+            MenuKeyPressType.JUST_RELEASED,
+            (m, b) => m.GetMenuItems().ForEach(a => a.Enabled = !a.Enabled),
+            "Toggle all");
         // Create a third menu without a banner.
         Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
 

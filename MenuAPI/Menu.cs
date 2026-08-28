@@ -709,10 +709,6 @@ public class Menu
     public string PreviousPageButtonText { get; set; } = "Previous page";
     public string NextPageButtonText { get; set; } = "Next page";
 
-    // Select and back are not in here because on keyboard they are key mappings the player can rebind,
-    // not a fixed Control. This dictionary is for whatever extra controls the resource wants to show.
-    public Dictionary<Control, string> InstructionalButtons = new();
-
     public List<InstructionalButton> CustomInstructionalButtons = new();
 
     public struct InstructionalButton(string controlString, string instructionText)
@@ -721,26 +717,45 @@ public class Menu
         public string instructionText = instructionText;
     }
 
-    public enum ControlPressCheckType
+    /// <summary>The keys this menu listens for. Add them with <see cref="AddKeyBinding"/>.</summary>
+    public List<KeyBindingHandler> KeyBindingHandlers = new();
+
+    /// <summary>One <see cref="MenuKeyBinding"/> and what this menu does with it.</summary>
+    public sealed class KeyBindingHandler(
+        MenuKeyBinding binding,
+        MenuKeyPressType pressType,
+        Action<Menu, MenuKeyBinding>? handler,
+        string? buttonText)
     {
-        JUST_RELEASED,
-        JUST_PRESSED,
-        RELEASED,
-        PRESSED
+        /// <summary>The key itself, which the player can rebind.</summary>
+        public MenuKeyBinding Binding { get; } = binding;
+
+        public MenuKeyPressType PressType { get; set; } = pressType;
+
+        public Action<Menu, MenuKeyBinding>? Handler { get; set; } = handler;
+
+        /// <summary>The text next to its instructional button. Null or empty draws nothing.</summary>
+        public string? ButtonText { get; set; } = buttonText;
     }
 
-    public struct ButtonPressHandler(Control control, Menu.ControlPressCheckType pressType, Action<Menu, Control> function, bool disableControl)
+    /// <summary>Registers a rebindable key for this menu, and calls <paramref name="handler"/> while the menu is open.</summary>
+    public KeyBindingHandler AddKeyBinding(
+        string name,
+        string description,
+        string keyboardKey,
+        string? controllerButton = null,
+        MenuKeyPressType pressType = MenuKeyPressType.JUST_RELEASED,
+        Action<Menu, MenuKeyBinding>? handler = null,
+        string? buttonText = null)
     {
-        // The control to listen for.
-        internal Control control = control;
-        // The type.
-        internal ControlPressCheckType pressType = pressType;
-        // The function to call when the control is triggered.
-        internal Action<Menu, Control> function = function;
-        // Whether or not the control needs to be disabled if the menu is visible.
-        internal bool disableControl = disableControl;
+        MenuKeyBinding binding = MenuInput.RegisterCustom(name, description, keyboardKey, controllerButton);
+
+        KeyBindingHandler entry = new(binding, pressType, handler, buttonText);
+
+        KeyBindingHandlers.Add(entry);
+
+        return entry;
     }
-    public List<ButtonPressHandler> ButtonPressHandlers = new();
 
     #endregion
 
@@ -1008,7 +1023,7 @@ public class Menu
         OnDynamicListItemSelect = null;
         OnPageChange = null;
 
-        InstructionalButtons.Clear();
+        KeyBindingHandlers.Clear();
         CustomInstructionalButtons.Clear();
 
         ParentMenu = null;
@@ -1445,56 +1460,32 @@ public class Menu
     #endregion
 
     #region internal/private task functions
-    /// <summary>
-    /// Processes any custom button press handlers for this menu.
-    /// </summary>
-    internal void ProcessButtonPressHandlers()
+    internal void ProcessKeyBindings()
     {
-        if (ButtonPressHandlers.Count != 0)
+        if (KeyBindingHandlers.Count == 0 || MenuController.DisableMenuButtons)
         {
-            if (!MenuController.DisableMenuButtons)
+            return;
+        }
+
+        foreach (KeyBindingHandler entry in KeyBindingHandlers)
+        {
+            if (entry.Handler is null)
             {
-                foreach (ButtonPressHandler handler in ButtonPressHandlers)
-                {
-                    if (handler.disableControl)
-                    {
-                        Native.DisableControlAction(0, (int)handler.control, false);
-                    }
+                continue;
+            }
 
-                    switch (handler.pressType)
-                    {
-                        case ControlPressCheckType.JUST_PRESSED:
-                            if (Native.IsControlJustPressed(0, (int)handler.control) || Native.IsDisabledControlJustPressed(0, (int)handler.control))
-                            {
-                                handler.function.Invoke(this, handler.control);
-                            }
+            bool triggered = entry.PressType switch
+            {
+                MenuKeyPressType.JUST_PRESSED => entry.Binding.ConsumePress(),
+                MenuKeyPressType.JUST_RELEASED => entry.Binding.ConsumeRelease(),
+                MenuKeyPressType.PRESSED => entry.Binding.Held,
+                MenuKeyPressType.RELEASED => !entry.Binding.Held,
+                _ => false
+            };
 
-                            break;
-                        case ControlPressCheckType.JUST_RELEASED:
-                            if (Native.IsControlJustReleased(0, (int)handler.control) || Native.IsDisabledControlJustReleased(0, (int)handler.control))
-                            {
-                                handler.function.Invoke(this, handler.control);
-                            }
-
-                            break;
-                        case ControlPressCheckType.PRESSED:
-                            if (Native.IsControlPressed(0, (int)handler.control) || Native.IsDisabledControlPressed(0, (int)handler.control))
-                            {
-                                handler.function.Invoke(this, handler.control);
-                            }
-
-                            break;
-                        case ControlPressCheckType.RELEASED:
-                            if (!Native.IsControlPressed(0, (int)handler.control) && !Native.IsDisabledControlPressed(0, (int)handler.control))
-                            {
-                                handler.function.Invoke(this, handler.control);
-                            }
-
-                            break;
-                        default:
-                            break;
-                    }
-                }
+            if (triggered)
+            {
+                entry.Handler.Invoke(this, entry.Binding);
             }
         }
     }
@@ -2200,7 +2191,7 @@ public class Menu
         // The pause menu, screen fade, death and player switch checks that used to be here are the
         // same four MenuController.ProcessMenus makes immediately before calling this, so they were
         // eight natives a frame answering a question that had just been answered.
-        ProcessButtonPressHandlers();
+        ProcessKeyBindings();
 
         MenuItemsYOffset = 0f;
         if (MenuController.SetDrawOrder)

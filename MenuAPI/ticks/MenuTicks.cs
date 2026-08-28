@@ -52,7 +52,7 @@ public static class MenuTicks
 
         // Carries the resource name, like the key bindings do, so two resources that both ship
         // MenuAPI do not fight over one command name.
-        SharedAPI.Commands.RegisterCommand($"{MenuKeyBindings.Prefix}ticks", false, new Action(Dump));
+        SharedAPI.Commands.RegisterCommand($"{MenuInput.Prefix}ticks", false, new Action(Dump));
 
         Engine.Register("Menu.Scheduler", Flush, MenuTickRate.PerFrame);
     }
