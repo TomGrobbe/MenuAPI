@@ -18,7 +18,7 @@ Here you'll find basic information about how to use MenuAPI in your projects.
 - Almost all menu items support left and right badges/icons.
 - Menu items can have left and right text.
 - Menu items can be disabled if you don't want users to interact with them.
-- The menu API handles all controls for you. On a keyboard every menu control is a proper FiveM key binding, so players can rebind them from their own settings menu. The controller keybind can not be changed and will always be back/select (the Interaction Menu button, hold it for 400ms to toggle the menu).
+- The menu API handles all controls for you. Every menu control, on the keyboard, on a controller and on the mouse, is a proper FiveM key binding, so players can rebind all of them from their own settings menu. The one thing that stays fixed is the shape of the controller toggle: it is a 400ms hold rather than a tap, so it does not fight with the game's own interaction menu.
 - Multiple checkbox designs supported.
 - You can prevent users from exiting the menu using the normal ESC/backspace/cancel controls. (only do this for important menus where you need progress saved or something like that, and always have a button to exit the menu! Be nice to your users!)
 

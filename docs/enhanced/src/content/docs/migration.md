@@ -27,6 +27,37 @@ MenuController.MenuToggleKeyDefault = "M";
 
 ----
 
+### Custom controls are key bindings now
+
+`Menu.ButtonPressHandlers`, `Menu.ButtonPressHandler`, `Menu.ControlPressCheckType` and the
+`Menu.InstructionalButtons` dictionary are gone. A menu's own keys are registered with
+[AddKeyBinding()](reference/menu/#addkeybinding) instead, which registers a real FiveM key mapping, so
+the player can rebind it and the instructional button follows whatever they picked.
+
+```cs
+// Before
+menu.ButtonPressHandlers.Add(new Menu.ButtonPressHandler(
+    Control.FrontendSocialClubSecondary,
+    Menu.ControlPressCheckType.JUST_RELEASED,
+    new Action<Menu, Control>((m, c) => DoThing()),
+    true));
+
+menu.InstructionalButtons.Add(Control.FrontendSocialClubSecondary, "Do the thing");
+
+// After, the key and its hint in one call
+menu.AddKeyBinding("dothing", "Do the thing", "K", "R1_INDEX",
+    handler: (m, b) => DoThing(),
+    buttonText: "Do the thing");
+```
+
+`disableControl` has no replacement. A key binding is not one of the game's controls, so there is nothing
+for MenuAPI to disable. If your key clashes with something the game does, pick a quieter default key or
+call `DisableControlAction` yourself while your menu is open.
+
+`Menu.CustomInstructionalButtons`, the raw button strings, is unchanged.
+
+----
+
 ### Select and back instructional buttons moved
 
 `Menu.InstructionalButtons` used to come with a select and a back entry already in it. It now starts

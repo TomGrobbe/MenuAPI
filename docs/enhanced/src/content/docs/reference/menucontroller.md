@@ -68,7 +68,7 @@ All properties are **static**.
 |DefaultTitleAlignment|[TitleAlignmentOption](../menu/#header-styling)|TitleAlignmentOption.Center|Where every menu banner title sits, unless that menu sets [MenuTitleAlignment](../menu/#header-styling) itself. See [Header styling defaults](#header-styling-defaults).|Yes|
 |DefaultShowHeaderGlare|boolean|false|Whether GTA Online's moving glow is drawn over every menu banner, unless that menu sets [ShowHeaderGlare](../menu/#header-styling) itself. See [Header styling defaults](#header-styling-defaults).|Yes|
 |MenuToggleKeyDefault|string|"M"|The key that opens the menu for players who have never rebound it themselves. Set it in your constructor. See [Changing the default toggle key](../keybindings/#changing-the-default-toggle-key).|Yes|
-|EnableMenuToggleKeyOnController|boolean|true|Whether the menu can also be toggled with a controller. The controller binding can not be changed: it is always the back/select button, held for 400ms. See [Key bindings](../keybindings/).|Yes|
+|EnableMenuToggleKeyOnController|boolean|true|Whether the menu can also be toggled with a controller. The controller binding defaults to the back/select button and the player can rebind it, but it is always a 400ms hold rather than a tap. See [Key bindings](../keybindings/).|Yes|
 |DisableMenuButtons|boolean|false|When true, all menu controls are ignored. The menu stays on screen, it just does not respond to input. Useful while you are doing something that should not be interrupted.|Yes|
 |AreMenuButtonsEnabled|boolean|false|(Getter only) Whether menu controls are currently being processed. This is false when no menu is open, the game is paused, the screen is faded out, a player switch is in progress, the player is dead, or `DisableMenuButtons` is true.|Yes|
 |DontOpenAnyMenu|boolean|false|When true, menus stop being drawn and can not be opened. Menus with [IgnoreDontOpenMenus](../menu/#properties) set to true are excluded.|Yes|
@@ -377,7 +377,7 @@ MenuController.MenuToggleKeyDefault = "F5";
 
 - Pressing the toggle key while a menu is open closes that menu, unless [PreventExitingMenu](#properties) is true.
 - When [MainMenu](#properties) is null, the first registered menu is opened instead. If no menus are registered at all, nothing happens.
-- The controller binding can **not** be changed: it is always the interaction menu button, held for 400ms. Set [EnableMenuToggleKeyOnController](#properties) to false to disable it.
+- On a controller it is the back/select button by default, held for 400ms, and the player can rebind that too. The hold stays whichever button they pick. Set [EnableMenuToggleKeyOnController](#properties) to false to disable it.
 
 If you would rather open menus yourself, call [Menu.OpenMenu()](../menu/#openmenu) from your own command or key mapping.
 

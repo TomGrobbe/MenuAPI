@@ -120,12 +120,13 @@ Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
 |ShowBackInstructionalButton|boolean|true|Whether the built in **back** hint is drawn. On a keyboard it follows the player's own [key binding](../keybindings/).|Yes|
 |SelectButtonText|string|"Select"|The text next to the built in **select** hint. Defaults to the game's own translated label.|Yes|
 |BackButtonText|string|"Back"|The text next to the built in **back** hint. Defaults to the game's own translated label.|Yes|
+|ShowChangeValueInstructionalButton|boolean|true|Whether the built in **change value** hint is drawn. Only ever drawn while the highlighted row is a list, a dynamic list or a slider.|Yes|
+|ChangeValueButtonText|string|"Change"|The text next to the built in **change value** hint.|Yes|
 |IgnoreDontOpenMenus|boolean|false|When true, this menu keeps being drawn even while [MenuController.DontOpenAnyMenu](../menucontroller/#properties) is set to true.|Yes|
 |ShowWeaponStatsPanel|boolean|false|Shows the weapon stats panel below the menu. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).|Yes|
 |ShowVehicleStatsPanel|boolean|false|Shows the vehicle stats panel below the menu. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).|Yes|
-|InstructionalButtons|Dictionary&lt;Control,&nbsp;string&gt;|(empty)|Extra instructional buttons for this menu, keyed by a fixed `Control`. Select and back are not in here, they have their own properties above. See [Instructional buttons](#instructional-buttons).|Yes|
-|CustomInstructionalButtons|List&lt;[InstructionalButton](#instructionalbutton)&gt;|(empty)|Extra instructional buttons that use a raw button string instead of a `Control`. See [Instructional buttons](#instructional-buttons).|Yes|
-|ButtonPressHandlers|List&lt;[ButtonPressHandler](#buttonpresshandler)&gt;|(empty)|Custom control handlers that run while this menu is open. See [Button press handlers](#button-press-handlers).|Yes|
+|CustomInstructionalButtons|List&lt;[InstructionalButton](#instructionalbutton)&gt;|(empty)|Extra instructional buttons that use a raw button string. See [Instructional buttons](#instructional-buttons).|Yes|
+|KeyBindingHandlers|List&lt;[KeyBindingHandler](#keybindinghandler)&gt;|(empty)|The keys this menu listens for on top of the menu controls. Add them with [AddKeyBinding()](#addkeybinding), do not build this list yourself.|Yes|
 |Size|int|0|(Getter only) The number of items in this menu. When a filter is active, this is the number of items that passed the filter. When the menu is [paginated](../pagination/), this is the number of items on the current page.|Yes|
 |CurrentIndex|int|0|(Getter only) The index of the currently highlighted menu item. Use [RefreshIndex()](#refreshindexint-index) to change it.|Yes|
 |MaxItemsOnScreen|int|10|(Getter only) How many items are visible on screen at a time. Use [SetMaxItemsOnScreen()](#setmaxitemsonscreenint-max) to change it.|Yes|
@@ -777,33 +778,39 @@ MenuController.AddSubmenu(menu, vehicleMenu);
 
 Instructional buttons are the button hints drawn in the bottom right of the screen. Every menu has its own set, and they update instantly when the user switches between keyboard/mouse and a controller.
 
-Every menu starts with a **select** and a **back** button. Those two are special: on a keyboard they follow whatever the player bound in their own [key bindings](../keybindings/), so if someone moves select to <kbd>J</kbd> the hint shows <kbd>J</kbd>. That is why they are not part of `InstructionalButtons`, which is keyed by a fixed `Control`. You get separate properties for them instead.
+Every menu starts with a **select** and a **back** button, and a **change value** button appears next to them whenever the highlighted row is a list, a dynamic list or a slider, since those are the rows where left and right change something. All three follow whatever the player bound in their own [key bindings](../keybindings/), so if someone moves select to <kbd>J</kbd> the hint shows <kbd>J</kbd>.
+
+Your own keys get a hint by giving [AddKeyBinding()](#addkeybinding) a `buttonText`, and those follow the player's bindings in exactly the same way.
 
 ```cs
 // Change the text next to the built in buttons.
 menu.SelectButtonText = "Buy";
 menu.BackButtonText = "Nevermind";
+menu.ChangeValueButtonText = "Pick a colour";
 
 // Hide the built in 'back' button.
 menu.ShowBackInstructionalButton = false;
 
-// Add your own buttons. These are fixed controls, they are not rebindable.
-menu.InstructionalButtons.Add(Control.CharacterWheel, "Right?!");
-menu.InstructionalButtons.Add(Control.Context, "Check");
+// Add your own, by registering a key for it. This one is rebindable like everything else.
+menu.AddKeyBinding("check", "Example: check something", "E", "R1_INDEX",
+    handler: (m, b) => Check(),
+    buttonText: "Check");
 
 // Or turn them all off for this menu and draw your own.
 menu.EnableInstructionalButtons = false;
 ```
 
-They are drawn in this order: the built in select and back first, then everything in `InstructionalButtons`, then everything in `CustomInstructionalButtons`.
+They are drawn in this order: the built in select and back first, then the change value hint (or, in a [paginated](../pagination/) menu on any other row, the page hints), then every key binding that was given a `buttonText`, then everything in `CustomInstructionalButtons`.
 
-:::caution[Coming from the older MenuAPI?]
-`InstructionalButtons` used to start with a `Control.FrontendAccept` and a `Control.FrontendCancel` entry in it. It now starts **empty** and is only for extra buttons you add yourself. Anything that did `menu.InstructionalButtons.Remove(Control.FrontendCancel)` or `menu.InstructionalButtons[Control.FrontendAccept] = "Buy"` should use `ShowBackInstructionalButton` and `SelectButtonText` instead.
+A disabled row gets no change value hint, because left and right do nothing on it.
+
+:::caution[Coming from an older MenuAPI?]
+`Menu.InstructionalButtons`, the dictionary keyed by `Control`, is **gone**. Extra hints now come from a key binding, so the key and its hint are declared in one place and the player can rebind both. See [Key bindings](../keybindings/#your-own-keys) for how to move over.
 :::
 
 #### InstructionalButton
 
-Use `CustomInstructionalButtons` when a single `Control` is not enough, for example to show a button combination. These take a raw instructional button string instead of a `Control`.
+Use `CustomInstructionalButtons` when you want to draw a hint MenuAPI knows nothing about, for example a button combination. These take a raw instructional button string.
 
 |Field|Type|Description|
 |-|-|-|
@@ -820,42 +827,79 @@ menu.CustomInstructionalButtons.Add(new Menu.InstructionalButton(buttons, "Move"
 
 ----
 
-### Button press handlers
+### Key bindings
 
-Button press handlers let you run your own code when a control is pressed while this menu is open, without having to write your own tick function. They are only processed while the menu is open and while [MenuController.DisableMenuButtons](../menucontroller/#properties) is false.
+A menu can listen for keys of its own, on top of the menu controls, without you having to write a tick function. Every one of them is a real FiveM key mapping, so it turns up in the player's **Settings, Key Bindings** screen under your resource and they can move it wherever they like, exactly like the menu controls. Handlers only run while the menu is open and while [MenuController.DisableMenuButtons](../menucontroller/#properties) is false.
 
-#### ButtonPressHandler
+#### AddKeyBinding()
+
+```cs
+public KeyBindingHandler AddKeyBinding(
+    string name,
+    string description,
+    string keyboardKey,
+    string? controllerButton = null,
+    MenuKeyPressType pressType = MenuKeyPressType.JUST_RELEASED,
+    Action<Menu, MenuKeyBinding>? handler = null,
+    string? buttonText = null)
+```
 
 |Parameter|Type|Description|
 |-|-|-|
-|control|Control|The control to listen for.|
-|pressType|[ControlPressCheckType](#controlpresschecktype)|How the control should be checked.|
-|function|Action&lt;Menu,&nbsp;Control&gt;|The function to run. It receives the menu and the control that triggered it.|
-|disableControl|boolean|Whether the control should be disabled (blocking the game's own action) while this menu is open.|
+|name|string|Identifies the binding. It ends up in the command name, so keep it short and lowercase. Two menus that pass the same name share one key.|
+|description|string|What the player reads next to it in their key bindings screen.|
+|keyboardKey|string|A [keyboard parameter id](https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/keyboard/), for example `"E"` or `"F5"`.|
+|controllerButton|string?|A [controller parameter id](https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/pad_analogbutton/), for example `"R1_INDEX"`. Leave it null for a key a controller cannot reach.|
+|pressType|[MenuKeyPressType](#menukeypresstype)|When the handler is called.|
+|handler|Action&lt;Menu,&nbsp;[MenuKeyBinding](#menukeybinding)&gt;?|Called with this menu and the binding that triggered it.|
+|buttonText|string?|Set it to also draw an [instructional button](#instructional-buttons) for this key.|
 
-#### ControlPressCheckType
+```cs
+// Toggle the 'enabled' state of every item whenever this key is released.
+menu.AddKeyBinding(
+    "toggleitems",
+    "Example: toggle every item",
+    "K",
+    "R1_INDEX",
+    MenuKeyPressType.JUST_RELEASED,
+    (m, b) => m.GetMenuItems().ForEach(item => item.Enabled = !item.Enabled),
+    "Toggle all");
+```
+
+#### MenuKeyPressType
 
 |Value|Description|
 |-|-|
-|ControlPressCheckType.JUST_PRESSED|Triggers once, on the frame the control is pressed down.|
-|ControlPressCheckType.JUST_RELEASED|Triggers once, on the frame the control is released.|
-|ControlPressCheckType.PRESSED|Triggers every frame while the control is held down.|
-|ControlPressCheckType.RELEASED|Triggers every frame while the control is not held down.|
+|MenuKeyPressType.JUST_PRESSED|Runs once, the moment the key goes down.|
+|MenuKeyPressType.JUST_RELEASED|Runs once, the moment the key is let go.|
+|MenuKeyPressType.PRESSED|Runs every frame while the key is held.|
+|MenuKeyPressType.RELEASED|Runs every frame while the key is not held.|
 
-```cs
-// Toggle the 'enabled' state of every item whenever this control is released.
-menu.ButtonPressHandlers.Add(
-    new Menu.ButtonPressHandler(
-        Control.FrontendSocialClubSecondary,
-        Menu.ControlPressCheckType.JUST_RELEASED,
-        new Action<Menu, Control>((m, c) =>
-        {
-            m.GetMenuItems().ForEach(item => item.Enabled = !item.Enabled);
-        }),
-        true
-    )
-);
-```
+#### MenuKeyBinding
+
+The key itself, handed to your handler and returned as `KeyBindingHandler.Binding`.
+
+|Property|Type|Description|
+|-|-|-|
+|Name|string|The name you registered it under.|
+|Command|string|The console command FiveM runs for it, prefix and all.|
+|Held|boolean|Whether the key is down right now, on whichever device.|
+|Icon|string|The instructional button icon for it, for whichever device is being used. Empty when the game has no icon to draw.|
+
+#### KeyBindingHandler
+
+What `AddKeyBinding()` gives back, so you can change your mind later.
+
+|Property|Type|Description|
+|-|-|-|
+|Binding|[MenuKeyBinding](#menukeybinding)|The key itself. Read only.|
+|PressType|[MenuKeyPressType](#menukeypresstype)|When the handler runs.|
+|Handler|Action&lt;Menu,&nbsp;MenuKeyBinding&gt;?|The code to run. Set it to null to stop listening.|
+|ButtonText|string?|The text next to its instructional button. Null or empty draws nothing.|
+
+:::caution[Coming from an older MenuAPI?]
+`Menu.ButtonPressHandlers`, `Menu.ButtonPressHandler` and `Menu.ControlPressCheckType` are **gone**, along with the `disableControl` option. See [Key bindings](../keybindings/#your-own-keys) for what to write instead, and what to do if you were relying on `disableControl`.
+:::
 
 ----
 

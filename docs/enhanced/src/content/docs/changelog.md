@@ -10,6 +10,43 @@ title: "Changelog"
 These are the changes in MenuAPI for FiveM Enhanced. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way.
 :::
 
+### Controllers and the mouse are rebindable too
+
+:::danger[Breaking change]
+`Menu.ButtonPressHandlers`, `Menu.ButtonPressHandler`, `Menu.ControlPressCheckType` and the
+`Menu.InstructionalButtons` dictionary have been **removed**. Every one of them was built around a fixed
+`Control`, which is exactly what this change is getting rid of. Use
+[Menu.AddKeyBinding()](reference/menu/#addkeybinding) instead, and see the
+[Migration guide](migration/#custom-controls-are-key-bindings-now).
+:::
+
+
+Every menu control is now a FiveM key binding, on all three devices. The controller buttons and the mouse used
+to be read straight from the game's controls, which meant they were fixed and a player who did not like them
+was stuck with them. They now sit in the same **Settings, Key Bindings** screen the keyboard controls have
+always been in, each with its own row, so they can be changed or removed one at a time.
+
+The defaults are the buttons the menu has always used, so nothing moves for a player who was happy with them.
+The controller toggle is still a 400ms hold of the back/select button, on purpose, because a tap of that
+button is the game's own interaction menu.
+
+**Things that just behave differently now:**
+
+- <kbd>Esc</kbd> goes back one menu, or closes the menu, the same as <kbd>Backspace</kbd> does. It used to do
+  nothing at all while a menu was open, since MenuAPI stops it opening the pause menu.
+- Holding the controller toggle button while a menu is open **closes** it. It used to only ever open a menu,
+  which meant a controller could open a menu it then could not close.
+- The scroll wheel moves one item per notch instead of scrolling faster the longer you keep scrolling. A wheel
+  notch can not be held down, so a binding can only see the notch itself.
+- Nothing polls the game's controls for menu input any more, with one exception: scrolling the wheel while
+  holding <kbd>TAB</kbd> on foot is still left to the weapon wheel, and that check has to ask the game.
+
+Lists, dynamic lists and sliders now get their own hint too. Whenever one of those rows is highlighted, a
+left/right hint appears next to select and back, so it is obvious that the row has a value to change. Its text
+is [ChangeValueButtonText](reference/menu/#properties) and it can be turned off per menu.
+
+See [Key bindings](reference/keybindings/) for the full list.
+
 ### The menu is drawn without describing it sixty times a second
 
 The NUI renderer used to build a full description of the open menu on every single frame, purely to

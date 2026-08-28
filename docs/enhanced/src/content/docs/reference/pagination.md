@@ -54,7 +54,7 @@ Holding left or right repeats more slowly than it does on a slider, and it never
 |PageIndex|int|0|(Getter only) The page currently being shown, counting from **0**. So the first page is `0`, and you add 1 to it when you show it to a player.|
 |PageCount|int|1|(Getter only) How many pages there are. Always at least 1, so an empty menu still reads as "page 1 of 1".|
 |WrapPages|boolean|true|Whether moving left on the first page jumps to the last page, and moving right on the last page jumps back to the first.|
-|ShowPageInstructionalButtons|boolean|true|Whether the previous/next page hints are drawn at the bottom of the screen. Only ever drawn when the menu is paginated and there is more than one page.|
+|ShowPageInstructionalButtons|boolean|true|Whether the previous/next page hints are drawn at the bottom of the screen. Only ever drawn when the menu is paginated, there is more than one page, and the highlighted row is not a list or a slider. On those rows left and right change the value instead of turning the page, so the [change value hint](../menu/#instructional-buttons) is shown there.|
 |PreviousPageButtonText|string|"Previous page"|The text next to the previous page hint.|
 |NextPageButtonText|string|"Next page"|The text next to the next page hint.|
 
