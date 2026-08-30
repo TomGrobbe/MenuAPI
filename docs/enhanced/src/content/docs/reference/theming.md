@@ -185,6 +185,18 @@ menu.HeaderImage = null;             // back to whatever it would have shown
 
 Extension optional, `"outlaw.png"` works too.
 
+## An image in another resource
+
+A full url is taken as it is, so a banner does not have to live in the resource drawing the menu:
+
+```cs
+menu.HeaderImage = "https://cfx-nui-my-theme-pack/banners/outlaw.png";
+```
+
+That is how a resource can hand a menu a banner of its own without anything being copied around. The
+file still has to be in that resource's `files`, and only `http`, `https` and `nui` urls count as
+full ones, everything else is a name inside `menuapi-banners` as above.
+
 ## Resolution order
 
 First one that exists on disk wins:

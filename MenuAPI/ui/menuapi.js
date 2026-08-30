@@ -67,6 +67,7 @@
     const BANNER_FOLDER = "menuapi-banners";
     const BANNER_EXTENSIONS = ["png", "jpg", "webp"];
     const BANNER_HAS_EXTENSION = /\.(png|jpe?g|webp)$/i;
+    const BANNER_IS_ABSOLUTE = /^(?:https?:|nui:)\/\//i;
 
     const bannerFiles = new Map();
 
@@ -77,9 +78,12 @@
 
         bannerFiles.set(key, null);
 
-        const candidates = BANNER_HAS_EXTENSION.test(key)
-            ? [`${BANNER_FOLDER}/${key}`]
-            : BANNER_EXTENSIONS.map(extension => `${BANNER_FOLDER}/${key}.${extension}`);
+        // A full url points at a file another resource serves, so it is never looked for in this one.
+        const candidates = BANNER_IS_ABSOLUTE.test(key)
+            ? [key]
+            : BANNER_HAS_EXTENSION.test(key)
+                ? [`${BANNER_FOLDER}/${key}`]
+                : BANNER_EXTENSIONS.map(extension => `${BANNER_FOLDER}/${key}.${extension}`);
 
         let index = 0;
 

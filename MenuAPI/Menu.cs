@@ -469,8 +469,10 @@ public class Menu
     private KeyValuePair<string, string> _headerTexture = new KeyValuePair<string, string>();
 
     /// <summary>
-    /// Banner image from the resource's <c>menuapi-banners</c> folder, without the extension.
-    /// Wins over <see cref="HeaderTexture"/>, falls back to it when missing. NUI render mode only.
+    /// Banner image from the resource's <c>menuapi-banners</c> folder, without the extension. A full
+    /// <c>http</c>, <c>https</c> or <c>nui</c> url is taken as it is instead, so the image may live in
+    /// another resource. Wins over <see cref="HeaderTexture"/>, falls back to it when missing. NUI
+    /// render mode only.
     /// </summary>
     public string? HeaderImage
     {
