@@ -212,7 +212,6 @@
         p: "#9b59b6",
         w: "#ffffff",
         h: null,
-        n: null,
         s: null
     };
 
@@ -230,8 +229,16 @@
                 continue;
             }
 
-            if (part.length <= 24 && !part.includes(" ") && Object.hasOwn(TOKENS, part.toLowerCase())) {
-                colour = TOKENS[part.toLowerCase()];
+            const token = part.length <= 24 && !part.includes(" ") ? part.toLowerCase() : null;
+
+            if (token === "n") {
+                fragment.append(document.createElement("br"));
+
+                continue;
+            }
+
+            if (token !== null && Object.hasOwn(TOKENS, token)) {
+                colour = TOKENS[token];
 
                 continue;
             }
