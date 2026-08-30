@@ -261,8 +261,7 @@
 
         const url = spriteUrl(spec.dict, spec.name);
 
-        node.style.width = `${spec.size}px`;
-        node.style.height = `${spec.size}px`;
+        node.style.setProperty("--menuapi-icon-size", `${spec.size}px`);
         node.style.setProperty("--tint", `rgb(${spec.r} ${spec.g} ${spec.b})`);
         node.dataset.sprite = url;
 

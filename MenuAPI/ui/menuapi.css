@@ -340,6 +340,9 @@
 .menuapi-icon {
   position: absolute;
   top: 50%;
+  width: var(--menuapi-icon-size);
+  height: var(--menuapi-icon-size);
+  transform: translateY(-50%);
   background-image: var(--sprite);
   background-position: center;
   background-repeat: no-repeat;
@@ -365,15 +368,14 @@
   -webkit-mask-size: contain;
 }
 
+/* Anchored on the sprite's centre, 20px in from the row edge, the way the game draws them. */
 .menuapi-icon--left {
-  left: 20px;
-  transform: translate(-50%, -50%);
+  left: calc(20px - (var(--menuapi-icon-size) / 2));
 }
 
 .menuapi-icon--right,
 .menuapi-icon--checkbox {
-  left: 480px;
-  transform: translate(-50%, -50%);
+  right: calc(20px - (var(--menuapi-icon-size) / 2));
 }
 
 .menuapi-slider {
@@ -409,7 +411,6 @@
 
 .menuapi-icon--slider {
   right: 202px;
-  transform: translateY(-50%);
 }
 
 .menuapi-overflow {
