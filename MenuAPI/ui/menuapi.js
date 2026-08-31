@@ -356,7 +356,7 @@
 
         if (data.kind === "separator") {
             node.classList.add("menuapi-row--separator");
-            node.append(text(data.arrows ? `↓ ${data.text ?? ""} ↓` : data.text ?? ""));
+            node.append(markup(data.arrows ? `↓ ${data.text ?? ""} ↓` : data.text ?? ""));
 
             return node;
         }
