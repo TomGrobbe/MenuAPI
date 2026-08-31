@@ -215,9 +215,18 @@
         o: "#e8910e",
         p: "#9b59b6",
         w: "#ffffff",
-        h: null,
-        s: null
+        d: "#2f5c73",
+        f: "#5db6e5",
+        q: "#cb3694",
+        c: "#8c8c8c",
+        t: "#8c8c8c",
+        m: "#646464",
+        l: "#000000",
+        v: null,
+        u: null
     };
+
+    const TOKEN_PATTERN = /~([^~\s]{1,24})~/g;
 
     function markup(value) {
         const fragment = document.createDocumentFragment();
@@ -226,43 +235,64 @@
             return fragment;
         }
 
+        const source = String(value);
+
         let colour = null;
+        let bold = false;
+        let italic = false;
+        let index = 0;
 
-        for (const part of String(value).split("~")) {
-            if (part === "") {
-                continue;
-            }
-
-            const token = part.length <= 24 && !part.includes(" ") ? part.toLowerCase() : null;
-
-            if (token === "n") {
-                fragment.append(document.createElement("br"));
-
-                continue;
-            }
-
-            if (token !== null && Object.hasOwn(TOKENS, token)) {
-                colour = TOKENS[token];
-
-                continue;
-            }
-
-            if (part.startsWith("HUD_COLOUR_")) {
-                colour = null;
-
-                continue;
+        function append(content) {
+            if (content === "") {
+                return;
             }
 
             const node = document.createElement("span");
 
-            node.textContent = part;
+            node.textContent = content;
 
             if (colour) {
                 node.style.color = colour;
             }
 
+            if (bold) {
+                node.style.fontWeight = "bold";
+            }
+
+            if (italic) {
+                node.style.fontStyle = "italic";
+            }
+
             fragment.append(node);
         }
+
+        TOKEN_PATTERN.lastIndex = 0;
+
+        for (let match = TOKEN_PATTERN.exec(source); match !== null; match = TOKEN_PATTERN.exec(source)) {
+            append(source.slice(index, match.index));
+
+            index = TOKEN_PATTERN.lastIndex;
+
+            const token = match[1].toLowerCase();
+
+            if (token === "n") {
+                fragment.append(document.createElement("br"));
+            } else if (token === "h" || token === "bold") {
+                bold = !bold;
+            } else if (token === "italic") {
+                italic = !italic;
+            } else if (token === "s") {
+                colour = null;
+                bold = false;
+                italic = false;
+            } else if (token.startsWith("hud_colour_")) {
+                colour = null;
+            } else if (Object.hasOwn(TOKENS, token)) {
+                colour = TOKENS[token];
+            }
+        }
+
+        append(source.slice(index));
 
         return fragment;
     }
