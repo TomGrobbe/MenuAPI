@@ -462,6 +462,8 @@ public class MenuController : IScript
         bool selectPressed = MenuInput.ConsumeSelect();
         bool backPressed = MenuInput.ConsumeBack();
 
+        MenuInput.DrainUnhandled(MenuReadingKeyBindings());
+
         if (FrameState.IsPauseMenuActive)
         {
             return;
@@ -1118,6 +1120,18 @@ public class MenuController : IScript
     public static void RefreshNui() => MenuNui.Invalidate();
 
     /// <summary>The game states that stop a menu being drawn, none of which announce a change.</summary>
+    private static Menu? MenuReadingKeyBindings()
+    {
+        if (!CanDraw() || DontOpenAnyMenu)
+        {
+            return null;
+        }
+
+        Menu? menu = GetCurrentMenu();
+
+        return menu is not null && menu.Visible ? menu : null;
+    }
+
     private static bool CanDraw() =>
         FrameState.IsScreenFadedIn &&
         !FrameState.IsPauseMenuActive &&

@@ -1479,6 +1479,26 @@ public class Menu
     #endregion
 
     #region internal/private task functions
+    // Answers what MenuInput.DrainUnhandled needs to know: whether a press on this binding is going
+    // to reach a handler, so everything else can be thrown away instead of firing later.
+    internal bool Handles(MenuKeyBinding binding)
+    {
+        if (KeyBindingHandlers.Count == 0 || MenuController.DisableMenuButtons)
+        {
+            return false;
+        }
+
+        foreach (KeyBindingHandler entry in KeyBindingHandlers)
+        {
+            if (entry.Handler is not null && ReferenceEquals(entry.Binding, binding))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     internal void ProcessKeyBindings()
     {
         if (KeyBindingHandlers.Count == 0 || MenuController.DisableMenuButtons)

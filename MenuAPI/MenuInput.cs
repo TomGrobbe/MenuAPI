@@ -1,4 +1,4 @@
-using CitizenFX.FiveM.Client;
+﻿using CitizenFX.FiveM.Client;
 using CitizenFX.FiveM.Shared;
 
 namespace MenuAPI;
@@ -202,6 +202,23 @@ internal static class MenuInput
         foreach (MenuKeyBinding binding in Custom.Values)
         {
             binding.ClearHeld();
+        }
+    }
+
+    /// <summary>
+    /// Drops the pending press and release on every custom binding <paramref name="menu"/> is not
+    /// about to read this frame.
+    /// </summary>
+    internal static void DrainUnhandled(Menu? menu)
+    {
+        foreach (MenuKeyBinding binding in Custom.Values)
+        {
+            if (menu is not null && menu.Handles(binding))
+            {
+                continue;
+            }
+
+            binding.ClearPending();
         }
     }
 
