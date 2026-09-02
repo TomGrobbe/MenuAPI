@@ -61,6 +61,8 @@ jobs:
       build_enhanced: ${{ steps.plan.outputs.build_enhanced }}
       legacy_ref:     ${{ steps.plan.outputs.legacy_ref }}
       enhanced_ref:   ${{ steps.plan.outputs.enhanced_ref }}
+      legacy_git_ref:   ${{ steps.plan.outputs.legacy_git_ref }}
+      enhanced_git_ref: ${{ steps.plan.outputs.enhanced_git_ref }}
 
     steps:
       - name: Checkout
@@ -73,8 +75,13 @@ jobs:
           RELEASE=false
           BUILD_LEGACY=false
           BUILD_ENHANCED=false
+          # *_REF is what actions/checkout is given, *_GIT_REF is what the release job's own
+          # git commands are given. They differ only in that one wants a plain branch name
+          # where the other wants a remote tracking name.
           LEGACY_REF=legacy
           ENHANCED_REF=fivem-enhanced
+          LEGACY_GIT_REF=origin/legacy
+          ENHANCED_GIT_REF=origin/fivem-enhanced
 
           if [ "$GITHUB_EVENT_NAME" = "push" ] && \
              { [ "$GITHUB_REF" = "refs/heads/legacy" ] || [ "$GITHUB_REF" = "refs/heads/fivem-enhanced" ]; }; then
@@ -83,17 +90,34 @@ jobs:
             RELEASE=true
             BUILD_LEGACY=true
             BUILD_ENHANCED=true
-            echo "Release run, building the tip of both branches."
+
+            # The line that was pushed is pinned to the commit that triggered this run. Left as
+            # a branch name it gets re-resolved by every job at its own checkout time, so a push
+            # landing while this run is in flight moves the run onto the newer commit for the
+            # jobs that have not started yet. That is how a release once got its version from one
+            # commit, its build from the same one, and then its tag and changelog from the next.
+            # The line that did NOT move stays a branch name, this run having no commit for it.
+            if [ "$GITHUB_REF" = "refs/heads/fivem-enhanced" ]; then
+              ENHANCED_REF="$GITHUB_SHA"
+              ENHANCED_GIT_REF="$GITHUB_SHA"
+            else
+              LEGACY_REF="$GITHUB_SHA"
+              LEGACY_GIT_REF="$GITHUB_SHA"
+            fi
+
+            echo "Release run, building $GITHUB_SHA and the tip of the other branch."
           elif [ -f MenuAPI.slnx ]; then
             # Side branch or pull request. Build only the line it belongs to, and build
             # the pushed commit rather than a branch tip. Enhanced is the line with the
             # .slnx solution file, legacy still uses MenuAPI.sln.
             BUILD_ENHANCED=true
             ENHANCED_REF="$GITHUB_SHA"
+            ENHANCED_GIT_REF="$GITHUB_SHA"
             echo "Enhanced side branch, build only, no release."
           else
             BUILD_LEGACY=true
             LEGACY_REF="$GITHUB_SHA"
+            LEGACY_GIT_REF="$GITHUB_SHA"
             echo "Legacy side branch, build only, no release."
           fi
 
@@ -103,6 +127,8 @@ jobs:
             echo "build_enhanced=$BUILD_ENHANCED"
             echo "legacy_ref=$LEGACY_REF"
             echo "enhanced_ref=$ENHANCED_REF"
+            echo "legacy_git_ref=$LEGACY_GIT_REF"
+            echo "enhanced_git_ref=$ENHANCED_GIT_REF"
           } >> "$GITHUB_OUTPUT"
 
   # ============================================================
@@ -355,6 +381,16 @@ jobs:
           ref: ${{ needs.plan.outputs.enhanced_ref }}
           fetch-depth: 0
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install web build tooling
+        shell: bash
+        run: npm ci
+
       - name: Restore NuGet (FiveM only)
         shell: bash
         run: dotnet restore "MenuAPI/MenuAPI.csproj" -p:Configuration=Release
@@ -562,8 +598,8 @@ jobs:
             echo ""
           }
 
-          LEGACY_RANGE=$(range_for 'v*'          origin/legacy)
-          ENHANCED_RANGE=$(range_for 'enhanced-v*' origin/fivem-enhanced)
+          LEGACY_RANGE=$(range_for 'v*'          "${{ needs.plan.outputs.legacy_git_ref }}")
+          ENHANCED_RANGE=$(range_for 'enhanced-v*' "${{ needs.plan.outputs.enhanced_git_ref }}")
 
           changelog "$LEGACY_RANGE"   changelog-legacy.txt
           changelog "$ENHANCED_RANGE" changelog-enhanced.txt
@@ -591,8 +627,8 @@ jobs:
             fi
           }
 
-          tag_branch "v${{ needs.version-legacy.outputs.semver }}"            origin/legacy
-          tag_branch "enhanced-v${{ needs.version-enhanced.outputs.semver }}" origin/fivem-enhanced
+          tag_branch "v${{ needs.version-legacy.outputs.semver }}"            "${{ needs.plan.outputs.legacy_git_ref }}"
+          tag_branch "enhanced-v${{ needs.version-enhanced.outputs.semver }}" "${{ needs.plan.outputs.enhanced_git_ref }}"
 
       # The release hangs off the Enhanced tag. A push to legacy on its own does not move
       # the Enhanced version, so that release already exists and gets updated in place
