@@ -1251,10 +1251,21 @@ public class MenuController : IScript
         {
             Menu.KeyBindingHandler entry = menu.KeyBindingHandlers[i];
 
-            if (!string.IsNullOrEmpty(entry.ButtonText))
+            if (string.IsNullOrEmpty(entry.ButtonText))
             {
-                SetInstructionalButtonSlot(slot++, entry.Binding.Icon, entry.ButtonText);
+                continue;
             }
+
+            string icon = entry.Binding.Icon;
+
+            // A binding with no controller button has no icon to draw once the player picks up a pad,
+            // and a label floating on its own reads as a button the player cannot find.
+            if (string.IsNullOrEmpty(icon))
+            {
+                continue;
+            }
+
+            SetInstructionalButtonSlot(slot++, icon, entry.ButtonText);
         }
 
         for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)
