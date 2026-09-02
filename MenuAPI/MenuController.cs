@@ -1119,7 +1119,8 @@ public class MenuController : IScript
     // MenuAPI does not own, such as a label you resolve yourself.
     public static void RefreshNui() => MenuNui.Invalidate();
 
-    /// <summary>The game states that stop a menu being drawn, none of which announce a change.</summary>
+    // The menu whose key bindings the draw tick is going to process this frame, matching the checks
+    // both draw paths make before they reach Menu.ProcessKeyBindings.
     private static Menu? MenuReadingKeyBindings()
     {
         if (!CanDraw() || DontOpenAnyMenu)
@@ -1132,6 +1133,7 @@ public class MenuController : IScript
         return menu is not null && menu.Visible ? menu : null;
     }
 
+    /// <summary>The game states that stop a menu being drawn, none of which announce a change.</summary>
     private static bool CanDraw() =>
         FrameState.IsScreenFadedIn &&
         !FrameState.IsPauseMenuActive &&
