@@ -24,7 +24,13 @@ export default defineConfig({
       // Point the header logo + title link at the MenuAPI chooser (see src/routeData.ts).
       routeMiddleware: './src/routeData.ts',
       // SocialIcons adds a "Back to all docs" pill into the header nav.
-      components: { SocialIcons: './src/components/SocialIcons.astro' },
+      components: {
+        SocialIcons: './src/components/SocialIcons.astro',
+        // Default the docs to dark mode; the toggle still saves the choice to
+        // localStorage. Both files fall back to dark when nothing is stored.
+        ThemeProvider: './src/components/ThemeProvider.astro',
+        ThemeSelect: './src/components/ThemeSelect.astro',
+      },
       head: [
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
