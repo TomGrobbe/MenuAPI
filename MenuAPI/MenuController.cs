@@ -12,16 +12,16 @@ namespace MenuAPI
         public static List<Menu> Menus { get; protected set; } = new List<Menu>();
         internal static HashSet<Menu> VisibleMenus { get; } = new HashSet<Menu>();
 #if FIVEM
-        public const string _texture_dict = "commonmenu";
-        public const string _header_texture = "interaction_bgd";
+        public static string _texture_dict = "commonmenu";
+        public static string _header_texture = "interaction_bgd";
 #endif
 #if REDM
-        public const string _texture_dict = "menu_textures";
-        public const string _header_texture = "translate_bg_1a";
+        public static string _texture_dict = "menu_textures";
+        public static string _header_texture = "translate_bg_1a";
 #endif
         private static List<string> menuTextureAssets = new List<string>()
         {
-#if FIVEM
+#if FIVEM   
             "commonmenu",
             "commonmenutu",
             "mpleaderboard",
@@ -31,12 +31,14 @@ namespace MenuAPI
             "mprankbadge",
             "mpcarhud",
             "mpcarhud2",
-            "shared"
+            "shared",
+            _texture_dict
 #endif
 #if REDM
             "menu_textures",
             "boot_flow",
             "generic_textures",
+            _texture_dict
 #endif
         };
 
