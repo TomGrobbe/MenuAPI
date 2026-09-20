@@ -266,3 +266,6 @@ postbuild\.cmd
 postbuild-fivem.cmd
 
 postbuild-redm.cmd
+
+MenuAPI/ui-dist/
+docs/enhanced/
