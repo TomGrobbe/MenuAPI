@@ -2,7 +2,7 @@ name: CI/CD
 
 # This exact file sits on both legacy and fivem-enhanced. Keep the two copies identical.
 # A push to either branch builds both lines into one release attached to the Enhanced tag.
-# Only the pushed line gets a new version, the other one is rebuilt from its latest tag.
+# A line only gets a new version when it has new commits, otherwise it is rebuilt from its latest tag.
 # Side branches and pull requests are handled by dev-legacy.yml and dev-enhanced.yml.
 
 on:
@@ -19,7 +19,8 @@ on:
 permissions:
   contents: read
 
-# Never cancelled, a half finished run leaves tags without a release.
+# One run at a time across both branches, never cancelled halfway. GitHub does drop a queued run when
+# a newer one queues behind it, which is why the plan job also picks up commits that never got a run.
 concurrency:
   group: combined-release
   cancel-in-progress: false
@@ -35,176 +36,192 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      legacy_moved:     ${{ steps.plan.outputs.legacy_moved }}
-      enhanced_moved:   ${{ steps.plan.outputs.enhanced_moved }}
-      legacy_ref:       ${{ steps.plan.outputs.legacy_ref }}
-      enhanced_ref:     ${{ steps.plan.outputs.enhanced_ref }}
-      legacy_version:   ${{ steps.plan.outputs.legacy_version }}
-      enhanced_version: ${{ steps.plan.outputs.enhanced_version }}
+      release:              ${{ steps.plan.outputs.release }}
+      legacy_moved:         ${{ steps.plan.outputs.legacy_moved }}
+      enhanced_moved:       ${{ steps.plan.outputs.enhanced_moved }}
+      legacy_ref:           ${{ steps.plan.outputs.legacy_ref }}
+      enhanced_ref:         ${{ steps.plan.outputs.enhanced_ref }}
+      legacy_version:       ${{ steps.plan.outputs.legacy_version }}
+      enhanced_version:     ${{ steps.plan.outputs.enhanced_version }}
+      legacy_assembly_ver:  ${{ steps.plan.outputs.legacy_assembly_ver }}
+      enhanced_assembly_ver: ${{ steps.plan.outputs.enhanced_assembly_ver }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          path: repo
           fetch-depth: 0
 
-      - name: Decide what moved
-        id: plan
+      # The pushed line is pinned to its sha, so a push landing mid run cannot move it.
+      # The other line also moves when it has commits since its tag that never got a run of their own,
+      # which happens when GitHub drops a queued run because a newer one queued behind it.
+      - name: Find the lines with unreleased changes
+        id: candidates
+        working-directory: repo
         shell: bash
         run: |
           git fetch origin --tags --prune "+refs/heads/*:refs/remotes/origin/*"
 
-          # The pushed line is pinned to its sha, so a push landing mid run cannot move it.
-          # A line without any tag yet has nothing to carry over and is versioned from its tip.
-          resolve() {
-            local line="$1" branch="$2" glob="$3" prefix="$4"
-            local moved ref version tag
+          releasable_commit() {
+            local sha="$1" files
+            if git log -1 --format=%B "$sha" | grep -qiE '\[(skip ci|ci skip|no ci|skip actions|actions skip)\]|^skip-checks: *true'; then
+              return 1
+            fi
+            if git rev-parse -q --verify "$sha^1" >/dev/null; then
+              files=$(git diff --name-only "$sha^1" "$sha")
+            else
+              files=$(git show --name-only --format= "$sha")
+            fi
+            printf '%s\n' "$files" | grep -vE '^(docs/|\.github/workflows/docs\.yml$)' | grep -q .
+          }
+
+          candidate() {
+            local line="$1" branch="$2" glob="$3"
+            local tag ref sha moved=false
+
+            tag=$(git describe --tags --abbrev=0 --match "$glob" "origin/$branch" 2>/dev/null || true)
 
             if [ "$GITHUB_REF" = "refs/heads/$branch" ]; then
-              moved=true
               ref="$GITHUB_SHA"
-              version=""
+              moved=true
             else
-              tag=$(git describe --tags --abbrev=0 --match "$glob" "origin/$branch" 2>/dev/null || true)
-
-              if [ -n "$tag" ]; then
-                moved=false
-                ref="$tag"
-                version="${tag#"$prefix"}"
-              else
+              ref=$(git rev-parse "origin/$branch")
+              if [ -z "$tag" ]; then
                 moved=true
-                ref=$(git rev-parse "origin/$branch")
-                version=""
+              else
+                for sha in $(git rev-list --first-parent "$tag..$ref"); do
+                  if releasable_commit "$sha"; then
+                    echo "$line has unreleased commit $(git log -1 --format='%h %s' "$sha")"
+                    moved=true
+                    break
+                  fi
+                done
               fi
             fi
 
-            echo "$line: moved=$moved ref=$ref version=${version:-<from GitVersion>}"
+            echo "$line: tag=${tag:-<none>} ref=$ref candidate=$moved"
             {
-              echo "${line}_moved=$moved"
+              echo "${line}_tag=$tag"
               echo "${line}_ref=$ref"
-              echo "${line}_version=$version"
+              echo "${line}_moved=$moved"
             } >> "$GITHUB_OUTPUT"
           }
 
-          resolve legacy   legacy         'v[0-9]*'          'v'
-          resolve enhanced fivem-enhanced 'enhanced-v[0-9]*' 'enhanced-v'
+          candidate legacy   legacy   'v[0-9]*'
+          candidate enhanced fivem-enhanced 'enhanced-v[0-9]*'
 
-  version-legacy:
-    name: Version (Legacy)
-    needs: plan
-    runs-on: windows-latest
-
-    outputs:
-      semver:       ${{ steps.version.outputs.semver }}
-      assembly_ver: ${{ steps.version.outputs.assembly_ver }}
-      zip_prefix:   ${{ steps.version.outputs.zip_prefix }}
-
-    steps:
-      - name: Checkout
+      - name: Checkout legacy
+        if: steps.candidates.outputs.legacy_moved == 'true'
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.plan.outputs.legacy_ref }}
+          ref: ${{ steps.candidates.outputs.legacy_ref }}
+          path: legacy
+          fetch-depth: 0
+
+      - name: Checkout enhanced
+        if: steps.candidates.outputs.enhanced_moved == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.candidates.outputs.enhanced_ref }}
+          path: enhanced
           fetch-depth: 0
 
       - name: Install GitVersion
-        if: needs.plan.outputs.legacy_moved == 'true'
+        if: steps.candidates.outputs.legacy_moved == 'true' || steps.candidates.outputs.enhanced_moved == 'true'
         uses: gittools/actions/gitversion/setup@v3.0.0
         with:
           versionSpec: '5.x'
 
-      - name: Execute GitVersion
-        if: needs.plan.outputs.legacy_moved == 'true'
-        id: gitversion
+      - name: GitVersion legacy
+        if: steps.candidates.outputs.legacy_moved == 'true'
+        id: gv_legacy
         uses: gittools/actions/gitversion/execute@v3.0.0
-
-      - name: Set version
-        id: version
-        shell: bash
-        run: |
-          if [ "${{ needs.plan.outputs.legacy_moved }}" = "true" ]; then
-            SEMVER="${{ steps.gitversion.outputs.semVer }}"
-            ASSEMBLY_VER="${{ steps.gitversion.outputs.assemblySemVer }}"
-            STATE="new"
-          else
-            SEMVER="${{ needs.plan.outputs.legacy_version }}"
-            ASSEMBLY_VER="${SEMVER%%-*}"
-            STATE="unchanged, rebuilt from its tag"
-          fi
-          {
-            echo "semver=$SEMVER"
-            echo "assembly_ver=$ASSEMBLY_VER"
-            echo "zip_prefix=MenuAPI-$SEMVER"
-          } >> "$GITHUB_OUTPUT"
-          {
-            echo "## MenuAPI Legacy"
-            echo ""
-            echo "| | |"
-            echo "| --- | --- |"
-            echo "| Version | \`${SEMVER}\` (${STATE}) |"
-            echo "| Assembly version | \`${ASSEMBLY_VER}\` |"
-            echo "| Tag | \`v${SEMVER}\` |"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-  version-enhanced:
-    name: Version (Enhanced)
-    needs: plan
-    runs-on: windows-latest
-
-    outputs:
-      semver:       ${{ steps.version.outputs.semver }}
-      assembly_ver: ${{ steps.version.outputs.assembly_ver }}
-      zip_prefix:   ${{ steps.version.outputs.zip_prefix }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
         with:
-          ref: ${{ needs.plan.outputs.enhanced_ref }}
-          fetch-depth: 0
+          targetPath: legacy
 
-      - name: Install GitVersion
-        if: needs.plan.outputs.enhanced_moved == 'true'
-        uses: gittools/actions/gitversion/setup@v3.0.0
-        with:
-          versionSpec: '5.x'
-
-      - name: Execute GitVersion
-        if: needs.plan.outputs.enhanced_moved == 'true'
-        id: gitversion
+      - name: GitVersion enhanced
+        if: steps.candidates.outputs.enhanced_moved == 'true'
+        id: gv_enhanced
         uses: gittools/actions/gitversion/execute@v3.0.0
+        with:
+          targetPath: enhanced
 
-      - name: Set version
-        id: version
+      # A +semver: none commit calculates the version that is already tagged on an older commit.
+      # Releasing it would overwrite that release with code its tag does not contain, so the line counts as unchanged.
+      - name: Settle versions
+        id: plan
+        working-directory: repo
         shell: bash
+        env:
+          LEGACY_MOVED:      ${{ steps.candidates.outputs.legacy_moved }}
+          LEGACY_REF:        ${{ steps.candidates.outputs.legacy_ref }}
+          LEGACY_TAG:        ${{ steps.candidates.outputs.legacy_tag }}
+          LEGACY_SEMVER:     ${{ steps.gv_legacy.outputs.semVer }}
+          LEGACY_ASSEMBLY:   ${{ steps.gv_legacy.outputs.assemblySemVer }}
+          ENHANCED_MOVED:    ${{ steps.candidates.outputs.enhanced_moved }}
+          ENHANCED_REF:      ${{ steps.candidates.outputs.enhanced_ref }}
+          ENHANCED_TAG:      ${{ steps.candidates.outputs.enhanced_tag }}
+          ENHANCED_SEMVER:   ${{ steps.gv_enhanced.outputs.semVer }}
+          ENHANCED_ASSEMBLY: ${{ steps.gv_enhanced.outputs.assemblySemVer }}
         run: |
-          if [ "${{ needs.plan.outputs.enhanced_moved }}" = "true" ]; then
-            SEMVER="${{ steps.gitversion.outputs.semVer }}"
-            ASSEMBLY_VER="${{ steps.gitversion.outputs.assemblySemVer }}"
-            STATE="new"
-          else
-            SEMVER="${{ needs.plan.outputs.enhanced_version }}"
-            ASSEMBLY_VER="${SEMVER%%-*}"
-            STATE="unchanged, rebuilt from its tag"
+          RELEASE=false
+
+          settle() {
+            local line="$1" title="$2" prefix="$3" moved="$4" ref="$5" tag="$6" semver="$7" assembly="$8"
+            local existing state
+
+            if [ "$moved" = "true" ]; then
+              existing=$(git rev-parse -q --verify "refs/tags/$prefix$semver^{commit}" || true)
+              if [ -n "$existing" ] && [ "$existing" != "$(git rev-parse "$ref^{commit}")" ]; then
+                echo "$line: $prefix$semver is already tagged on ${existing:0:7}, nothing new to release."
+                moved=false
+                tag="$prefix$semver"
+              fi
+            fi
+
+            if [ "$moved" = "true" ]; then
+              RELEASE=true
+              state="new"
+            else
+              ref="$tag"
+              semver="${tag#"$prefix"}"
+              assembly="${semver%%-*}"
+              state="unchanged, rebuilt from its tag"
+            fi
+
+            echo "$line: moved=$moved ref=$ref version=$semver"
+            {
+              echo "${line}_moved=$moved"
+              echo "${line}_ref=$ref"
+              echo "${line}_version=$semver"
+              echo "${line}_assembly_ver=$assembly"
+            } >> "$GITHUB_OUTPUT"
+            {
+              echo "## $title"
+              echo ""
+              echo "| | |"
+              echo "| --- | --- |"
+              echo "| Version | \`${semver}\` (${state}) |"
+              echo "| Assembly version | \`${assembly}\` |"
+              echo "| Tag | \`${prefix}${semver}\` |"
+              echo ""
+            } >> "$GITHUB_STEP_SUMMARY"
+          }
+
+          settle legacy   "MenuAPI Legacy"   'v'          "$LEGACY_MOVED"   "$LEGACY_REF"   "$LEGACY_TAG"   "$LEGACY_SEMVER"   "$LEGACY_ASSEMBLY"
+          settle enhanced "MenuAPI Enhanced" 'enhanced-v' "$ENHANCED_MOVED" "$ENHANCED_REF" "$ENHANCED_TAG" "$ENHANCED_SEMVER" "$ENHANCED_ASSEMBLY"
+
+          if [ "$RELEASE" = "false" ]; then
+            echo "Nothing new to release on either line." | tee -a "$GITHUB_STEP_SUMMARY"
           fi
-          {
-            echo "semver=$SEMVER"
-            echo "assembly_ver=$ASSEMBLY_VER"
-            echo "zip_prefix=MenuAPI-$SEMVER"
-          } >> "$GITHUB_OUTPUT"
-          {
-            echo "## MenuAPI Enhanced"
-            echo ""
-            echo "| | |"
-            echo "| --- | --- |"
-            echo "| Version | \`${SEMVER}\` (${STATE}) |"
-            echo "| Assembly version | \`${ASSEMBLY_VER}\` |"
-            echo "| Tag | \`enhanced-v${SEMVER}\` |"
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo "release=$RELEASE" >> "$GITHUB_OUTPUT"
 
   # FiveM and RedM restore separately, the CitizenFX NuGet package conflicts with the local RedM dll.
   build-legacy-fivem:
     name: Build Legacy FiveM
-    needs: [plan, version-legacy]
+    needs: plan
+    if: needs.plan.outputs.release == 'true'
     runs-on: windows-latest
 
     steps:
@@ -222,29 +239,29 @@ jobs:
         shell: bash
         run: |
           dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore \
-            -p:Version=${{ needs.version-legacy.outputs.semver }} \
-            -p:AssemblyVersion=${{ needs.version-legacy.outputs.assembly_ver }} \
-            -p:FileVersion=${{ needs.version-legacy.outputs.assembly_ver }}
+            -p:Version=${{ needs.plan.outputs.legacy_version }} \
+            -p:AssemblyVersion=${{ needs.plan.outputs.legacy_assembly_ver }} \
+            -p:FileVersion=${{ needs.plan.outputs.legacy_assembly_ver }}
 
       - name: Package FiveM zip
         shell: pwsh
         run: |
           $outDir = 'MenuAPI/bin/Release FiveM/net452'
           Copy-Item README.md "$outDir/README.md" -Force
-          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version-legacy.outputs.zip_prefix }}-FiveM.zip" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "MenuAPI-${{ needs.plan.outputs.legacy_version }}-FiveM.zip" -Force
 
       - name: Upload FiveM zip
         uses: actions/upload-artifact@v4
         with:
           name: zip-legacy-fivem
-          path: ${{ needs.version-legacy.outputs.zip_prefix }}-FiveM.zip
+          path: MenuAPI-${{ needs.plan.outputs.legacy_version }}-FiveM.zip
 
       - name: Pack NuGet FiveM
         run: >-
           dotnet pack MenuAPI/MenuAPI.csproj
           -c "Release FiveM"
           --no-restore
-          -p:PackageVersion=${{ needs.version-legacy.outputs.semver }}
+          -p:PackageVersion=${{ needs.plan.outputs.legacy_version }}
           -p:DefineConstants=FIVEM
           -p:PackageId=MenuAPI.FiveM
           -o nupkgs
@@ -257,7 +274,8 @@ jobs:
 
   build-legacy-redm:
     name: Build Legacy RedM
-    needs: [plan, version-legacy]
+    needs: plan
+    if: needs.plan.outputs.release == 'true'
     runs-on: windows-latest
 
     steps:
@@ -275,29 +293,29 @@ jobs:
         shell: bash
         run: |
           dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore \
-            -p:Version=${{ needs.version-legacy.outputs.semver }} \
-            -p:AssemblyVersion=${{ needs.version-legacy.outputs.assembly_ver }} \
-            -p:FileVersion=${{ needs.version-legacy.outputs.assembly_ver }}
+            -p:Version=${{ needs.plan.outputs.legacy_version }} \
+            -p:AssemblyVersion=${{ needs.plan.outputs.legacy_assembly_ver }} \
+            -p:FileVersion=${{ needs.plan.outputs.legacy_assembly_ver }}
 
       - name: Package RedM zip
         shell: pwsh
         run: |
           $outDir = 'MenuAPI/bin/Release RedM/net452'
           Copy-Item README.md "$outDir/README.md" -Force
-          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version-legacy.outputs.zip_prefix }}-RedM.zip" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "MenuAPI-${{ needs.plan.outputs.legacy_version }}-RedM.zip" -Force
 
       - name: Upload RedM zip
         uses: actions/upload-artifact@v4
         with:
           name: zip-legacy-redm
-          path: ${{ needs.version-legacy.outputs.zip_prefix }}-RedM.zip
+          path: MenuAPI-${{ needs.plan.outputs.legacy_version }}-RedM.zip
 
       - name: Pack NuGet RedM
         run: >-
           dotnet pack MenuAPI/MenuAPI.csproj
           -c "Release RedM"
           --no-restore
-          -p:PackageVersion=${{ needs.version-legacy.outputs.semver }}
+          -p:PackageVersion=${{ needs.plan.outputs.legacy_version }}
           -p:DefineConstants=REDM
           -p:PackageId=MenuAPI.RedM
           -o nupkgs
@@ -310,7 +328,8 @@ jobs:
 
   build-enhanced:
     name: Build Enhanced
-    needs: [plan, version-enhanced]
+    needs: plan
+    if: needs.plan.outputs.release == 'true'
     runs-on: windows-latest
 
     steps:
@@ -338,29 +357,29 @@ jobs:
         shell: bash
         run: |
           dotnet build MenuAPI/MenuAPI.csproj -c Release --no-restore \
-            -p:Version=${{ needs.version-enhanced.outputs.semver }} \
-            -p:AssemblyVersion=${{ needs.version-enhanced.outputs.assembly_ver }} \
-            -p:FileVersion=${{ needs.version-enhanced.outputs.assembly_ver }}
+            -p:Version=${{ needs.plan.outputs.enhanced_version }} \
+            -p:AssemblyVersion=${{ needs.plan.outputs.enhanced_assembly_ver }} \
+            -p:FileVersion=${{ needs.plan.outputs.enhanced_assembly_ver }}
 
       - name: Package FiveM zip
         shell: pwsh
         run: |
           $outDir = 'MenuAPI/bin/Release/net10.0'
           Copy-Item README.md "$outDir/README.md" -Force
-          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version-enhanced.outputs.zip_prefix }}-FiveM-Enhanced.zip" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "MenuAPI-${{ needs.plan.outputs.enhanced_version }}-FiveM-Enhanced.zip" -Force
 
       - name: Upload FiveM zip
         uses: actions/upload-artifact@v4
         with:
           name: zip-enhanced
-          path: ${{ needs.version-enhanced.outputs.zip_prefix }}-FiveM-Enhanced.zip
+          path: MenuAPI-${{ needs.plan.outputs.enhanced_version }}-FiveM-Enhanced.zip
 
       - name: Pack NuGet FiveM
         run: >-
           dotnet pack MenuAPI/MenuAPI.csproj
           -c Release
           --no-restore
-          -p:PackageVersion=${{ needs.version-enhanced.outputs.semver }}
+          -p:PackageVersion=${{ needs.plan.outputs.enhanced_version }}
           -o nupkgs
 
       - name: Upload NuGet FiveM
@@ -378,25 +397,25 @@ jobs:
         shell: bash
         run: |
           dotnet pack MenuAPI/MenuAPI.csproj -c NativeHooks --no-restore \
-            -p:PackageVersion=${{ needs.version-enhanced.outputs.semver }} \
-            -p:Version=${{ needs.version-enhanced.outputs.semver }} \
-            -p:AssemblyVersion=${{ needs.version-enhanced.outputs.assembly_ver }} \
-            -p:FileVersion=${{ needs.version-enhanced.outputs.assembly_ver }} \
+            -p:PackageVersion=${{ needs.plan.outputs.enhanced_version }} \
+            -p:Version=${{ needs.plan.outputs.enhanced_version }} \
+            -p:AssemblyVersion=${{ needs.plan.outputs.enhanced_assembly_ver }} \
+            -p:FileVersion=${{ needs.plan.outputs.enhanced_assembly_ver }} \
             -o nupkgs-nativehooks
 
       - name: Package NativeHooks zip
         shell: pwsh
-        run: Compress-Archive -Path 'nupkgs-nativehooks/*.nupkg' -DestinationPath "${{ needs.version-enhanced.outputs.zip_prefix }}-NativeHooks-NuGet.zip" -Force
+        run: Compress-Archive -Path 'nupkgs-nativehooks/*.nupkg' -DestinationPath "MenuAPI-${{ needs.plan.outputs.enhanced_version }}-NativeHooks-NuGet.zip" -Force
 
       - name: Upload NativeHooks zip
         uses: actions/upload-artifact@v4
         with:
           name: zip-enhanced-nativehooks
-          path: ${{ needs.version-enhanced.outputs.zip_prefix }}-NativeHooks-NuGet.zip
+          path: MenuAPI-${{ needs.plan.outputs.enhanced_version }}-NativeHooks-NuGet.zip
 
   release:
     name: Release
-    needs: [plan, version-legacy, version-enhanced, build-legacy-fivem, build-legacy-redm, build-enhanced]
+    needs: [plan, build-legacy-fivem, build-legacy-redm, build-enhanced]
     runs-on: ubuntu-latest
 
     permissions:
@@ -408,8 +427,8 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}
-      LEGACY_VERSION: ${{ needs.version-legacy.outputs.semver }}
-      ENHANCED_VERSION: ${{ needs.version-enhanced.outputs.semver }}
+      LEGACY_VERSION: ${{ needs.plan.outputs.legacy_version }}
+      ENHANCED_VERSION: ${{ needs.plan.outputs.enhanced_version }}
       LEGACY_REF: ${{ needs.plan.outputs.legacy_ref }}
       ENHANCED_REF: ${{ needs.plan.outputs.enhanced_ref }}
 
@@ -629,7 +648,7 @@ jobs:
 
   notify:
     name: Discord Notification
-    needs: [plan, version-legacy, version-enhanced, build-legacy-fivem, build-legacy-redm, build-enhanced, release, publish-nuget]
+    needs: [plan, build-legacy-fivem, build-legacy-redm, build-enhanced, release, publish-nuget]
     if: always() && needs.plan.result != 'skipped'
     runs-on: ubuntu-latest
 
@@ -644,8 +663,10 @@ jobs:
           ENHANCED_RESULT: ${{ needs.build-enhanced.result }}
           RELEASE_RESULT: ${{ needs.release.result }}
           NUGET_RESULT: ${{ needs.publish-nuget.result }}
-          LEGACY_VERSION: ${{ needs.version-legacy.outputs.semver }}
-          ENHANCED_VERSION: ${{ needs.version-enhanced.outputs.semver }}
+          LEGACY_VERSION: ${{ needs.plan.outputs.legacy_version }}
+          ENHANCED_VERSION: ${{ needs.plan.outputs.enhanced_version }}
+          RELEASE: ${{ needs.plan.outputs.release }}
+          PLAN_RESULT: ${{ needs.plan.result }}
           LEGACY_MOVED: ${{ needs.plan.outputs.legacy_moved }}
           ENHANCED_MOVED: ${{ needs.plan.outputs.enhanced_moved }}
           RELEASE_URL: ${{ needs.release.outputs.release_url }}
@@ -681,7 +702,9 @@ jobs:
 
           LEGACY_RESULT=$(worst "$LEGACY_FIVEM_RESULT" "$LEGACY_REDM_RESULT")
 
-          if [ "$ENHANCED_MOVED" = "true" ] && [ "$LEGACY_MOVED" = "true" ]; then
+          if [ "$RELEASE" != "true" ]; then
+            PUBLISHED="nothing new"
+          elif [ "$ENHANCED_MOVED" = "true" ] && [ "$LEGACY_MOVED" = "true" ]; then
             PUBLISHED="Enhanced and Legacy"
           elif [ "$ENHANCED_MOVED" = "true" ]; then
             PUBLISHED="Enhanced"
@@ -692,7 +715,7 @@ jobs:
 
           FAILED=false
           CANCELLED=false
-          for RESULT in "$LEGACY_FIVEM_RESULT" "$LEGACY_REDM_RESULT" "$ENHANCED_RESULT" "$RELEASE_RESULT" "$NUGET_RESULT"; do
+          for RESULT in "$PLAN_RESULT" "$LEGACY_FIVEM_RESULT" "$LEGACY_REDM_RESULT" "$ENHANCED_RESULT" "$RELEASE_RESULT" "$NUGET_RESULT"; do
             case "$RESULT" in
               cancelled) CANCELLED=true ;;
               success|skipped) ;;
@@ -700,7 +723,10 @@ jobs:
             esac
           done
 
-          if [ "$CANCELLED" = "true" ]; then
+          if [ "$RELEASE" != "true" ] && [ "$FAILED" = "false" ] && [ "$CANCELLED" = "false" ]; then
+            COLOR=9807270
+            STATUS_TEXT="No new version, nothing was released."
+          elif [ "$CANCELLED" = "true" ]; then
             COLOR=16776960
             STATUS_TEXT="Build cancelled."
           elif [ "$FAILED" = "true" ]; then
