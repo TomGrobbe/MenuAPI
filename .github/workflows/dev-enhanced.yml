@@ -1,0 +1,166 @@
+name: Dev Build (Enhanced)
+
+# Branches taken from fivem-enhanced. Builds a dev version and pre-release NuGet packages, never tags or releases.
+
+on:
+  push:
+    branches-ignore:
+      - legacy
+      - fivem-enhanced
+    paths-ignore:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Dotted dev.<run> so NuGet compares the run number as a number, dev-123 would sort below dev-57.
+      - name: Set dev version
+        id: version
+        shell: bash
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          TAG=$(git describe --tags --abbrev=0 --match 'enhanced-v[0-9]*' HEAD 2>/dev/null || true)
+          BASE="${TAG#enhanced-v}"
+          BASE="${BASE%%-*}"
+          IFS=. read -r MAJOR MINOR PATCH <<< "${BASE:-0.0.0}"
+          NEXT="$MAJOR.$MINOR.$((PATCH + 1))"
+          SEMVER="$NEXT-dev.${{ github.run_number }}+${HEAD_SHA:0:7}"
+          {
+            echo "semver=$SEMVER"
+            echo "assembly_ver=$NEXT"
+            echo "zip_prefix=MenuAPI-$SEMVER"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "## Dev version"
+            echo ""
+            echo "This run built MenuAPI Enhanced \`${SEMVER}\`, based on \`${TAG:-no tag}\`. It is not tagged or released."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install web build tooling
+        shell: bash
+        run: npm ci
+
+      - name: Restore NuGet (FiveM only)
+        shell: bash
+        run: dotnet restore "MenuAPI/MenuAPI.csproj" -p:Configuration=Release
+
+      - name: Build FiveM
+        shell: bash
+        run: |
+          dotnet build MenuAPI/MenuAPI.csproj -c Release --no-restore \
+            -p:Version=${{ steps.version.outputs.semver }} \
+            -p:AssemblyVersion=${{ steps.version.outputs.assembly_ver }} \
+            -p:FileVersion=${{ steps.version.outputs.assembly_ver }}
+
+      - name: Package FiveM zip
+        shell: pwsh
+        run: |
+          $outDir = 'MenuAPI/bin/Release/net10.0'
+          Copy-Item README.md "$outDir/README.md" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ steps.version.outputs.zip_prefix }}-FiveM-Enhanced.zip" -Force
+
+      - name: Upload FiveM zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip-enhanced
+          path: ${{ steps.version.outputs.zip_prefix }}-FiveM-Enhanced.zip
+
+      - name: Pack NuGet FiveM
+        run: >-
+          dotnet pack MenuAPI/MenuAPI.csproj
+          -c Release
+          --no-restore
+          -p:PackageVersion=${{ steps.version.outputs.semver }}
+          -o nupkgs
+
+      - name: Upload NuGet FiveM
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-enhanced
+          path: nupkgs/*.nupkg
+
+      - name: Restore NuGet (NativeHooks)
+        shell: bash
+        run: dotnet restore "MenuAPI/MenuAPI.csproj" -p:Configuration=NativeHooks
+
+      - name: Pack NuGet NativeHooks
+        shell: bash
+        run: |
+          dotnet pack MenuAPI/MenuAPI.csproj -c NativeHooks --no-restore \
+            -p:PackageVersion=${{ steps.version.outputs.semver }} \
+            -p:Version=${{ steps.version.outputs.semver }} \
+            -p:AssemblyVersion=${{ steps.version.outputs.assembly_ver }} \
+            -p:FileVersion=${{ steps.version.outputs.assembly_ver }} \
+            -o nupkgs-nativehooks
+
+      - name: Package NativeHooks zip
+        shell: pwsh
+        run: Compress-Archive -Path 'nupkgs-nativehooks/*.nupkg' -DestinationPath "${{ steps.version.outputs.zip_prefix }}-NativeHooks-NuGet.zip" -Force
+
+      - name: Upload NativeHooks zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip-enhanced-nativehooks
+          path: ${{ steps.version.outputs.zip_prefix }}-NativeHooks-NuGet.zip
+
+  # Pushes only. Pull requests and dependabot runs have no business publishing, and cannot get an id-token anyway.
+  publish-nuget-prerelease:
+    name: Publish pre-release NuGet package
+    needs: build
+    if: github.event_name == 'push' && github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download package
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-enhanced
+          path: packages
+
+      - name: NuGet login (trusted publishing)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Push package
+        shell: bash
+        run: |
+          dotnet nuget push packages/MenuAPI.FiveM.Enhanced.*.nupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --skip-duplicate
