@@ -1,0 +1,200 @@
+name: Dev Build (Legacy)
+
+# Branches taken from legacy. Builds a dev version and pre-release NuGet packages, never tags or releases.
+
+on:
+  push:
+    branches-ignore:
+      - legacy
+      - fivem-enhanced
+    paths-ignore:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  # Dotted dev.<run> so NuGet compares the run number as a number, dev-123 would sort below dev-57.
+  version:
+    name: Dev version
+    runs-on: ubuntu-latest
+
+    outputs:
+      semver:       ${{ steps.version.outputs.semver }}
+      assembly_ver: ${{ steps.version.outputs.assembly_ver }}
+      zip_prefix:   ${{ steps.version.outputs.zip_prefix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set dev version
+        id: version
+        shell: bash
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' HEAD 2>/dev/null || true)
+          BASE="${TAG#v}"
+          BASE="${BASE%%-*}"
+          IFS=. read -r MAJOR MINOR PATCH <<< "${BASE:-0.0.0}"
+          NEXT="$MAJOR.$MINOR.$((PATCH + 1))"
+          SEMVER="$NEXT-dev.${{ github.run_number }}+${HEAD_SHA:0:7}"
+          {
+            echo "semver=$SEMVER"
+            echo "assembly_ver=$NEXT"
+            echo "zip_prefix=MenuAPI-$SEMVER"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "## Dev version"
+            echo ""
+            echo "This run built MenuAPI Legacy \`${SEMVER}\`, based on \`${TAG:-no tag}\`. It is not tagged or released."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # FiveM and RedM restore separately, the CitizenFX NuGet package conflicts with the local RedM dll.
+  build-fivem:
+    name: Build FiveM
+    needs: version
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore NuGet (FiveM only)
+        shell: bash
+        run: dotnet restore "MenuAPI/MenuAPI.csproj" "-p:Configuration=Release FiveM"
+
+      - name: Build FiveM
+        shell: bash
+        run: |
+          dotnet build MenuAPI/MenuAPI.csproj -c "Release FiveM" --no-restore \
+            -p:Version=${{ needs.version.outputs.semver }} \
+            -p:AssemblyVersion=${{ needs.version.outputs.assembly_ver }} \
+            -p:FileVersion=${{ needs.version.outputs.assembly_ver }}
+
+      - name: Package FiveM zip
+        shell: pwsh
+        run: |
+          $outDir = 'MenuAPI/bin/Release FiveM/net452'
+          Copy-Item README.md "$outDir/README.md" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version.outputs.zip_prefix }}-FiveM.zip" -Force
+
+      - name: Upload FiveM zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip-legacy-fivem
+          path: ${{ needs.version.outputs.zip_prefix }}-FiveM.zip
+
+      - name: Pack NuGet FiveM
+        run: >-
+          dotnet pack MenuAPI/MenuAPI.csproj
+          -c "Release FiveM"
+          --no-restore
+          -p:PackageVersion=${{ needs.version.outputs.semver }}
+          -p:DefineConstants=FIVEM
+          -p:PackageId=MenuAPI.FiveM
+          -o nupkgs
+
+      - name: Upload NuGet FiveM
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-legacy-fivem
+          path: nupkgs/*.nupkg
+
+  build-redm:
+    name: Build RedM
+    needs: version
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore NuGet (RedM only)
+        shell: bash
+        run: dotnet restore "MenuAPI/MenuAPI.csproj" "-p:Configuration=Release RedM"
+
+      - name: Build RedM
+        shell: bash
+        run: |
+          dotnet build MenuAPI/MenuAPI.csproj -c "Release RedM" --no-restore \
+            -p:Version=${{ needs.version.outputs.semver }} \
+            -p:AssemblyVersion=${{ needs.version.outputs.assembly_ver }} \
+            -p:FileVersion=${{ needs.version.outputs.assembly_ver }}
+
+      - name: Package RedM zip
+        shell: pwsh
+        run: |
+          $outDir = 'MenuAPI/bin/Release RedM/net452'
+          Copy-Item README.md "$outDir/README.md" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "${{ needs.version.outputs.zip_prefix }}-RedM.zip" -Force
+
+      - name: Upload RedM zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip-legacy-redm
+          path: ${{ needs.version.outputs.zip_prefix }}-RedM.zip
+
+      - name: Pack NuGet RedM
+        run: >-
+          dotnet pack MenuAPI/MenuAPI.csproj
+          -c "Release RedM"
+          --no-restore
+          -p:PackageVersion=${{ needs.version.outputs.semver }}
+          -p:DefineConstants=REDM
+          -p:PackageId=MenuAPI.RedM
+          -o nupkgs
+
+      - name: Upload NuGet RedM
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-legacy-redm
+          path: nupkgs/*.nupkg
+
+  # Pushes only. Pull requests and dependabot runs have no business publishing, and cannot get an id-token anyway.
+  publish-nuget-prerelease:
+    name: Publish pre-release NuGet packages
+    needs: [build-fivem, build-redm]
+    if: github.event_name == 'push' && github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: nuget-legacy-*
+          merge-multiple: true
+          path: packages
+
+      - name: NuGet login (trusted publishing)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Push packages
+        shell: bash
+        run: |
+          dotnet nuget push "packages/*.nupkg" \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --skip-duplicate
