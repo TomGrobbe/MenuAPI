@@ -63,6 +63,10 @@ jobs:
       enhanced_ref:   ${{ steps.plan.outputs.enhanced_ref }}
       legacy_git_ref:   ${{ steps.plan.outputs.legacy_git_ref }}
       enhanced_git_ref: ${{ steps.plan.outputs.enhanced_git_ref }}
+      legacy_moved:     ${{ steps.plan.outputs.legacy_moved }}
+      enhanced_moved:   ${{ steps.plan.outputs.enhanced_moved }}
+      legacy_version:   ${{ steps.plan.outputs.legacy_version }}
+      enhanced_version: ${{ steps.plan.outputs.enhanced_version }}
 
     steps:
       - name: Checkout
@@ -82,6 +86,10 @@ jobs:
           ENHANCED_REF=fivem-enhanced
           LEGACY_GIT_REF=origin/legacy
           ENHANCED_GIT_REF=origin/fivem-enhanced
+          LEGACY_MOVED=true
+          ENHANCED_MOVED=true
+          LEGACY_VERSION=""
+          ENHANCED_VERSION=""
 
           if [ "$GITHUB_EVENT_NAME" = "push" ] && \
              { [ "$GITHUB_REF" = "refs/heads/legacy" ] || [ "$GITHUB_REF" = "refs/heads/fivem-enhanced" ]; }; then
@@ -96,16 +104,38 @@ jobs:
             # landing while this run is in flight moves the run onto the newer commit for the
             # jobs that have not started yet. That is how a release once got its version from one
             # commit, its build from the same one, and then its tag and changelog from the next.
-            # The line that did NOT move stays a branch name, this run having no commit for it.
+            # The line that did NOT move is rebuilt from its latest tag, so untagged commits on it
+            # (a skip ci commit, a docs merge) never cut a version for a line nobody pushed.
+            # Without any tag yet it falls back to its branch tip and GitVersion.
+            git fetch origin --tags --prune "+refs/heads/*:refs/remotes/origin/*"
+
+            carry() {
+              git describe --tags --abbrev=0 --match "$1" "origin/$2" 2>/dev/null || true
+            }
+
             if [ "$GITHUB_REF" = "refs/heads/fivem-enhanced" ]; then
               ENHANCED_REF="$GITHUB_SHA"
               ENHANCED_GIT_REF="$GITHUB_SHA"
+              TAG=$(carry 'v[0-9]*' legacy)
+              if [ -n "$TAG" ]; then
+                LEGACY_MOVED=false
+                LEGACY_REF="$TAG"
+                LEGACY_GIT_REF="$TAG"
+                LEGACY_VERSION="${TAG#v}"
+              fi
             else
               LEGACY_REF="$GITHUB_SHA"
               LEGACY_GIT_REF="$GITHUB_SHA"
+              TAG=$(carry 'enhanced-v[0-9]*' fivem-enhanced)
+              if [ -n "$TAG" ]; then
+                ENHANCED_MOVED=false
+                ENHANCED_REF="$TAG"
+                ENHANCED_GIT_REF="$TAG"
+                ENHANCED_VERSION="${TAG#enhanced-v}"
+              fi
             fi
 
-            echo "Release run, building $GITHUB_SHA and the tip of the other branch."
+            echo "Release run, building $GITHUB_SHA. Legacy: $LEGACY_REF, Enhanced: $ENHANCED_REF."
           elif [ -f MenuAPI.slnx ]; then
             # Side branch or pull request. Build only the line it belongs to, and build
             # the pushed commit rather than a branch tip. Enhanced is the line with the
@@ -129,6 +159,10 @@ jobs:
             echo "enhanced_ref=$ENHANCED_REF"
             echo "legacy_git_ref=$LEGACY_GIT_REF"
             echo "enhanced_git_ref=$ENHANCED_GIT_REF"
+            echo "legacy_moved=$LEGACY_MOVED"
+            echo "enhanced_moved=$ENHANCED_MOVED"
+            echo "legacy_version=$LEGACY_VERSION"
+            echo "enhanced_version=$ENHANCED_VERSION"
           } >> "$GITHUB_OUTPUT"
 
   # ============================================================
@@ -153,13 +187,13 @@ jobs:
           fetch-depth: 0
 
       - name: Install GitVersion
-        if: needs.plan.outputs.release == 'true'
+        if: needs.plan.outputs.release == 'true' && needs.plan.outputs.legacy_moved == 'true'
         uses: gittools/actions/gitversion/setup@v3.0.0
         with:
           versionSpec: '5.x'
 
       - name: Execute GitVersion
-        if: needs.plan.outputs.release == 'true'
+        if: needs.plan.outputs.release == 'true' && needs.plan.outputs.legacy_moved == 'true'
         id: gitversion
         uses: gittools/actions/gitversion/execute@v3.0.0
 
@@ -169,7 +203,10 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [ "${{ needs.plan.outputs.release }}" = "true" ]; then
+          if [ "${{ needs.plan.outputs.release }}" = "true" ] && [ "${{ needs.plan.outputs.legacy_moved }}" != "true" ]; then
+            SEMVER="${{ needs.plan.outputs.legacy_version }}"
+            ASSEMBLY_VER="${SEMVER%%-*}"
+          elif [ "${{ needs.plan.outputs.release }}" = "true" ]; then
             SEMVER="${{ steps.gitversion.outputs.semVer }}"
             ASSEMBLY_VER="${{ steps.gitversion.outputs.assemblySemVer }}"
           else
@@ -204,13 +241,13 @@ jobs:
           fetch-depth: 0
 
       - name: Install GitVersion
-        if: needs.plan.outputs.release == 'true'
+        if: needs.plan.outputs.release == 'true' && needs.plan.outputs.enhanced_moved == 'true'
         uses: gittools/actions/gitversion/setup@v3.0.0
         with:
           versionSpec: '5.x'
 
       - name: Execute GitVersion
-        if: needs.plan.outputs.release == 'true'
+        if: needs.plan.outputs.release == 'true' && needs.plan.outputs.enhanced_moved == 'true'
         id: gitversion
         uses: gittools/actions/gitversion/execute@v3.0.0
 
@@ -218,7 +255,10 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [ "${{ needs.plan.outputs.release }}" = "true" ]; then
+          if [ "${{ needs.plan.outputs.release }}" = "true" ] && [ "${{ needs.plan.outputs.enhanced_moved }}" != "true" ]; then
+            SEMVER="${{ needs.plan.outputs.enhanced_version }}"
+            ASSEMBLY_VER="${SEMVER%%-*}"
+          elif [ "${{ needs.plan.outputs.release }}" = "true" ]; then
             SEMVER="${{ steps.gitversion.outputs.semVer }}"
             ASSEMBLY_VER="${{ steps.gitversion.outputs.assemblySemVer }}"
           else
@@ -701,6 +741,19 @@ jobs:
             echo "Release $TAG already exists, updating it."
             gh release edit "$TAG" --title "$TITLE" --notes-file release_notes.md
             gh release upload "$TAG" "${ASSETS[@]}" --clobber
+
+            # Asset names carry the version, so the previous zips of the line that moved are left behind otherwise.
+            gh release view "$TAG" --json assets --jq '.assets[].name' | while read -r NAME; do
+              KEEP=false
+              for ASSET in "${ASSETS[@]}"; do
+                if [ "$NAME" = "$(basename "$ASSET")" ]; then KEEP=true; fi
+              done
+              if [ "$KEEP" = "false" ]; then
+                echo "Removing stale asset $NAME."
+                gh release delete-asset "$TAG" "$NAME" --yes
+              fi
+            done
+
             RELEASE_URL=$(gh release view "$TAG" --json url --jq .url)
           else
             RELEASE_URL=$(gh release create "$TAG" \
