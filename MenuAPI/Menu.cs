@@ -933,7 +933,7 @@ public class Menu
     /// Resets the index to 0
     /// </summary>
     public void RefreshIndex() => RefreshIndex(0, 0);
-    public void RefreshIndex(int index) => RefreshIndex(index, index > MaxItemsOnScreen ? index - MaxItemsOnScreen : 0);
+    public void RefreshIndex(int index) => RefreshIndex(index, index >= MaxItemsOnScreen ? index - MaxItemsOnScreen + 1 : 0);
     public void RefreshIndex(int index, int viewOffset) { CurrentIndex = index; ViewIndexOffset = viewOffset; }
 
     /// <summary>
