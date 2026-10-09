@@ -10,6 +10,16 @@ title: "Changelog"
 These are the changes in MenuAPI for FiveM Enhanced. If you are moving a resource over from the older (v3, non Enhanced) MenuAPI, this is the list of things you will have to deal with along the way.
 :::
 
+### Inserting and moving items
+
+Two new ways to change a menu without clearing and refilling it.
+
+**[InsertMenuItem()](../reference/menu/#insertmenuitemint-index-menuitem-item)** puts an item at a chosen spot instead of at the bottom.
+
+**[MoveMenuItem()](../reference/menu/#movemenuitemmenuitem-item-int-index)** moves an item that is already in the menu. A submenu button keeps the menu it opens, which removing and adding it again would not.
+
+Both keep the highlighted item highlighted, except in a paginated menu.
+
 ### Themes, custom banners, and smaller downloads
 
 :::danger[Breaking change]

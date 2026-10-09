@@ -266,6 +266,48 @@ _This function does not return anything_.
 
 ----
 
+#### InsertMenuItem(int index, MenuItem item)
+
+Adds a menu item at a chosen spot instead of at the bottom. The highlighted item stays highlighted, even when the new item lands above it. In a paginated menu the highlight stays at the same spot on the page instead.
+
+The index counts every item in the menu, also the ones a filter is hiding. An index past the end puts the item at the bottom.
+
+:::note
+If a filter is active, the new item is not part of it yet. Call [FilterMenuItems()](#filtermenuitemsfuncmenuitem-bool-predicate) again to show it.
+:::
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|index|int|Where the item goes. 0 is the top.|
+|item|[MenuItem](../menuitems/menuitem/)|The item to add.|
+
+##### Return value
+
+_This function does not return anything_.
+
+----
+
+#### MoveMenuItem(MenuItem item, int index)
+
+Moves an item that is already in this menu to another spot. Unlike removing it and adding it again, a submenu button keeps the menu it opens. The highlighted item stays highlighted, except in a paginated menu. If a filter is active, the item moves within it too, so there is no need to filter again.
+
+The index counts every item in the menu, also the ones a filter is hiding. Does nothing if the item is not in this menu.
+
+##### Parameters
+
+|Parameter|Type|Description|
+|-|-|-|
+|item|[MenuItem](../menuitems/menuitem/)|The item to move.|
+|index|int|Where the item goes. 0 is the top.|
+
+##### Return value
+
+_This function does not return anything_.
+
+----
+
 #### RemoveMenuItem(int itemIndex)
 
 Removes the item at the given index. The current index is corrected so the highlighted item does not jump around. Does nothing if the index is out of range.
