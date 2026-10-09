@@ -1062,6 +1062,86 @@ public class Menu
     }
 
     /// <summary>
+    /// Inserts a <see cref="MenuItem"/> into this <see cref="Menu"/> at <paramref name="index"/>. The highlighted item stays highlighted, except in a paginated menu. While a filter is active the new item stays hidden until <see cref="FilterMenuItems"/> runs again.
+    /// </summary>
+    /// <param name="index">Position among all items, the ones a filter hides included. Clamped to the list.</param>
+    /// <param name="item"></param>
+    public void InsertMenuItem(int index, MenuItem item)
+    {
+        index = Math.Clamp(index, 0, MenuItems.Count);
+
+        var shiftCursor = !filterActive && !Paginated && MenuItems.Count > 0 && index <= CurrentIndex;
+
+        MenuItems.Insert(index, item);
+        item.ParentMenu = this;
+        item.PositionOnScreen = item.Index;
+
+        InvalidatePage();
+
+        if (shiftCursor)
+        {
+            CurrentIndex++;
+            KeepCursorInView();
+        }
+    }
+
+    /// <summary>
+    /// Moves a <see cref="MenuItem"/> that is already in this <see cref="Menu"/>, also within an active filter. A submenu button keeps the menu it opens. The highlighted item stays highlighted, except in a paginated menu.
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="index">Position among all items, the ones a filter hides included. Clamped to the list.</param>
+    public void MoveMenuItem(MenuItem item, int index)
+    {
+        var from = MenuItems.IndexOf(item);
+
+        if (from < 0)
+        {
+            return;
+        }
+
+        var current = Paginated ? null : GetCurrentMenuItem();
+
+        MenuItems.RemoveAt(from);
+        MenuItems.Insert(Math.Clamp(index, 0, MenuItems.Count), item);
+
+        if (filterActive && FilterItems.Remove(item))
+        {
+            var position = 0;
+
+            foreach (var other in MenuItems)
+            {
+                if (ReferenceEquals(other, item))
+                {
+                    break;
+                }
+
+                if (position < FilterItems.Count && ReferenceEquals(FilterItems[position], other))
+                {
+                    position++;
+                }
+            }
+
+            FilterItems.Insert(position, item);
+        }
+
+        InvalidatePage();
+
+        if (current is not null)
+        {
+            CurrentIndex = SourceItems.IndexOf(current);
+            KeepCursorInView();
+        }
+    }
+
+    private void KeepCursorInView()
+    {
+        var max = MaxItemsOnScreen;
+        var offset = Math.Min(ViewIndexOffset, Math.Max(Size - max, 0));
+
+        ViewIndexOffset = Math.Clamp(offset, Math.Max(CurrentIndex - max + 1, 0), CurrentIndex);
+    }
+
+    /// <summary>
     /// Removes the item at that index.
     /// </summary>
     /// <param name="itemIndex">An index into the items currently on screen, page and filter applied.</param>
