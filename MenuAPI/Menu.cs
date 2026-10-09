@@ -1506,8 +1506,10 @@ public class Menu
             return;
         }
 
-        foreach (KeyBindingHandler entry in KeyBindingHandlers)
+        for (var index = 0; index < KeyBindingHandlers.Count; index++)
         {
+            var entry = KeyBindingHandlers[index];
+
             if (entry.Handler is null)
             {
                 continue;
