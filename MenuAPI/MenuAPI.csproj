@@ -61,11 +61,10 @@
     </ItemGroup>
   </Target>
 
-  <ItemGroup>
-    <Compile Include="..\shared\Controls.cs" Link="Controls.cs" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <!-- Legacy uses the Control enum that CitizenFX.Core already has, see platform/legacy/GlobalUsings.cs. -->
+    <Compile Include="..\shared\Controls.cs" Link="Controls.cs" />
+
     <Compile Remove="platform/legacy/**" />
 
     <PackageReference Include="CitizenFX.FiveM.Client" />
