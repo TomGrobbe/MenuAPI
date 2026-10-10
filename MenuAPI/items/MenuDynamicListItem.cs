@@ -1,5 +1,3 @@
-﻿using CitizenFX.FiveM.Client;
-
 namespace MenuAPI;
 
 public class MenuDynamicListItem(string text, string? initialValue, MenuDynamicListItem.ChangeItemCallback callback, string? description) : MenuItem(text, description)

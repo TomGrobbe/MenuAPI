@@ -1,7 +1,5 @@
 ﻿using System.Globalization;
 
-using CitizenFX.FiveM.Client;
-
 namespace MenuAPI;
 
 internal static class MenuNui
@@ -445,7 +443,7 @@ internal static class MenuNui
     {
         var at = text.IndexOf("~1~", StringComparison.Ordinal);
 
-        return at < 0 ? text : text[..at] + value + text[(at + 3)..];
+        return at < 0 ? text : text.Substring(0, at) + value + text.Substring(at + 3);
     }
 
     private static void WriteStats(NuiJson json, Menu menu)

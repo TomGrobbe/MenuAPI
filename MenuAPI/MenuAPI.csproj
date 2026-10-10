@@ -1,18 +1,51 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Shared settings (framework, langversion, nullable, ...) live in ../Directory.Build.props. -->
+  <!--
+    Shared settings (langversion, nullable, ...) live in ../Directory.Build.props.
+
+    One project, two runtimes. net10.0 is FiveM Enhanced, net452 is FiveM Legacy. The code is shared,
+    what differs per runtime lives in platform/enhanced and platform/legacy.
+
+    A normal build compiles both. Packing picks one with MenuApiFlavor, so each package keeps its
+    own name: -p:MenuApiFlavor=Enhanced gives MenuAPI.FiveM.Enhanced, -p:MenuApiFlavor=Legacy
+    gives MenuAPI.FiveM.
+  -->
   <PropertyGroup>
+    <TargetFrameworks>net10.0;net452</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MenuApiFlavor)' == 'Enhanced' Or '$(NativeHooks)' == 'true'">net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MenuApiFlavor)' == 'Legacy'">net452</TargetFrameworks>
+
     <TargetName>MenuAPI</TargetName>
 
-    <AssemblyTitle>MenuAPI FiveM Enhanced</AssemblyTitle>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Description>An advanced Menu API for FiveM (Enhanced) C# resources.</Description>
-    <PackageId>MenuAPI.FiveM.Enhanced</PackageId>
-    <PackageTags>FiveM Enhanced MenuAPI</PackageTags>
     <PackageProjectUrl>https://github.com/tomgrobbe/menuapi/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/tomgrobbe/menuapi/</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+
+    <PackageId>MenuAPI.FiveM.Enhanced</PackageId>
+    <Description>An advanced Menu API for FiveM (Enhanced) C# resources.</Description>
+    <PackageTags>FiveM Enhanced MenuAPI</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MenuApiFlavor)' == 'Legacy'">
+    <PackageId>MenuAPI.FiveM</PackageId>
+    <Description>An advanced Menu API for FiveM C# resources.</Description>
+    <PackageTags>FiveM MenuAPI</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <AssemblyTitle>MenuAPI FiveM Enhanced</AssemblyTitle>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net452'">
+    <AssemblyTitle>MenuAPI FiveM</AssemblyTitle>
+
+    <!--
+      The net10.0 build already checks for nulls. .NET Framework has no null annotations on its own
+      methods, so checking again here only gives false warnings.
+    -->
+    <Nullable>annotations</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NativeHooks)' == 'true'">
@@ -32,8 +65,22 @@
     <Compile Include="..\shared\Controls.cs" Link="Controls.cs" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <Compile Remove="platform/legacy/**" />
+
     <PackageReference Include="CitizenFX.FiveM.Client" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
+    <Compile Remove="platform/enhanced/**" />
+
+    <!-- System.Net.Http is not part of .NET Framework 4.5.2 unless referenced, and nothing here needs it. -->
+    <Using Remove="System.Net.Http" />
+
+    <Reference Include="Microsoft.CSharp" />
+
+    <PackageReference Include="CitizenFX.Core.Client" ExcludeAssets="runtime" />
+    <PackageReference Include="PolySharp" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,13 +88,14 @@
     <MenuApiUiOutput Include="@(MenuApiUiSource->'ui-dist/%(Filename).min%(Extension)')" />
   </ItemGroup>
 
+  <!-- contentFiles/any/any reaches every framework a consuming project targets. -->
   <ItemGroup>
     <None Include="ui/**/*"
           Exclude="@(MenuApiUiSource)"
           TargetPath="menuapi/%(RecursiveDir)%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest"
           Pack="true"
-          PackagePath="contentFiles/any/net10.0/menuapi/"
+          PackagePath="contentFiles/any/any/menuapi/"
           PackageCopyToOutput="true" />
 
     <!-- Named, not globbed: globs expand before any target runs, so ui-dist would be empty. -->
@@ -55,7 +103,7 @@
           TargetPath="menuapi/%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest"
           Pack="true"
-          PackagePath="contentFiles/any/net10.0/menuapi/"
+          PackagePath="contentFiles/any/any/menuapi/"
           PackageCopyToOutput="true" />
   </ItemGroup>
 

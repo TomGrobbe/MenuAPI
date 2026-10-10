@@ -1,5 +1,3 @@
-﻿using CitizenFX.FiveM.Client;
-
 namespace MenuAPI;
 
 public class MenuListItem(string text, List<string> items, int index, string? description) : MenuItem(text, description)
@@ -52,11 +50,11 @@ public class MenuListItem(string text, List<string> items, int index, string? de
     public int OpacityPercent
     {
         get => opacityPercent;
-        set => MenuNui.Change(ref opacityPercent, Math.Clamp(value, 0, 100));
+        set => MenuNui.Change(ref opacityPercent, MenuMath.Clamp(value, 0, 100));
     }
 
     internal int ResolvedOpacityPercent =>
-        ShowColorPanel ? OpacityPercent : Math.Clamp(ListIndex * 10, 0, 100);
+        ShowColorPanel ? OpacityPercent : MenuMath.Clamp(ListIndex * 10, 0, 100);
     public enum ColorPanelType
     {
         Hair,

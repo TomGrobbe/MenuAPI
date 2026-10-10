@@ -5,8 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- CitizenFX runtime for FiveM Enhanced. Both projects consume the client package. -->
+    <!-- CitizenFX runtime for FiveM Enhanced (net10.0). -->
     <PackageVersion Include="CitizenFX.FiveM.Client" Version="0.0.4-alpha" />
+
+    <!-- CitizenFX runtime for FiveM Legacy (net452). -->
+    <PackageVersion Include="CitizenFX.Core.Client" Version="1.0.3394" />
+
+    <!-- Adds the compiler helper types (init, ranges, nullable attributes) that .NET Framework does not have. -->
+    <PackageVersion Include="PolySharp" Version="1.15.0" />
   </ItemGroup>
 
 </Project>

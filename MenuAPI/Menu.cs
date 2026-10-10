@@ -1,5 +1,3 @@
-﻿using CitizenFX.FiveM.Client;
-
 namespace MenuAPI;
 
 public class Menu
@@ -391,7 +389,7 @@ public class Menu
             if (pageItemsDirty)
             {
                 var source = SourceItems;
-                var start = Math.Clamp(PageIndex * PageSize, 0, source.Count);
+                var start = MenuMath.Clamp(PageIndex * PageSize, 0, source.Count);
 
                 pageItems = source.GetRange(start, Math.Min(PageSize, source.Count - start));
                 pageItemsDirty = false;
@@ -599,7 +597,7 @@ public class Menu
         get => index;
         internal set
         {
-            var clamped = Math.Clamp(value, 0, Math.Max(0, Size - 1));
+            var clamped = MenuMath.Clamp(value, 0, Math.Max(0, Size - 1));
 
             if (index == clamped)
             {
@@ -776,7 +774,7 @@ public class Menu
     /// <param name="max">A value between 3 and 10 (inclusive).</param>
     public void SetMaxItemsOnScreen(int max)
     {
-        MaxItemsOnScreen = Math.Clamp(max, 3, 10);
+        MaxItemsOnScreen = MenuMath.Clamp(max, 3, 10);
     }
 
     /// <summary>
@@ -850,7 +848,7 @@ public class Menu
             return false;
         }
 
-        var target = Math.Clamp(pageIndex, 0, PageCount - 1);
+        var target = MenuMath.Clamp(pageIndex, 0, PageCount - 1);
 
         if (target == PageIndex)
         {
@@ -883,7 +881,7 @@ public class Menu
             return;
         }
 
-        var target = Math.Clamp(PageIndex, 0, PageCount - 1);
+        var target = MenuMath.Clamp(PageIndex, 0, PageCount - 1);
 
         if (target == PageIndex)
         {
@@ -1029,7 +1027,7 @@ public class Menu
     /// <param name="item"></param>
     public void InsertMenuItem(int index, MenuItem item)
     {
-        index = Math.Clamp(index, 0, MenuItems.Count);
+        index = MenuMath.Clamp(index, 0, MenuItems.Count);
 
         var shiftCursor = !filterActive && !Paginated && MenuItems.Count > 0 && index <= CurrentIndex;
 
@@ -1063,7 +1061,7 @@ public class Menu
         var current = Paginated ? null : GetCurrentMenuItem();
 
         MenuItems.RemoveAt(from);
-        MenuItems.Insert(Math.Clamp(index, 0, MenuItems.Count), item);
+        MenuItems.Insert(MenuMath.Clamp(index, 0, MenuItems.Count), item);
 
         if (filterActive && FilterItems.Remove(item))
         {
@@ -1099,7 +1097,7 @@ public class Menu
         var max = MaxItemsOnScreen;
         var offset = Math.Min(ViewIndexOffset, Math.Max(Size - max, 0));
 
-        ViewIndexOffset = Math.Clamp(offset, Math.Max(CurrentIndex - max + 1, 0), CurrentIndex);
+        ViewIndexOffset = MenuMath.Clamp(offset, Math.Max(CurrentIndex - max + 1, 0), CurrentIndex);
     }
 
     /// <summary>
@@ -1512,7 +1510,7 @@ public class Menu
         };
     }
 
-    private static float ClampStat(float value) => float.IsFinite(value) ? Math.Clamp(value, 0f, 1f) : 0f;
+    private static float ClampStat(float value) => MenuMath.IsFinite(value) ? MenuMath.Clamp(value, 0f, 1f) : 0f;
     #endregion
 
     #region internal/private task functions
@@ -1575,7 +1573,7 @@ public class Menu
         String[] outputString = new String[stringsNeeded];
         for (int i = 0; i < stringsNeeded; i++)
         {
-            outputString[i] = inputString.Substring(i * 99, Math.Clamp(inputString[(i * 99)..].Length, 0, 99));
+            outputString[i] = inputString.Substring(i * 99, MenuMath.Clamp(inputString.Length - (i * 99), 0, 99));
         }
 
         return outputString;

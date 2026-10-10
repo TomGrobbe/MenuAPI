@@ -17,6 +17,9 @@ internal enum MenuTickLog
 // Conditions are a bare Func<bool> so this stays free of everything else in MenuAPI.
 internal sealed class MenuTickEngine(Func<long, Task> delay, Func<Task> yield, Action<MenuTickLog, string> write)
 {
+    // Task.CompletedTask does not exist on .NET Framework 4.5.2, which the Legacy build targets.
+    private static readonly Task Completed = Task.FromResult(0);
+
     private readonly List<MenuTickHandle> _registered = new();
 
     public IReadOnlyList<MenuTickHandle> Handles => _registered;
@@ -71,7 +74,7 @@ internal sealed class MenuTickEngine(Func<long, Task> delay, Func<Task> yield, A
             {
                 handler();
 
-                return Task.CompletedTask;
+                return Completed;
             },
             rate,
             condition,

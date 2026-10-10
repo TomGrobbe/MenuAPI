@@ -1,7 +1,3 @@
-using CitizenFX.FiveM.Client;
-using CitizenFX.FiveM.Shared;
-using CitizenFX.FiveM.Shared.FuncRef;
-
 namespace MenuAPI;
 
 /// <summary>
@@ -45,22 +41,11 @@ internal static class SpritePreload
 
         _registered = true;
 
-        Native.RegisterNuiCallbackType(CallbackName);
-
-        SharedAPI.OnEvent($"__cfx_nui:{CallbackName}", new Action<object, FunctionReference>(OnReport));
+        Runtime.RegisterNuiCallback(CallbackName, OnReport);
     }
 
-    private static void OnReport(object body, FunctionReference callback)
+    private static void OnReport(object body)
     {
-        try
-        {
-            callback?.CallVoid(new object[] { "ok" });
-        }
-        catch
-        {
-            // Replying is a courtesy, losing it must not stop the preload.
-        }
-
         switch (Text(body, "stage"))
         {
             case "ready":
@@ -139,7 +124,7 @@ internal static class SpritePreload
         TextureDictionaries.ReleaseAll(SpriteManifest.Dictionaries);
 
         await HoldDictionaries();
-        await API.Delay(RetryDelayMs);
+        await Runtime.Delay(RetryDelayMs);
 
         Send(again);
     }
@@ -155,16 +140,16 @@ internal static class SpritePreload
                 TextureDictionaries.ReleaseAll(SpriteManifest.Dictionaries);
             }
 
-            API.Log.Info($"[MenuAPI] NUI holds {_cached.Count} of {SpriteManifest.Sprites.Count} menu sprites, the game no longer has to.");
+            Runtime.Log.Info($"[MenuAPI] NUI holds {_cached.Count} of {SpriteManifest.Sprites.Count} menu sprites, the game no longer has to.");
         }
         else
         {
-            API.Log.Warn("[MenuAPI] NUI could not copy the menu sprites, they stay on the game's texture dictionaries.");
+            Runtime.Log.Warn("[MenuAPI] NUI could not copy the menu sprites, they stay on the game's texture dictionaries.");
         }
 
         if (missing.Count > 0)
         {
-            API.Log.Warn($"[MenuAPI] {missing.Count} menu sprites never arrived: {string.Join(", ", missing)}");
+            Runtime.Log.Warn($"[MenuAPI] {missing.Count} menu sprites never arrived: {string.Join(", ", missing)}");
         }
 
         MenuNui.Invalidate();
@@ -178,7 +163,7 @@ internal static class SpritePreload
         {
             frames++;
 
-            await API.Delay(0);
+            await Runtime.Delay(0);
         }
     }
 
@@ -278,7 +263,7 @@ internal static class SpritePreload
         {
             var end = json.IndexOf('"', at + 1);
 
-            return end < 0 ? "" : json[(at + 1)..end];
+            return end < 0 ? "" : json.Substring(at + 1, end - at - 1);
         }
 
         var stop = at;
@@ -288,6 +273,6 @@ internal static class SpritePreload
             stop++;
         }
 
-        return json[at..stop].Trim();
+        return json.Substring(at, stop - at).Trim();
     }
 }

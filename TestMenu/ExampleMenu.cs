@@ -1,13 +1,8 @@
-﻿using CitizenFX.FiveM.Client;
-using CitizenFX.FiveM.Shared.Script;
-
-using MenuAPI;
-
-using static CitizenFX.FiveM.Client.Native;
+﻿using MenuAPI;
 
 namespace TestMenu;
 
-public class ExampleMenu : IScript
+public partial class ExampleMenu
 {
     private static readonly List<string> themeNames = new List<string>() { "Default", "Red Dead", "Midnight", "Sunset" };
     private static readonly List<string?> themeBanners = new List<string?>() { null, "red-dead", "midnight", "sunset" };
@@ -221,7 +216,7 @@ public class ExampleMenu : IScript
         MenuController.BindMenuItem(menu, submenu, menuButton);
 
         // Adding items with sprites left & right to the submenu.
-        for (var i = 0; i < Enum.GetValues<MenuItem.Icon>().Length; i++)
+        for (var i = 0; i < Enum.GetValues(typeof(MenuItem.Icon)).Length; i++)
         {
             var tmpItem = new MenuItem(
                 $"Icon.{Enum.GetName(typeof(MenuItem.Icon), ((MenuItem.Icon)i))}",
@@ -429,7 +424,9 @@ public class ExampleMenu : IScript
                 for (int i = produce.Count - 1; i > 0; i--)
                 {
                     int j = shuffleRandom.Next(i + 1);
-                    (produce[i], produce[j]) = (produce[j], produce[i]);
+                    var swap = produce[i];
+                    produce[i] = produce[j];
+                    produce[j] = swap;
                 }
                 SortProduce((a, b) => ProduceOrder(a).CompareTo(ProduceOrder(b)));
             }
@@ -489,7 +486,7 @@ public class ExampleMenu : IScript
 
         menu8.OnPageChange += (_menu, _oldPage, _newPage, _wrapped) =>
         {
-            API.Log.Info($"OnPageChange: [{_menu}, {_oldPage}, {_newPage}, wrapped: {_wrapped}]");
+            Log($"OnPageChange: [{_menu}, {_oldPage}, {_newPage}, wrapped: {_wrapped}]");
 
             _menu.MenuSubtitle = _wrapped
                 ? $"~y~Page {_newPage + 1} / {_menu.PageCount} (wrapped around)"
@@ -693,7 +690,7 @@ public class ExampleMenu : IScript
         {
             if (_item.Text == "Print the values")
             {
-                API.Log.Info($"[TestMenu] NUI text: {NuiTuning.Describe()}");
+                Log($"[TestMenu] NUI text: {NuiTuning.Describe()}");
             }
             else if (_item.Text == "Reset")
             {
@@ -752,7 +749,7 @@ public class ExampleMenu : IScript
         menu.OnCheckboxChange += (_menu, _item, _index, _checked) =>
         {
             // Code in here gets executed whenever a checkbox is toggled.
-            API.Log.Info($"OnCheckboxChange: [{_menu}, {_item}, {_index}, {_checked}]");
+            Log($"OnCheckboxChange: [{_menu}, {_item}, {_index}, {_checked}]");
             // If the align-menu checkbox is toggled, toggle the menu alignment.
             if (_item == box)
             {
@@ -770,61 +767,61 @@ public class ExampleMenu : IScript
         menu.OnItemSelect += (_menu, _item, _index) =>
         {
             // Code in here would get executed whenever an item is pressed.
-            API.Log.Info($"OnItemSelect: [{_menu}, {_item}, {_index}]");
+            Log($"OnItemSelect: [{_menu}, {_item}, {_index}]");
         };
 
         menu.OnIndexChange += (_menu, _oldItem, _newItem, _oldIndex, _newIndex) =>
         {
             // Code in here would get executed whenever the up or down key is pressed and the index of the menu is changed.
-            API.Log.Info($"OnIndexChange: [{_menu}, {_oldItem}, {_newItem}, {_oldIndex}, {_newIndex}]");
+            Log($"OnIndexChange: [{_menu}, {_oldItem}, {_newItem}, {_oldIndex}, {_newIndex}]");
         };
 
         menu.OnListIndexChange += (_menu, _listItem, _oldIndex, _newIndex, _itemIndex) =>
         {
             // Code in here would get executed whenever the selected value of a list item changes (when left/right key is pressed).
-            API.Log.Info($"OnListIndexChange: [{_menu}, {_listItem}, {_oldIndex}, {_newIndex}, {_itemIndex}]");
+            Log($"OnListIndexChange: [{_menu}, {_listItem}, {_oldIndex}, {_newIndex}, {_itemIndex}]");
         };
 
         menu.OnListItemSelect += (_menu, _listItem, _listIndex, _itemIndex) =>
         {
             // Code in here would get executed whenever a list item is pressed.
-            API.Log.Info($"OnListItemSelect: [{_menu}, {_listItem}, {_listIndex}, {_itemIndex}]");
+            Log($"OnListItemSelect: [{_menu}, {_listItem}, {_listIndex}, {_itemIndex}]");
         };
 
         menu.OnSliderPositionChange += (_menu, _sliderItem, _oldPosition, _newPosition, _itemIndex) =>
         {
             // Code in here would get executed whenever the position of a slider is changed (when left/right key is pressed).
-            API.Log.Info($"OnSliderPositionChange: [{_menu}, {_sliderItem}, {_oldPosition}, {_newPosition}, {_itemIndex}]");
+            Log($"OnSliderPositionChange: [{_menu}, {_sliderItem}, {_oldPosition}, {_newPosition}, {_itemIndex}]");
         };
 
         menu.OnSliderItemSelect += (_menu, _sliderItem, _sliderPosition, _itemIndex) =>
         {
             // Code in here would get executed whenever a slider item is pressed.
-            API.Log.Info($"OnSliderItemSelect: [{_menu}, {_sliderItem}, {_sliderPosition}, {_itemIndex}]");
+            Log($"OnSliderItemSelect: [{_menu}, {_sliderItem}, {_sliderPosition}, {_itemIndex}]");
         };
 
         menu.OnMenuClose += (_menu) =>
         {
             // Code in here gets triggered whenever the menu is closed.
-            API.Log.Info($"OnMenuClose: [{_menu}]");
+            Log($"OnMenuClose: [{_menu}]");
         };
 
         menu.OnMenuOpen += (_menu) =>
         {
             // Code in here gets triggered whenever the menu is opened.
-            API.Log.Info($"OnMenuOpen: [{_menu}]");
+            Log($"OnMenuOpen: [{_menu}]");
         };
 
         menu.OnDynamicListItemCurrentItemChange += (_menu, _dynamicListItem, _oldCurrentItem, _newCurrentItem) =>
         {
             // Code in here would get executed whenever the value of the current item of a dynamic list item changes.
-            API.Log.Info($"OnDynamicListItemCurrentItemChange: [{_menu}, {_dynamicListItem}, {_oldCurrentItem}, {_newCurrentItem}]");
+            Log($"OnDynamicListItemCurrentItemChange: [{_menu}, {_dynamicListItem}, {_oldCurrentItem}, {_newCurrentItem}]");
         };
 
         menu.OnDynamicListItemSelect += (_menu, _dynamicListItem, _currentItem) =>
         {
             // Code in here would get executed whenever a dynamic list item is pressed.
-            API.Log.Info($"OnDynamicListItemSelect: [{_menu}, {_dynamicListItem}, {_currentItem}]");
+            Log($"OnDynamicListItemSelect: [{_menu}, {_dynamicListItem}, {_currentItem}]");
         };
 
         ApplyTheme(startingTheme);

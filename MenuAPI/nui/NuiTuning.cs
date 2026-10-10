@@ -24,7 +24,7 @@ public static class NuiTuning
         get => _textSize;
         set
         {
-            _textSize = Math.Clamp(value, 8f, 48f);
+            _textSize = MenuMath.Clamp(value, 8f, 48f);
 
             MenuNui.Invalidate();
         }
@@ -35,7 +35,7 @@ public static class NuiTuning
         get => _textBrightness;
         set
         {
-            _textBrightness = Math.Clamp(value, 0, 255);
+            _textBrightness = MenuMath.Clamp(value, 0, 255);
 
             MenuNui.Invalidate();
         }
@@ -56,7 +56,7 @@ public static class NuiTuning
     public static string? Theme => _theme;
 
     /// <summary>Every registered theme name.</summary>
-    public static IReadOnlyCollection<string> Themes => _themes.Keys;
+    public static IReadOnlyCollection<string> Themes => _themes.Keys.ToList();
 
     /// <summary>
     /// Registers a stylesheet under a name. The path is relative to your NUI page. Registering the

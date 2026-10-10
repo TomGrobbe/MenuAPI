@@ -93,11 +93,11 @@ public sealed class MenuKeyBinding
         return pending;
     }
 
-    internal void ClearHeld() => Array.Clear(held);
+    internal void ClearHeld() => Array.Clear(held, 0, held.Length);
 
     internal void ClearPending()
     {
-        Array.Clear(armed);
+        Array.Clear(armed, 0, armed.Length);
         pressed = false;
         released = false;
     }

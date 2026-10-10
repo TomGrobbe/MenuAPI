@@ -1,6 +1,3 @@
-﻿using CitizenFX.FiveM.Client;
-using CitizenFX.FiveM.Shared;
-
 namespace MenuAPI;
 
 /// <summary>
@@ -10,7 +7,7 @@ namespace MenuAPI;
 /// </summary>
 public static class MenuTicks
 {
-    private static readonly MenuTickEngine Engine = new(ms => API.Delay(ms), () => API.Yield(), Write);
+    private static readonly MenuTickEngine Engine = new(ms => Runtime.Delay(ms), () => Runtime.Yield(), Write);
 
     private static bool _initialized;
 
@@ -34,11 +31,11 @@ public static class MenuTicks
     /// <summary>Writes every tick and its state to the console.</summary>
     public static void Dump()
     {
-        API.Log.Info($"[MenuAPI] {Engine.Handles.Count} ticks registered:");
+        Runtime.Log.Info($"[MenuAPI] {Engine.Handles.Count} ticks registered:");
 
         foreach (var line in Engine.Describe())
         {
-            API.Log.Info("[MenuAPI]   " + line);
+            Runtime.Log.Info("[MenuAPI]   " + line);
         }
     }
 
@@ -52,7 +49,7 @@ public static class MenuTicks
 
         // Carries the resource name, like the key bindings do, so two resources that both ship
         // MenuAPI do not fight over one command name.
-        SharedAPI.Commands.RegisterCommand($"{MenuInput.Prefix}ticks", false, new Action(Dump));
+        Runtime.RegisterCommand($"{MenuInput.Prefix}ticks", new Action(Dump));
 
         Engine.Register("Menu.Scheduler", Flush, MenuTickRate.PerFrame);
     }
@@ -103,16 +100,16 @@ public static class MenuTicks
         switch (level)
         {
             case MenuTickLog.Error:
-                API.Log.Error($"[MenuAPI] {message}");
+                Runtime.Log.Error($"[MenuAPI] {message}");
                 break;
             case MenuTickLog.Warn:
-                API.Log.Warn($"[MenuAPI] {message}");
+                Runtime.Log.Warn($"[MenuAPI] {message}");
                 break;
             case MenuTickLog.Info:
-                API.Log.Info($"[MenuAPI] {message}");
+                Runtime.Log.Info($"[MenuAPI] {message}");
                 break;
             default:
-                API.Log.Debug($"[MenuAPI] {message}");
+                Runtime.Log.Debug($"[MenuAPI] {message}");
                 break;
         }
     }

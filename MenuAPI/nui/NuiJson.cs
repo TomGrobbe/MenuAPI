@@ -3,7 +3,7 @@ using System.Text;
 
 namespace MenuAPI;
 
-internal sealed class NuiJson
+internal sealed partial class NuiJson
 {
     private readonly StringBuilder _builder = new();
     private bool _needsComma;
@@ -15,8 +15,6 @@ internal sealed class NuiJson
 
         return this;
     }
-
-    internal bool Matches(string? value) => value is not null && _builder.Equals(value.AsSpan());
 
     internal NuiJson Object()
     {

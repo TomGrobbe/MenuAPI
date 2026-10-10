@@ -1,5 +1,3 @@
-﻿using CitizenFX.FiveM.Client;
-
 namespace MenuAPI;
 
 public class MenuSliderItem(string name, string? description, int min, int max, int startPosition, bool showDivider) : MenuItem(name, description)

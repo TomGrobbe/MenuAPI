@@ -1,9 +1,6 @@
-﻿using CitizenFX.FiveM.Client;
-using CitizenFX.FiveM.Shared.Script;
-
 namespace MenuAPI;
 
-public class MenuController : IScript
+public partial class MenuController
 {
     public static List<Menu> Menus { get; protected set; } = new List<Menu>();
     internal static HashSet<Menu> VisibleMenus { get; } = new HashSet<Menu>();
@@ -136,7 +133,7 @@ public class MenuController : IScript
                 // In case the value was being changed to be right aligned, notify the user properly.
                 if (value == MenuAlignmentOption.Right)
                 {
-                    API.Log.Error($"[MenuAPI ({Native.GetCurrentResourceName()})] Right aligned menus are not supported for aspect ratios 17:9 or 21:9, left aligned will be used instead.");
+                    Runtime.Log.Error($"[MenuAPI ({Native.GetCurrentResourceName()})] Right aligned menus are not supported for aspect ratios 17:9 or 21:9, left aligned will be used instead.");
                 }
             }
         }
@@ -215,7 +212,7 @@ public class MenuController : IScript
     // script or MenuAPI's was constructed first. Not a tick, so it is not worth a handle.
     static async void RegisterKeyBindings()
     {
-        await API.Delay(0);
+        await Runtime.Delay(0);
         MenuInput.Register();
     }
     /// <summary>
@@ -355,10 +352,12 @@ public class MenuController : IScript
     /// </summary>
     internal static void Unbind(MenuItem item, HashSet<Menu>? removed = null)
     {
-        if (!MenuButtons.Remove(item, out var child))
+        if (!MenuButtons.TryGetValue(item, out var child))
         {
             return;
         }
+
+        MenuButtons.Remove(item);
 
         // Checked after the entry is gone, so a row bound twice to the same menu keeps it.
         if (StillBound(child) || ReferenceEquals(MainMenu, child))
@@ -457,7 +456,7 @@ public class MenuController : IScript
         else if (back && !DisableBackButton)
         {
             // Wait for the next frame to make sure the "cinematic camera" button doesn't get "re-enabled" before the menu gets closed.
-            await API.Delay(0);
+            await Runtime.Delay(0);
 
             // A submenu can always go back to its parent, a top level menu can only be closed when
             // the resource allows it.
@@ -658,7 +657,7 @@ public class MenuController : IScript
                 currentMenu.GoRight();
                 time = Native.GetGameTimer();
             }
-            await API.Delay(0);
+            await Runtime.Delay(0);
         }
     }
 
@@ -715,7 +714,7 @@ public class MenuController : IScript
                 currentMenu.GoLeft();
                 time = Native.GetGameTimer();
             }
-            await API.Delay(0);
+            await Runtime.Delay(0);
         }
     }
 
@@ -759,7 +758,7 @@ public class MenuController : IScript
 
                 time = Native.GetGameTimer();
             }
-            await API.Delay(0);
+            await Runtime.Delay(0);
         }
     }
 
@@ -816,7 +815,7 @@ public class MenuController : IScript
             }
 
             // Wait for the next game tick.
-            await API.Delay(0);
+            await Runtime.Delay(0);
         }
     }
 
@@ -828,13 +827,13 @@ public class MenuController : IScript
             bool buttonsState = DisableMenuButtons;
             while (isInputVisible())
             {
-                await API.Delay(0);
+                await Runtime.Delay(0);
                 DisableMenuButtons = true;
             }
             int timer = Native.GetGameTimer();
             while (Native.GetGameTimer() - timer < 300)
             {
-                await API.Delay(0);
+                await Runtime.Delay(0);
                 DisableMenuButtons = true;
             }
             DisableMenuButtons = buttonsState;
@@ -1115,7 +1114,7 @@ public class MenuController : IScript
 
             while (!Native.HasScaleformMovieLoaded(_scale))
             {
-                await API.Delay(0);
+                await Runtime.Delay(0);
             }
         }
 

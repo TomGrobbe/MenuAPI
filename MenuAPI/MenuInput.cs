@@ -1,6 +1,3 @@
-﻿using CitizenFX.FiveM.Client;
-using CitizenFX.FiveM.Shared;
-
 namespace MenuAPI;
 
 internal static class MenuInput
@@ -98,7 +95,7 @@ internal static class MenuInput
         RegisterScroll(Up, "Menu up", "IOM_WHEEL_UP", AddScrollUp);
         RegisterScroll(Down, "Menu down", "IOM_WHEEL_DOWN", AddScrollDown);
 
-        SharedAPI.Commands.RegisterCommand($"{Prefix}buttons", false, new Action(DumpButtons));
+        Runtime.RegisterCommand($"{Prefix}buttons", new Action(DumpButtons));
     }
 
     internal static MenuKeyBinding RegisterCustom(string name, string description, string keyboardKey, string? controllerButton)
@@ -132,16 +129,16 @@ internal static class MenuInput
 
     private static void RegisterToggle(string keyboardKey)
     {
-        SharedAPI.Commands.RegisterCommand(ToggleCommand, false, new Action(() => togglePressed = true));
+        Runtime.RegisterCommand(ToggleCommand, new Action(() => togglePressed = true));
         Native.RegisterKeyMapping(ToggleCommand, "Open / close menu", "keyboard", keyboardKey);
 
         string pad = PadCommand(ToggleCommand);
-        SharedAPI.Commands.RegisterCommand($"+{pad}", false, new Action(() =>
+        Runtime.RegisterCommand($"+{pad}", new Action(() =>
         {
             controllerToggleSince = Native.GetGameTimer();
             controllerToggleFired = false;
         }));
-        SharedAPI.Commands.RegisterCommand($"-{pad}", false, new Action(() => controllerToggleSince = -1));
+        Runtime.RegisterCommand($"-{pad}", new Action(() => controllerToggleSince = -1));
         Native.RegisterKeyMapping($"+{pad}", "Open / close menu (controller)", "PAD_ANALOGBUTTON", "SELECT_INDEX");
     }
 
@@ -178,14 +175,14 @@ internal static class MenuInput
     {
         string mouse = MouseCommand(binding.Command);
 
-        SharedAPI.Commands.RegisterCommand(mouse, false, onScroll);
+        Runtime.RegisterCommand(mouse, onScroll);
         Native.RegisterKeyMapping(mouse, $"{description} (mouse wheel)", "MOUSE_WHEEL", wheelDirection);
     }
 
     private static void RegisterHoldCommands(MenuKeyBinding binding, string command, int device)
     {
-        SharedAPI.Commands.RegisterCommand($"+{command}", false, new Action(() => binding.Press(device)));
-        SharedAPI.Commands.RegisterCommand($"-{command}", false, new Action(() => binding.Release(device)));
+        Runtime.RegisterCommand($"+{command}", new Action(() => binding.Press(device)));
+        Runtime.RegisterCommand($"-{command}", new Action(() => binding.Release(device)));
     }
 
     internal static string PadCommand(string command) => $"{command}:pad";
@@ -332,19 +329,19 @@ internal static class MenuInput
 
         string device = Native.IsUsingKeyboardAndMouse(2) ? "keyboard" : "a controller";
 
-        API.Log.Info($"[MenuAPI] instructional button icons, on {device}:");
-        API.Log.Info($"[MenuAPI]   a binding with no icon looks like \"{InstructionalButtonIcons.For(UnboundControl)}\"");
+        Runtime.Log.Info($"[MenuAPI] instructional button icons, on {device}:");
+        Runtime.Log.Info($"[MenuAPI]   a binding with no icon looks like \"{InstructionalButtonIcons.For(UnboundControl)}\"");
 
         foreach (MenuKeyBinding binding in Own.Concat(Custom.Values))
         {
             string keyboard = InstructionalButtonIcons.For(binding.KeyboardControl);
             string controller = InstructionalButtonIcons.For(binding.ControllerControl);
 
-            API.Log.Info($"[MenuAPI]   {binding.Command}: keyboard \"{keyboard}\", controller \"{controller}\", " +
+            Runtime.Log.Info($"[MenuAPI]   {binding.Command}: keyboard \"{keyboard}\", controller \"{controller}\", " +
                 $"defaults {binding.KeyboardDefault} \"{DefaultIcon(binding.KeyboardDefault)}\" and " +
                 $"{binding.ControllerDefault} \"{DefaultIcon(binding.ControllerDefault)}\"");
         }
     }
 
-    internal static int BindingControl(string command) => API.HashSigned(command) | int.MinValue;
+    internal static int BindingControl(string command) => Runtime.Hash(command) | int.MinValue;
 }

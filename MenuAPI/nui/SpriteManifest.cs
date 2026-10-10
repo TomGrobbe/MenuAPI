@@ -45,7 +45,7 @@ internal static class SpriteManifest
         // The sprite lookups are instance methods, so throwaway items are the only way to reach them.
         var item = new MenuItem("");
 
-        foreach (var icon in Enum.GetValues<MenuItem.Icon>())
+        foreach (MenuItem.Icon icon in Enum.GetValues(typeof(MenuItem.Icon)))
         {
             if (icon == MenuItem.Icon.NONE)
             {
@@ -60,7 +60,7 @@ internal static class SpriteManifest
 
         var checkbox = new MenuCheckboxItem("");
 
-        foreach (var style in Enum.GetValues<MenuCheckboxItem.CheckboxStyle>())
+        foreach (MenuCheckboxItem.CheckboxStyle style in Enum.GetValues(typeof(MenuCheckboxItem.CheckboxStyle)))
         {
             checkbox.Style = style;
 

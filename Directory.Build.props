@@ -1,13 +1,14 @@
 <Project>
 
   <!--
-    Shared MSBuild settings for every project in this repo (MenuAPI, TestMenu).
+    Shared MSBuild settings for every FiveM project in this repo (MenuAPI, TestMenu). RedM has its
+    own in redm/, which does not import this one.
 
-    OutputPath is deliberately NOT set here. CI builds MenuAPI/MenuAPI.csproj directly and
-    zips MenuAPI/bin/Release/net10.0, so moving the output would break the release workflow.
+    OutputPath is deliberately NOT set here. CI zips MenuAPI/bin/Release/<framework>, so moving
+    the output would break the workflow. The framework is set per project, because MenuAPI and
+    TestMenu build for both net10.0 (Enhanced) and net452 (Legacy).
   -->
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

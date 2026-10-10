@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Shared settings (framework, langversion, nullable, ...) live in ../Directory.Build.props. -->
+  <!-- Shared settings (langversion, nullable, ...) live in ../Directory.Build.props. -->
   <PropertyGroup>
+    <!-- NativeHooks only exists for Enhanced. -->
+    <TargetFramework>net10.0</TargetFramework>
+
     <!-- Only ever built as part of the NativeHooks configuration, so nothing ships it. -->
     <IsPackable>false</IsPackable>
   </PropertyGroup>

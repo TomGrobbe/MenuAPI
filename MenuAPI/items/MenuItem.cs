@@ -1,5 +1,3 @@
-﻿using CitizenFX.FiveM.Client;
-
 namespace MenuAPI;
 
 public class MenuItem
@@ -489,17 +487,17 @@ public class MenuItem
     /// <param name="icon"></param>
     /// <param name="selected"></param>
     /// <returns></returns>
-    protected internal (int R, int G, int B) GetSpriteColour(Icon icon, bool selected)
+    protected internal System.Drawing.Color GetSpriteColour(Icon icon, bool selected)
     {
         return icon switch
         {
-            Icon.CROWN or Icon.TICK or Icon.MALE or Icon.FEMALE or Icon.LOCK or Icon.LOCK_ARENA or Icon.ADVERSARY or Icon.BASE_JUMPING or Icon.BRIEFCASE or Icon.MISSION_STAR or Icon.DEATHMATCH or Icon.CASTLE or Icon.TROPHY or Icon.RACE_FLAG or Icon.RACE_FLAG_PLANE or Icon.RACE_FLAG_BICYCLE or Icon.RACE_FLAG_PERSON or Icon.RACE_FLAG_CAR or Icon.RACE_FLAG_BOAT_ANCHOR or Icon.ROCKSTAR or Icon.STUNT or Icon.STUNT_PREMIUM or Icon.RACE_FLAG_STUNT_JUMP or Icon.SHIELD or Icon.TEAM_DEATHMATCH or Icon.VEHICLE_DEATHMATCH or Icon.MP_SPECTATING or Icon.GLOBE_WHITE or Icon.AUDIO_MUTE or Icon.AUDIO_INACTIVE or Icon.AUDIO_VOL1 or Icon.AUDIO_VOL2 or Icon.AUDIO_VOL3 or Icon.BRAND_ALBANY or Icon.BRAND_ANNIS or Icon.BRAND_BANSHEE or Icon.BRAND_BENEFACTOR or Icon.BRAND_BF or Icon.BRAND_BOLLOKAN or Icon.BRAND_BRAVADO or Icon.BRAND_BRUTE or Icon.BRAND_BUCKINGHAM or Icon.BRAND_CANIS or Icon.BRAND_CHARIOT or Icon.BRAND_CHEVAL or Icon.BRAND_CLASSIQUE or Icon.BRAND_COIL or Icon.BRAND_DECLASSE or Icon.BRAND_DEWBAUCHEE or Icon.BRAND_DILETTANTE or Icon.BRAND_DINKA or Icon.BRAND_DUNDREARY or Icon.BRAND_EMPORER or Icon.BRAND_ENUS or Icon.BRAND_FATHOM or Icon.BRAND_GALIVANTER or Icon.BRAND_GROTTI or Icon.BRAND_HIJAK or Icon.BRAND_HVY or Icon.BRAND_IMPONTE or Icon.BRAND_INVETERO or Icon.BRAND_JACKSHEEPE or Icon.BRAND_JOBUILT or Icon.BRAND_KARIN or Icon.BRAND_LAMPADATI or Icon.BRAND_MAIBATSU or Icon.BRAND_MAMMOTH or Icon.BRAND_MTL or Icon.BRAND_NAGASAKI or Icon.BRAND_OBEY or Icon.BRAND_OCELOT or Icon.BRAND_OVERFLOD or Icon.BRAND_PED or Icon.BRAND_PEGASSI or Icon.BRAND_PFISTER or Icon.BRAND_PRINCIPE or Icon.BRAND_PROGEN or Icon.BRAND_SCHYSTER or Icon.BRAND_SHITZU or Icon.BRAND_SPEEDOPHILE or Icon.BRAND_STANLEY or Icon.BRAND_TRUFFADE or Icon.BRAND_UBERMACHT or Icon.BRAND_VAPID or Icon.BRAND_VULCAR or Icon.BRAND_WEENY or Icon.BRAND_WESTERN or Icon.BRAND_WESTERNMOTORCYCLE or Icon.BRAND_WILLARD or Icon.BRAND_ZIRCONIUM or Icon.BRAND_GROTTI2 or Icon.BRAND_LCC or Icon.BRAND_PROGEN2 or Icon.BRAND_RUNE => selected ? (Enabled ? (0, 0, 0) : (50, 50, 50)) : (Enabled ? (255, 255, 255) : (109, 109, 109)),
-            Icon.GLOBE_BLUE => Enabled ? (10, 103, 166) : (11, 62, 117),
-            Icon.GLOBE_GREEN => Enabled ? (10, 166, 85) : (5, 71, 22),
-            Icon.GLOBE_ORANGE => Enabled ? (232, 145, 14) : (133, 77, 12),
-            Icon.GLOBE_RED => Enabled ? (207, 43, 31) : (110, 7, 7),
-            Icon.GLOBE_YELLOW => Enabled ? (232, 207, 14) : (131, 133, 12),
-            _ => Enabled ? (255, 255, 255) : (109, 109, 109),
+            Icon.CROWN or Icon.TICK or Icon.MALE or Icon.FEMALE or Icon.LOCK or Icon.LOCK_ARENA or Icon.ADVERSARY or Icon.BASE_JUMPING or Icon.BRIEFCASE or Icon.MISSION_STAR or Icon.DEATHMATCH or Icon.CASTLE or Icon.TROPHY or Icon.RACE_FLAG or Icon.RACE_FLAG_PLANE or Icon.RACE_FLAG_BICYCLE or Icon.RACE_FLAG_PERSON or Icon.RACE_FLAG_CAR or Icon.RACE_FLAG_BOAT_ANCHOR or Icon.ROCKSTAR or Icon.STUNT or Icon.STUNT_PREMIUM or Icon.RACE_FLAG_STUNT_JUMP or Icon.SHIELD or Icon.TEAM_DEATHMATCH or Icon.VEHICLE_DEATHMATCH or Icon.MP_SPECTATING or Icon.GLOBE_WHITE or Icon.AUDIO_MUTE or Icon.AUDIO_INACTIVE or Icon.AUDIO_VOL1 or Icon.AUDIO_VOL2 or Icon.AUDIO_VOL3 or Icon.BRAND_ALBANY or Icon.BRAND_ANNIS or Icon.BRAND_BANSHEE or Icon.BRAND_BENEFACTOR or Icon.BRAND_BF or Icon.BRAND_BOLLOKAN or Icon.BRAND_BRAVADO or Icon.BRAND_BRUTE or Icon.BRAND_BUCKINGHAM or Icon.BRAND_CANIS or Icon.BRAND_CHARIOT or Icon.BRAND_CHEVAL or Icon.BRAND_CLASSIQUE or Icon.BRAND_COIL or Icon.BRAND_DECLASSE or Icon.BRAND_DEWBAUCHEE or Icon.BRAND_DILETTANTE or Icon.BRAND_DINKA or Icon.BRAND_DUNDREARY or Icon.BRAND_EMPORER or Icon.BRAND_ENUS or Icon.BRAND_FATHOM or Icon.BRAND_GALIVANTER or Icon.BRAND_GROTTI or Icon.BRAND_HIJAK or Icon.BRAND_HVY or Icon.BRAND_IMPONTE or Icon.BRAND_INVETERO or Icon.BRAND_JACKSHEEPE or Icon.BRAND_JOBUILT or Icon.BRAND_KARIN or Icon.BRAND_LAMPADATI or Icon.BRAND_MAIBATSU or Icon.BRAND_MAMMOTH or Icon.BRAND_MTL or Icon.BRAND_NAGASAKI or Icon.BRAND_OBEY or Icon.BRAND_OCELOT or Icon.BRAND_OVERFLOD or Icon.BRAND_PED or Icon.BRAND_PEGASSI or Icon.BRAND_PFISTER or Icon.BRAND_PRINCIPE or Icon.BRAND_PROGEN or Icon.BRAND_SCHYSTER or Icon.BRAND_SHITZU or Icon.BRAND_SPEEDOPHILE or Icon.BRAND_STANLEY or Icon.BRAND_TRUFFADE or Icon.BRAND_UBERMACHT or Icon.BRAND_VAPID or Icon.BRAND_VULCAR or Icon.BRAND_WEENY or Icon.BRAND_WESTERN or Icon.BRAND_WESTERNMOTORCYCLE or Icon.BRAND_WILLARD or Icon.BRAND_ZIRCONIUM or Icon.BRAND_GROTTI2 or Icon.BRAND_LCC or Icon.BRAND_PROGEN2 or Icon.BRAND_RUNE => selected ? (Enabled ? System.Drawing.Color.FromArgb(0, 0, 0) : System.Drawing.Color.FromArgb(50, 50, 50)) : (Enabled ? System.Drawing.Color.FromArgb(255, 255, 255) : System.Drawing.Color.FromArgb(109, 109, 109)),
+            Icon.GLOBE_BLUE => Enabled ? System.Drawing.Color.FromArgb(10, 103, 166) : System.Drawing.Color.FromArgb(11, 62, 117),
+            Icon.GLOBE_GREEN => Enabled ? System.Drawing.Color.FromArgb(10, 166, 85) : System.Drawing.Color.FromArgb(5, 71, 22),
+            Icon.GLOBE_ORANGE => Enabled ? System.Drawing.Color.FromArgb(232, 145, 14) : System.Drawing.Color.FromArgb(133, 77, 12),
+            Icon.GLOBE_RED => Enabled ? System.Drawing.Color.FromArgb(207, 43, 31) : System.Drawing.Color.FromArgb(110, 7, 7),
+            Icon.GLOBE_YELLOW => Enabled ? System.Drawing.Color.FromArgb(232, 207, 14) : System.Drawing.Color.FromArgb(131, 133, 12),
+            _ => Enabled ? System.Drawing.Color.FromArgb(255, 255, 255) : System.Drawing.Color.FromArgb(109, 109, 109),
         };
     }
 
