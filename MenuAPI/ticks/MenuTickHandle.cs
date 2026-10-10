@@ -14,7 +14,9 @@ public sealed class MenuTickHandle
 
     private readonly MenuTickEngine _engine;
     private readonly Func<Task> _handler;
-    private readonly MenuTickRate _rate;
+    // Not readonly: reading a member off a readonly struct field takes the field's address, which
+    // the Legacy runtime's IL verifier rejects.
+    private MenuTickRate _rate;
     private readonly Func<bool>? _condition;
 
     /// <summary>The loop's exit condition: the state <see cref="Apply"/> committed to, not the state it wants.</summary>
