@@ -44,7 +44,6 @@ public class MenuController : IScript
     public static bool NavigateMenuUsingArrows { get; set; } = true;
     public static bool PreventExitingMenu { get; set; } = false;
     public static bool DisableBackButton { get; set; } = false;
-    public static bool SetDrawOrder { get; set; } = true;
 
     #region Menu title styling defaults
     // What every menu falls back to when it has not been told otherwise, so a resource can set the
@@ -79,22 +78,15 @@ public class MenuController : IScript
     private static bool _defaultShowHeaderGlare = false;
     #endregion
 
-    private static MenuRenderMode _renderMode = MenuRenderMode.Native;
-
+    /// <summary>
+    /// Menus are always drawn with NUI now. Reading this always gives <see cref="MenuRenderMode.Nui"/>
+    /// and setting it does nothing.
+    /// </summary>
+    [Obsolete("Menus are always drawn with NUI. This property does nothing and will be removed.")]
     public static MenuRenderMode RenderMode
     {
-        get => _renderMode;
-        set
-        {
-            if (_renderMode == value)
-            {
-                return;
-            }
-
-            _renderMode = value;
-
-            MenuTicks.Reevaluate();
-        }
+        get => MenuRenderMode.Nui;
+        set { }
     }
 
     public static bool DontOpenAnyMenu { get; set; } = false;
@@ -180,12 +172,7 @@ public class MenuController : IScript
             MenuTickRate.Every(TextureRefreshIntervalMs), IsAnyMenuOpen,
             onStopped: UnloadAssets);
 
-        MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame,
-            () => IsAnyMenuOpen() && RenderMode == MenuRenderMode.Native,
-            onStopped: HeaderGlare.Dispose);
-
-        MenuTicks.Register("Menu.DrawNui", ProcessMenusNui, MenuTickRate.PerFrame,
-            () => IsAnyMenuOpen() && RenderMode == MenuRenderMode.Nui,
+        MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame, IsAnyMenuOpen,
             onStopped: MenuNui.Hide);
 
         MenuTicks.Register("Menu.InstructionalButtons", DrawInstructionalButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
@@ -396,32 +383,6 @@ public class MenuController : IScript
     }
 
     #endregion
-
-    /// <summary>
-    /// Loads the texture dict for the common menu sprites.
-    /// </summary>
-    /// <returns></returns>
-    /// <returns>Whether it had to wait for streaming, so callers know time has passed.</returns>
-    private static async Task<bool> LoadAssets()
-    {
-        var waited = false;
-
-        while (!TextureDictionaries.RequestAll(MenuTextureAssets))
-        {
-            // The menu closing already ran UnloadAssets, so waiting out the rest of the stream would
-            // leave dicts requested that nothing is going to release.
-            if (!IsAnyMenuOpen())
-            {
-                return true;
-            }
-
-            waited = true;
-
-            await API.Delay(0);
-        }
-
-        return waited;
-    }
 
     /// <summary>
     /// Unloads the texture dict for the common menu sprites.
@@ -1028,39 +989,16 @@ public class MenuController : IScript
     }
 
     /// <summary>
-    /// Draws all the menus that are visible on the screen.
+    /// Sends the open menu to the NUI page.
     /// </summary>
-    /// <returns></returns>
-    private static async Task ProcessMenus()
+    private static void ProcessMenus()
     {
-        // Cheap insurance: Menu.Layout's onStarted normally fills this in before the first frame
-        // here, but a resource that draws through some other path should never read an empty cache.
+        // Cheap insurance: Menu.Layout's onStarted normally fills this in before the first frame here.
         MenuLayout.EnsureComputed();
 
         // Whether a menu is open is the tick's own condition, so it is not checked again here. What
         // is left changes every frame with no event to react to, which is why it stays inline: the
-        // tick keeps running through a pause menu and simply draws nothing. Menu.Draw trusts this
-        // check rather than repeating it.
-        if (!CanDraw())
-        {
-            return;
-        }
-
-        // Only re-checked when the textures actually had to stream in, which waits frames and gives
-        // the player time to open the pause menu. Normally they are already loaded and this is free.
-        if (await LoadAssets() && !CanDraw())
-        {
-            return;
-        }
-
-        DisableControls();
-        await DrawMenus();
-    }
-
-    private static void ProcessMenusNui()
-    {
-        MenuLayout.EnsureComputed();
-
+        // tick keeps running through a pause menu and simply hides the menu.
         if (!CanDraw())
         {
             MenuNui.Hide();
@@ -1107,7 +1045,7 @@ public class MenuController : IScript
     {
         // Once the page holds its own copies, the only thing left to stream is a texture a resource
         // set itself, which asks for its dictionary through the pending list below.
-        if (RenderMode == MenuRenderMode.Native || !SpritePreload.Cached)
+        if (!SpritePreload.Cached)
         {
             TextureDictionaries.RequestAll(MenuTextureAssets);
         }
@@ -1120,7 +1058,7 @@ public class MenuController : IScript
     public static void RefreshNui() => MenuNui.Invalidate();
 
     // The menu whose key bindings the draw tick is going to process this frame, matching the checks
-    // both draw paths make before they reach Menu.ProcessKeyBindings.
+    // ProcessMenus makes before it reaches Menu.ProcessKeyBindings.
     private static Menu? MenuReadingKeyBindings()
     {
         if (!CanDraw() || DontOpenAnyMenu)
@@ -1139,26 +1077,6 @@ public class MenuController : IScript
         !FrameState.IsPauseMenuActive &&
         !FrameState.IsDead &&
         !FrameState.IsPlayerSwitchInProgress;
-
-    private static async Task DrawMenus()
-    {
-        Menu? menu = GetCurrentMenu();
-        if (menu == null)
-        {
-            return;
-        }
-        if (DontOpenAnyMenu)
-        {
-            if (menu.Visible && !menu.IgnoreDontOpenMenus)
-            {
-                menu.CloseMenu();
-            }
-        }
-        else if (menu.Visible)
-        {
-            await menu.Draw();
-        }
-    }
 
     internal static void DrawInstructionalButtons()
     {

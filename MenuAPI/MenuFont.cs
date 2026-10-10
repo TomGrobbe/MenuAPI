@@ -22,37 +22,4 @@ public static class MenuFont
 
     /// <summary>The Grand Theft Auto logo font.</summary>
     public const int Pricedown = 7;
-
-    // Each font disagrees about how big a given text scale is and about where its baseline sits, so
-    // one shared size and one shared nudge would leave half of them looking wrong. Both tables were
-    // picked by eye against the standard banner. A font neither table knows about, which means one
-    // registered at runtime, gets a middle of the road value to start from.
-    //
-    // Internal on purpose. These are what makes a title sit correctly on its banner, not a taste
-    // setting, so there is nothing to gain from letting a resource move a title off its own header.
-
-    /// <summary>The size a title in <paramref name="font"/> is drawn at.</summary>
-    internal static float DefaultSizeFor(int font) => font switch
-    {
-        ChaletLondon => 0.875f,
-        HouseScript => 1.05f,
-        Monospace => 1.075f,
-        ChaletComprimeCologne => 0.975f,
-        Pricedown => 1.05f,
-        _ => 1f
-    };
-
-    /// <summary>
-    /// How far a title in <paramref name="font"/> is nudged vertically, in pixels at 1080p, to sit
-    /// centred on the banner. Positive is down.
-    /// </summary>
-    internal static float DefaultOffsetYFor(int font) => font switch
-    {
-        ChaletLondon => -4f,
-        HouseScript => 0f,
-        Monospace => -4f,
-        ChaletComprimeCologne => 0f,
-        Pricedown => 3f,
-        _ => 0f
-    };
 }

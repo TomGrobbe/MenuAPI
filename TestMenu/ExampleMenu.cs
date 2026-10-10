@@ -9,8 +9,6 @@ namespace TestMenu;
 
 public class ExampleMenu : IScript
 {
-    private static MenuCheckboxItem? renderModeBox;
-
     private static readonly List<string> themeNames = new List<string>() { "Default", "Red Dead", "Midnight", "Sunset" };
     private static readonly List<string?> themeBanners = new List<string?>() { null, "red-dead", "midnight", "sunset" };
 
@@ -18,10 +16,6 @@ public class ExampleMenu : IScript
 
     public ExampleMenu()
     {
-        RegisterRenderModeToggle();
-
-        MenuController.RenderMode = MenuRenderMode.Nui;
-
         MenuController.DefaultTitleAlignment = Menu.TitleAlignmentOption.Left;
 
         // Setting the menu alignment to be right aligned. This can be changed at any time and it'll update instantly.
@@ -199,7 +193,7 @@ public class ExampleMenu : IScript
             "Theme",
             themeNames,
             startingTheme,
-            "Scroll left and right to restyle every menu and swap its banner. Only does anything in NUI render mode."
+            "Scroll left and right to restyle every menu and swap its banner."
         );
 
         menu.AddMenuItem(themePicker);
@@ -550,7 +544,7 @@ public class ExampleMenu : IScript
 
         MenuCheckboxItem headerGlare = new MenuCheckboxItem(
             "Header glare",
-            "Sets ShowHeaderGlare. This is GTA Online's moving glow, drawn with the game's own scaleform. Turn the camera to see it move.",
+            "Sets ShowHeaderGlare. This is GTA Online's moving glow. Turn the camera to see it move.",
             true
         );
 
@@ -560,64 +554,10 @@ public class ExampleMenu : IScript
             MenuController.MenuAlignment == MenuController.MenuAlignmentOption.Right
         );
 
-        // Glare tuning rows. These nudge an offset on top of whatever MenuAPI works out on its own,
-        // so an offset left at zero means the placement already had that screen right, and one you
-        // had to move is the correction that screen needs. This is how the numbers in HeaderGlare
-        // were measured in the first place.
-        float[] nudgeSteps = new float[] { 0.0005f, 0.001f, 0.005f, 0.02f };
-        int nudgeStep = 1;
-
-        MenuCheckboxItem glarePinned = new MenuCheckboxItem(
-            "Hold the glare still",
-            "The glare normally sweeps sideways with the camera, which makes two screens impossible to compare. This pins it in place.",
-            GlareTuning.PinHeading
-        );
-        MenuListItem glareStep = new MenuListItem(
-            "Nudge step",
-            new List<string>() { "0.0005", "0.001", "0.005", "0.02" },
-            nudgeStep,
-            "How far one left or right press moves the glare."
-        );
-        MenuDynamicListItem glareX = new MenuDynamicListItem("Glare X offset", GlareTuning.XOffset.ToString("+0.0000;-0.0000; 0.0000"), (item, left) =>
-        {
-            GlareTuning.XOffset += left ? -nudgeSteps[nudgeStep] : nudgeSteps[nudgeStep];
-
-            return GlareTuning.XOffset.ToString("+0.0000;-0.0000; 0.0000");
-        }, "Slides the glare sideways, on top of the position MenuAPI worked out.");
-        MenuDynamicListItem glareY = new MenuDynamicListItem("Glare Y offset", GlareTuning.YOffset.ToString("+0.0000;-0.0000; 0.0000"), (item, left) =>
-        {
-            GlareTuning.YOffset += left ? -nudgeSteps[nudgeStep] : nudgeSteps[nudgeStep];
-
-            return GlareTuning.YOffset.ToString("+0.0000;-0.0000; 0.0000");
-        }, "Slides the glare up and down.");
-        MenuDynamicListItem glareWidth = new MenuDynamicListItem("Glare width offset", GlareTuning.WidthOffset.ToString("+0.0000;-0.0000; 0.0000"), (item, left) =>
-        {
-            GlareTuning.WidthOffset += left ? -nudgeSteps[nudgeStep] : nudgeSteps[nudgeStep];
-
-            return GlareTuning.WidthOffset.ToString("+0.0000;-0.0000; 0.0000");
-        }, "Stretches the movie sideways, which moves and resizes the glare inside it.");
-        MenuDynamicListItem glareHeight = new MenuDynamicListItem("Glare height offset", GlareTuning.HeightOffset.ToString("+0.0000;-0.0000; 0.0000"), (item, left) =>
-        {
-            GlareTuning.HeightOffset += left ? -nudgeSteps[nudgeStep] : nudgeSteps[nudgeStep];
-
-            return GlareTuning.HeightOffset.ToString("+0.0000;-0.0000; 0.0000");
-        }, "Stretches the movie vertically.");
-        MenuItem glareLog = new MenuItem(
-            "Log the glare numbers",
-            "Prints the screen, the offsets and the final numbers to the console. Do this once per resolution, per alignment."
-        );
-
         menu9.AddMenuItem(titleFont);
         menu9.AddMenuItem(titleAlignment);
         menu9.AddMenuItem(headerGlare);
         menu9.AddMenuItem(glareRightAligned);
-        menu9.AddMenuItem(glarePinned);
-        menu9.AddMenuItem(glareStep);
-        menu9.AddMenuItem(glareX);
-        menu9.AddMenuItem(glareY);
-        menu9.AddMenuItem(glareWidth);
-        menu9.AddMenuItem(glareHeight);
-        menu9.AddMenuItem(glareLog);
 
         menu9.OnListIndexChange += (_menu, _listItem, _oldIndex, _newIndex, _itemIndex) =>
         {
@@ -629,10 +569,6 @@ public class ExampleMenu : IScript
             {
                 _menu.MenuTitleAlignment = (Menu.TitleAlignmentOption)_newIndex;
             }
-            else if (_listItem == glareStep)
-            {
-                nudgeStep = _newIndex;
-            }
         };
 
         menu9.OnCheckboxChange += (_menu, _item, _index, _checked) =>
@@ -641,32 +577,11 @@ public class ExampleMenu : IScript
             {
                 _menu.ShowHeaderGlare = _checked;
             }
-            else if (_item == glarePinned)
-            {
-                GlareTuning.PinHeading = _checked;
-            }
             else if (_item == glareRightAligned)
             {
                 MenuController.MenuAlignment = _checked
                     ? MenuController.MenuAlignmentOption.Right
                     : MenuController.MenuAlignmentOption.Left;
-            }
-        };
-
-        menu9.OnItemSelect += (_menu, _item, _index) =>
-        {
-            if (_item == glareLog)
-            {
-                GetActiveScreenResolution(out int screenWidth, out int screenHeight);
-
-                API.Log.Info(
-                    $"[glare] res={screenWidth}x{screenHeight} aspect={GetScreenAspectRatio(false):0.0000} " +
-                    $"safezone={GetSafeZoneSize():0.0000} " +
-                    $"aligned={(MenuController.MenuAlignment == MenuController.MenuAlignmentOption.Right ? "right" : "left")} " +
-                    $"dx={GlareTuning.XOffset:+0.0000;-0.0000; 0.0000} dy={GlareTuning.YOffset:+0.0000;-0.0000; 0.0000} " +
-                    $"dw={GlareTuning.WidthOffset:+0.0000;-0.0000; 0.0000} dh={GlareTuning.HeightOffset:+0.0000;-0.0000; 0.0000} " +
-                    $"final x={GlareTuning.DrawnX:0.0000} y={GlareTuning.DrawnY:0.0000} " +
-                    $"w={GlareTuning.DrawnWidth:0.0000} h={GlareTuning.DrawnHeight:0.0000}");
             }
         };
 
@@ -719,35 +634,6 @@ public class ExampleMenu : IScript
         };
         menu.AddMenuItem(separators);
         MenuController.BindMenuItem(menu, menu10, separators);
-        Menu menu11 = new Menu("Render Mode", "Native vs NUI");
-
-        renderModeBox = new MenuCheckboxItem(
-            "Draw with NUI",
-            "Off draws the menu with the game's own natives, on draws it as a web page. F7 does the same thing without moving your selection, which is what you want when comparing the two.",
-            MenuController.RenderMode == MenuRenderMode.Nui
-        );
-        menu11.AddMenuItem(renderModeBox);
-
-        menu11.AddMenuItem(new MenuItem("A normal row", "Something to look at while you flick between the two."));
-        menu11.AddMenuItem(new MenuCheckboxItem("A checkbox", "Ticked, so the box sprite is on screen too.", true));
-        menu11.AddMenuItem(new MenuItem("A row with an icon", "So an icon's tint can be compared as well.") { LeftIcon = MenuItem.Icon.STAR });
-        menu11.AddMenuItem(new MenuItem("A disabled row", "Greyed out, so the disabled colour is on screen too.") { Enabled = false });
-
-        menu11.OnCheckboxChange += (_menu, _item, _index, _checked) =>
-        {
-            if (_item == renderModeBox)
-            {
-                MenuController.RenderMode = _checked ? MenuRenderMode.Nui : MenuRenderMode.Native;
-            }
-        };
-
-        MenuController.AddSubmenu(menu, menu11);
-        MenuItem renderMode = new MenuItem("Render mode", "Switch between drawing the menu with game natives and drawing it as a web page.")
-        {
-            Label = "→→→"
-        };
-        menu.AddMenuItem(renderMode);
-        MenuController.BindMenuItem(menu, menu11, renderMode);
 
         Menu menu12 = new Menu("NUI Text", "Weight & size");
 
@@ -757,7 +643,7 @@ public class ExampleMenu : IScript
             "Stem treatment",
             weightNames,
             0,
-            "How the page is asked for a thinner stem. Flip to native with F7 after each one and see which matches."
+            "How the page is asked for a thinner stem."
         );
         menu12.AddMenuItem(weightMode);
 
@@ -952,26 +838,5 @@ public class ExampleMenu : IScript
         {
             other.HeaderImage = themeBanners[index];
         }
-    }
-
-    private static void RegisterRenderModeToggle()
-    {
-        const string command = "menuapi_testmenu_rendermode";
-
-        CitizenFX.FiveM.Shared.SharedAPI.Commands.RegisterCommand(command, false, new Action(() =>
-        {
-            MenuController.RenderMode = MenuController.RenderMode == MenuRenderMode.Native
-                ? MenuRenderMode.Nui
-                : MenuRenderMode.Native;
-
-            if (renderModeBox != null)
-            {
-                renderModeBox.Checked = MenuController.RenderMode == MenuRenderMode.Nui;
-            }
-
-            API.Log.Info($"[TestMenu] render mode is now {MenuController.RenderMode}.");
-        }));
-
-        RegisterKeyMapping(command, "Toggle NUI menu rendering", "keyboard", "F7");
     }
 }

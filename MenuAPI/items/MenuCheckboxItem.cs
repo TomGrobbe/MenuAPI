@@ -48,11 +48,6 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
     /// <param name="description"></param>
     public MenuCheckboxItem(string text, string? description) : this(text, description, false) { }
 
-    private int GetSpriteColour()
-    {
-        return Enabled ? 255 : 109;
-    }
-
     internal const float SpriteSizePx = 45f;
 
     internal string GetSpriteName(bool selected)
@@ -86,65 +81,10 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
         }
     }
 
-    private static float GetSpriteX(Menu parent)
-    {
-        bool leftSide = false;
-        bool leftAligned = parent.LeftAligned;
-        if (leftSide)
-        {
-            if (leftAligned)
-            {
-                return 20f / MenuLayout.ScreenWidth;
-            }
-            else
-            {
-                return MenuLayout.RightWideIconX;
-            }
-        }
-        else
-        {
-            if (leftAligned)
-            {
-                return (Width - 20f) / MenuLayout.ScreenWidth;
-            }
-            else
-            {
-                return MenuLayout.RightIconX;
-            }
-        }
-    }
-
     internal override void PrepareForDisplay()
     {
         RightIcon = Icon.NONE;
         Label = null;
-    }
-
-    internal override void Draw(int offset)
-    {
-        base.Draw(offset);
-
-        if (ParentMenu is not Menu parent)
-        {
-            return;
-        }
-
-        Native.SetScriptGfxAlign(76, 84);
-        Native.SetScriptGfxAlignParams(0f, 0f, 0f, 0f);
-
-        int index = Index;
-        bool selected = parent.CurrentIndex == index;
-
-        float yOffset = RowYOffset(parent);
-        string name = GetSpriteName(selected);
-
-        float spriteY = (((index - offset) * RowHeight) + 20f + yOffset) / MenuLayout.ScreenHeight;
-        float spriteX = GetSpriteX(parent);
-        float spriteHeight = SpriteSizePx / MenuLayout.ScreenHeight;
-        float spriteWidth = SpriteSizePx / MenuLayout.ScreenWidth;
-        int color = GetSpriteColour();
-        Native.DrawSprite("commonmenu", name, spriteX, spriteY, spriteWidth, spriteHeight, 0f, color, color, color, 255, false, false);
-        Native.ResetScriptGfxAlign();
     }
 
     internal override void GoRight()
