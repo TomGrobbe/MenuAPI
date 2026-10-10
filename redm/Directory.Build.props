@@ -1,0 +1,23 @@
+<Project>
+
+  <!-- Deliberately does not import the root Directory.Build.props, RedM builds on .NET Framework 4.5.2 with its own settings. -->
+  <PropertyGroup>
+    <TargetFramework>net452</TargetFramework>
+    <DebugType>embedded</DebugType>
+    <DefineConstants>$(DefineConstants);REDM</DefineConstants>
+
+    <Authors>Tom Grobbe</Authors>
+    <Copyright>Copyright (C) 2018-2026 Tom Grobbe</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+
+    <!-- RedM has no NuGet package, so the client assembly is checked in. -->
+    <Reference Include="CitizenFX.Core">
+      <HintPath>$(MSBuildThisFileDirectory)dependencies\CitizenFX.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

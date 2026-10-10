@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Shared settings (framework, CitizenFX reference, ...) live in ../Directory.Build.props. -->
+  <PropertyGroup>
+    <TargetName>MenuAPI</TargetName>
+
+    <AssemblyTitle>MenuAPI RedM</AssemblyTitle>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Description>An advanced Menu API for RedM C# resources.</Description>
+    <PackageId>MenuAPI.RedM</PackageId>
+    <PackageTags>RedM MenuAPI</PackageTags>
+    <PackageProjectUrl>https://github.com/tomgrobbe/menuapi/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/tomgrobbe/menuapi/</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE.GPL.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

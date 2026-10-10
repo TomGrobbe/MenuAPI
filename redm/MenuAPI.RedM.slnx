@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="MenuAPI/MenuAPI.csproj" />
+  <Project Path="TestMenu/TestMenu.csproj" />
+</Solution>

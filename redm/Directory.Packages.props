@@ -1,0 +1,8 @@
+<Project>
+
+  <!-- Stops the root central package management from applying here. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+</Project>
