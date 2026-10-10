@@ -129,8 +129,12 @@ internal static class MenuInput
 
     private static void RegisterToggle(string keyboardKey)
     {
-        Runtime.RegisterCommand(ToggleCommand, new Action(() => togglePressed = true));
-        Native.RegisterKeyMapping(ToggleCommand, "Open / close menu", "keyboard", keyboardKey);
+        // Not registered at all when off, so the player's key binding settings do not list a key that does nothing.
+        if (MenuController.EnableMenuToggleKey)
+        {
+            Runtime.RegisterCommand(ToggleCommand, new Action(() => togglePressed = MenuController.EnableMenuToggleKey));
+            Native.RegisterKeyMapping(ToggleCommand, "Open / close menu", "keyboard", keyboardKey);
+        }
 
         string pad = PadCommand(ToggleCommand);
         Runtime.RegisterCommand($"+{pad}", new Action(() =>

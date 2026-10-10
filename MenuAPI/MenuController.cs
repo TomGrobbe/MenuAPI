@@ -91,6 +91,13 @@ public partial class MenuController
     public static bool EnableMenuToggleKeyOnController { get; set; } = true;
 
     /// <summary>
+    /// Whether MenuAPI's own keyboard key opens and closes <see cref="MainMenu"/>. Turn it off when your
+    /// resource opens its menus itself. Must be set before the first tick, so from your resource's
+    /// constructor, because the key is only registered with FiveM when this is on.
+    /// </summary>
+    public static bool EnableMenuToggleKey { get; set; } = true;
+
+    /// <summary>
     /// The key the menu toggle is bound to for players who have never rebound it themselves. Must be
     /// set before the first tick, so from your resource's constructor. A FiveM keyboard input mapper
     /// parameter id, for example "M" or "F5".
