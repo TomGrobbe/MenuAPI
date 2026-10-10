@@ -195,6 +195,21 @@ namespace TestMenu
                 // Code in here would get executed whenever a dynamic list item is pressed.
                 Debug.WriteLine($"OnDynamicListItemSelect: [{_menu}, {_dynamicListItem}, {_currentItem}]");
             };
+
+            // Opens the menu without the toggle key, or closes it when one is already open.
+            CitizenFX.Core.Native.API.RegisterCommand("testmenu", new Action<int, List<object>, string>((source, args, raw) =>
+            {
+                if (MenuController.IsAnyMenuOpen())
+                {
+                    Debug.WriteLine("[TestMenu] /testmenu: a menu is open, closing all menus.");
+                    MenuController.CloseAllMenus();
+                    return;
+                }
+
+                Debug.WriteLine($"[TestMenu] /testmenu: opening {menu.MenuTitle}. MainMenu is {(MenuController.MainMenu == null ? "null" : MenuController.MainMenu.MenuTitle)}, {MenuController.Menus.Count} menus registered.");
+                menu.OpenMenu();
+                Debug.WriteLine($"[TestMenu] /testmenu: menu visible after opening: {menu.Visible}, any menu open: {MenuController.IsAnyMenuOpen()}.");
+            }), false);
         }
     }
 }
