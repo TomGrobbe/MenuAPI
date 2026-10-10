@@ -1,18 +1,39 @@
 # MenuAPI
 
-**FiveM (Enhanced) C# Menu API**
+**C# Menu API for FiveM and RedM**
 
 [![Discord](https://discordapp.com/api/guilds/285424882534187008/widget.png)](https://vespura.com/discord) [![CodeFactor](https://www.codefactor.io/repository/github/tomgrobbe/menuapi/badge)](https://www.codefactor.io/repository/github/tomgrobbe/menuapi) [![Patreon](https://img.shields.io/badge/donate-Patreon-orange.svg)](https://www.patreon.com/vespura)
 
 Designed specifically as a replacement of **NativeUI**, MenuAPI features performance improvements, improved stability, better features, less bugs, full safezone alignment support for both left and right aligned menus and less (in my opinion) unnecessary features.
 
-This is the **FiveM Enhanced** version, targeting `net10.0` and the modern `CitizenFX.FiveM.Client` runtime.
-
 This has been coded from the ground up. Using decompiled scripts from GTA V to figure out what some undocumented natives were used for.
+
+## Which package do I need?
+
+MenuAPI comes in three packages. Pick the one that matches the game and the C# runtime your resource uses.
+
+| Package | Game | What it is built for |
+| --- | --- | --- |
+| `MenuAPI.FiveM.Enhanced` | FiveM Enhanced | .NET 10 with the new `CitizenFX.FiveM.Client` runtime |
+| `MenuAPI.FiveM` | FiveM | .NET Framework 4.5.2 with the classic `CitizenFX.Core` runtime |
+| `MenuAPI.RedM` | RedM | .NET Framework 4.5.2 with the RedM `CitizenFX.Core` runtime |
+
+The two FiveM packages are built from the exact same code, so they offer the same features. Both draw the menu with NUI, which is a small web page that FiveM shows on top of the game. Your resource needs a `ui_page` and has to list the `menuapi` folder in its `fxmanifest.lua` for that to work. The TestMenu folder in this repository has a working example of both manifests.
+
+The RedM package is the older MenuAPI, kept as it was.
 
 ## Installation
 
 Please refer to the [documentation](https://docs.vespura.com/menuapi/enhanced) for installation instructions.
+
+## Building it yourself
+
+There are two solutions in this repository.
+
+1. `MenuAPI.FiveM.slnx` builds both FiveM packages. One project builds the same code twice, once for .NET 10 and once for .NET Framework 4.5.2. The few things that differ between the two FiveM runtimes live in the `MenuAPI/platform` folder.
+2. `redm/MenuAPI.RedM.slnx` builds the RedM package. It is completely separate and shares nothing with the FiveM side.
+
+Run `dotnet build` on either one. For the smaller web files, install Node and run `npm ci` once first. Without it the build still works, it just ships the web files unminified.
 
 ## Documentation
 
