@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- packages.config projects skip contentFiles, so the web files are copied to the output from here instead. -->
+  <ItemGroup Condition="'$(NuGetProjectStyle)' != 'PackageReference'">
+    <None Include="$(MSBuildThisFileDirectory)..\contentFiles\any\any\menuapi\**\*"
+          Link="menuapi\%(RecursiveDir)%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+  </ItemGroup>
+
+</Project>

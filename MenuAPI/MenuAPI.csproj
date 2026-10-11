@@ -16,6 +16,7 @@
     <TargetFrameworks Condition="'$(MenuApiFlavor)' == 'Legacy'">net452</TargetFrameworks>
 
     <TargetName>MenuAPI</TargetName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/tomgrobbe/menuapi/</PackageProjectUrl>
@@ -104,6 +105,11 @@
           Pack="true"
           PackagePath="contentFiles/any/any/menuapi/"
           PackageCopyToOutput="true" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(MenuApiFlavor)' == 'Legacy'">
+    <None Remove="build/MenuAPI.FiveM.targets" />
+    <None Include="build/MenuAPI.FiveM.targets" Pack="true" PackagePath="build/" />
   </ItemGroup>
 
   <Target Name="MinifyUiAssets"
