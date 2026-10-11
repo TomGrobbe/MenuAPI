@@ -62,6 +62,7 @@ else
 fi
 
 # Highest stable v tag by number, not by history, so develop also sees tags made on main's merge commits.
+# Merge develop into main with a merge commit, a squash hides from the tag which develop commits it already holds.
 PREVIOUS=$(git tag --list 'v[0-9]*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1 || true)
 
 if [ -n "$PREVIOUS" ]; then

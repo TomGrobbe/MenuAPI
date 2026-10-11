@@ -35,14 +35,6 @@ There are two solutions in this repository.
 
 Run `dotnet build` on either one. For the smaller web files, install Node and run `npm ci` once first. Without it the build still works, it just ships the web files unminified.
 
-## Versions and branches
-
-Work happens on the `develop` branch. Every push there publishes a prerelease of all three packages to NuGet, like `4.0.1-develop.57`. Merging into `main` publishes a real release: the next version number, a git tag, a GitHub release with the zips, all three packages on NuGet and a message on Discord.
-
-Always merge `develop` into `main` with a merge commit, never a squash. The next version on `develop` is worked out from the commits since the last release tag, and a squash merge hides from that tag which `develop` commits it already contains.
-
-By default every release raises the last number (4.0.0 becomes 4.0.1). Put `+semver: minor` or `+semver: major` in a commit message to raise the middle or first number instead. When every commit since the last release says `+semver: none`, a push to `main` releases nothing.
-
 ## Documentation
 
 Documentation is available [here](https://docs.vespura.com/menuapi/).
