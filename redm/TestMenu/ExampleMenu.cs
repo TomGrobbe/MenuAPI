@@ -201,14 +201,11 @@ namespace TestMenu
             {
                 if (MenuController.IsAnyMenuOpen())
                 {
-                    Debug.WriteLine("[TestMenu] /testmenu: a menu is open, closing all menus.");
                     MenuController.CloseAllMenus();
                     return;
                 }
 
-                Debug.WriteLine($"[TestMenu] /testmenu: opening {menu.MenuTitle}. MainMenu is {(MenuController.MainMenu == null ? "null" : MenuController.MainMenu.MenuTitle)}, {MenuController.Menus.Count} menus registered.");
                 menu.OpenMenu();
-                Debug.WriteLine($"[TestMenu] /testmenu: menu visible after opening: {menu.Visible}, any menu open: {MenuController.IsAnyMenuOpen()}.");
             }), false);
         }
     }
