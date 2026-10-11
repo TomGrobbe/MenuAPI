@@ -7,7 +7,7 @@ namespace MenuAPI;
 // a new icon added to the enum is preloaded without anyone having to remember this file exists.
 internal static class SpriteManifest
 {
-    internal readonly record struct Sprite(string Dict, string Name);
+    internal record struct Sprite(string Dict, string Name);
 
     private static List<Sprite>? _sprites;
     private static List<string>? _dictionaries;

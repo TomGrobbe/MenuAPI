@@ -3,7 +3,8 @@ namespace MenuAPI;
 /// <summary>How long one of MenuAPI's internal ticks waits between iterations.</summary>
 // The wait happens after the handler returns rather than on a timer, so a slow iteration delays the
 // next instead of overlapping with it. That is the whole difference from API.SetInterval.
-public readonly struct MenuTickRate
+// Not a readonly struct: the Legacy IL verifier rejects the ldflda that member calls on readonly fields of one produce.
+public struct MenuTickRate
 {
     private readonly long _milliseconds;
 
