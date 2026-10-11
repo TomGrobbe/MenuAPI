@@ -6,7 +6,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const source = join(root, "MenuAPI", "ui");
 const target = join(root, "MenuAPI", "ui-dist");
 
-const BANNER = "/*! MenuAPI (FiveM Enhanced) | LGPL-3.0-or-later | https://github.com/TomGrobbe/MenuAPI */\n";
+const BANNER = "/*! MenuAPI (FiveM) | LGPL-3.0-or-later | https://github.com/TomGrobbe/MenuAPI */\n";
 
 async function loadEsbuild() {
     try {

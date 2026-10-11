@@ -5,19 +5,21 @@ namespace MenuAPI;
 /// <see cref="MenuController.DefaultTitleFont"/>.
 /// </summary>
 /// <remarks>
-/// These are plain ints rather than an enum so a font registered at runtime through
-/// <c>RegisterFontId</c> can be used just as easily. Ids not listed here are either duplicates of
-/// the ones that are, or language specific fallbacks that resolve to one of them.
+/// Only these ids are styled by the menu. Any other id, including a font registered at runtime through
+/// <c>RegisterFontId</c>, falls back to the item font at item size.
 /// </remarks>
 public static class MenuFont
 {
+    /// <summary>The game's normal text font.</summary>
     public const int ChaletLondon = 0;
 
     /// <summary>The handwritten look GTA uses for menu banners. MenuAPI's default.</summary>
     public const int HouseScript = 1;
 
+    /// <summary>A monospaced font.</summary>
     public const int Monospace = 2;
 
+    /// <summary>A narrow version of the game's normal text font.</summary>
     public const int ChaletComprimeCologne = 4;
 
     /// <summary>The Grand Theft Auto logo font.</summary>
