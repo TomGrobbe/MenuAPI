@@ -10,7 +10,7 @@ This has been coded from the ground up. Using decompiled scripts from GTA V to f
 
 ## Which package do I need?
 
-MenuAPI comes in three packages. Pick the one that matches the game and the C# runtime your resource uses.
+MenuAPI comes in three packages. Pick the one that matches the game and the C# runtime your resource uses. All three always have the same version number, and they come out together.
 
 | Package | Game | What it is built for |
 | --- | --- | --- |
@@ -20,11 +20,11 @@ MenuAPI comes in three packages. Pick the one that matches the game and the C# r
 
 The two FiveM packages are built from the exact same code, so they offer the same features. Both draw the menu with NUI, which is a small web page that FiveM shows on top of the game. Your resource needs a `ui_page` and has to list the `menuapi` folder in its `fxmanifest.lua` for that to work. The TestMenu folder in this repository has a working example of both manifests.
 
-The RedM package is the older MenuAPI, kept as it was.
+The RedM package is the older MenuAPI, kept as it was, with a few fixes.
 
 ## Installation
 
-Please refer to the [documentation](https://docs.vespura.com/menuapi/enhanced) for installation instructions.
+Please refer to the documentation for installation instructions: [FiveM](https://docs.vespura.com/menuapi/fivem/setup/) or [RedM](https://docs.vespura.com/menuapi/redm/setup/).
 
 ## Building it yourself
 
@@ -35,9 +35,15 @@ There are two solutions in this repository.
 
 Run `dotnet build` on either one. For the smaller web files, install Node and run `npm ci` once first. Without it the build still works, it just ships the web files unminified.
 
+## Versions and branches
+
+Work happens on the `develop` branch. Every push there publishes a prerelease of all three packages to NuGet, like `4.0.1-develop.57`. Merging into `main` publishes a real release: the next version number, a git tag, a GitHub release with the zips, all three packages on NuGet and a message on Discord.
+
+By default every release raises the last number (4.0.0 becomes 4.0.1). Put `+semver: minor` or `+semver: major` in a commit message to raise the middle or first number instead. When every commit since the last release says `+semver: none`, a push to `main` releases nothing.
+
 ## Documentation
 
-Documentation is available [here](https://docs.vespura.com/menuapi/enhanced).
+Documentation is available [here](https://docs.vespura.com/menuapi/).
 
 Feel like contributing to the documentation? The docs source lives in the [`docs/`](docs/) folder of this repository, thanks!
 
