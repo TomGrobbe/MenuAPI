@@ -1,19 +1,25 @@
 namespace MenuAPI;
 
 /// <summary>
-/// Creates a new <see cref="MenuCheckboxItem"/> with all parameters set.
+/// An item with a checkbox on the right. Pressing select or right toggles it and raises <see cref="Menu.OnCheckboxChange"/>.
 /// </summary>
-/// <param name="text"></param>
-/// <param name="description"></param>
-/// <param name="_checked"></param>
+/// <param name="text">The text on the left side of the item.</param>
+/// <param name="description">Shown below the menu while the item is highlighted. Null for none.</param>
+/// <param name="_checked">Whether the checkbox starts checked.</param>
 public class MenuCheckboxItem(string text, string? description, bool _checked) : MenuItem(text, description)
 {
+    /// <summary>
+    /// Whether the checkbox is checked. Already updated when <see cref="Menu.OnCheckboxChange"/> fires.
+    /// </summary>
     public bool Checked
     {
         get => _isChecked;
         set => MenuNui.Change(ref _isChecked, value);
     }
 
+    /// <summary>
+    /// What the checkbox shows when checked. Defaults to <see cref="CheckboxStyle.Tick"/>.
+    /// </summary>
     public CheckboxStyle Style
     {
         get => _style;
@@ -22,28 +28,33 @@ public class MenuCheckboxItem(string text, string? description, bool _checked) :
 
     private bool _isChecked = _checked;
     private CheckboxStyle _style = CheckboxStyle.Tick;
+    /// <summary>
+    /// What a checked checkbox shows.
+    /// </summary>
     public enum CheckboxStyle
     {
+        /// <summary>A cross.</summary>
         Cross,
+        /// <summary>A tick mark.</summary>
         Tick
     }
 
     /// <summary>
-    /// Creates a basic <see cref="MenuCheckboxItem"/>.
+    /// Creates an unchecked <see cref="MenuCheckboxItem"/> without a description.
     /// </summary>
-    /// <param name="text"></param>
+    /// <param name="text">The text on the left side of the item.</param>
     public MenuCheckboxItem(string text) : this(text, null) { }
     /// <summary>
-    /// Creates a basic <see cref="MenuCheckboxItem"/> and sets the checked state to <param name="_checked"></param>'s state.
+    /// Creates a <see cref="MenuCheckboxItem"/> without a description and sets the checked state to <paramref name="_checked"/>.
     /// </summary>
-    /// <param name="text"></param>
-    /// <param name="_checked"></param>
+    /// <param name="text">The text on the left side of the item.</param>
+    /// <param name="_checked">Whether the checkbox starts checked.</param>
     public MenuCheckboxItem(string text, bool _checked) : this(text, null, _checked) { }
     /// <summary>
-    /// Creates a basic <see cref="MenuCheckboxItem"/> and adds an item description.
+    /// Creates an unchecked <see cref="MenuCheckboxItem"/> with an item description.
     /// </summary>
-    /// <param name="text"></param>
-    /// <param name="description"></param>
+    /// <param name="text">The text on the left side of the item.</param>
+    /// <param name="description">Shown below the menu while the item is highlighted. Null for none.</param>
     public MenuCheckboxItem(string text, string? description) : this(text, description, false) { }
 
     internal const float SpriteSizePx = 45f;

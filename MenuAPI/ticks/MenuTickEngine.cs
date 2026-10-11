@@ -29,10 +29,15 @@ internal sealed class MenuTickEngine(Func<long, Task> delay, Func<Task> yield, A
     // should coalesce.
     public event Action? Changed;
 
+    /// <param name="name">Shown in <see cref="Describe"/>, in log lines and in the profiler.</param>
+    /// <param name="handler">Run once per iteration. The next iteration waits for it to finish.</param>
+    /// <param name="rate">How long to wait between iterations. Once per frame by default.</param>
     /// <param name="condition">
     /// Re-run by <see cref="Reevaluate"/>. When null the tick answers to <see cref="MenuTickHandle.Start"/>
     /// and <see cref="MenuTickHandle.Stop"/> instead.
     /// </param>
+    /// <param name="onStarted">Run each time the tick starts.</param>
+    /// <param name="onStopped">Run each time the tick stops, also after it gave up on repeated failures.</param>
     /// <param name="autoStart">Ignored when <paramref name="condition"/> is set.</param>
     public MenuTickHandle Register(
         string name,

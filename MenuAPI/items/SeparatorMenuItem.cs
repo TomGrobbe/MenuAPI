@@ -22,29 +22,29 @@ public class SeparatorMenuItem : MenuItem
     /// <summary>
     /// Creates a <see cref="SeparatorMenuItem"/> with the down arrows around its text.
     /// </summary>
-    /// <param name="text"></param>
+    /// <param name="text">The text shown on the row.</param>
     public SeparatorMenuItem(string text) : this(text, null, true) { }
 
     /// <summary>
     /// Creates a <see cref="SeparatorMenuItem"/> and says whether to draw the down arrows.
     /// </summary>
-    /// <param name="text"></param>
-    /// <param name="showArrows"></param>
+    /// <param name="text">The text shown on the row.</param>
+    /// <param name="showArrows">Whether to draw the down arrows around the text.</param>
     public SeparatorMenuItem(string text, bool showArrows) : this(text, null, showArrows) { }
 
     /// <summary>
     /// Creates a <see cref="SeparatorMenuItem"/> with a description, shown while the cursor is on it.
     /// </summary>
-    /// <param name="text"></param>
-    /// <param name="description"></param>
+    /// <param name="text">The text shown on the row.</param>
+    /// <param name="description">Shown below the menu while the cursor is on the separator. Null for none.</param>
     public SeparatorMenuItem(string text, string? description) : this(text, description, true) { }
 
     /// <summary>
     /// Creates a <see cref="SeparatorMenuItem"/> with all options set.
     /// </summary>
-    /// <param name="text"></param>
-    /// <param name="description"></param>
-    /// <param name="showArrows"></param>
+    /// <param name="text">The text shown on the row.</param>
+    /// <param name="description">Shown below the menu while the cursor is on the separator. Null for none.</param>
+    /// <param name="showArrows">Whether to draw the down arrows around the text.</param>
     public SeparatorMenuItem(string text, string? description, bool showArrows) : base(text, description)
     {
         ShowArrows = showArrows;

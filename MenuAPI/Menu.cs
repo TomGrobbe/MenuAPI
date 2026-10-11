@@ -1,5 +1,9 @@
 namespace MenuAPI;
 
+/// <summary>
+/// One menu: a banner, a subtitle, a list of items and a description box. Register it with
+/// <see cref="MenuController.AddMenu"/> or <see cref="MenuController.AddSubmenu"/> before opening it.
+/// </summary>
 public class Menu
 {
     #region Setting up events
@@ -56,7 +60,7 @@ public class Menu
     /// <summary>
     /// Triggered when the <see cref="CurrentIndex"/> changes.
     /// </summary>
-    /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnIndexChange"/></param> event occurred.
+    /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnIndexChange"/> event occurred.</param>
     /// <param name="oldItem">The old <see cref="MenuItem"/> that was previously selected.</param>
     /// <param name="newItem">The new <see cref="MenuItem"/> that is now selected.</param>
     /// <param name="oldIndex">The old <see cref="MenuItem.Index"/> of this item.</param>
@@ -67,7 +71,7 @@ public class Menu
     /// Triggered when the <see cref="MenuSliderItem.Position"/> changes.
     /// </summary>
     /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnSliderPositionChange"/> event occurred.</param>
-    /// <param name="sliderItem">The <see cref="MenuSliderItem>"/> that was changed.</param>
+    /// <param name="sliderItem">The <see cref="MenuSliderItem"/> that was changed.</param>
     /// <param name="oldPosition">The old position of the slider bar.</param>
     /// <param name="newPosition">The new position of the slider bar.</param>
     /// <param name="itemIndex">The index of this <see cref="MenuSliderItem"/>.</param>
@@ -77,7 +81,7 @@ public class Menu
     /// Triggered when a <see cref="MenuSliderItem"/> was selected.
     /// </summary>
     /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnSliderItemSelect"/> event occurred.</param>
-    /// <param name="sliderItem">The <see cref="MenuSliderItem>"/> that was pressed.</param>
+    /// <param name="sliderItem">The <see cref="MenuSliderItem"/> that was pressed.</param>
     /// <param name="sliderPosition">The current position of the slider bar.</param>
     /// <param name="itemIndex">The index of this <see cref="MenuSliderItem"/>.</param>
     public delegate void SliderItemSelectedEvent(Menu menu, MenuSliderItem sliderItem, int sliderPosition, int itemIndex);
@@ -186,7 +190,6 @@ public class Menu
     /// <summary>
     /// Triggered when a <see cref="MenuItem"/> is selected.
     /// </summary>
-    /// <param name="menu">The <see cref="Menu"/> in which this event occurred.</param>
     /// <param name="menuItem">The <see cref="MenuItem"/> that was selected.</param>
     /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuItem"/>.</param>
     internal virtual void ItemSelectedEvent(MenuItem menuItem, int itemIndex)
@@ -197,10 +200,9 @@ public class Menu
     /// <summary>
     /// Triggered when a <see cref="MenuCheckboxItem"/> was toggled.
     /// </summary>
-    /// <param name="menu">The <see cref="Menu"/> in which this event occurred.</param>
     /// <param name="menuItem">The <see cref="MenuCheckboxItem"/> that was toggled.</param>
     /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuCheckboxItem"/>.</param>
-    /// <param name="newCheckedState">The new <see cref="MenuCheckboxItem.Checked"/> state of this <see cref="MenuCheckboxItem"/>.</param>
+    /// <param name="_checked">The new <see cref="MenuCheckboxItem.Checked"/> state of this <see cref="MenuCheckboxItem"/>.</param>
     internal virtual void CheckboxChangedEvent(MenuCheckboxItem menuItem, int itemIndex, bool _checked)
     {
         OnCheckboxChange?.Invoke(this, menuItem, itemIndex, _checked);
@@ -266,7 +268,7 @@ public class Menu
     /// Triggered when the <see cref="MenuSliderItem.Position"/> changes.
     /// </summary>
     /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnSliderPositionChange"/> event occurred.</param>
-    /// <param name="sliderItem">The <see cref="MenuSliderItem>"/> that was changed.</param>
+    /// <param name="sliderItem">The <see cref="MenuSliderItem"/> that was changed.</param>
     /// <param name="oldPosition">The old position of the slider bar.</param>
     /// <param name="newPosition">The new position of the slider bar.</param>
     /// <param name="itemIndex">The index of this <see cref="MenuSliderItem"/>.</param>
@@ -279,7 +281,7 @@ public class Menu
     /// Triggered when a <see cref="MenuSliderItem"/> was selected.
     /// </summary>
     /// <param name="menu">The <see cref="Menu"/> in which this <see cref="OnSliderItemSelect"/> event occurred.</param>
-    /// <param name="sliderItem">The <see cref="MenuSliderItem>"/> that was pressed.</param>
+    /// <param name="sliderItem">The <see cref="MenuSliderItem"/> that was pressed.</param>
     /// <param name="sliderPosition">The current position of the slider bar.</param>
     /// <param name="itemIndex">The index of this <see cref="MenuSliderItem"/>.</param>
     internal virtual void SliderSelectedEvent(Menu menu, MenuSliderItem sliderItem, int sliderPosition, int itemIndex)
@@ -326,6 +328,7 @@ public class Menu
     #endregion
 
     #region constants or readonlys
+    /// <summary>How wide every menu is, in pixels on a screen scaled to 1080 pixels high.</summary>
     public const float Width = 500f;
 
     #endregion
@@ -340,6 +343,10 @@ public class Menu
 
     private bool visible = false;
 
+    /// <summary>
+    /// The index of the first item on screen, which moves as the menu scrolls. Set it with
+    /// <see cref="RefreshIndex(int, int)"/>.
+    /// </summary>
     public int ViewIndexOffset
     {
         get => viewIndexOffset;
@@ -421,6 +428,7 @@ public class Menu
     #endregion
 
     #region Public Variables
+    /// <summary>The banner text. Null or empty draws no banner.</summary>
     public string? MenuTitle
     {
         get => _menuTitle;
@@ -429,6 +437,7 @@ public class Menu
 
     private string? _menuTitle;
 
+    /// <summary>The text in the subtitle bar below the banner.</summary>
     public string? MenuSubtitle
     {
         get => _menuSubtitle;
@@ -437,6 +446,10 @@ public class Menu
 
     private string? _menuSubtitle;
 
+    /// <summary>
+    /// A banner from a game texture. <c>Key</c> is the texture dictionary, which is streamed in for you,
+    /// and <c>Value</c> is the texture name. Leave either empty for the default banner.
+    /// </summary>
     public KeyValuePair<string, string> HeaderTexture
     {
         get => _headerTexture;
@@ -485,10 +498,14 @@ public class Menu
 
     private TitleAlignmentOption? _menuTitleAlignment;
 
+    /// <summary>Where a menu title sits inside the header.</summary>
     public enum TitleAlignmentOption
     {
+        /// <summary>Starts at the left edge of the banner.</summary>
         Left,
+        /// <summary>Centred in the banner. The default.</summary>
         Center,
+        /// <summary>Ends at the right edge of the banner.</summary>
         Right
     }
 
@@ -508,8 +525,13 @@ public class Menu
     internal bool ResolvedShowHeaderGlare => ShowHeaderGlare ?? MenuController.DefaultShowHeaderGlare;
     #endregion
 
+    /// <summary>
+    /// When true, <see cref="MenuController.DontOpenAnyMenu"/> does not close this menu. It is still
+    /// hidden until that is turned off again.
+    /// </summary>
     public bool IgnoreDontOpenMenus { get; set; } = false;
 
+    /// <summary>How many items are visible at once, 10 by default. Change it with <see cref="SetMaxItemsOnScreen"/>.</summary>
     public int MaxItemsOnScreen
     {
         get => _maxItemsOnScreen;
@@ -518,6 +540,10 @@ public class Menu
 
     private int _maxItemsOnScreen = 10;
 
+    /// <summary>
+    /// How many items the menu has. With a filter, only the ones that passed it. When paginated, only
+    /// the ones on the current page.
+    /// </summary>
     public int Size => ActiveItems.Count;
 
     /// <summary>How many items fit on one page. 0 means the menu is not paginated.</summary>
@@ -549,6 +575,10 @@ public class Menu
     /// <summary>Whether paging past the last page comes out at the first, and the other way around.</summary>
     public bool WrapPages { get; set; } = true;
 
+    /// <summary>
+    /// Whether the menu is drawn. Prefer <see cref="OpenMenu"/> and <see cref="CloseMenu"/>, which also
+    /// raise <see cref="OnMenuOpen"/> and <see cref="OnMenuClose"/>.
+    /// </summary>
     public bool Visible
     {
         get
@@ -577,11 +607,20 @@ public class Menu
         }
     }
 
+    /// <summary>
+    /// Whether menus are drawn on the left side of the screen. A shortcut for
+    /// <see cref="MenuController.MenuAlignment"/>.
+    /// </summary>
     public bool LeftAligned => MenuController.MenuAlignment == MenuController.MenuAlignmentOption.Left;
-    // Nothing has ever assigned this, so it has always been (0, 0), and every position calculation
-    // used to add it anyway. The drawing code no longer reads it. Kept because it is public.
+
+    /// <summary>Does nothing. It is never set and always returns (0, 0).</summary>
+    [Obsolete("Menus are always drawn with NUI. This property does nothing and will be removed.")]
     public KeyValuePair<float, float> Position { get; private set; } = new KeyValuePair<float, float>(0f, 0f);
 
+    /// <summary>
+    /// Text in front of the current / total counter in the subtitle bar. Setting it always shows the
+    /// counter, even when every item fits on screen.
+    /// </summary>
     public string? CounterPreText
     {
         get => _counterPreText;
@@ -590,8 +629,13 @@ public class Menu
 
     private string? _counterPreText;
 
+    /// <summary>
+    /// The menu that going back returns to, or null for a top level menu. Set by
+    /// <see cref="MenuController.AddSubmenu"/>.
+    /// </summary>
     public Menu? ParentMenu { get; internal set; } = null;
 
+    /// <summary>The index of the highlighted item. Change it with <see cref="RefreshIndex(int)"/>.</summary>
     public int CurrentIndex
     {
         get => index;
@@ -610,6 +654,7 @@ public class Menu
         }
     }
 
+    /// <summary>Whether this menu draws its instructional buttons, the button hints in the bottom right.</summary>
     public bool EnableInstructionalButtons { get; set; } = true;
 
     /// <summary>
@@ -653,12 +698,14 @@ public class Menu
 
     private float[] _vehicleUpgradeStats = new float[4] { 0f, 0f, 0f, 0f };
 
+    /// <summary>Shows the weapon stats panel under the description. Fill it with <see cref="SetWeaponStats"/>.</summary>
     public bool ShowWeaponStatsPanel
     {
         get => _showWeaponStatsPanel;
         set => MenuNui.Change(ref _showWeaponStatsPanel, value);
     }
 
+    /// <summary>Shows the vehicle stats panel under the description. Fill it with <see cref="SetVehicleStats"/>.</summary>
     public bool ShowVehicleStatsPanel
     {
         get => _showVehicleStatsPanel;
@@ -676,28 +723,41 @@ public class Menu
 
     private bool filterActive = false;
 
+    /// <summary>Whether the select button hint is drawn.</summary>
     public bool ShowSelectInstructionalButton { get; set; } = true;
+    /// <summary>Whether the back button hint is drawn.</summary>
     public bool ShowBackInstructionalButton { get; set; } = true;
 
+    /// <summary>The text next to the select button hint. Defaults to the game's translated "Select" label.</summary>
     public string SelectButtonText { get; set; } = Native.GetLabelText("HUD_INPUT28");
+    /// <summary>The text next to the back button hint. Defaults to the game's translated "Back" label.</summary>
     public string BackButtonText { get; set; } = Native.GetLabelText("HUD_INPUT53");
 
     /// <summary>Only ever drawn when the menu is paginated, whatever this is set to.</summary>
     public bool ShowPageInstructionalButtons { get; set; } = true;
 
+    /// <summary>The text next to the previous page hint.</summary>
     public string PreviousPageButtonText { get; set; } = "Previous page";
+    /// <summary>The text next to the next page hint.</summary>
     public string NextPageButtonText { get; set; } = "Next page";
 
     /// <summary>Only drawn while the highlighted row is a list or a slider.</summary>
     public bool ShowChangeValueInstructionalButton { get; set; } = true;
 
+    /// <summary>The text next to the change value hint.</summary>
     public string ChangeValueButtonText { get; set; } = "Change";
 
+    /// <summary>Extra button hints built from a raw button string, drawn after all the others.</summary>
     public List<InstructionalButton> CustomInstructionalButtons = new();
 
+    /// <summary>One extra button hint for <see cref="CustomInstructionalButtons"/>.</summary>
+    /// <param name="controlString">The raw button string, for example from <c>GetControlInstructionalButton</c>.</param>
+    /// <param name="instructionText">The text next to the button.</param>
     public struct InstructionalButton(string controlString, string instructionText)
     {
+        /// <summary>The raw button string, for example from <c>GetControlInstructionalButton</c>.</summary>
         public string controlString = controlString;
+        /// <summary>The text next to the button.</summary>
         public string instructionText = instructionText;
     }
 
@@ -714,8 +774,10 @@ public class Menu
         /// <summary>The key itself, which the player can rebind.</summary>
         public MenuKeyBinding Binding { get; } = binding;
 
+        /// <summary>When <see cref="Handler"/> runs. See <see cref="MenuKeyPressType"/>.</summary>
         public MenuKeyPressType PressType { get; set; } = pressType;
 
+        /// <summary>Called with this menu and the binding when the key fires. Null stops listening.</summary>
         public Action<Menu, MenuKeyBinding>? Handler { get; set; } = handler;
 
         /// <summary>The text next to its instructional button. Null or empty draws nothing.</summary>
@@ -898,7 +960,16 @@ public class Menu
     /// Resets the index to 0
     /// </summary>
     public void RefreshIndex() => RefreshIndex(0, 0);
+    /// <summary>
+    /// Highlights the item at <paramref name="index"/> and scrolls it into view.
+    /// </summary>
+    /// <param name="index">The item to highlight.</param>
     public void RefreshIndex(int index) => RefreshIndex(index, index >= MaxItemsOnScreen ? index - MaxItemsOnScreen + 1 : 0);
+    /// <summary>
+    /// Highlights the item at <paramref name="index"/> and makes the item at <paramref name="viewOffset"/> the first one on screen.
+    /// </summary>
+    /// <param name="index">The item to highlight.</param>
+    /// <param name="viewOffset">The item drawn at the top.</param>
     public void RefreshIndex(int index, int viewOffset) { CurrentIndex = index; ViewIndexOffset = viewOffset; }
 
     /// <summary>
@@ -981,7 +1052,7 @@ public class Menu
         InvalidatePage();
     }
 
-    /// <summary>Lets go of everything this menu holds. Only <see cref="MenuController.RemoveMenu"/> calls it.</summary>
+    /// <summary>Lets go of everything this menu holds. Only <see cref="MenuController.RemoveMenu(Menu)"/> calls it.</summary>
     internal void Detach(HashSet<Menu> removed)
     {
         ClearMenuItems(removed);
@@ -1014,7 +1085,6 @@ public class Menu
     public void AddMenuItem(MenuItem item)
     {
         MenuItems.Add(item);
-        item.PositionOnScreen = item.Index;
         item.ParentMenu = this;
 
         InvalidatePage();
@@ -1033,7 +1103,6 @@ public class Menu
 
         MenuItems.Insert(index, item);
         item.ParentMenu = this;
-        item.PositionOnScreen = item.Index;
 
         InvalidatePage();
 
@@ -1182,7 +1251,7 @@ public class Menu
     /// <summary>
     /// Triggers the <see cref="ItemSelectedEvent(MenuItem, int)"/> event function.
     /// </summary>
-    /// <param name="index"></param>
+    /// <param name="item">The item to select.</param>
     public void SelectItem(MenuItem item)
     {
         if (item == null || IsWeaponWheelActive)
@@ -1566,6 +1635,13 @@ public class Menu
         }
     }
     #endregion
+    /// <summary>
+    /// Splits text into chunks of at most 99 characters, which the old native drawing needed. Nothing
+    /// in MenuAPI uses it anymore.
+    /// </summary>
+    /// <param name="inputString">The text to split.</param>
+    /// <returns>The chunks, in order.</returns>
+    [Obsolete("Menus are always drawn with NUI. This method is no longer used and will be removed.")]
     public static String[] SplitString(String inputString)
     {
         int stringsNeeded = (inputString.Length - 1) / 99 + 1; // division with round up

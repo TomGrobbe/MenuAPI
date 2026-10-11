@@ -1,5 +1,9 @@
 ﻿namespace MenuAPI;
 
+/// <summary>
+/// Tunes how menu text looks on the NUI page, and switches between registered themes. Every change
+/// shows on the next frame.
+/// </summary>
 public static class NuiTuning
 {
     private static float _textSize = DefaultTextSize;
@@ -9,16 +13,23 @@ public static class NuiTuning
     private static readonly Dictionary<string, string> _themes = new(StringComparer.OrdinalIgnoreCase);
     private static string? _theme;
 
+    /// <summary>The <see cref="TextSize"/> menus start with, and go back to on <see cref="Reset"/>.</summary>
     public const float DefaultTextSize = 21f;
+    /// <summary>The <see cref="TextBrightness"/> menus start with, and go back to on <see cref="Reset"/>.</summary>
     public const int DefaultTextBrightness = 225;
 
+    /// <summary>How the page renders menu text, which changes how sharp and heavy it looks.</summary>
     public enum TextWeightMode
     {
+        /// <summary>The browser's normal text rendering.</summary>
         Default,
+        /// <summary>The browser's <c>geometricPrecision</c> text rendering, which keeps letter shapes exact.</summary>
         GeometricPrecision,
+        /// <summary>Draws the menu at double size and scales it down, for smoother text. Costs more to draw.</summary>
         Supersampled,
     }
 
+    /// <summary>Menu text size in pixels, clamped between 8 and 48.</summary>
     public static float TextSize
     {
         get => _textSize;
@@ -30,6 +41,7 @@ public static class NuiTuning
         }
     }
 
+    /// <summary>How bright menu text is, from 0 for black to 255 for white.</summary>
     public static int TextBrightness
     {
         get => _textBrightness;
@@ -41,6 +53,7 @@ public static class NuiTuning
         }
     }
 
+    /// <summary>How menu text is rendered. See <see cref="TextWeightMode"/>.</summary>
     public static TextWeightMode TextWeight
     {
         get => _textWeight;
@@ -140,6 +153,10 @@ public static class NuiTuning
     internal static string? ThemeUrl =>
         _theme is not null && _themes.TryGetValue(_theme, out var path) ? path : null;
 
+    /// <summary>
+    /// Puts text size, brightness and weight back to their defaults and clears the applied theme.
+    /// Registered themes are kept.
+    /// </summary>
     public static void Reset()
     {
         _textSize = DefaultTextSize;
@@ -150,6 +167,7 @@ public static class NuiTuning
         MenuNui.Invalidate();
     }
 
+    /// <summary>The current text size, brightness and weight as one readable line, for debug output.</summary>
     public static string Describe() =>
         $"size {_textSize:0.##}px, brightness {_textBrightness}, weight {_textWeight}";
 

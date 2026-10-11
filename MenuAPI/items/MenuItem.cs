@@ -1,220 +1,427 @@
 namespace MenuAPI;
 
+/// <summary>
+/// A plain button in a <see cref="Menu"/>. Every other item type inherits from it.
+/// Pressing it raises <see cref="Menu.OnItemSelect"/> on its menu.
+/// </summary>
 public class MenuItem
 {
+    /// <summary>
+    /// The icons (game sprites) an item can show, for example in <see cref="LeftIcon"/> and <see cref="RightIcon"/>.
+    /// </summary>
     public enum Icon
     {
+        /// <summary>No icon.</summary>
         NONE,
+        /// <summary>A padlock.</summary>
         LOCK,
+        /// <summary>A star, the shop's "new" marker.</summary>
         STAR,
+        /// <summary>A warning triangle.</summary>
         WARNING,
+        /// <summary>A crown.</summary>
         CROWN,
+        /// <summary>A bronze medal.</summary>
         MEDAL_BRONZE,
+        /// <summary>A gold medal.</summary>
         MEDAL_GOLD,
+        /// <summary>A silver medal.</summary>
         MEDAL_SILVER,
+        /// <summary>A stack of cash.</summary>
         CASH,
+        /// <summary>A bag of cocaine.</summary>
         COKE,
+        /// <summary>A bag of heroin.</summary>
         HEROIN,
+        /// <summary>A bag of meth.</summary>
         METH,
+        /// <summary>A bag of weed.</summary>
         WEED,
+        /// <summary>Bullets, the Ammu-Nation shop icon.</summary>
         AMMO,
+        /// <summary>A body armor vest.</summary>
         ARMOR,
+        /// <summary>The barber shop icon.</summary>
         BARBER,
+        /// <summary>A shirt, the clothing shop icon.</summary>
         CLOTHING,
+        /// <summary>Franklin's character icon.</summary>
         FRANKLIN,
+        /// <summary>A motorbike.</summary>
         BIKE,
+        /// <summary>A car.</summary>
         CAR,
+        /// <summary>A gun.</summary>
         GUN,
+        /// <summary>A heart.</summary>
         HEALTH_HEART,
+        /// <summary>A makeup brush.</summary>
         MAKEUP_BRUSH,
+        /// <summary>A mask.</summary>
         MASK,
+        /// <summary>Michael's character icon.</summary>
         MICHAEL,
+        /// <summary>The tattoo parlor icon.</summary>
         TATTOO,
+        /// <summary>A tick mark.</summary>
         TICK,
+        /// <summary>Trevor's character icon.</summary>
         TREVOR,
+        /// <summary>The female symbol.</summary>
         FEMALE,
+        /// <summary>The male symbol.</summary>
         MALE,
+        /// <summary>The Arena War style padlock.</summary>
         LOCK_ARENA,
+        /// <summary>The adversary mode job icon.</summary>
         ADVERSARY,
+        /// <summary>The parachuting job icon.</summary>
         BASE_JUMPING,
+        /// <summary>A briefcase, the capture job icon.</summary>
         BRIEFCASE,
+        /// <summary>A star, the custom mission job icon.</summary>
         MISSION_STAR,
+        /// <summary>The deathmatch job icon.</summary>
         DEATHMATCH,
+        /// <summary>A castle, the gang attack job icon.</summary>
         CASTLE,
+        /// <summary>A trophy, the last team standing job icon.</summary>
         TROPHY,
+        /// <summary>A checkered race flag.</summary>
         RACE_FLAG,
+        /// <summary>A race flag with a plane, the air race icon.</summary>
         RACE_FLAG_PLANE,
+        /// <summary>A race flag with a bicycle.</summary>
         RACE_FLAG_BICYCLE,
+        /// <summary>A race flag with a person, the foot race icon.</summary>
         RACE_FLAG_PERSON,
+        /// <summary>A race flag with a car, the land race icon.</summary>
         RACE_FLAG_CAR,
+        /// <summary>A race flag with an anchor, the sea race icon.</summary>
         RACE_FLAG_BOAT_ANCHOR,
+        /// <summary>The Rockstar logo.</summary>
         ROCKSTAR,
+        /// <summary>The stunt job icon.</summary>
         STUNT,
+        /// <summary>The premium stunt job icon.</summary>
         STUNT_PREMIUM,
+        /// <summary>A race flag with a stunt ramp, the stunt race icon.</summary>
         RACE_FLAG_STUNT_JUMP,
+        /// <summary>A shield, the survival job icon.</summary>
         SHIELD,
+        /// <summary>The team deathmatch job icon.</summary>
         TEAM_DEATHMATCH,
+        /// <summary>The vehicle deathmatch job icon.</summary>
         VEHICLE_DEATHMATCH,
+        /// <summary>The ammo pickup HUD icon.</summary>
         MP_AMMO_PICKUP,
+        /// <summary>The ammo HUD icon.</summary>
         MP_AMMO,
+        /// <summary>The cash HUD icon.</summary>
         MP_CASH,
+        /// <summary>The RP HUD icon.</summary>
         MP_RP,
+        /// <summary>The spectating icon.</summary>
         MP_SPECTATING,
+        /// <summary>A sale tag.</summary>
         SALE,
+        /// <summary>A white globe.</summary>
         GLOBE_WHITE,
+        /// <summary>A red globe.</summary>
         GLOBE_RED,
+        /// <summary>A blue globe.</summary>
         GLOBE_BLUE,
+        /// <summary>A yellow globe.</summary>
         GLOBE_YELLOW,
+        /// <summary>A green globe.</summary>
         GLOBE_GREEN,
+        /// <summary>An orange globe.</summary>
         GLOBE_ORANGE,
+        /// <summary>The arm wrestling inventory icon.</summary>
         INV_ARM_WRESTLING,
+        /// <summary>The parachuting inventory icon.</summary>
         INV_BASEJUMP,
+        /// <summary>The custom mission inventory icon.</summary>
         INV_MISSION,
+        /// <summary>The darts inventory icon.</summary>
         INV_DARTS,
+        /// <summary>The deathmatch inventory icon.</summary>
         INV_DEATHMATCH,
+        /// <summary>The drug trafficking inventory icon.</summary>
         INV_DRUG,
+        /// <summary>A castle, the gang attack inventory icon.</summary>
         INV_CASTLE,
+        /// <summary>The golf inventory icon.</summary>
         INV_GOLF,
+        /// <summary>A motorbike inventory icon.</summary>
         INV_BIKE,
+        /// <summary>A boat inventory icon.</summary>
         INV_BOAT,
+        /// <summary>An anchor inventory icon.</summary>
         INV_ANCHOR,
+        /// <summary>A car inventory icon.</summary>
         INV_CAR,
+        /// <summary>A dollar inventory icon.</summary>
         INV_DOLLAR,
+        /// <summary>A cocaine inventory icon.</summary>
         INV_COKE,
+        /// <summary>A key inventory icon.</summary>
         INV_KEY,
+        /// <summary>A data inventory icon.</summary>
         INV_DATA,
+        /// <summary>A helicopter inventory icon.</summary>
         INV_HELI,
+        /// <summary>A heroin inventory icon.</summary>
         INV_HEORIN,
+        /// <summary>A keycard inventory icon.</summary>
         INV_KEYCARD,
+        /// <summary>A meth inventory icon.</summary>
         INV_METH,
+        /// <summary>A briefcase inventory icon.</summary>
         INV_BRIEFCASE,
+        /// <summary>A chain link inventory icon.</summary>
         INV_LINK,
+        /// <summary>A person inventory icon.</summary>
         INV_PERSON,
+        /// <summary>A plane inventory icon.</summary>
         INV_PLANE,
+        /// <summary>A second plane inventory icon.</summary>
         INV_PLANE2,
+        /// <summary>A question mark inventory icon.</summary>
         INV_QUESTIONMARK,
+        /// <summary>A remote control inventory icon.</summary>
         INV_REMOTE,
+        /// <summary>A safe inventory icon.</summary>
         INV_SAFE,
+        /// <summary>A steering wheel inventory icon.</summary>
         INV_STEER_WHEEL,
+        /// <summary>A weapon inventory icon.</summary>
         INV_WEAPON,
+        /// <summary>A weed inventory icon.</summary>
         INV_WEED,
+        /// <summary>The air race inventory icon.</summary>
         INV_RACE_FLAG_PLANE,
+        /// <summary>The bike race inventory icon.</summary>
         INV_RACE_FLAG_BICYCLE,
+        /// <summary>The boat race inventory icon.</summary>
         INV_RACE_FLAG_BOAT_ANCHOR,
+        /// <summary>The foot race inventory icon.</summary>
         INV_RACE_FLAG_PERSON,
+        /// <summary>The land race inventory icon.</summary>
         INV_RACE_FLAG_CAR,
+        /// <summary>A helmet, the off road race inventory icon.</summary>
         INV_RACE_FLAG_HELMET,
+        /// <summary>The shooting range inventory icon.</summary>
         INV_SHOOTING_RANGE,
+        /// <summary>The survival inventory icon.</summary>
         INV_SURVIVAL,
+        /// <summary>The team deathmatch inventory icon.</summary>
         INV_TEAM_DEATHMATCH,
+        /// <summary>The tennis inventory icon.</summary>
         INV_TENNIS,
+        /// <summary>The vehicle deathmatch inventory icon.</summary>
         INV_VEHICLE_DEATHMATCH,
+        /// <summary>A muted speaker.</summary>
         AUDIO_MUTE,
+        /// <summary>A speaker without sound waves.</summary>
         AUDIO_INACTIVE,
+        /// <summary>A speaker with one sound wave.</summary>
         AUDIO_VOL1,
+        /// <summary>A speaker with two sound waves.</summary>
         AUDIO_VOL2,
+        /// <summary>A speaker with three sound waves.</summary>
         AUDIO_VOL3,
+        /// <summary>The flag of the United States.</summary>
         COUNTRY_USA,
+        /// <summary>The flag of the United Kingdom.</summary>
         COUNTRY_UK,
+        /// <summary>The flag of Sweden.</summary>
         COUNTRY_SWEDEN,
+        /// <summary>The flag of South Korea.</summary>
         COUNTRY_KOREA,
+        /// <summary>The flag of Japan.</summary>
         COUNTRY_JAPAN,
+        /// <summary>The flag of Italy.</summary>
         COUNTRY_ITALY,
+        /// <summary>The flag of Germany.</summary>
         COUNTRY_GERMANY,
+        /// <summary>The flag of France.</summary>
         COUNTRY_FRANCE,
+        /// <summary>The Albany vehicle brand logo.</summary>
         BRAND_ALBANY,
+        /// <summary>The Annis vehicle brand logo.</summary>
         BRAND_ANNIS,
+        /// <summary>The Banshee logo.</summary>
         BRAND_BANSHEE,
+        /// <summary>The Benefactor vehicle brand logo.</summary>
         BRAND_BENEFACTOR,
+        /// <summary>The BF vehicle brand logo.</summary>
         BRAND_BF,
+        /// <summary>The Bollokan vehicle brand logo.</summary>
         BRAND_BOLLOKAN,
+        /// <summary>The Bravado vehicle brand logo.</summary>
         BRAND_BRAVADO,
+        /// <summary>The Brute vehicle brand logo.</summary>
         BRAND_BRUTE,
+        /// <summary>The Buckingham vehicle brand logo.</summary>
         BRAND_BUCKINGHAM,
+        /// <summary>The Canis vehicle brand logo.</summary>
         BRAND_CANIS,
+        /// <summary>The Chariot vehicle brand logo.</summary>
         BRAND_CHARIOT,
+        /// <summary>The Cheval vehicle brand logo.</summary>
         BRAND_CHEVAL,
+        /// <summary>The Classique vehicle brand logo.</summary>
         BRAND_CLASSIQUE,
+        /// <summary>The Coil vehicle brand logo.</summary>
         BRAND_COIL,
+        /// <summary>The Declasse vehicle brand logo.</summary>
         BRAND_DECLASSE,
+        /// <summary>The Dewbauchee vehicle brand logo.</summary>
         BRAND_DEWBAUCHEE,
+        /// <summary>The Dilettante vehicle brand logo.</summary>
         BRAND_DILETTANTE,
+        /// <summary>The Dinka vehicle brand logo.</summary>
         BRAND_DINKA,
+        /// <summary>The Dundreary vehicle brand logo.</summary>
         BRAND_DUNDREARY,
+        /// <summary>The Emporer vehicle brand logo.</summary>
         BRAND_EMPORER,
+        /// <summary>The Enus vehicle brand logo.</summary>
         BRAND_ENUS,
+        /// <summary>The Fathom vehicle brand logo.</summary>
         BRAND_FATHOM,
+        /// <summary>The Galivanter vehicle brand logo.</summary>
         BRAND_GALIVANTER,
+        /// <summary>The Grotti vehicle brand logo.</summary>
         BRAND_GROTTI,
+        /// <summary>The second style of the Grotti vehicle brand logo.</summary>
         BRAND_GROTTI2,
+        /// <summary>The Hijak vehicle brand logo.</summary>
         BRAND_HIJAK,
+        /// <summary>The HVY vehicle brand logo.</summary>
         BRAND_HVY,
+        /// <summary>The Imponte vehicle brand logo.</summary>
         BRAND_IMPONTE,
+        /// <summary>The Invetero vehicle brand logo.</summary>
         BRAND_INVETERO,
+        /// <summary>The Jacksheepe vehicle brand logo.</summary>
         BRAND_JACKSHEEPE,
+        /// <summary>The LCC vehicle brand logo.</summary>
         BRAND_LCC,
+        /// <summary>The JoBuilt vehicle brand logo.</summary>
         BRAND_JOBUILT,
+        /// <summary>The Karin vehicle brand logo.</summary>
         BRAND_KARIN,
+        /// <summary>The Lampadati vehicle brand logo.</summary>
         BRAND_LAMPADATI,
+        /// <summary>The Maibatsu vehicle brand logo.</summary>
         BRAND_MAIBATSU,
+        /// <summary>The Mammoth vehicle brand logo.</summary>
         BRAND_MAMMOTH,
+        /// <summary>The MTL vehicle brand logo.</summary>
         BRAND_MTL,
+        /// <summary>The Nagasaki vehicle brand logo.</summary>
         BRAND_NAGASAKI,
+        /// <summary>The Obey vehicle brand logo.</summary>
         BRAND_OBEY,
+        /// <summary>The Ocelot vehicle brand logo.</summary>
         BRAND_OCELOT,
+        /// <summary>The Overflod vehicle brand logo.</summary>
         BRAND_OVERFLOD,
+        /// <summary>The Ped vehicle brand logo.</summary>
         BRAND_PED,
+        /// <summary>The Pegassi vehicle brand logo.</summary>
         BRAND_PEGASSI,
+        /// <summary>The Pfister vehicle brand logo.</summary>
         BRAND_PFISTER,
+        /// <summary>The Principe vehicle brand logo.</summary>
         BRAND_PRINCIPE,
+        /// <summary>The Progen vehicle brand logo.</summary>
         BRAND_PROGEN,
+        /// <summary>The second style of the Progen vehicle brand logo.</summary>
         BRAND_PROGEN2,
+        /// <summary>The Rune vehicle brand logo.</summary>
         BRAND_RUNE,
+        /// <summary>The Schyster vehicle brand logo.</summary>
         BRAND_SCHYSTER,
+        /// <summary>The Shitzu vehicle brand logo.</summary>
         BRAND_SHITZU,
+        /// <summary>The Speedophile vehicle brand logo.</summary>
         BRAND_SPEEDOPHILE,
+        /// <summary>The Stanley vehicle brand logo.</summary>
         BRAND_STANLEY,
+        /// <summary>The Truffade vehicle brand logo.</summary>
         BRAND_TRUFFADE,
+        /// <summary>The Ubermacht vehicle brand logo.</summary>
         BRAND_UBERMACHT,
+        /// <summary>The Vapid vehicle brand logo.</summary>
         BRAND_VAPID,
+        /// <summary>The Vulcar vehicle brand logo.</summary>
         BRAND_VULCAR,
+        /// <summary>The Weeny vehicle brand logo.</summary>
         BRAND_WEENY,
+        /// <summary>The Western vehicle brand logo.</summary>
         BRAND_WESTERN,
+        /// <summary>The Western Motorcycle vehicle brand logo.</summary>
         BRAND_WESTERNMOTORCYCLE,
+        /// <summary>The Willard vehicle brand logo.</summary>
         BRAND_WILLARD,
+        /// <summary>The Zirconium vehicle brand logo.</summary>
         BRAND_ZIRCONIUM,
+        /// <summary>An info icon, a letter i in a circle.</summary>
         INFO
     }
+    /// <summary>
+    /// The text on the left side of the item. Supports the game's color codes like <c>~r~</c>.
+    /// </summary>
     public string Text
     {
         get => _text;
         set => MenuNui.Change(ref _text, value);
     }
 
+    /// <summary>
+    /// The text on the right side of the item. Null shows nothing.
+    /// List, checkbox and slider items overwrite it, so it only works on plain items.
+    /// </summary>
     public string? Label
     {
         get => _label;
         set => MenuNui.Change(ref _label, value);
     }
 
+    /// <summary>
+    /// The icon on the left side of the item. Defaults to <see cref="Icon.NONE"/>.
+    /// </summary>
     public Icon LeftIcon
     {
         get => _leftIcon;
         set => MenuNui.Change(ref _leftIcon, value);
     }
 
+    /// <summary>
+    /// The icon on the right side of the item. Defaults to <see cref="Icon.NONE"/>.
+    /// Checkbox and slider items overwrite it.
+    /// </summary>
     public Icon RightIcon
     {
         get => _rightIcon;
         set => MenuNui.Change(ref _rightIcon, value);
     }
 
+    /// <summary>
+    /// When false, the item is greyed out and cannot be used. True by default.
+    /// </summary>
     public bool Enabled
     {
         get => _enabled;
         set => MenuNui.Change(ref _enabled, value);
     }
 
+    /// <summary>
+    /// Shown below the menu while the item is highlighted. Null shows no description.
+    /// </summary>
     public string? Description
     {
         get => _description;
@@ -227,25 +434,41 @@ public class MenuItem
     private Icon _rightIcon;
     private bool _enabled = true;
     private string? _description;
+    /// <summary>
+    /// The position of the item in its menu, or -1 when it is not in a menu.
+    /// </summary>
     public int Index => ParentMenu?.IndexOf(this) ?? -1;
+    /// <summary>
+    /// Whether the item is the highlighted one in its menu. Always false when it is not in a menu.
+    /// </summary>
     public bool Selected { get { if (ParentMenu != null) { return ParentMenu.CurrentIndex == Index; } return false; } }
+    /// <summary>
+    /// The menu this item was added to, or null. Set by <see cref="Menu.AddMenuItem(MenuItem)"/>, mainly used internally.
+    /// </summary>
     public Menu? ParentMenu { get; set; }
+    /// <summary>
+    /// Left over from the old native drawing. Nothing reads it any more, so it does nothing.
+    /// </summary>
+    [Obsolete("Menus are always drawn with NUI. This property does nothing and will be removed.")]
     public int PositionOnScreen { get; internal set; }
 
-    // Allows you to attach data to a menu item if you want to identify the menu item without having to put identification info in the visible text or description.
+    /// <summary>
+    /// Your own data to identify the item by, so you do not have to put it in the visible text or description.
+    /// Null by default.
+    /// </summary>
     public dynamic? ItemData { get; set; }
 
     /// <summary>
-    /// Creates a new <see cref="MenuItem"/>.
+    /// Creates a new <see cref="MenuItem"/> without a description.
     /// </summary>
-    /// <param name="text"></param>
+    /// <param name="text">The text on the left side of the item.</param>
     public MenuItem(string text) : this(text, null) { }
 
     /// <summary>
     /// Creates a new <see cref="MenuItem"/>.
     /// </summary>
-    /// <param name="text"></param>
-    /// <param name="description"></param>
+    /// <param name="text">The text on the left side of the item.</param>
+    /// <param name="description">Shown below the menu while the item is highlighted. Null for none.</param>
     public MenuItem(string text, string? description)
     {
         Text = text;
@@ -255,8 +478,8 @@ public class MenuItem
     /// <summary>
     /// Get the sprite dictionary name for the given icon.
     /// </summary>
-    /// <param name="icon"></param>
-    /// <returns></returns>
+    /// <param name="icon">The icon to look up.</param>
+    /// <returns>The texture dictionary that holds the icon's sprite.</returns>
     protected internal string GetSpriteDictionary(Icon icon)
     {
         return icon switch
@@ -277,9 +500,9 @@ public class MenuItem
     /// <summary>
     /// Get the sprite name for the given icon depending on the selected state of the item.
     /// </summary>
-    /// <param name="icon"></param>
-    /// <param name="selected"></param>
-    /// <returns></returns>
+    /// <param name="icon">The icon to look up.</param>
+    /// <param name="selected">Whether the item is highlighted. Some icons have a dark version for the highlighted row.</param>
+    /// <returns>The sprite name inside the icon's dictionary, or an empty string for <see cref="Icon.NONE"/>.</returns>
     protected internal string GetSpriteName(Icon icon, bool selected)
     {
         switch (icon)
@@ -470,6 +693,11 @@ public class MenuItem
         return "";
     }
 
+    /// <summary>
+    /// Get the size the given icon is drawn at.
+    /// </summary>
+    /// <param name="icon">The icon to look up.</param>
+    /// <returns>The width and height of the icon in pixels.</returns>
     protected internal static float GetSpriteSizePx(Icon icon)
     {
         return icon switch
@@ -482,11 +710,11 @@ public class MenuItem
     }
 
     /// <summary>
-    /// Get the sprite color for the provided icon depending on the current state of the item (Enabled & selected values).
+    /// Get the sprite color for the provided icon depending on the current state of the item (its <see cref="Enabled"/> and selected values).
     /// </summary>
-    /// <param name="icon"></param>
-    /// <param name="selected"></param>
-    /// <returns></returns>
+    /// <param name="icon">The icon to look up.</param>
+    /// <param name="selected">Whether the item is highlighted.</param>
+    /// <returns>The color to tint the icon with.</returns>
     protected internal System.Drawing.Color GetSpriteColour(Icon icon, bool selected)
     {
         return icon switch

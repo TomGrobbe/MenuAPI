@@ -13,9 +13,13 @@ public struct MenuTickRate
     /// <summary>Once per frame.</summary>
     public static MenuTickRate PerFrame => default;
 
+    /// <summary>Waits <paramref name="milliseconds"/> between iterations.</summary>
+    /// <param name="milliseconds">The wait in milliseconds. 0 is the same as <see cref="PerFrame"/>.</param>
     public static MenuTickRate Every(long milliseconds) => new(milliseconds);
 
+    /// <summary>The wait between iterations in milliseconds. 0 means once per frame.</summary>
     public long Milliseconds => _milliseconds;
 
+    /// <summary>The rate in words, "per frame" or for example "every 500ms".</summary>
     public override string ToString() => _milliseconds <= 0 ? "per frame" : $"every {_milliseconds}ms";
 }

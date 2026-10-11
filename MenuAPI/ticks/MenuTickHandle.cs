@@ -47,10 +47,13 @@ public sealed class MenuTickHandle
         _manuallyStarted = autoStart;
     }
 
+    /// <summary>The tick's name, as shown in the tick list and the profiler.</summary>
     public string Name { get; }
 
+    /// <summary>How long the tick waits between iterations.</summary>
     public MenuTickRate Rate => _rate;
 
+    /// <summary>Whether the tick's loop is running right now. A stopped tick costs nothing.</summary>
     public bool IsRunning => _running;
 
     /// <summary>Runs when the tick starts, for setup that must not happen per iteration.</summary>

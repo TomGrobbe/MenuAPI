@@ -1,10 +1,17 @@
 namespace MenuAPI;
 
+/// <summary>
+/// Draws every registered <see cref="Menu"/>, handles its controls and tracks which one is open. It
+/// starts by itself when your resource loads MenuAPI, so you never create one yourself.
+/// </summary>
 public partial class MenuController
 {
+    /// <summary>Every registered menu. Add to it with <see cref="AddMenu"/> or <see cref="AddSubmenu"/>.</summary>
     public static List<Menu> Menus { get; protected set; } = new List<Menu>();
     internal static HashSet<Menu> VisibleMenus { get; } = new HashSet<Menu>();
+    /// <summary>The game texture dictionary the default menu sprites come from.</summary>
     public const string _texture_dict = "commonmenu";
+    /// <summary>The texture in <see cref="_texture_dict"/> used for the default banner.</summary>
     public const string _header_texture = "interaction_bgd";
     // Derived from the sprites the menu can actually draw, so an icon added to a dictionary that is
     // not in this list cannot go missing because someone forgot to add the dictionary too.
@@ -20,8 +27,13 @@ public partial class MenuController
     private const long InstructionalButtonsConfigureIntervalMs = 300;
 
     private static float AspectRatio => Native.GetScreenAspectRatio(false);
+    /// <summary>1080 times the screen aspect ratio. Only the old native drawing used this, nothing reads it anymore.</summary>
+    [Obsolete("Menus are always drawn with NUI. This property is no longer used and will be removed.")]
     public static float ScreenWidth => 1080 * AspectRatio;
+    /// <summary>Always 1080. Only the old native drawing used this, nothing reads it anymore.</summary>
+    [Obsolete("Menus are always drawn with NUI. This property is no longer used and will be removed.")]
     public static float ScreenHeight => 1080;
+    /// <summary>When true, the open menu stays on screen but ignores all input, the toggle key included.</summary>
     public static bool DisableMenuButtons { get; set; } = false;
 
     // Control 360 is a control that is rarely used, no other scripts should be disabling
@@ -29,6 +41,11 @@ public partial class MenuController
     // can use that to guess if the console is open or not by checking if the control is enabled.
     private static bool IsF8ConsoleLikelyOpen => !Native.IsControlEnabled(0, 360);
 
+    /// <summary>
+    /// Whether the open menu takes input right now. False when no menu is open, the pause menu is open,
+    /// the screen is faded out, a player switch is in progress, the player is dead, the F8 console is
+    /// open, or <see cref="DisableMenuButtons"/> is true.
+    /// </summary>
     public static bool AreMenuButtonsEnabled =>
         IsAnyMenuOpen() &&
         !FrameState.IsPauseMenuActive &&
@@ -38,8 +55,14 @@ public partial class MenuController
         !FrameState.IsDead &&
         !IsF8ConsoleLikelyOpen;
 
+    /// <summary>When true, pressing left on an item that has no left action goes back to the parent menu.</summary>
     public static bool NavigateMenuUsingArrows { get; set; } = true;
+    /// <summary>
+    /// When true, back and the toggle key cannot close a top level menu. Submenus can still go back to
+    /// their parent, so give the player a button that closes the menu.
+    /// </summary>
     public static bool PreventExitingMenu { get; set; } = false;
+    /// <summary>When true, back does nothing, in submenus too.</summary>
     public static bool DisableBackButton { get; set; } = false;
 
     #region Menu title styling defaults
@@ -86,8 +109,16 @@ public partial class MenuController
         set { }
     }
 
+    /// <summary>
+    /// When true, open menus are closed, the toggle key does nothing and no menu is drawn. A menu with
+    /// <see cref="Menu.IgnoreDontOpenMenus"/> set stays open, but is hidden until this is false again.
+    /// </summary>
     public static bool DontOpenAnyMenu { get; set; } = false;
 
+    /// <summary>
+    /// Whether holding the controller toggle button opens and closes the menu too. Only matters while
+    /// <see cref="EnableMenuToggleKey"/> is true.
+    /// </summary>
     public static bool EnableMenuToggleKeyOnController { get; set; } = true;
 
     /// <summary>
@@ -106,6 +137,10 @@ public partial class MenuController
 
     internal static Dictionary<MenuItem, Menu> MenuButtons { get; private set; } = new Dictionary<MenuItem, Menu>();
 
+    /// <summary>
+    /// The menu the toggle key opens. The first registered menu becomes it automatically. When null,
+    /// the first registered menu opens instead.
+    /// </summary>
     public static Menu? MainMenu { get; set; } = null;
 
     internal static int _scale = Native.RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
@@ -117,6 +152,10 @@ public partial class MenuController
     private const string IconSeparator = "%b_998%";
 
     private static MenuAlignmentOption _alignment = MenuAlignmentOption.Left;
+    /// <summary>
+    /// Which side of the screen menus are drawn on. Right is not supported on 17:9 and wider screens,
+    /// there it stays <see cref="MenuAlignmentOption.Left"/> and an error is logged.
+    /// </summary>
     public static MenuAlignmentOption MenuAlignment
     {
         get
@@ -146,9 +185,12 @@ public partial class MenuController
         }
     }
 
+    /// <summary>Which side of the screen menus are drawn on.</summary>
     public enum MenuAlignmentOption
     {
+        /// <summary>The left side of the screen. The default.</summary>
         Left,
+        /// <summary>The right side of the screen.</summary>
         Right
     }
 
@@ -427,7 +469,7 @@ public partial class MenuController
 
     #region Process Menu Buttons
     /// <summary>
-    /// Process the select & go back/cancel buttons.
+    /// Process the select and go back/cancel buttons.
     /// </summary>
     /// <returns></returns>
     private static async Task ProcessMainButtons()
@@ -1067,8 +1109,10 @@ public partial class MenuController
         MenuNui.RequestPendingTextures();
     }
 
-    // For the one thing that cannot say so itself: something the description is built from that
-    // MenuAPI does not own, such as a label you resolve yourself.
+    /// <summary>
+    /// Redraws the open menu. Call it when item text is built from something MenuAPI does not own, such
+    /// as a label you resolve yourself, and that changes. Everything MenuAPI owns already redraws itself.
+    /// </summary>
     public static void RefreshNui() => MenuNui.Invalidate();
 
     // The menu whose key bindings the draw tick is going to process this frame, matching the checks
