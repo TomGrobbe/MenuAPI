@@ -4,8 +4,7 @@ title: "MenuListItem"
 
 ## MenuListItem
 
-A menu item with a list of (string) values, from which one can be selected using the left/right arrow keys.
-You can also select a menu list item by pressing enter, which will trigger a separate event that you can listen for.
+A menu item that picks one string out of a list with left and right. Pressing select raises a separate event.
 
 ----
 
@@ -32,7 +31,7 @@ menu.AddMenuItem(item);
 
 #### Reacting to a list item
 
-List items raise two different events: one when the value changes, and one when the item is pressed.
+List items raise one event when the value changes and another when the item is pressed. The list wraps around at both ends.
 
 ```cs
 MenuListItem weather = new MenuListItem("Weather", new List<string>() { "CLEAR", "RAIN", "THUNDER" }, 0, "Pick a weather type.");
@@ -57,15 +56,9 @@ menu.OnListItemSelect += (_menu, _listItem, _listIndex, _itemIndex) =>
 };
 ```
 
-:::note
-The list wraps around: pressing right on the last value goes back to the first one, and pressing left on the first value goes to the last one.
-:::
-
 #### Changing the values later
 
-`ListItems` is a `MenuItemList`, which is used exactly like a `List<string>`: add to it, index into
-it, loop over it, ask it for its `Count`. The difference is that it tells the menu when it changes,
-so the row redraws as soon as you touch it. Remember to keep `ListIndex` in range when you do.
+`ListItems` is a `MenuItemList`, used like a `List<string>`. It tells the menu when it changes, so the row redraws straight away. An out of range `ListIndex` is wrapped back into range the next time the row is drawn.
 
 ```cs
 item.ListItems.Add("Option 4");
@@ -77,66 +70,47 @@ item.ListIndex = 0;
 ```
 
 :::caution
-The list you hand to the constructor is **copied**, so changing your own copy afterwards does not
-reach the item. Change it through `item.ListItems` instead. See the [Migration guide](/migration/)
-if you are moving a resource over from the older MenuAPI.
+The constructor **copies** the list you pass, so later changes to your own list do not reach the item. Change `item.ListItems` instead. See the [Migration Guide (v4)](../../../migration/#list-item-values-are-a-menuitemlist) when moving from an older MenuAPI.
 :::
 
 :::caution
-Never leave a list item with an empty `ListItems` list. If the list is empty, MenuAPI inserts a single `"N/A"` value to keep the menu from freezing, and the item's value will read `N/A`.
+Never leave `ListItems` empty. MenuAPI then inserts a single `"N/A"` value to keep the game from freezing, and the item reads `N/A`.
 :::
 
 ----
 
 ### Constructors
 
-----
-
-#### MenuListItem(string text, List&lt;string&gt; items, int index)
-
-Creates a list item without a description.
-
-##### Parameters
+|Constructor|Description|
+|-|-|
+|`MenuListItem(string text, List<string> items, int index)`|Creates a list item without a description.|
+|`MenuListItem(string text, List<string> items, int index, string description)`|Creates a list item with a description.|
 
 |Parameter|Type|Description|
 |-|-|-|
-|text|string|The text displayed on the left side of the item.|
-|items|List&lt;string&gt;|The selectable values. At least one value must be provided.|
-|index|int|The index that is selected by default. Must be a valid index for `items`.|
-
-----
-
-#### MenuListItem(string text, List&lt;string&gt; items, int index, string description)
-
-Creates a list item with a description.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|text|string|The text displayed on the left side of the item.|
-|items|List&lt;string&gt;|The selectable values. At least one value must be provided.|
-|index|int|The index that is selected by default. Must be a valid index for `items`.|
-|description|string|The description shown below the menu while this item is selected.|
+|text|string|The text on the left side of the item.|
+|items|List&lt;string&gt;|The selectable values. Provide at least one. The list is copied.|
+|index|int|The index selected at the start. Must be valid for `items`.|
+|description|string|Shown below the menu while the item is highlighted.|
 
 ----
 
 ### Properties
 
 :::note
-All standard MenuItem class properties are inherited.
-The MenuItem properties **RightIcon** and **Label** are not available for MenuListItems.
+**RightIcon** and **Label** are not available for MenuListItems.
 :::
 
-|Property|Type|Default value|Description|Optional|
-|---|---|---|---|---|
-|ListIndex|int|0|The currently selected list index.|**No**|
-|ListItems|MenuItemList|-|A list holding a collection of strings which can be selected through this menu list item. At least one string must be present in this list. Used exactly like a `List<string>`, and one can be assigned straight to it.|**No**|
-|HideArrowsWhenNotSelected|boolean|false|Hides the left & right arrows when the menu list item is not currently highlighted.|Yes|
-|ShowOpacityPanel|boolean|false|Shows the Opacity Panel.|Yes|
-|ShowColorPanel|boolean|false|Shows the Color Panel.|Yes|
-|ColorPanelColorType|[ColorPanelType](#color-panel-types)|ColorPanelType.Hair|Shows the Color Panel.|Yes|
-|ItemsCount|int|0|Returns how many ListItems there are in this MenuListItem.|Yes|
+|Property|Type|Default value|Description|
+|---|---|---|---|
+|ListIndex|int|`index` argument|The selected index.|
+|ListItems|MenuItemList|copy of `items`|The selectable values. Keep at least one. Used like a `List<string>`, and a `List<string>` can be assigned to it.|
+|HideArrowsWhenNotSelected|bool|false|Hides the left and right arrows while the item is not highlighted.|
+|ShowColorPanel|bool|false|Shows the [color panel](#color-panel-types).|
+|ShowOpacityPanel|bool|false|Shows the [opacity panel](#opacity-panel-example).|
+|ColorPanelColorType|[ColorPanelType](#color-panel-types)|ColorPanelType.Hair|Which palette the color panel shows.|
+|OpacityPercent|int|0|The opacity shown when both panels are on. Clamped to 0 to 100.|
+|ItemsCount|int|0|Read only. The number of values in `ListItems`.|
 
 ----
 
@@ -146,17 +120,7 @@ The MenuItem properties **RightIcon** and **Label** are not available for MenuLi
 
 #### GetCurrentSelection()
 
-Returns the value at the current `ListIndex`.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-|Type|Description|
-|-|-|
-|string|Returns the currently selected ListItem value, or `null` if `ListIndex` is out of range.|
+Returns the value at `ListIndex` as a `string`, or `null` if `ListIndex` is out of range.
 
 ```cs
 string selected = item.GetCurrentSelection();
@@ -169,18 +133,14 @@ string alsoSelected = item.ListItems[item.ListIndex];
 
 #### Color panel types
 
-:::note
-Color and Opacity panels are only available in FiveM.
-:::
-
-Color panels are shown below the menu, right under the item's description text (if present).
+The color panel is drawn below the menu, under the description. The enum is `MenuListItem.ColorPanelType`.
 
 |Type|Default|Example|
 |-|-|-|
 |ColorPanelType.Hair|Yes|![Hair color panel](https://vespura.com/hi/i/20-04-18_14-31-06_0BBvH_3287.png)|
 |ColorPanelType.Makeup|No|![Makeup color panel](https://vespura.com/hi/i/20-04-18_14-31-45_9mgFr_3288.png)|
 
-The panel always shows the game's 64 hair or makeup colors, and the highlighted swatch follows `ListIndex`. So give the list 64 values, one per color, or the highlight and your list will drift apart.
+The panel always shows the game's 64 hair or makeup colors and highlights the swatch at `ListIndex`. Give the list 64 values, one per color, or the highlight and your list drift apart.
 
 ```cs
 // A hair color palette (64 colors).
@@ -209,11 +169,11 @@ menu.AddMenuItem(makeupColors);
 
 #### Opacity panel example
 
-Opacity panels are also shown below the menu, right under the item's description text (if present).
+The opacity panel is also drawn below the menu, under the description.
 
 ![Opacity panel](https://vespura.com/hi/i/20-04-18_14-34-02_730Ed_3289.png)
 
-The percentage shown in the panel is `ListIndex * 10`, so give the list 11 values to cover 0% - 100%.
+The percentage shown is `ListIndex * 10`, so 11 values cover 0% to 100%.
 
 ```cs
 List<string> opacities = new List<string>();
@@ -229,5 +189,5 @@ menu.AddMenuItem(new MenuListItem("Opacity", opacities, 0, "Set an opacity.")
 ```
 
 :::note
-A list item can show a color panel **or** an opacity panel. If both `ShowOpacityPanel` and `ShowColorPanel` are true, only the opacity panel is drawn.
+With both `ShowColorPanel` and `ShowOpacityPanel` on, one panel shows the palette with an opacity bar. `ListIndex` then picks the color, and the opacity comes from `OpacityPercent` instead of `ListIndex * 10`.
 :::

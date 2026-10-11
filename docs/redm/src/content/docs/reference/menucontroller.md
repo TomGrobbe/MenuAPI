@@ -65,7 +65,7 @@ All properties are **static**.
 |MainMenu|Menu|Null|The menu that is opened when the user presses the [menu toggle key](#the-menu-toggle-key). This is set automatically to the first menu you register, but you can change it at any time.|Yes|
 |Menus|List&lt;[Menu](../menu/)&gt;|(empty)|(Getter only) Every menu that has been registered with [AddMenu()](#addmenumenu-menu) or [AddSubmenu()](#addsubmenumenu-parent-menu-child).|Yes|
 |MenuToggleKey|Control|Control.PlayerMenu|The control that opens [MainMenu](#properties). See [The menu toggle key](#the-menu-toggle-key).|Yes|
-|MenuToggleKeyIsValid|boolean|true|(Getter only) Whether the toggle key is turned on. It is false when `MenuToggleKey` is `(Control)0`, which is how you turn the toggle key off. See [The menu toggle key](#the-menu-toggle-key).|Yes|
+|MenuToggleKeyIsValid|boolean|true|(Getter only) False when `MenuToggleKey` is `(Control)0`, which turns the toggle key off. See [The menu toggle key](#the-menu-toggle-key).|Yes|
 |DisableMenuButtons|boolean|false|When true, all menu controls are ignored. The menu stays on screen, it just does not respond to input. Useful while you are doing something that should not be interrupted.|Yes|
 |AreMenuButtonsEnabled|boolean|false|(Getter only) Whether menu controls are currently being processed. This is false when no menu is open, the pause menu is active, the screen is faded out, the player is dead, or `DisableMenuButtons` is true.|Yes|
 |DontOpenAnyMenu|boolean|false|When true, menus stop being drawn and can not be opened. Menus with [IgnoreDontOpenMenus](../menu/#properties) set to true are excluded.|Yes|
@@ -247,10 +247,10 @@ _This function does not return anything_.
 MenuAPI handles all menu controls for you, including one control that opens [MainMenu](#properties). By default that is `Control.PlayerMenu`.
 
 :::note[Fixed in 4.0.0]
-In MenuAPI 3.x the toggle key never worked in RedM. MenuAPI checked the key against the small control numbers FiveM uses, and RedM controls are large numbers called hashes, so every RedM key failed that check. Version 4.0.0 fixes this, and `Control.PlayerMenu` opens the menu again.
+In 3.x the toggle key never worked in RedM. Since 4.0.0 `Control.PlayerMenu` opens the menu again.
 :::
 
-To use a different key, set `MenuToggleKey` to any other RedM control. To turn the key off completely, set it to `(Control)0`. You can always open a menu from your own code too, for example from a chat command:
+Set `MenuToggleKey` to any RedM control to change it, or to `(Control)0` to turn it off. You can also open a menu from your own code:
 
 ```cs
 // Open the menu from your own command.

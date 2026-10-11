@@ -6,28 +6,30 @@ title: "Changelog"
 
 ## 4.0.0
 
-MenuAPI now has one version number for everything. FiveM Enhanced, FiveM Legacy and RedM always come out together, with the same version. That is why Enhanced jumps from 1.x straight to 4.0.
+One version number for everything. FiveM Enhanced, FiveM Legacy and RedM are released together with the same version, which is why Enhanced jumps from 1.x to 4.0.
 
 ### Enhanced and Legacy are built from the same code
 
-Everything listed further down this page, which used to be Enhanced only, now works on the Legacy runtime too. That includes the NUI menus, themes, custom banners, rebindable key bindings and pagination. The Legacy package is still called `MenuAPI.FiveM`, and the Enhanced package is still `MenuAPI.FiveM.Enhanced`. The [Setup](../setup/) page shows the differences between the two.
+Everything below, which used to be Enhanced only, now works on Legacy too: NUI menus, themes, custom banners, rebindable key bindings and pagination. The package names stay `MenuAPI.FiveM` (Legacy) and `MenuAPI.FiveM.Enhanced`.
 
 ### Menus are always drawn with NUI
 
 :::danger[Breaking change]
-The old way of drawing menus with the game's own drawing functions is gone. Every menu is drawn with NUI now, so every resource needs the `index.html` page and the `ui_page` and `files` lines from [Setup](../setup/). `MenuController.RenderMode` still compiles, but does nothing. A few properties that only existed for the old drawing are removed, see the [Migration guide](../migration/#coming-from-enhanced-1x).
+Native drawing is gone. Every resource needs the `index.html` page and the manifest lines from [Setup](../setup/). `MenuController.RenderMode` still compiles but does nothing. See the [Migration Guide (v4)](../migration/).
 :::
+
+Only title fonts 0, 1, 2, 4 and 7 render. Other font ids, including fonts registered with `RegisterFontId`, fall back to the item font.
 
 ### Turning off the toggle key
 
-New: [MenuController.EnableMenuToggleKey](../reference/menucontroller/#properties). Set it to `false` when your resource opens its menus itself and MenuAPI should not register a key to open them.
+New: [MenuController.EnableMenuToggleKey](../reference/menucontroller/#properties). Set it to `false` when your resource opens its menus itself. It turns off the keyboard key, `EnableMenuToggleKeyOnController` turns off the controller hold.
 
 ---------------
 
 ## Enhanced 1.x
 
-:::caution[Heads up]
-These are the changes that came with MenuAPI for FiveM Enhanced 1.x. If you are moving a resource over from MenuAPI 3.x, this is the list of things you will have to deal with along the way. The [Migration guide](../migration/#coming-from-menuapi-3x) has the short version.
+:::note
+The changes in MenuAPI for FiveM Enhanced 1.x. Coming from 3.x? The [Migration Guide (v4)](../migration/#coming-from-menuapi-3x) has the short version.
 :::
 
 ### Inserting and moving items
@@ -45,7 +47,7 @@ Both keep the highlighted item highlighted, except in a paginated menu.
 :::danger[Breaking change]
 The NUI css and js are minified and renamed with `.min`, and only the minified files ship. Using NUI
 render mode means updating the six paths in your `index.html`. See the
-[Migration guide](../migration/#the-nui-web-files-are-minified-and-renamed). Native mode is
+[Migration Guide (v4)](../migration/#the-nui-web-files-are-minified-and-renamed). Native mode is
 unaffected.
 :::
 
@@ -87,7 +89,7 @@ NUI render mode now has [a setup page](../nui/), and both features are documente
 `Menu.InstructionalButtons` dictionary have been **removed**. Every one of them was built around a fixed
 `Control`, which is exactly what this change is getting rid of. Use
 [Menu.AddKeyBinding()](../reference/menu/#addkeybinding) instead, and see the
-[Migration guide](../migration/#custom-controls-are-key-bindings-now).
+[Migration Guide (v4)](../migration/#custom-controls-are-key-bindings-now).
 :::
 
 
@@ -134,7 +136,7 @@ draw itself.
   two things that do: a variable typed `List<string> values = item.ListItems;` has to become
   `MenuItemList` (or call `.ToList()`), and the list you pass to the constructor is now **copied**,
   so change the values through `item.ListItems` rather than through your own copy of the list. See
-  the [Migration guide](../migration/).
+  the [Migration Guide (v4)](../migration/).
 
 **Things that just behave differently now:**
 

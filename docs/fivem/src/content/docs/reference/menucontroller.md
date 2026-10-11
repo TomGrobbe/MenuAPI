@@ -4,17 +4,13 @@ title: "MenuController"
 
 ## MenuController
 
-The `MenuController` is the part of MenuAPI that actually runs: it draws every registered [Menu](../menu/), handles all controls, and keeps track of which menu is currently open.
-
-You never create one yourself. It is a script of its own (an `IScript` on Enhanced, a `BaseScript` on Legacy) that starts automatically as soon as `MenuAPI.dll` is loaded by your resource. Every member on it is **static**, so you always use it as `MenuController.Something`.
-
-Its main job for you is registering menus ([AddMenu()](#addmenumenu-menu), [AddSubmenu()](#addsubmenumenu-parent-menu-child) and [BindMenuItem()](#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem)) and giving you a handful of global switches to control how menus behave.
+`MenuController` draws every registered [Menu](../menu/), handles all controls and tracks which menu is open. It starts on its own when your resource loads `MenuAPI.dll` (an `IScript` on Enhanced, a `BaseScript` on Legacy), so you never create one. Every member is static.
 
 ----
 
 ### Example usage
 
-This example is written for Enhanced. On Legacy, replace the two `CitizenFX.FiveM` lines with `using CitizenFX.Core;` and `IScript` with `BaseScript`. Everything inside the class is the same.
+This class is written for Enhanced, on Legacy use `using CitizenFX.Core;` and `BaseScript`. Other examples in this reference use Legacy names such as `Debug.WriteLine` and `Game`, on Enhanced use their `CitizenFX.FiveM.Client` equivalents.
 
 ```cs
 using MenuAPI;
@@ -59,31 +55,25 @@ public class MyMenus : IScript
 
 ### Properties
 
-All properties are **static**.
-
-|Property|Type|Default value|Description|Optional|
-|---|---|---|---|---|
-|MainMenu|Menu|Null|The menu that is opened when the user presses the [menu toggle key](#the-menu-toggle-key). This is set automatically to the first menu you register, but you can change it at any time. When it is null, the first registered menu is opened instead.|Yes|
-|Menus|List&lt;[Menu](../menu/)&gt;|(empty)|(Getter only) Every menu that has been registered with [AddMenu()](#addmenumenu-menu) or [AddSubmenu()](#addsubmenumenu-parent-menu-child).|Yes|
-|MenuAlignment|[MenuAlignmentOption](#menu-alignment)|MenuAlignmentOption.Left|Whether menus are drawn on the left or the right side of the screen. See [Menu alignment](#menu-alignment).|Yes|
-|DefaultTitleFont|int|MenuFont.HouseScript|The font every menu banner title is drawn in, unless that menu sets [MenuTitleFont](../menu/#header-styling) itself. See [Header styling defaults](#header-styling-defaults).|Yes|
-|DefaultTitleAlignment|[TitleAlignmentOption](../menu/#header-styling)|TitleAlignmentOption.Center|Where every menu banner title sits, unless that menu sets [MenuTitleAlignment](../menu/#header-styling) itself. See [Header styling defaults](#header-styling-defaults).|Yes|
-|DefaultShowHeaderGlare|boolean|false|Whether GTA Online's moving glow is drawn over every menu banner, unless that menu sets [ShowHeaderGlare](../menu/#header-styling) itself. See [Header styling defaults](#header-styling-defaults).|Yes|
-|MenuToggleKeyDefault|string|"M"|The key that opens the menu for players who have never rebound it themselves. Set it in your constructor. See [Changing the default toggle key](../keybindings/#changing-the-default-toggle-key).|Yes|
-|EnableMenuToggleKeyOnController|boolean|true|Whether the menu can also be toggled with a controller. The controller binding defaults to the back/select button and the player can rebind it, but it is always a 400ms hold rather than a tap. See [Key bindings](../keybindings/).|Yes|
-|EnableMenuToggleKey|boolean|true|Whether MenuAPI registers the keyboard key that opens the menu. Set it to false in your constructor when your resource opens its menus itself, so players don't get a key binding that does nothing useful. MenuAPI checks it once, one tick after it starts. See [The menu toggle key](#the-menu-toggle-key).|Yes|
-|DisableMenuButtons|boolean|false|When true, all menu controls are ignored. The menu stays on screen, it just does not respond to input. Useful while you are doing something that should not be interrupted.|Yes|
-|AreMenuButtonsEnabled|boolean|false|(Getter only) Whether menu controls are currently being processed. This is false when no menu is open, the game is paused, the screen is faded out, a player switch is in progress, the player is dead, or `DisableMenuButtons` is true.|Yes|
-|DontOpenAnyMenu|boolean|false|When true, menus stop being drawn and can not be opened. Menus with [IgnoreDontOpenMenus](../menu/#properties) set to true are excluded.|Yes|
-|PreventExitingMenu|boolean|false|When true, the user can not close the menu with the back/cancel control. Submenus can still go back to their parent.|Yes|
-|DisableBackButton|boolean|false|When true, the back/cancel control does nothing at all, not even in submenus.|Yes|
-|NavigateMenuUsingArrows|boolean|true|When true, pressing left on an item that has no left/right behaviour goes back to the parent menu.|Yes|
-|ScreenWidth|float|1920f|(Getter only) The width of the screen, scaled to a 1080p height. This changes with the aspect ratio.|Yes|
-|ScreenHeight|float|1080f|(Getter only) The height of the screen. This is always 1080.|Yes|
-
-:::caution
-`PreventExitingMenu` should only be used for menus where the user really must not walk away halfway through. Always give them a button to close the menu themselves. Be nice to your users!
-:::
+|Property|Type|Default value|Description|
+|---|---|---|---|
+|MainMenu|Menu|null|The menu the [toggle key](#the-menu-toggle-key) opens. Set to the first menu you register, and can be changed at any time. When null, the first registered menu opens.|
+|Menus|List&lt;[Menu](../menu/)&gt;|(empty)|Getter only. Every menu registered with [AddMenu()](#addmenumenu-menu) or [AddSubmenu()](#addsubmenumenu-parent-menu-child).|
+|MenuAlignment|[MenuAlignmentOption](#menu-alignment)|MenuAlignmentOption.Left|Which side of the screen menus are drawn on. See [Menu alignment](#menu-alignment).|
+|DefaultTitleFont|int|MenuFont.HouseScript|Banner title font for menus that do not set [MenuTitleFont](../menu/#header-styling). See [Header styling defaults](#header-styling-defaults).|
+|DefaultTitleAlignment|[TitleAlignmentOption](../menu/#header-styling)|TitleAlignmentOption.Center|Banner title alignment for menus that do not set [MenuTitleAlignment](../menu/#header-styling).|
+|DefaultShowHeaderGlare|boolean|false|GTA Online's moving banner glow, for menus that do not set [ShowHeaderGlare](../menu/#header-styling).|
+|MenuToggleKeyDefault|string|"M"|The keyboard toggle key for players who never rebound it. Set it in your constructor. See [Changing the default toggle key](../keybindings/#changing-the-default-toggle-key).|
+|EnableMenuToggleKeyOnController|boolean|true|Whether the controller toggle works. It is a 400ms hold on the back/select button by default, and the player can rebind the button.|
+|EnableMenuToggleKey|boolean|true|Whether MenuAPI registers the keyboard toggle key. Set it in your constructor, because it is read when the key mappings are registered one tick after MenuAPI starts. It does not affect the controller toggle. See [The menu toggle key](#the-menu-toggle-key).|
+|DisableMenuButtons|boolean|false|When true, the open menu stays on screen but ignores all input, including the toggle key.|
+|AreMenuButtonsEnabled|boolean|false|Getter only. False when no menu is open, the pause menu is open, the screen is faded out, a player switch is in progress, the player is dead, the F8 console is open, or `DisableMenuButtons` is true.|
+|DontOpenAnyMenu|boolean|false|When true, open menus are closed, the toggle key does nothing and no menu is drawn or takes input. A menu with [IgnoreDontOpenMenus](../menu/#properties) set to true is not closed, but it is still hidden until this is false again.|
+|PreventExitingMenu|boolean|false|When true, back and the toggle key can not close a top level menu. Submenus can still go back to their parent. Give the player a button that closes the menu.|
+|DisableBackButton|boolean|false|When true, back does nothing, in submenus too.|
+|NavigateMenuUsingArrows|boolean|true|When true, left on an item without left/right behaviour acts like back.|
+|ScreenWidth|float|1920f|Getter only. 1080 times the screen aspect ratio.|
+|ScreenHeight|float|1080f|Getter only. Always 1080.|
 
 ----
 
@@ -98,25 +88,13 @@ All properties are **static**.
 
 ### Methods
 
-All methods are **static**.
+All methods are static.
 
 ----
 
 #### AddMenu(Menu menu)
 
-Registers a menu with the controller. A menu is not drawn and does not respond to controls until it has been registered.
-
-If [MainMenu](#properties) is still null, the menu you pass here becomes the main menu.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|menu|[Menu](../menu/)|The menu to register. Registering the same menu twice does nothing.|
-
-##### Return value
-
-_This function does not return anything_.
+Registers `menu`. A menu is not drawn and takes no input until it is registered. Registering the same menu twice does nothing. If [MainMenu](#properties) is null, `menu` becomes the main menu.
 
 ```cs
 Menu menu = new Menu("Main Menu", "Subtitle");
@@ -127,42 +105,15 @@ MenuController.AddMenu(menu);
 
 #### AddSubmenu(Menu parent, Menu child)
 
-Registers `child` (if it was not registered yet) and sets its [ParentMenu](../menu/#properties) to `parent`. That parent/child relation is what makes the back/cancel control return to the previous menu.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|parent|[Menu](../menu/)|The menu that the child returns to.|
-|child|[Menu](../menu/)|The submenu.|
-
-##### Return value
-
-_This function does not return anything_.
-
-:::note
-`AddSubmenu()` only sets up the relation. To give the user a button that opens the submenu, use [BindMenuItem()](#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem) instead, which does both.
-:::
+Registers `child` if needed and sets its [ParentMenu](../menu/#properties) to `parent`, which is where back returns to. It does not add a button that opens `child`, use [BindMenuItem()](#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem) for that.
 
 ----
 
 #### BindMenuItem(Menu parentMenu, Menu childMenu, MenuItem menuItem)
 
-Turns `menuItem` into a submenu button: pressing it closes `parentMenu` and opens `childMenu`. This also calls [AddSubmenu()](#addsubmenumenu-parent-menu-child) for you.
+Makes `menuItem` a submenu button: selecting it closes `parentMenu` and opens `childMenu`. Calls [AddSubmenu()](#addsubmenumenu-parent-menu-child) for you.
 
-Binding the same item again replaces the menu it was bound to. The menu it used to open is removed for you, unless another button still opens it, because with nothing pointing at it nobody could ever get to it again.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|parentMenu|[Menu](../menu/)|The menu that `menuItem` belongs to.|
-|childMenu|[Menu](../menu/)|The menu to open when the item is pressed.|
-|menuItem|[MenuItem](../menuitems/menuitem/)|The item that opens the submenu.|
-
-##### Return value
-
-_This function does not return anything_.
+Binding the same item again replaces its menu. The old menu is removed, unless another item still opens it or it is [MainMenu](#properties).
 
 ```cs
 Menu menu = new Menu("Main Menu", "Subtitle");
@@ -184,23 +135,9 @@ MenuController.BindMenuItem(menu, submenu, submenuButton);
 
 #### RemoveMenu(Menu menu)
 
-Takes `menu` back out of MenuAPI again. Use it when a menu is finished with and you do not want it hanging around.
+Removes `menu`, and every menu that could only be reached through its items, all the way down. Passing null does nothing.
 
-It also removes every menu that could only be reached through one of `menu`'s buttons, all the way down. That sounds drastic, but think about it: if the only button that opened a submenu has just gone, there is no route to that submenu anymore, so keeping it would only waste memory.
-
-Along the way it closes the menu if it happens to be open, empties its buttons, and forgets every event handler you attached to it. Once that is done, the only thing still pointing at the menu is your own variable, so as soon as you stop using that variable the game can clean it up.
-
-If the menu was open when you removed it, the player is put back on its parent menu rather than being left staring at nothing.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|menu|[Menu](../menu/)|The menu to remove. Passing null does nothing.|
-
-##### Return value
-
-_This function does not return anything_.
+The menu is closed if open (raising [OnMenuClose](../events/#onmenuclose)), its items are cleared and all its event handlers are dropped, so your own reference is the only one left. If it was open, its parent menu is opened. If it was [MainMenu](#properties), the first remaining menu takes its place.
 
 ```cs
 Menu submenu = new Menu("Submenu");
@@ -213,24 +150,14 @@ MenuController.RemoveMenu(submenu);
 ```
 
 :::note
-You rarely need to call this yourself for submenus. Removing the button that opens one, with [RemoveMenuItem()](../menu/#removemenuitemmenuitem-item) or [ClearMenuItems()](../menu/#clearmenuitems), already removes the menu behind it.
+Removing a submenu button with [RemoveMenuItem()](../menu/#removemenuitemmenuitem-item) or [ClearMenuItems()](../menu/#clearmenuitems) already removes the menu behind it.
 :::
 
 ----
 
 #### RemoveAllMenus()
 
-Removes every registered menu in one go, and empties everything MenuAPI was keeping track of: the menu list, the open menus, the submenu bindings and [MainMenu](#properties).
-
-This is the one to call when your resource is shutting down, or when you want to throw away your whole menu structure and build a fresh one from scratch.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Removes every menu and clears the menu list, the open menus, the submenu bindings and [MainMenu](#properties). Use it on resource shutdown or to rebuild your menus from scratch.
 
 ```cs
 // Start over with a clean slate.
@@ -241,17 +168,7 @@ MenuController.RemoveAllMenus();
 
 #### GetCurrentMenu()
 
-Returns the menu that is currently open.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-|Type|Description|
-|-|-|
-|[Menu](../menu/)|The currently open menu, or `null` if no menu is open.|
+Returns the open [Menu](../menu/), or `null` if no menu is open.
 
 ```cs
 Menu current = MenuController.GetCurrentMenu();
@@ -265,17 +182,7 @@ if (current != null)
 
 #### IsAnyMenuOpen()
 
-Returns whether any menu is currently open.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-|Type|Description|
-|-|-|
-|boolean|True if at least one menu is open.|
+Returns true if at least one menu is open.
 
 ```cs
 // Don't let the player shoot while a menu is open.
@@ -289,26 +196,24 @@ if (MenuController.IsAnyMenuOpen())
 
 #### CloseAllMenus()
 
-Closes every open menu. Each closed menu triggers its own [OnMenuClose](../events/#onmenuclose) event.
+Closes every open menu. Each one raises its own [OnMenuClose](../events/#onmenuclose) event.
 
-##### Parameters
+----
 
-_This function does not have any parameters_.
+#### RefreshNui()
 
-##### Return value
-
-_This function does not return anything_.
+Redraws the open menu. Call it when item text is built from something MenuAPI does not own, such as a label you resolve yourself, and that changes. Everything MenuAPI owns already triggers a redraw.
 
 ----
 
 ### Menu alignment
 
-Menus can be drawn on the left or the right side of the screen, and this can be changed at any time during runtime. The menu updates instantly, and both alignments scale with the safezone size automatically.
+Can be changed at any time and takes effect immediately. Both sides follow the safe zone size.
 
 |Value|Description|
 |-|-|
-|MenuAlignmentOption.Left|Menus are drawn on the left side of the screen. This is the default.|
-|MenuAlignmentOption.Right|Menus are drawn on the right side of the screen.|
+|MenuAlignmentOption.Left|Left side of the screen. The default.|
+|MenuAlignmentOption.Right|Right side of the screen.|
 
 ```cs
 // Right align all menus.
@@ -330,20 +235,14 @@ menu.OnCheckboxChange += (_menu, _item, _index, _checked) =>
 ```
 
 :::caution
-Right aligned menus are not supported on 17:9 and 21:9 aspect ratios. On those resolutions the value is forced back to `MenuAlignmentOption.Left` and a warning is printed to the console. Always read the property back if you need to know the alignment that is actually being used, or use [Menu.LeftAligned](../menu/#properties).
-:::
-
-:::note
-Menu alignment is only available in FiveM.
+Right alignment is not supported on 17:9 and wider aspect ratios. There the value is forced to `MenuAlignmentOption.Left` and an error is logged. Read the property back, or use [Menu.LeftAligned](../menu/#properties), to get the alignment actually in use.
 :::
 
 ----
 
 ### Header styling defaults
 
-Every menu banner can have its own title font, its own title alignment and its own glare, and each of those is described in full under [Header styling](../menu/#header-styling). The three properties here are what a menu falls back to when it has not been told otherwise.
-
-That means you can set the look of your whole resource in one place. Do it before you build your menus and every one of them picks it up:
+The fallbacks for menus that do not set their own title font, title alignment or glare (see [Header styling](../menu/#header-styling)). Set them before building your menus to style your whole resource in one place.
 
 ```cs
 MenuController.DefaultTitleFont = MenuFont.Pricedown;
@@ -361,13 +260,13 @@ Menu warning = new Menu("Are you sure?", "This cannot be undone")
 };
 ```
 
-Changing a default at runtime affects every menu that has not overridden it, immediately, including menus you built earlier and menus that are on screen right now.
+Changing a default at runtime immediately affects every menu that has not overridden it, including menus already built or on screen.
 
 ----
 
 ### The menu toggle key
 
-MenuAPI handles all menu controls for you, including one key that opens [MainMenu](#properties). On a keyboard that key defaults to <kbd>M</kbd>, and **the player can rebind it themselves** from FiveM's **Settings, Key Bindings** screen. See [Key bindings](../keybindings/) for the full list and how it works.
+The toggle key opens [MainMenu](#properties). It defaults to <kbd>M</kbd> on a keyboard and to holding the back/select button for 400ms on a controller. Players can rebind both in **Settings, Key Bindings**, the controller toggle stays a hold. See [Key bindings](../keybindings/).
 
 ```cs
 // Decide which menu the toggle key opens.
@@ -377,12 +276,11 @@ MenuController.MainMenu = myOtherMenu;
 MenuController.MenuToggleKeyDefault = "F5";
 ```
 
-- Pressing the toggle key while a menu is open closes that menu, unless [PreventExitingMenu](#properties) is true.
-- When [MainMenu](#properties) is null, the first registered menu is opened instead. If no menus are registered at all, nothing happens.
-- On a controller it is the back/select button by default, held for 400ms, and the player can rebind that too. The hold stays whichever button they pick. Set [EnableMenuToggleKeyOnController](#properties) to false to disable it.
+- Pressing it while a menu is open closes that menu, unless [PreventExitingMenu](#properties) is true.
+- When [MainMenu](#properties) is null, the first registered menu opens. With no menus, nothing happens.
 
-If you would rather open menus yourself, call [Menu.OpenMenu()](../menu/#openmenu) from your own command or key mapping, and set [EnableMenuToggleKey](#properties) to false so MenuAPI does not register a key of its own.
+To open menus yourself, call [Menu.OpenMenu()](../menu/#openmenu) from your own command or key mapping and set [EnableMenuToggleKey](#properties) to false in your constructor. That only turns off the keyboard key, set [EnableMenuToggleKeyOnController](#properties) to false too to turn off the controller hold.
 
 :::caution[Coming from the older MenuAPI?]
-`MenuController.MenuToggleKey` and `MenuController.MenuToggleKeyIsValid` are **gone**. Which key opens the menu is now the player's choice, not the resource's. Use `MenuToggleKeyDefault` to pick the key players start with, or set `EnableMenuToggleKey` to false where you used to set the key to `-1`. See the [Migration guide](../../migration/#the-menu-toggle-key-is-the-players-choice-now).
+`MenuController.MenuToggleKey` and `MenuController.MenuToggleKeyIsValid` are **gone**, the key is now the player's choice. Use `MenuToggleKeyDefault` to pick the key players start with, or set `EnableMenuToggleKey` to false where you used to set the key to `-1`. See the [Migration Guide (v4)](../../migration/#the-menu-toggle-key-is-the-players-choice-now).
 :::

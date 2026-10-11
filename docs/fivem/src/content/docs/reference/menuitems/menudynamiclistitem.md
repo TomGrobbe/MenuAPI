@@ -4,11 +4,7 @@ title: "MenuDynamicListItem"
 
 ## MenuDynamicListItem
 
-A menu item with a dynamic list of values.
-
-Anytime the left or right arrow keys are pressed, a callback function will be executed which will determine what the next value to be displayed should be.
-
-You can also select a menu dynamic list item by pressing enter, which will trigger a separate event that you can listen for.
+A list item without a fixed list. Left and right call your callback, and the string it returns becomes the displayed value. Pressing select raises a separate event.
 
 ----
 
@@ -49,7 +45,7 @@ menu.AddMenuItem(dynList);
 
 #### A clamped counter
 
-Because the callback decides what the next value is, you can clamp it, step by any amount, or format it however you like.
+The callback can clamp, step or format the value however you like.
 
 ```cs
 string VolumeCallback(MenuDynamicListItem item, bool left)
@@ -84,41 +80,24 @@ menu.OnDynamicListItemSelect += (_menu, _item, _currentItem) =>
 ```
 
 :::caution
-The callback is called directly, without a null check, so `Callback` must never be null. It also has to return a value for every input — returning null makes the item display `N/A`.
+`Callback` is called without a null check, so it must never be null. Returning null from it makes the item show `N/A`.
 :::
 
 ----
 
 ### Constructors
 
-----
-
-#### MenuDynamicListItem(string text, string initialValue, ChangeItemCallback callback)
-
-Creates a dynamic list item without a description.
-
-##### Parameters
+|Constructor|Description|
+|-|-|
+|`MenuDynamicListItem(string text, string initialValue, ChangeItemCallback callback)`|Creates a dynamic list item without a description.|
+|`MenuDynamicListItem(string text, string initialValue, ChangeItemCallback callback, string description)`|Creates a dynamic list item with a description.|
 
 |Parameter|Type|Description|
 |-|-|-|
-|text|string|The text displayed on the left side of the item.|
-|initialValue|string|The value that is displayed before the user changes anything.|
-|callback|[ChangeItemCallback](#changeitemcallback)|The function that returns the next value.|
-
-----
-
-#### MenuDynamicListItem(string text, string initialValue, ChangeItemCallback callback, string description)
-
-Creates a dynamic list item with a description.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|text|string|The text displayed on the left side of the item.|
-|initialValue|string|The value that is displayed before the user changes anything.|
-|callback|[ChangeItemCallback](#changeitemcallback)|The function that returns the next value.|
-|description|string|The description shown below the menu while this item is selected.|
+|text|string|The text on the left side of the item.|
+|initialValue|string|The value shown before the user changes anything.|
+|callback|[ChangeItemCallback](#changeitemcallback)|Returns the next value.|
+|description|string|Shown below the menu while the item is highlighted.|
 
 ----
 
@@ -128,34 +107,29 @@ Creates a dynamic list item with a description.
 public delegate string ChangeItemCallback(MenuDynamicListItem item, bool left);
 ```
 
-The callback runs every time the user presses left or right on the item. Whatever string you return becomes the new displayed value.
+Runs on every left or right press. The returned string becomes the new `CurrentItem`.
 
 |Parameter|Type|Description|
 |-|-|-|
-|item|MenuDynamicListItem|The item the user is interacting with. Read `item.CurrentItem` to get the current value.|
-|left|boolean|True when the **left** control was pressed, false when the **right** control was pressed.|
-
-|Return type|Description|
-|-|-|
-|string|The new value to display.|
+|item|MenuDynamicListItem|The item being changed. `item.CurrentItem` holds the current value.|
+|left|bool|True for the **left** control, false for the **right** control.|
 
 ----
 
 ### Properties
 
 :::note
-All standard MenuItem class properties are inherited.
-The MenuItem properties **RightIcon** and **Label** are not available for MenuDynamicListItems.
+**RightIcon** and **Label** are not available for MenuDynamicListItems.
 :::
 
-|Property|Type|Default value|Description|Optional|
-|---|---|---|---|---|
-|HideArrowsWhenNotSelected|boolean|false|Hides the left & right arrows when the menu list item is not currently highlighted.|Yes|
-|CurrentItem|string|Null|Gets or sets the current text that is being displayed.|**No**|
-|Callback|ChangeItemCallback|Null|The callback function to trigger when the left or right arrow key was pressed.|**No**|
+|Property|Type|Default value|Description|
+|---|---|---|---|
+|HideArrowsWhenNotSelected|bool|false|Hides the left and right arrows while the item is not highlighted.|
+|CurrentItem|string|`initialValue` argument|The value being displayed. Can be set.|
+|Callback|ChangeItemCallback|`callback` argument|Called on left and right to get the next value.|
 
 ----
 
 ### Methods
 
-_There are no methods for MenuDynamicListItems._
+MenuDynamicListItem has no methods of its own.

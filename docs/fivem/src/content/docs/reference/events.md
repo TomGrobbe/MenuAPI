@@ -4,16 +4,7 @@ title: "Events"
 
 ## Events
 
-Every event in MenuAPI is a member of a [Menu](../menu/), so you always subscribe on the menu that the item belongs to — not on the item itself.
-
-```cs
-menu.OnItemSelect += (_menu, _item, _index) =>
-{
-    Debug.WriteLine($"'{_item.Text}' was pressed.");
-};
-```
-
-MenuAPI uses plain delegates, so a lambda, a `new EventHandler(...)` style delegate or a normal method all work:
+Every event is a member of [Menu](../menu/), so you subscribe on the menu the item belongs to, not on the item. Lambdas and methods both work.
 
 ```cs
 // Lambda
@@ -33,21 +24,21 @@ private void HandleMenuOpen(Menu menu)
 ### Which event fires for which item?
 
 :::caution
-Each item type raises **only its own** select event. `OnItemSelect` is *not* a catch-all: pressing a checkbox raises `OnCheckboxChange`, pressing a list item raises `OnListItemSelect`, and so on.
+`OnItemSelect` is *not* a catch-all. Each item type raises **only its own** select event, so pressing a checkbox raises `OnCheckboxChange`, pressing a list item raises `OnListItemSelect`, and so on.
 :::
 
 |Item type|Pressing select|Pressing left / right|
 |-|-|-|
 |[MenuItem](../menuitems/menuitem/)|[OnItemSelect](#onitemselect)|Right selects the item, left goes back to the parent menu.|
-|[MenuCheckboxItem](../menuitems/menucheckboxitem/)|[OnCheckboxChange](#oncheckboxchange)|Right toggles the checkbox (so it also raises `OnCheckboxChange`).|
+|[MenuCheckboxItem](../menuitems/menucheckboxitem/)|[OnCheckboxChange](#oncheckboxchange)|Right toggles the checkbox (raising `OnCheckboxChange`), left goes back to the parent menu.|
 |[MenuListItem](../menuitems/menulistitem/)|[OnListItemSelect](#onlistitemselect)|[OnListIndexChange](#onlistindexchange)|
 |[MenuDynamicListItem](../menuitems/menudynamiclistitem/)|[OnDynamicListItemSelect](#ondynamiclistitemselect)|[OnDynamicListItemCurrentItemChange](#ondynamiclistitemcurrentitemchange)|
 |[MenuSliderItem](../menuitems/menuslideritem/)|[OnSliderItemSelect](#onslideritemselect)|[OnSliderPositionChange](#onsliderpositionchange)|
 
-Three more events are not tied to a specific item type: [OnIndexChange](#onindexchange) (the highlighted item changed), [OnMenuOpen](#onmenuopen) / [OnMenuClose](#onmenuclose), and [OnPageChange](../pagination/#the-onpagechange-event) (the page of a paginated menu changed).
+Not tied to an item type: [OnIndexChange](#onindexchange), [OnMenuOpen](#onmenuopen), [OnMenuClose](#onmenuclose) and [OnPageChange](../pagination/#the-onpagechange-event).
 
 :::note
-In a [paginated](../pagination/) menu, left and right turn the page on every item type except list, dynamic list and slider items. Those three keep changing their own value.
+In a [paginated](../pagination/) menu, left and right turn the page on every item type except list, dynamic list and slider items.
 :::
 
 ----
@@ -97,13 +88,7 @@ menu.OnMenuClose += (_menu) => Debug.WriteLine("Menu closed.");
 
 ### OnItemSelect
 
-Triggered when a [MenuItem](../menuitems/menuitem/) is pressed. This only fires for plain menu items, not for checkbox/list/slider items.
-
-If the item is bound to a submenu with [MenuController.BindMenuItem()](../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem), this event fires **before** the submenu opens.
-
-Disabled items (`Enabled = false`) never raise this event; they play the error sound instead.
-
-#### Parameters
+A [MenuItem](../menuitems/menuitem/) was pressed. For an item bound with [MenuController.BindMenuItem()](../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem), this fires **before** the submenu opens. Disabled items never raise it, they play the error sound instead.
 
 |Parameter|Type|Description|
 |-|-|-|
@@ -132,9 +117,7 @@ menu.OnItemSelect += (_menu, _item, _index) =>
 
 ### OnCheckboxChange
 
-Triggered when a [MenuCheckboxItem](../menuitems/menucheckboxitem/) is toggled, either by pressing select on it or by pressing right on it. The `Checked` property has already been updated when this fires.
-
-#### Parameters
+A [MenuCheckboxItem](../menuitems/menucheckboxitem/) was toggled with select or right. `Checked` is already updated when this fires.
 
 |Parameter|Type|Description|
 |-|-|-|
@@ -157,15 +140,13 @@ menu.OnCheckboxChange += (_menu, _item, _index, _checked) =>
 
 ### OnListItemSelect
 
-Triggered when a [MenuListItem](../menuitems/menulistitem/) is pressed (select), not when its value is changed with left/right.
-
-#### Parameters
+A [MenuListItem](../menuitems/menulistitem/) was pressed with select. Changing its value with left or right does not raise this.
 
 |Parameter|Type|Description|
 |-|-|-|
 |menu|[Menu](../menu/)|The menu in which this event occurred.|
 |listItem|[MenuListItem](../menuitems/menulistitem/)|The list item that was pressed.|
-|selectedIndex|int|The currently selected index inside that list item's `ListItems`.|
+|selectedIndex|int|The selected index inside that list item's `ListItems`.|
 |itemIndex|int|The index of the list item in the menu.|
 
 ```cs
@@ -182,9 +163,7 @@ menu.OnListItemSelect += (_menu, _listItem, _listIndex, _itemIndex) =>
 
 ### OnListIndexChange
 
-Triggered every time the value of a [MenuListItem](../menuitems/menulistitem/) is changed with the left or right control. List items wrap around, so going right on the last value moves back to the first one.
-
-#### Parameters
+The value of a [MenuListItem](../menuitems/menulistitem/) was changed with left or right. Lists wrap around at both ends.
 
 |Parameter|Type|Description|
 |-|-|-|
@@ -209,13 +188,7 @@ menu.OnListIndexChange += (_menu, _listItem, _oldIndex, _newIndex, _itemIndex) =
 
 ### OnSliderPositionChange
 
-Triggered every time the position of a [MenuSliderItem](../menuitems/menuslideritem/) is changed with the left or right control. Sliders do **not** wrap around: at `Min` or `Max` the error sound plays and this event does not fire.
-
-:::note
-Slider items, and therefore this event, are only available in FiveM.
-:::
-
-#### Parameters
+The position of a [MenuSliderItem](../menuitems/menuslideritem/) was changed with left or right. Sliders do **not** wrap: at `Min` or `Max` the error sound plays and this does not fire.
 
 |Parameter|Type|Description|
 |-|-|-|
@@ -239,13 +212,7 @@ menu.OnSliderPositionChange += (_menu, _sliderItem, _oldPosition, _newPosition, 
 
 ### OnSliderItemSelect
 
-Triggered when a [MenuSliderItem](../menuitems/menuslideritem/) is pressed (select).
-
-:::note
-Slider items, and therefore this event, are only available in FiveM.
-:::
-
-#### Parameters
+A [MenuSliderItem](../menuitems/menuslideritem/) was pressed with select.
 
 |Parameter|Type|Description|
 |-|-|-|
@@ -258,15 +225,13 @@ Slider items, and therefore this event, are only available in FiveM.
 
 ### OnDynamicListItemCurrentItemChange
 
-Triggered every time the value of a [MenuDynamicListItem](../menuitems/menudynamiclistitem/) is changed with the left or right control, right after the item's callback has returned the new value.
-
-#### Parameters
+The value of a [MenuDynamicListItem](../menuitems/menudynamiclistitem/) was changed with left or right. Fires right after the item's callback returned the new value.
 
 |Parameter|Type|Description|
 |-|-|-|
 |menu|[Menu](../menu/)|The menu in which this event occurred.|
 |dynamicListItem|[MenuDynamicListItem](../menuitems/menudynamiclistitem/)|The dynamic list item that was changed.|
-|oldValue|string|The value before the change.|
+|oldValue|string?|The value before the change.|
 |newValue|string|The value the callback returned.|
 
 ```cs
@@ -280,29 +245,25 @@ menu.OnDynamicListItemCurrentItemChange += (_menu, _item, _oldValue, _newValue) 
 
 ### OnDynamicListItemSelect
 
-Triggered when a [MenuDynamicListItem](../menuitems/menudynamiclistitem/) is pressed (select).
-
-#### Parameters
+A [MenuDynamicListItem](../menuitems/menudynamiclistitem/) was pressed with select.
 
 |Parameter|Type|Description|
 |-|-|-|
 |menu|[Menu](../menu/)|The menu in which this event occurred.|
 |dynamicListItem|[MenuDynamicListItem](../menuitems/menudynamiclistitem/)|The dynamic list item that was pressed.|
-|currentItem|string|The value that is currently being displayed.|
+|currentItem|string?|The value currently displayed.|
 
 ----
 
 ### OnIndexChange
 
-Triggered whenever the highlighted item changes, so every time the user presses up or down. The list wraps around at both ends.
-
-#### Parameters
+The highlighted item changed, by up, down or the scroll wheel. The list wraps around at both ends. It does not fire in a menu with fewer than 2 items.
 
 |Parameter|Type|Description|
 |-|-|-|
 |menu|[Menu](../menu/)|The menu in which this event occurred.|
 |oldItem|[MenuItem](../menuitems/menuitem/)|The item that was highlighted before.|
-|newItem|[MenuItem](../menuitems/menuitem/)|The item that is highlighted now.|
+|newItem|[MenuItem](../menuitems/menuitem/)?|The item that is highlighted now. Can be null.|
 |oldIndex|int|The previous index.|
 |newIndex|int|The new index.|
 
@@ -321,9 +282,7 @@ menu.OnIndexChange += (_menu, _oldItem, _newItem, _oldIndex, _newIndex) =>
 
 ### OnMenuOpen
 
-Triggered when a menu is opened, either by the user or by a call to [Menu.OpenMenu()](../menu/#openmenu).
-
-#### Parameters
+The menu was opened, by the player or by [Menu.OpenMenu()](../menu/#openmenu).
 
 |Parameter|Type|Description|
 |-|-|-|
@@ -342,13 +301,11 @@ menu.OnMenuOpen += (_menu) =>
 
 ### OnMenuClose
 
-Triggered when a menu is closed, either by the user or by a call to [Menu.CloseMenu()](../menu/#closemenu), [Menu.GoBack()](../menu/#goback) or [MenuController.CloseAllMenus()](../menucontroller/#closeallmenus).
+The menu was closed, by the player or by [Menu.CloseMenu()](../menu/#closemenu), [Menu.GoBack()](../menu/#goback) or [MenuController.CloseAllMenus()](../menucontroller/#closeallmenus).
 
 :::note
-Opening a submenu closes the parent menu first, so this event also fires when the user navigates *into* a submenu.
+Opening a submenu closes the parent menu first, so this also fires when the player goes *into* a submenu.
 :::
-
-#### Parameters
 
 |Parameter|Type|Description|
 |-|-|-|
@@ -365,7 +322,7 @@ menu.OnMenuClose += (_menu) =>
 
 ### Delegate signatures
 
-If you prefer to declare your handlers explicitly, these are the delegate types the events use. They are all nested in `Menu`.
+All delegate types are nested in `Menu`.
 
 |Event|Delegate|
 |-|-|
@@ -375,9 +332,9 @@ If you prefer to declare your handlers explicitly, these are the delegate types 
 |OnListIndexChange|`void ListItemIndexChangedEvent(Menu menu, MenuListItem listItem, int oldSelectionIndex, int newSelectionIndex, int itemIndex)`|
 |OnSliderPositionChange|`void SliderPositionChangedEvent(Menu menu, MenuSliderItem sliderItem, int oldPosition, int newPosition, int itemIndex)`|
 |OnSliderItemSelect|`void SliderItemSelectedEvent(Menu menu, MenuSliderItem sliderItem, int sliderPosition, int itemIndex)`|
-|OnDynamicListItemCurrentItemChange|`void DynamicListItemCurrentItemChangedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string oldValue, string newValue)`|
-|OnDynamicListItemSelect|`void DynamicListItemSelectedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string currentItem)`|
-|OnIndexChange|`void IndexChangedEvent(Menu menu, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex)`|
+|OnDynamicListItemCurrentItemChange|`void DynamicListItemCurrentItemChangedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string? oldValue, string newValue)`|
+|OnDynamicListItemSelect|`void DynamicListItemSelectedEvent(Menu menu, MenuDynamicListItem dynamicListItem, string? currentItem)`|
+|OnIndexChange|`void IndexChangedEvent(Menu menu, MenuItem oldItem, MenuItem? newItem, int oldIndex, int newIndex)`|
 |OnMenuOpen|`void MenuOpenedEvent(Menu menu)`|
 |OnMenuClose|`void MenuClosedEvent(Menu menu)`|
 |OnPageChange|`void PageChangedEvent(Menu menu, int oldPage, int newPage, bool wrapped)`|

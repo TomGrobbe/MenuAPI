@@ -4,11 +4,11 @@ title: "Menu"
 
 ## Menu
 
-A `Menu` is one self contained menu: a banner, a subtitle bar, a list of [menu items](../menuitems/), a description box and (optionally) instructional buttons.
+A `Menu` is one menu: a banner, a subtitle bar, a list of [menu items](../menuitems/), a description box and optional instructional buttons.
 
-Every menu has to be registered with the [MenuController](../menucontroller/), which takes care of drawing it and of handling all controls for you. Menus can be nested: bind any menu to a [MenuItem](../menuitems/menuitem/) of another menu and that item becomes a submenu button.
+Every menu must be registered with the [MenuController](../menucontroller/), which draws it and handles its controls. Bind a menu to a [MenuItem](../menuitems/menuitem/) of another menu to make that item a submenu button.
 
-All events (`OnItemSelect`, `OnCheckboxChange`, etc.) are members of this class. They are documented on their own page: [Events](../events/).
+Events (`OnItemSelect`, `OnCheckboxChange`, etc.) are members of this class and are documented on the [Events](../events/) page.
 
 ----
 
@@ -69,26 +69,22 @@ submenu.AddMenuItem(new MenuItem("I'm inside the submenu!"));
 
 #### Menu(string name)
 
-Creates a new menu with only a banner title.
-
-##### Parameters
+Creates a menu with only a banner title.
 
 |Parameter|Type|Description|
 |-|-|-|
-|name|string|The text displayed on the menu banner. Pass `null` to create a menu without a banner.|
+|name|string|The banner text. Pass `null` for a menu without a banner.|
 
 ----
 
 #### Menu(string name, string subtitle)
 
-Creates a new menu with a banner title and a subtitle.
-
-##### Parameters
+Creates a menu with a banner title and a subtitle.
 
 |Parameter|Type|Description|
 |-|-|-|
-|name|string|The text displayed on the menu banner. Pass `null` to create a menu without a banner.|
-|subtitle|string|The text displayed in the subtitle bar, directly below the banner.|
+|name|string|The banner text. Pass `null` for a menu without a banner.|
+|subtitle|string|The text in the subtitle bar below the banner.|
 
 ```cs
 // With a banner and a subtitle.
@@ -105,48 +101,48 @@ Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
 
 ### Properties
 
-|Property|Type|Default value|Description|Optional|
-|---|---|---|---|---|
-|MenuTitle|string|-|The text displayed on the menu banner. If this is null or empty, no banner is drawn.|Yes|
-|MenuSubtitle|string|Null|The text displayed in the subtitle bar below the banner.|Yes|
-|HeaderTexture|KeyValuePair&lt;string,&nbsp;string&gt;|(empty)|A custom banner image. The `Key` is the streamed texture dictionary, the `Value` is the texture name. The texture dictionary is requested for you. When this is not set, the default banner is used. You can also replace a banner with an image file instead of a game texture, see [Theming and banners](../theming/#part-two-banner-images).|Yes|
-|HeaderImage|string?|`null`|A banner image your resource ships, named whatever you like, in its `menuapi-banners` folder. Set it to the name without the extension, so `"outlaw"` uses `menuapi-banners/outlaw.png`. Wins over `HeaderTexture`, and falls back to it when the file is not there. See [Theming and banners](../theming/#option-two-a-menu-pointing-at-your-own-image).|Yes|
-|MenuTitleFont|int?|Null|The font the banner title is drawn in. See [Header styling](#header-styling). When this is null, [MenuController.DefaultTitleFont](../menucontroller/#properties) is used.|Yes|
-|MenuTitleAlignment|[TitleAlignmentOption](#header-styling)?|Null|Where the banner title sits inside the banner. See [Header styling](#header-styling). When this is null, [MenuController.DefaultTitleAlignment](../menucontroller/#properties) is used.|Yes|
-|ShowHeaderGlare|boolean?|Null|Whether GTA Online's moving glow is drawn over the banner. See [Header styling](#header-styling). When this is null, [MenuController.DefaultShowHeaderGlare](../menucontroller/#properties) is used.|Yes|
-|CounterPreText|string|Null|Text placed in front of the `current / total` counter in the top right of the subtitle bar. Setting this forces the counter to be shown, even when all items already fit on screen.|Yes|
-|Visible|boolean|false|Whether this menu is currently being drawn. Prefer [OpenMenu()](#openmenu) and [CloseMenu()](#closemenu), because those also trigger the open/close events.|Yes|
-|EnableInstructionalButtons|boolean|true|Whether the instructional buttons for this menu are drawn at the bottom of the screen.|Yes|
-|ShowSelectInstructionalButton|boolean|true|Whether the built in **select** hint is drawn. On a keyboard it follows the player's own [key binding](../keybindings/).|Yes|
-|ShowBackInstructionalButton|boolean|true|Whether the built in **back** hint is drawn. On a keyboard it follows the player's own [key binding](../keybindings/).|Yes|
-|SelectButtonText|string|"Select"|The text next to the built in **select** hint. Defaults to the game's own translated label.|Yes|
-|BackButtonText|string|"Back"|The text next to the built in **back** hint. Defaults to the game's own translated label.|Yes|
-|ShowChangeValueInstructionalButton|boolean|true|Whether the built in **change value** hint is drawn. Only ever drawn while the highlighted row is a list, a dynamic list or a slider.|Yes|
-|ChangeValueButtonText|string|"Change"|The text next to the built in **change value** hint.|Yes|
-|IgnoreDontOpenMenus|boolean|false|When true, this menu keeps being drawn even while [MenuController.DontOpenAnyMenu](../menucontroller/#properties) is set to true.|Yes|
-|ShowWeaponStatsPanel|boolean|false|Shows the weapon stats panel below the menu. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).|Yes|
-|ShowVehicleStatsPanel|boolean|false|Shows the vehicle stats panel below the menu. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).|Yes|
-|CustomInstructionalButtons|List&lt;[InstructionalButton](#instructionalbutton)&gt;|(empty)|Extra instructional buttons that use a raw button string. See [Instructional buttons](#instructional-buttons).|Yes|
-|KeyBindingHandlers|List&lt;[KeyBindingHandler](#keybindinghandler)&gt;|(empty)|The keys this menu listens for on top of the menu controls. Add them with [AddKeyBinding()](#addkeybinding), do not build this list yourself.|Yes|
-|Size|int|0|(Getter only) The number of items in this menu. When a filter is active, this is the number of items that passed the filter. When the menu is [paginated](../pagination/), this is the number of items on the current page.|Yes|
-|CurrentIndex|int|0|(Getter only) The index of the currently highlighted menu item. Use [RefreshIndex()](#refreshindexint-index) to change it.|Yes|
-|MaxItemsOnScreen|int|10|(Getter only) How many items are visible on screen at a time. Use [SetMaxItemsOnScreen()](#setmaxitemsonscreenint-max) to change it.|Yes|
-|PageSize|int|0|(Getter only) How many items fit on one page, or `0` when the menu is not paginated. See [Pagination](../pagination/).|Yes|
-|Paginated|boolean|false|(Getter only) Whether this menu is split into pages. See [Pagination](../pagination/).|Yes|
-|PageIndex|int|0|(Getter only) The page currently being shown, counting from 0. See [Pagination](../pagination/).|Yes|
-|PageCount|int|1|(Getter only) How many pages this menu has. See [Pagination](../pagination/).|Yes|
-|WrapPages|boolean|true|Whether paging past either end of a paginated menu comes out the other side. See [Pagination](../pagination/).|Yes|
-|ShowPageInstructionalButtons|boolean|true|Whether the previous/next page hints are drawn. Only ever drawn for a paginated menu with more than one page.|Yes|
-|PreviousPageButtonText|string|"Previous page"|The text next to the previous page hint.|Yes|
-|NextPageButtonText|string|"Next page"|The text next to the next page hint.|Yes|
-|ViewIndexOffset|int|0|(Getter only) The index of the first item that is currently visible on screen.|Yes|
-|ParentMenu|Menu|Null|(Getter only) The parent of this menu, or null if it has none. Set by [MenuController.AddSubmenu()](../menucontroller/#addsubmenumenu-parent-menu-child).|Yes|
-|LeftAligned|boolean|true|(Getter only) Whether menus are currently left aligned. Shortcut for [MenuController.MenuAlignment](../menucontroller/#menu-alignment).|Yes|
-|Position|KeyValuePair&lt;float,&nbsp;float&gt;|(0f,&nbsp;0f)|(Getter only) The current x/y position of the menu on screen.|Yes|
-|WeaponStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) The current weapon stats (4 floats). Set with [SetWeaponStats()](#setweaponstatsfloat-damage-float-firerate-float-accuracy-float-range).|Yes|
-|WeaponComponentStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) The current weapon component stats (4 floats). Set with [SetWeaponComponentStats()](#setweaponcomponentstatsfloat-damage-float-firerate-float-accuracy-float-range).|Yes|
-|VehicleStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) The current vehicle stats (4 floats). Set with [SetVehicleStats()](#setvehiclestatsfloat-topspeed-float-acceleration-float-braking-float-traction).|Yes|
-|VehicleUpgradeStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) The current vehicle upgrade stats (4 floats). Set with [SetVehicleUpgradeStats()](#setvehicleupgradestatsfloat-topspeed-float-acceleration-float-braking-float-traction).|Yes|
+|Property|Type|Default value|Description|
+|---|---|---|---|
+|MenuTitle|string|-|The banner text. Null or empty draws no banner.|
+|MenuSubtitle|string|Null|The subtitle bar text.|
+|HeaderTexture|KeyValuePair&lt;string,&nbsp;string&gt;|(empty)|A custom banner from a game texture. `Key` is the streamed texture dictionary (requested for you), `Value` is the texture name. See [Banners](../theming/#banners).|
+|HeaderImage|string?|`null`|A banner image from your resource's `menuapi-banners` folder, by name without extension, so `"outlaw"` uses `menuapi-banners/outlaw.png`. Wins over `HeaderTexture`, and falls back to it when the file is missing. See [Point one menu at your own image](../theming/#point-one-menu-at-your-own-image).|
+|MenuTitleFont|int?|Null|The banner title font. Null uses [MenuController.DefaultTitleFont](../menucontroller/#properties). See [Header styling](#header-styling).|
+|MenuTitleAlignment|[TitleAlignmentOption](#header-styling)?|Null|Where the title sits in the banner. Null uses [MenuController.DefaultTitleAlignment](../menucontroller/#properties).|
+|ShowHeaderGlare|boolean?|Null|Draws GTA Online's moving glow over the banner. Null uses [MenuController.DefaultShowHeaderGlare](../menucontroller/#properties).|
+|CounterPreText|string|Null|Text in front of the `current / total` counter in the subtitle bar. Setting it forces the counter to show, even when all items fit on screen.|
+|Visible|boolean|false|Whether the menu is drawn. Prefer [OpenMenu()](#openmenu) and [CloseMenu()](#closemenu), which also fire the open/close events.|
+|EnableInstructionalButtons|boolean|true|Whether this menu's instructional buttons are drawn.|
+|ShowSelectInstructionalButton|boolean|true|Draws the built in **select** hint. On a keyboard it follows the player's [key binding](../keybindings/).|
+|ShowBackInstructionalButton|boolean|true|Draws the built in **back** hint. On a keyboard it follows the player's [key binding](../keybindings/).|
+|SelectButtonText|string|"Select"|Text of the **select** hint. Defaults to the game's translated label.|
+|BackButtonText|string|"Back"|Text of the **back** hint. Defaults to the game's translated label.|
+|ShowChangeValueInstructionalButton|boolean|true|Draws the built in **change value** hint, only while the highlighted row is a list, dynamic list or slider.|
+|ChangeValueButtonText|string|"Change"|Text of the **change value** hint.|
+|IgnoreDontOpenMenus|boolean|false|Keeps this menu drawn while [MenuController.DontOpenAnyMenu](../menucontroller/#properties) is true.|
+|ShowWeaponStatsPanel|boolean|false|Shows the weapon stats panel. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).|
+|ShowVehicleStatsPanel|boolean|false|Shows the vehicle stats panel. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).|
+|CustomInstructionalButtons|List&lt;[InstructionalButton](#instructionalbutton)&gt;|(empty)|Extra hints from a raw button string. See [Instructional buttons](#instructional-buttons).|
+|KeyBindingHandlers|List&lt;[KeyBindingHandler](#keybindinghandler)&gt;|(empty)|The extra keys this menu listens for. Fill it with [AddKeyBinding()](#addkeybinding), not by hand.|
+|Size|int|0|(Getter only) The number of items. With a filter, only the items that passed. When [paginated](../pagination/), only the current page.|
+|CurrentIndex|int|0|(Getter only) Index of the highlighted item. Change it with [RefreshIndex()](#refreshindexint-index).|
+|MaxItemsOnScreen|int|10|(Getter only) How many items are visible at once. Change it with [SetMaxItemsOnScreen()](#setmaxitemsonscreenint-max).|
+|PageSize|int|0|(Getter only) Items per page, or `0` when not paginated. See [Pagination](../pagination/).|
+|Paginated|boolean|false|(Getter only) Whether the menu is split into pages.|
+|PageIndex|int|0|(Getter only) The current page, from 0.|
+|PageCount|int|1|(Getter only) The number of pages.|
+|WrapPages|boolean|true|Whether paging past either end wraps around.|
+|ShowPageInstructionalButtons|boolean|true|Draws the previous/next page hints, only for a paginated menu with more than one page.|
+|PreviousPageButtonText|string|"Previous page"|Text of the previous page hint.|
+|NextPageButtonText|string|"Next page"|Text of the next page hint.|
+|ViewIndexOffset|int|0|(Getter only) Index of the first visible item.|
+|ParentMenu|Menu|Null|(Getter only) The parent menu, or null. Set by [MenuController.AddSubmenu()](../menucontroller/#addsubmenumenu-parent-menu-child).|
+|LeftAligned|boolean|true|(Getter only) Shortcut for [MenuController.MenuAlignment](../menucontroller/#menu-alignment).|
+|Position|KeyValuePair&lt;float,&nbsp;float&gt;|(0f,&nbsp;0f)|(Getter only) Not used. It is never updated and always returns `(0f, 0f)`.|
+|WeaponStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) Set with [SetWeaponStats()](#setweaponstatsfloat-damage-float-firerate-float-accuracy-float-range).|
+|WeaponComponentStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) Set with [SetWeaponComponentStats()](#setweaponcomponentstatsfloat-damage-float-firerate-float-accuracy-float-range).|
+|VehicleStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) Set with [SetVehicleStats()](#setvehiclestatsfloat-topspeed-float-acceleration-float-braking-float-traction).|
+|VehicleUpgradeStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) Set with [SetVehicleUpgradeStats()](#setvehicleupgradestatsfloat-topspeed-float-acceleration-float-braking-float-traction).|
 
 ----
 
@@ -154,31 +150,23 @@ Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
 
 |Constant|Type|Value|Description|
 |-|-|-|-|
-|Width|float|500f|The width of a menu, in 1080p scaled pixels.|
+|Width|float|500f|Menu width, in 1080p scaled pixels.|
 
 ----
 
 ### Methods
 
+Methods below return nothing unless a return value is listed.
+
 ----
 
 #### SetMaxItemsOnScreen(int max)
 
-Sets how many menu items are visible on screen at a time. The value is clamped between 3 and 10.
-
-:::note
-If the screen resolution is too small to fit this many items, MenuAPI automatically reduces the amount of visible items so the menu never runs off screen.
-:::
-
-##### Parameters
+Sets how many items are visible at once, clamped between 3 and 10. If the resolution is too small for that many, fewer are shown so the menu never runs off screen.
 
 |Parameter|Type|Description|
 |-|-|-|
-|max|int|A value between 3 and 10 (inclusive).|
-
-##### Return value
-
-_This function does not return anything_.
+|max|int|3 to 10.|
 
 ```cs
 // Only show 5 items at a time.
@@ -186,55 +174,35 @@ menu.SetMaxItemsOnScreen(5);
 ```
 
 :::tip
-This is about how many items you can *see*, not about how long the menu is allowed to be. For a menu with hundreds or thousands of items, see [Pagination](../pagination/) instead: `SetPageSize()`, `GoToPage()`, `NextPage()`, `PreviousPage()` and the `OnPageChange` event are all documented there.
+For menus with hundreds or thousands of items, see [Pagination](../pagination/).
 :::
 
 ----
 
 #### RefreshIndex()
 
-Resets the highlighted item back to the first item, and scrolls the menu back to the top.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Highlights the first item and scrolls back to the top.
 
 ----
 
 #### RefreshIndex(int index)
 
-Highlights the item at `index` and scrolls the menu so that item is visible.
-
-##### Parameters
+Highlights the item at `index` and scrolls it into view.
 
 |Parameter|Type|Description|
 |-|-|-|
-|index|int|The index of the item to highlight.|
-
-##### Return value
-
-_This function does not return anything_.
+|index|int|The item to highlight.|
 
 ----
 
 #### RefreshIndex(int index, int viewOffset)
 
-Highlights the item at `index` and scrolls the menu so that the item at `viewOffset` is the first item on screen. Use this when you want full control over the scroll position.
-
-##### Parameters
+Highlights the item at `index` and makes the item at `viewOffset` the first one on screen.
 
 |Parameter|Type|Description|
 |-|-|-|
-|index|int|The index of the item to highlight.|
-|viewOffset|int|The index of the item that should be drawn at the top of the menu.|
-
-##### Return value
-
-_This function does not return anything_.
+|index|int|The item to highlight.|
+|viewOffset|int|The item drawn at the top.|
 
 ```cs
 // Rebuild the menu, but keep the user roughly where they were.
@@ -251,133 +219,77 @@ menu.RefreshIndex(index, offset);
 
 #### AddMenuItem(MenuItem item)
 
-Adds a menu item to the bottom of this menu, and sets that item's `ParentMenu` to this menu.
-
-##### Parameters
+Adds an item to the bottom and sets its `ParentMenu` to this menu.
 
 |Parameter|Type|Description|
 |-|-|-|
-|item|[MenuItem](../menuitems/menuitem/)|The item to add. Any item type can be used, since they all inherit `MenuItem`.|
-
-##### Return value
-
-_This function does not return anything_.
+|item|[MenuItem](../menuitems/menuitem/)|Any item type.|
 
 ----
 
 #### InsertMenuItem(int index, MenuItem item)
 
-Adds a menu item at a chosen spot instead of at the bottom. The highlighted item stays highlighted, even when the new item lands above it. In a paginated menu the highlight stays at the same spot on the page instead.
+Adds an item at `index`. The highlighted item stays highlighted, even when the new item lands above it. In a paginated menu the highlight stays at the same spot on the page instead.
 
-The index counts every item in the menu, also the ones a filter is hiding. An index past the end puts the item at the bottom.
-
-:::note
-If a filter is active, the new item is not part of it yet. Call [FilterMenuItems()](#filtermenuitemsfuncmenuitem-bool-predicate) again to show it.
-:::
-
-##### Parameters
+The index counts every item, including those a filter hides. An index past the end adds to the bottom. If a filter is active, the new item is not part of it until you call [FilterMenuItems()](#filtermenuitemsfuncmenuitem-bool-predicate) again.
 
 |Parameter|Type|Description|
 |-|-|-|
 |index|int|Where the item goes. 0 is the top.|
 |item|[MenuItem](../menuitems/menuitem/)|The item to add.|
 
-##### Return value
-
-_This function does not return anything_.
-
 ----
 
 #### MoveMenuItem(MenuItem item, int index)
 
-Moves an item that is already in this menu to another spot. Unlike removing it and adding it again, a submenu button keeps the menu it opens. The highlighted item stays highlighted, except in a paginated menu. If a filter is active, the item moves within it too, so there is no need to filter again.
+Moves an item already in this menu. Unlike remove and add, a submenu button keeps its submenu. The highlighted item stays highlighted, except in a paginated menu. An active filter is updated too.
 
-The index counts every item in the menu, also the ones a filter is hiding. Does nothing if the item is not in this menu.
-
-##### Parameters
+The index counts every item, including those a filter hides. Does nothing if the item is not in this menu.
 
 |Parameter|Type|Description|
 |-|-|-|
 |item|[MenuItem](../menuitems/menuitem/)|The item to move.|
 |index|int|Where the item goes. 0 is the top.|
 
-##### Return value
-
-_This function does not return anything_.
-
 ----
 
 #### RemoveMenuItem(int itemIndex)
 
-Removes the item at the given index. The current index is corrected so the highlighted item does not jump around. Does nothing if the index is out of range.
+Removes the item at the index and corrects the current index so the highlight does not jump. Does nothing if the index is out of range.
 
 :::caution
-If the item is a submenu button, the menu it opened is removed too, because once the button is gone nothing can reach that menu anymore. To keep that menu, bind it to another button with [BindMenuItem()](../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem) before removing this one.
+Removing a submenu button also removes its submenu. To keep it, bind it to another button with [BindMenuItem()](../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem) first.
 :::
-
-##### Parameters
 
 |Parameter|Type|Description|
 |-|-|-|
 |itemIndex|int|The index of the item to remove.|
 
-##### Return value
-
-_This function does not return anything_.
-
 ----
 
 #### RemoveMenuItem(MenuItem item)
 
-Removes the given item from this menu. Does nothing if the item is not in this menu. The item's `ParentMenu` is cleared, so afterwards it no longer belongs to any menu.
-
-:::caution
-If the item is a submenu button, the menu it opened is removed too, because once the button is gone nothing can reach that menu anymore. To keep that menu, bind it to another button with [BindMenuItem()](../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem) before removing this one.
-:::
-
-##### Parameters
+Removes the item and clears its `ParentMenu`. Does nothing if the item is not in this menu. A submenu button takes its submenu with it, as above.
 
 |Parameter|Type|Description|
 |-|-|-|
 |item|[MenuItem](../menuitems/menuitem/)|The item to remove.|
 
-##### Return value
-
-_This function does not return anything_.
-
 ----
 
 #### ClearMenuItems()
 
-Removes all menu items and resets the index and scroll position.
-
-Any submenu that was only reachable through one of the removed buttons is removed as well, so rebuilding a menu over and over does not slowly fill memory with menus nobody can open.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Removes all items and resets the index and scroll position. Submenus only reachable through the removed buttons are removed too.
 
 ----
 
 #### ClearMenuItems(bool dontResetIndex)
 
-Removes all menu items, optionally keeping the current index and scroll position. Useful when you rebuild the contents of a menu while it is open.
-
-Like [ClearMenuItems()](#clearmenuitems), any submenu that was only reachable through one of the removed buttons is removed with it.
-
-##### Parameters
+Same as [ClearMenuItems()](#clearmenuitems), but can keep the index and scroll position, for rebuilding an open menu.
 
 |Parameter|Type|Description|
 |-|-|-|
-|dontResetIndex|boolean|When true, the current index and scroll position are kept.|
-
-##### Return value
-
-_This function does not return anything_.
+|dontResetIndex|boolean|When true, the index and scroll position are kept.|
 
 ```cs
 // Rebuild the items without the menu jumping back to the top.
@@ -389,21 +301,11 @@ BuildItems(menu);
 
 #### GetMenuItems()
 
-Returns the items in this menu. When a filter is active, only the items that passed the filter are returned.
+Returns the items, only the filtered ones when a filter is active. The list is a **copy**, so changing it does not change the menu.
 
-:::note
-This returns a **copy** of the internal list, so adding to or removing from the returned list does not change the menu. Use [AddMenuItem()](#addmenuitemmenuitem-item) and [RemoveMenuItem()](#removemenuitemmenuitem-item) for that.
-:::
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-|Type|Description|
+|Return type|Description|
 |-|-|
-|List&lt;[MenuItem](../menuitems/menuitem/)&gt;|All (visible) menu items in this menu.|
+|List&lt;[MenuItem](../menuitems/menuitem/)&gt;|The (visible) items.|
 
 ```cs
 // Toggle the 'enabled' state of every item in the menu.
@@ -414,167 +316,81 @@ menu.GetMenuItems().ForEach(item => item.Enabled = !item.Enabled);
 
 #### GetCurrentMenuItem()
 
-Returns the currently highlighted menu item.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-|Type|Description|
+|Return type|Description|
 |-|-|
-|[MenuItem](../menuitems/menuitem/)|The currently highlighted item, or `null` if the menu is empty or the current index is out of range.|
+|[MenuItem](../menuitems/menuitem/)|The highlighted item, or `null` if the menu is empty or the index is out of range.|
 
 ----
 
 #### SelectItem(int index)
 
-Selects the item at the given index, exactly as if the user had pressed the select control on it. Disabled items play the error sound instead, and submenu buttons open their submenu.
-
-##### Parameters
+Selects the item at `index` as if the user pressed select on it. Disabled items play the error sound, submenu buttons open their submenu.
 
 |Parameter|Type|Description|
 |-|-|-|
-|index|int|The index of the item to select.|
-
-##### Return value
-
-_This function does not return anything_.
+|index|int|The item to select.|
 
 ----
 
 #### SelectItem(MenuItem item)
 
-Selects the given item, exactly as if the user had pressed the select control on it.
-
-##### Parameters
+Selects the item as if the user pressed select on it.
 
 |Parameter|Type|Description|
 |-|-|-|
 |item|[MenuItem](../menuitems/menuitem/)|The item to select.|
 
-##### Return value
-
-_This function does not return anything_.
-
 ----
 
 #### OpenMenu()
 
-Makes this menu visible and triggers the [OnMenuOpen](../events/#onmenuopen) event.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Shows this menu and fires [OnMenuOpen](../events/#onmenuopen).
 
 ----
 
 #### CloseMenu()
 
-Hides this menu and triggers the [OnMenuClose](../events/#onmenuclose) event.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Hides this menu and fires [OnMenuClose](../events/#onmenuclose).
 
 ----
 
 #### GoBack()
 
-Closes this menu and opens its parent menu. If there is no parent menu, the menu simply closes.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Closes this menu and opens its parent, or just closes if there is none.
 
 ----
 
 #### GoUp()
 
-Moves the highlighted item up by one, wrapping around to the bottom of the list. Triggers the [OnIndexChange](../events/#onindexchange) event. Does nothing if the menu is not visible or has fewer than 2 items.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Moves the highlight up one, wrapping to the bottom, and fires [OnIndexChange](../events/#onindexchange). Does nothing if the menu is hidden or has fewer than 2 items.
 
 ----
 
 #### GoDown()
 
-Moves the highlighted item down by one, wrapping around to the top of the list. Triggers the [OnIndexChange](../events/#onindexchange) event. Does nothing if the menu is not visible or has fewer than 2 items.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Moves the highlight down one, wrapping to the top, and fires [OnIndexChange](../events/#onindexchange). Does nothing if the menu is hidden or has fewer than 2 items.
 
 ----
 
 #### GoLeft()
 
-Moves the currently highlighted item to the left, if it supports that (list, dynamic list and slider items). If the item does not support it and [MenuController.NavigateMenuUsingArrows](../menucontroller/#properties) is enabled, this returns to the parent menu instead.
-
-In a [paginated](../pagination/) menu it goes to the previous page instead, unless the highlighted item is a list, dynamic list or slider item.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Moves a list, dynamic list or slider item left. On other items it goes to the parent menu if [MenuController.NavigateMenuUsingArrows](../menucontroller/#properties) is on. In a [paginated](../pagination/) menu, other items go to the previous page instead.
 
 ----
 
 #### GoRight()
 
-Moves the currently highlighted item to the right, if it supports that (list, dynamic list and slider items). Otherwise it selects the item.
-
-In a [paginated](../pagination/) menu it goes to the next page instead, unless the highlighted item is a list, dynamic list or slider item.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Moves a list, dynamic list or slider item right. Other items are selected. In a [paginated](../pagination/) menu, other items go to the next page instead.
 
 ----
 
 #### SortMenuItems(Comparison&lt;MenuItem&gt; compare)
 
-Sorts the items in this menu using the provided compare function. Any active filter is cleared first.
-
-##### Parameters
+Sorts the items. Any active filter is cleared first.
 
 |Parameter|Type|Description|
 |-|-|-|
-|compare|Comparison&lt;[MenuItem](../menuitems/menuitem/)&gt;|The compare function used to sort the items.|
-
-##### Return value
-
-_This function does not return anything_.
+|compare|Comparison&lt;[MenuItem](../menuitems/menuitem/)&gt;|The compare function.|
 
 ```cs
 // Sort all items alphabetically by their text.
@@ -585,19 +401,11 @@ menu.SortMenuItems((a, b) => a.Text.ToLower().CompareTo(b.Text.ToLower()));
 
 #### FilterMenuItems(Func&lt;MenuItem, bool&gt; predicate)
 
-Hides every item for which the predicate returns false. The index and scroll position are reset. Only one filter can be active at a time; calling this again replaces the previous filter.
-
-While a filter is active, [Size](#properties) and [GetMenuItems()](#getmenuitems) only report the items that passed the filter, but the hidden items are **not** removed from the menu.
-
-##### Parameters
+Hides every item for which the predicate returns false and resets the index and scroll position. Calling it again replaces the previous filter. Hidden items are **not** removed, but [Size](#properties) and [GetMenuItems()](#getmenuitems) only report the visible ones.
 
 |Parameter|Type|Description|
 |-|-|-|
-|predicate|Func&lt;[MenuItem](../menuitems/menuitem/),&nbsp;bool&gt;|Returns true for every item that should stay visible.|
-
-##### Return value
-
-_This function does not return anything_.
+|predicate|Func&lt;[MenuItem](../menuitems/menuitem/),&nbsp;bool&gt;|True for items that stay visible.|
 
 ```cs
 // Only show items that are enabled.
@@ -614,132 +422,90 @@ menu.ResetFilter();
 
 #### ResetFilter()
 
-Clears the active filter, making all items visible again, and resets the index.
-
-##### Parameters
-
-_This function does not have any parameters_.
-
-##### Return value
-
-_This function does not return anything_.
+Clears the filter so all items show again, and resets the index.
 
 ----
 
 #### SetWeaponStats(float damage, float fireRate, float accuracy, float range)
 
-Sets the values of the weapon stats panel. All values are clamped between 0 and 1. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).
-
-##### Parameters
+Sets the weapon stats panel values, each clamped between 0 and 1. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).
 
 |Parameter|Type|Description|
 |-|-|-|
-|damage|float|A value between 0 and 1.|
-|fireRate|float|A value between 0 and 1.|
-|accuracy|float|A value between 0 and 1.|
-|range|float|A value between 0 and 1.|
-
-##### Return value
-
-_This function does not return anything_.
+|damage|float|0 to 1.|
+|fireRate|float|0 to 1.|
+|accuracy|float|0 to 1.|
+|range|float|0 to 1.|
 
 ----
 
 #### SetWeaponComponentStats(float damage, float fireRate, float accuracy, float range)
 
-Sets the weapon component (attachment) bonus for each weapon stat. Each value is **added on top of** the matching value from [SetWeaponStats()](#setweaponstatsfloat-damage-float-firerate-float-accuracy-float-range), and the total is clamped between 0 and 1. The added section is drawn in a different color.
-
-Values may be negative, for attachments that make a stat worse.
-
-##### Parameters
+Sets the attachment bonus per stat. Each value is **added on top of** the matching [SetWeaponStats()](#setweaponstatsfloat-damage-float-firerate-float-accuracy-float-range) value, the total is clamped between 0 and 1, and the added part is drawn in another colour. Negative values make a stat worse.
 
 |Parameter|Type|Description|
 |-|-|-|
-|damage|float|The amount added on top of the weapon's damage stat.|
-|fireRate|float|The amount added on top of the weapon's fire rate stat.|
-|accuracy|float|The amount added on top of the weapon's accuracy stat.|
-|range|float|The amount added on top of the weapon's range stat.|
-
-##### Return value
-
-_This function does not return anything_.
+|damage|float|Added to damage.|
+|fireRate|float|Added to fire rate.|
+|accuracy|float|Added to accuracy.|
+|range|float|Added to range.|
 
 :::caution
-Call `SetWeaponStats()` **before** `SetWeaponComponentStats()`. The component stats are calculated from the weapon stats at the moment you call this, so calling them the other way around gives the wrong result.
+Call `SetWeaponStats()` **before** `SetWeaponComponentStats()`. The total is calculated from the weapon stats at the moment of the call.
 :::
 
 ----
 
 #### SetVehicleStats(float topSpeed, float acceleration, float braking, float traction)
 
-Sets the values of the vehicle stats panel. All values are clamped between 0 and 1. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).
-
-##### Parameters
+Sets the vehicle stats panel values, each clamped between 0 and 1. See [Weapon &amp; vehicle stats panels](#weapon--vehicle-stats-panels).
 
 |Parameter|Type|Description|
 |-|-|-|
-|topSpeed|float|A value between 0 and 1.|
-|acceleration|float|A value between 0 and 1.|
-|braking|float|A value between 0 and 1.|
-|traction|float|A value between 0 and 1.|
-
-##### Return value
-
-_This function does not return anything_.
+|topSpeed|float|0 to 1.|
+|acceleration|float|0 to 1.|
+|braking|float|0 to 1.|
+|traction|float|0 to 1.|
 
 ----
 
 #### SetVehicleUpgradeStats(float topSpeed, float acceleration, float braking, float traction)
 
-Sets the upgrade bonus for each vehicle stat. Each value is **added on top of** the matching value from [SetVehicleStats()](#setvehiclestatsfloat-topspeed-float-acceleration-float-braking-float-traction), and the total is clamped between 0 and 1. The added section is drawn in blue.
-
-So if the normal top speed value is 0.5 and you provide 0.2 here, the total top speed value is 0.7, where the last 0.2 is colored blue. Values may be negative, for downgrades.
-
-##### Parameters
+Sets the upgrade bonus per stat. Each value is **added on top of** the matching [SetVehicleStats()](#setvehiclestatsfloat-topspeed-float-acceleration-float-braking-float-traction) value, the total is clamped between 0 and 1, and the added part is drawn in blue. A top speed of 0.5 plus 0.2 here shows 0.7 with the last 0.2 in blue. Negative values are downgrades.
 
 |Parameter|Type|Description|
 |-|-|-|
-|topSpeed|float|The amount added on top of the vehicle's top speed stat.|
-|acceleration|float|The amount added on top of the vehicle's acceleration stat.|
-|braking|float|The amount added on top of the vehicle's braking stat.|
-|traction|float|The amount added on top of the vehicle's traction stat.|
-
-##### Return value
-
-_This function does not return anything_.
+|topSpeed|float|Added to top speed.|
+|acceleration|float|Added to acceleration.|
+|braking|float|Added to braking.|
+|traction|float|Added to traction.|
 
 :::caution
-Call `SetVehicleStats()` **before** `SetVehicleUpgradeStats()`, for the same reason as the weapon stat functions above.
+Call `SetVehicleStats()` **before** `SetVehicleUpgradeStats()`, for the same reason.
 :::
 
 ----
 
 ### Header styling
 
-The banner at the top of a menu, the one with the menu title on it, has three things you can change: the font the title is drawn in, where the title sits on the banner, and whether GTA Online's moving glow is drawn over it.
+You can change the banner title's font, its alignment, and whether GTA Online's moving glow is drawn. This only affects the banner, not the subtitle bar, counter or items.
 
-Every one of these is a **nullable** property. Leaving it null means "use whatever [MenuController](../menucontroller/#header-styling-defaults) says", which is how you style a whole tree of menus by setting three values once. Setting it on a menu overrules that, for that one menu.
-
-None of this touches the subtitle bar, the counter or the menu items. It is the banner only.
+Each property is nullable. Null uses the [MenuController](../menucontroller/#header-styling-defaults) default, so you can style all menus at once and override per menu.
 
 #### The title font
 
-`MenuTitleFont` is a plain `int`, because that is what the game's fonts are. The ones worth using have names in the `MenuFont` class:
+`MenuTitleFont` is a game font id. The useful ones are in `MenuFont`:
 
 |Value|Font|
 |-|-|
-|MenuFont.ChaletLondon|`0`. The clean, slightly condensed font the menu items themselves use.|
-|MenuFont.HouseScript|`1`. The handwritten look GTA uses for its own menu banners. This is the default.|
-|MenuFont.Monospace|`2`. Every character the same width, like a terminal.|
-|MenuFont.ChaletComprimeCologne|`4`. Narrower than Chalet London, so long titles fit better.|
-|MenuFont.Pricedown|`7`. The Grand Theft Auto logo font.|
+|MenuFont.ChaletLondon|`0`. The font the menu items use.|
+|MenuFont.HouseScript|`1`. GTA's handwritten banner font. The default.|
+|MenuFont.Monospace|`2`. Fixed width, drawn in capitals.|
+|MenuFont.ChaletComprimeCologne|`4`. Narrower than Chalet London, for long titles.|
+|MenuFont.Pricedown|`7`. The GTA logo font.|
 
 :::note
-Those descriptions are the game's own fonts. Menus are drawn on a web page, so MenuAPI can only use fonts
-that are allowed to be shipped with it. Chalet London and Pricedown are the real thing. House Script is
-drawn in Dancing Script instead, Chalet Comprime Cologne in Antonio, and Monospace in Bebas Neue, in
-capitals, which is how the game draws that one too. So a title looks a little different from the game's
-own menus, but very close.
+Chalet London and Pricedown are the real fonts. The others are stand-ins, because the game's fonts cannot be shipped: House Script is Dancing Script, Chalet Comprime Cologne is Antonio, and Monospace is Bebas Neue.
 :::
 
 ```cs
@@ -749,19 +515,17 @@ Menu menu = new Menu("Los Santos Customs", "Vehicle mods")
 };
 ```
 
-Only the five fonts in that list exist on the page. Any other number gets the normal banner font.
-
-Each font is drawn at the size and height that suits it, worked out for you. That is why there is no size or offset property to set.
+Only these five ids are styled. Any other id falls back to the item font at item size, so the title comes out small. Size and vertical offset are set per font, so there is nothing to tune.
 
 #### Where the title sits
 
 |Value|Description|
 |-|-|
-|Menu.TitleAlignmentOption.Left|The title starts at the left edge of the banner.|
-|Menu.TitleAlignmentOption.Center|The title is centred on the banner. This is the default.|
-|Menu.TitleAlignmentOption.Right|The title ends at the right edge of the banner.|
+|Menu.TitleAlignmentOption.Left|Starts at the left edge of the banner.|
+|Menu.TitleAlignmentOption.Center|Centred. The default.|
+|Menu.TitleAlignmentOption.Right|Ends at the right edge of the banner.|
 
-This is about the title inside its banner, and has nothing to do with [MenuController.MenuAlignment](../menucontroller/#menu-alignment), which is about which side of the *screen* the whole menu is drawn on. The two work together: a right aligned menu with a left aligned title puts the title at the left edge of that menu's banner.
+This is separate from [MenuController.MenuAlignment](../menucontroller/#menu-alignment), which picks the side of the screen. A right aligned menu with a left aligned title puts the title at the left of that menu's banner.
 
 ```cs
 menu.MenuTitleAlignment = Menu.TitleAlignmentOption.Left;
@@ -769,7 +533,7 @@ menu.MenuTitleAlignment = Menu.TitleAlignmentOption.Left;
 
 #### The header glare
 
-`ShowHeaderGlare` draws the soft moving glow that GTA Online has behind its own pause menu title. It drifts as the player turns the camera.
+`ShowHeaderGlare` draws GTA Online's `mp_menu_glare` glow, which drifts as the camera turns.
 
 ```cs
 Menu menu = new Menu("Nightclub", "Management")
@@ -779,19 +543,13 @@ Menu menu = new Menu("Nightclub", "Management")
 };
 ```
 
-It is a copy of the game's own `mp_menu_glare` animation, drawn on the menu's page by `glare.min.js`. MenuAPI only tells the page which way the camera is facing, and the page does the rest. If the glow never shows up, check that `glare.min.js` is in your `index.html`, see [How menus are drawn](../../nui/#when-something-is-wrong).
+The page draws it with `glare.min.js`. If it never shows, check that `glare.min.js` is in your `index.html`, see [How menus are drawn](../../nui/#when-something-is-wrong).
 
 ----
 
 ### Weapon &amp; vehicle stats panels
 
-Both panels are drawn below the menu, under the description box. They are the same panels the game itself uses in the weapon and vehicle shops.
-
-:::note
-Weapon and vehicle stats panels are only available in FiveM.
-:::
-
-A menu should contain at least one menu item when a stats panel is enabled.
+Both panels are the game's shop panels, drawn under the description box. A menu with a stats panel enabled should have at least one item.
 
 ```cs
 // Weapon stats panel
@@ -813,11 +571,9 @@ MenuController.AddSubmenu(menu, vehicleMenu);
 
 ### Instructional buttons
 
-Instructional buttons are the button hints drawn in the bottom right of the screen. Every menu has its own set, and they update instantly when the user switches between keyboard/mouse and a controller.
+The button hints in the bottom right. Each menu has its own set, and they switch instantly between keyboard and controller.
 
-Every menu starts with a **select** and a **back** button, and a **change value** button appears next to them whenever the highlighted row is a list, a dynamic list or a slider, since those are the rows where left and right change something. All three follow whatever the player bound in their own [key bindings](../keybindings/), so if someone moves select to <kbd>J</kbd> the hint shows <kbd>J</kbd>.
-
-Your own keys get a hint by giving [AddKeyBinding()](#addkeybinding) a `buttonText`, and those follow the player's bindings in exactly the same way.
+Every menu has **select** and **back**, plus **change value** while the highlighted row is a list, dynamic list or slider (not when it is disabled). All three follow the player's [key bindings](../keybindings/). Give [AddKeyBinding()](#addkeybinding) a `buttonText` to add a hint for your own key, which follows the bindings too.
 
 ```cs
 // Change the text next to the built in buttons.
@@ -837,22 +593,20 @@ menu.AddKeyBinding("check", "Example: check something", "E", "R1_INDEX",
 menu.EnableInstructionalButtons = false;
 ```
 
-They are drawn in this order: the built in select and back first, then the change value hint (or, in a [paginated](../pagination/) menu on any other row, the page hints), then every key binding that was given a `buttonText`, then everything in `CustomInstructionalButtons`.
-
-A disabled row gets no change value hint, because left and right do nothing on it.
+Draw order: select and back, then change value (or the page hints on other rows of a [paginated](../pagination/) menu), then key bindings with a `buttonText`, then `CustomInstructionalButtons`.
 
 :::caution[Coming from an older MenuAPI?]
-`Menu.InstructionalButtons`, the dictionary keyed by `Control`, is **gone**. Extra hints now come from a key binding, so the key and its hint are declared in one place and the player can rebind both. See [Key bindings](../keybindings/#your-own-keys) for how to move over.
+`Menu.InstructionalButtons`, the dictionary keyed by `Control`, is **gone**. Use a key binding instead. See [Key bindings](../keybindings/#your-own-keys).
 :::
 
 #### InstructionalButton
 
-Use `CustomInstructionalButtons` when you want to draw a hint MenuAPI knows nothing about, for example a button combination. These take a raw instructional button string.
+For hints MenuAPI knows nothing about, such as a button combination, add a raw button string to `CustomInstructionalButtons`.
 
 |Field|Type|Description|
 |-|-|-|
-|controlString|string|The raw instructional button string, e.g. the result of `GetControlInstructionalButton()`.|
-|instructionText|string|The text displayed next to the button.|
+|controlString|string|The raw button string, e.g. from `GetControlInstructionalButton()`.|
+|instructionText|string|The text next to the button.|
 
 ```cs
 // Show the up + down buttons with the text 'Move'.
@@ -862,11 +616,13 @@ string buttons = GetControlInstructionalButton(0, (int)Control.FrontendUp, 1)
 menu.CustomInstructionalButtons.Add(new Menu.InstructionalButton(buttons, "Move"));
 ```
 
+On Enhanced the third parameter of `GetControlInstructionalButton` is a `bool`, so pass `true` instead of `1`.
+
 ----
 
 ### Key bindings
 
-A menu can listen for keys of its own, on top of the menu controls, without you having to write a tick function. Every one of them is a real FiveM key mapping, so it turns up in the player's **Settings, Key Bindings** screen under your resource and they can move it wherever they like, exactly like the menu controls. Handlers only run while the menu is open and while [MenuController.DisableMenuButtons](../menucontroller/#properties) is false.
+A menu can listen for its own keys without a tick function. Each is a real FiveM key mapping, so players can rebind it under **Settings, Key Bindings**. Handlers only run while the menu is open and [MenuController.DisableMenuButtons](../menucontroller/#properties) is false.
 
 #### AddKeyBinding()
 
@@ -883,13 +639,13 @@ public KeyBindingHandler AddKeyBinding(
 
 |Parameter|Type|Description|
 |-|-|-|
-|name|string|Identifies the binding. It ends up in the command name, so keep it short and lowercase. Two menus that pass the same name share one key.|
-|description|string|What the player reads next to it in their key bindings screen.|
-|keyboardKey|string|A [keyboard parameter id](https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/keyboard/), for example `"E"` or `"F5"`.|
-|controllerButton|string?|A [controller parameter id](https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/pad_analogbutton/), for example `"R1_INDEX"`. Leave it null for a key a controller cannot reach.|
+|name|string|Part of the command name, so keep it short and lowercase. Menus passing the same name share one key.|
+|description|string|Shown in the player's key bindings screen.|
+|keyboardKey|string|A [keyboard parameter id](https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/keyboard/), e.g. `"E"` or `"F5"`.|
+|controllerButton|string?|A [controller parameter id](https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/pad_analogbutton/), e.g. `"R1_INDEX"`. Null for no controller button.|
 |pressType|[MenuKeyPressType](#menukeypresstype)|When the handler is called.|
-|handler|Action&lt;Menu,&nbsp;[MenuKeyBinding](#menukeybinding)&gt;?|Called with this menu and the binding that triggered it.|
-|buttonText|string?|Set it to also draw an [instructional button](#instructional-buttons) for this key.|
+|handler|Action&lt;Menu,&nbsp;[MenuKeyBinding](#menukeybinding)&gt;?|Called with this menu and the binding.|
+|buttonText|string?|Also draws an [instructional button](#instructional-buttons) for this key.|
 
 ```cs
 // Toggle the 'enabled' state of every item whenever this key is released.
@@ -907,35 +663,35 @@ menu.AddKeyBinding(
 
 |Value|Description|
 |-|-|
-|MenuKeyPressType.JUST_PRESSED|Runs once, the moment the key goes down.|
-|MenuKeyPressType.JUST_RELEASED|Runs once, the moment the key is let go.|
-|MenuKeyPressType.PRESSED|Runs every frame while the key is held.|
-|MenuKeyPressType.RELEASED|Runs every frame while the key is not held.|
+|MenuKeyPressType.JUST_PRESSED|Once, when the key goes down.|
+|MenuKeyPressType.JUST_RELEASED|Once, when the key is let go.|
+|MenuKeyPressType.PRESSED|Every frame while held.|
+|MenuKeyPressType.RELEASED|Every frame while not held.|
 
 #### MenuKeyBinding
 
-The key itself, handed to your handler and returned as `KeyBindingHandler.Binding`.
+The key, passed to your handler and available as `KeyBindingHandler.Binding`.
 
 |Property|Type|Description|
 |-|-|-|
-|Name|string|The name you registered it under.|
-|Command|string|The console command FiveM runs for it, prefix and all.|
-|Held|boolean|Whether the key is down right now, on whichever device.|
-|Icon|string|The instructional button icon for it, for whichever device is being used. Empty when the game has no icon to draw.|
+|Name|string|The registered name.|
+|Command|string|The console command FiveM runs for it, prefix included.|
+|Held|boolean|Whether the key is down now, on either device.|
+|Icon|string|The instructional button icon for the current device. Empty when the game has none.|
 
 #### KeyBindingHandler
 
-What `AddKeyBinding()` gives back, so you can change your mind later.
+Returned by `AddKeyBinding()`.
 
 |Property|Type|Description|
 |-|-|-|
-|Binding|[MenuKeyBinding](#menukeybinding)|The key itself. Read only.|
+|Binding|[MenuKeyBinding](#menukeybinding)|The key. Read only.|
 |PressType|[MenuKeyPressType](#menukeypresstype)|When the handler runs.|
-|Handler|Action&lt;Menu,&nbsp;MenuKeyBinding&gt;?|The code to run. Set it to null to stop listening.|
-|ButtonText|string?|The text next to its instructional button. Null or empty draws nothing.|
+|Handler|Action&lt;Menu,&nbsp;MenuKeyBinding&gt;?|The code to run. Null stops listening.|
+|ButtonText|string?|The instructional button text. Null or empty draws nothing.|
 
 :::caution[Coming from an older MenuAPI?]
-`Menu.ButtonPressHandlers`, `Menu.ButtonPressHandler` and `Menu.ControlPressCheckType` are **gone**, along with the `disableControl` option. See [Key bindings](../keybindings/#your-own-keys) for what to write instead, and what to do if you were relying on `disableControl`.
+`Menu.ButtonPressHandlers`, `Menu.ButtonPressHandler`, `Menu.ControlPressCheckType` and the `disableControl` option are **gone**. See [Key bindings](../keybindings/#your-own-keys) for replacements.
 :::
 
 ----

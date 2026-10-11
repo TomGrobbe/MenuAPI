@@ -4,9 +4,7 @@ title: "MenuItem"
 
 ## MenuItem
 
-A plain button: the simplest menu item there is. All other menu items inherit the 'regular' MenuItem class, so every property on this page also applies to them.
-
-A `MenuItem` is also what you use to open a [submenu](../../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem).
+A plain button. Every other item type inherits it, so the properties on this page apply to all of them. A `MenuItem` is also how you open a [submenu](../../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem).
 
 ----
 
@@ -19,13 +17,13 @@ MenuItem item = new MenuItem("Disabled Item Text", "An item description, that su
 item.Enabled = false;
 
 // Set the left item icon to the 'lock' icon.
-item.LeftIcon = Icon.LOCK;
+item.LeftIcon = MenuItem.Icon.LOCK;
 
 // Add a menu item to a menu:
 menu.AddMenuItem(item);
 ```
 
-Items are usually created with an object initializer, which keeps things a bit shorter:
+The same with an object initializer:
 
 ```cs
 menu.AddMenuItem(new MenuItem("Buy vehicle", "Costs $1000.")
@@ -38,7 +36,7 @@ menu.AddMenuItem(new MenuItem("Buy vehicle", "Costs $1000.")
 
 #### Reacting to a button press
 
-Pressing a plain menu item raises the [OnItemSelect](../../events/#onitemselect) event on its parent menu:
+Pressing the item raises [OnItemSelect](../../events/#onitemselect) on its parent menu.
 
 ```cs
 MenuItem button = new MenuItem("Fix vehicle", "Repairs the vehicle you're in.");
@@ -71,64 +69,40 @@ MenuController.BindMenuItem(menu, submenu, submenuButton);
 
 ### Constructors
 
-----
+|Constructor|Description|
+|-|-|
+|`MenuItem(string text)`|Creates an item without a description.|
+|`MenuItem(string text, string description)`|Creates an item with a description, shown below the menu while the item is highlighted. Pass `null` for none.|
 
-#### MenuItem(string text)
-
-Creates a new menu item without a description.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|text|string|The text displayed on the left side of the item.|
-
-----
-
-#### MenuItem(string text, string description)
-
-Creates a new menu item with a description, which is shown in the box below the menu while the item is highlighted.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|text|string|The text displayed on the left side of the item.|
-|description|string|The description shown below the menu while this item is selected. Pass `null` for no description.|
+`text` is drawn on the left side of the row.
 
 ----
 
 ### Properties
 
-:::tip
-Also note that not all properties or methods are available for all MenuItem types.
-:::
-
-|Property|Type|Default value|Description|Optional|
-|---|---|---|---|---|
-|Text|String|-|The text to display on the left side of the menu item|**No**|
-|Description|String|Null|A description text which will be displayed below the menu, when this menu item is currently selected.|Yes|
-|Label|String|Null|Text that is displayed on the right side of the item.[¹](#footnotes)|Yes|
-|LeftIcon|[Icon](#icons)|Icon.NONE|An [Icon](#icons) that will appear on the left side of the menu item.[¹](#footnotes)|Yes|
-|RightIcon|[Icon](#icons)|Icon.NONE|An [Icon](#icons) that will appear on the right side of the menu item.[¹](#footnotes)|Yes|
-|Enabled|boolean|true|If set to false, the menu item will be grayed out and can not be toggled on/off.|Yes|
-|Index|int|-1|(Getter only) Gets the position of this menu item in the current menu. Returns -1 if this menu item is not inside a menu.|Yes|
-|Selected|boolean|false|(Getter only) Gets whether or not this menu item is currently highlighted (if the current menu index is the same as this menu item index). Returns false by default if this menu item is not in a menu.|Yes|
-|ParentMenu|Menu|Null|This is mainly used internally to get and set this item's parent menu. This is to avoid having to manually scan all menu's for this menu item.|Yes|
-|PositionOnScreen|int|0|(Getter only) Gets the current screen position of this item.|Yes|
-|ItemData|dynamic|Null|Allows you to attach data to a menu item if you want to identify the menu item without having to put identification info in the visible text or description.|Yes|
+|Property|Type|Default value|Description|
+|---|---|---|---|
+|Text|string|-|Text on the left side of the item.|
+|Description|string|null|Shown below the menu while the item is highlighted.|
+|Label|string|null|Text on the right side of the item.[¹](#footnotes)|
+|LeftIcon|[Icon](#icons)|Icon.NONE|Icon on the left side of the item.[¹](#footnotes)|
+|RightIcon|[Icon](#icons)|Icon.NONE|Icon on the right side of the item.[¹](#footnotes)|
+|Enabled|bool|true|When false, the item is greyed out and cannot be used.|
+|Index|int|-1|Read only. Position of the item in its menu, or -1 when it is not in a menu.|
+|Selected|bool|false|Read only. Whether the item is highlighted. Always false when it is not in a menu.|
+|ParentMenu|Menu|null|The menu holding this item. Mainly used internally.|
+|PositionOnScreen|int|0|Read only. The item's current position on screen.|
+|ItemData|dynamic|null|Your own data, see [Attaching your own data](#attaching-your-own-data).|
 
 #### Footnotes
 
-¹ Not available for all MenuItem types.
+¹ Not available on every item type. Each type's page lists what it does not support.
 
 ----
 
 ### Methods
 
-_There are no methods available for the standard MenuItem type._
-
-Everything you would do *to* an item is done through its menu instead:
+`MenuItem` has no methods. Act on an item through its menu:
 
 |I want to…|Use|
 |-|-|
@@ -141,7 +115,7 @@ Everything you would do *to* an item is done through its menu instead:
 
 ### Attaching your own data
 
-`ItemData` is a `dynamic` property that lets you hang whatever you like on a menu item, so you do not have to encode identifying information in the visible text or description. This is the easiest way to handle menus that are built in a loop.
+`ItemData` holds anything you want to identify the item by, so you do not have to encode it in the text or description. Useful for menus built in a loop.
 
 ```cs
 foreach (var vehicle in vehicles)
@@ -161,7 +135,7 @@ menu.OnItemSelect += (_menu, _item, _index) =>
 };
 ```
 
-Because `ItemData` is `dynamic`, anything works: a string, an int, an anonymous object, or one of your own classes.
+It is `dynamic`, so anonymous objects work too:
 
 ```cs
 // An anonymous object.
@@ -175,7 +149,7 @@ menu.FilterMenuItems(i => i.ItemData?.category == "vehicles");
 
 ### Text formatting
 
-Item text, labels and descriptions all support the game's text formatting codes.
+Item text, labels and descriptions support the game's formatting codes.
 
 |Code|Effect|
 |-|-|
@@ -202,7 +176,7 @@ MenuItem item = new MenuItem(
 
 ### Icons
 
-The `Icon` (enum) is a list of all icons (sprites) which can be used in MenuItems.
+`MenuItem.Icon` lists every icon (sprite) an item can show. Use it as `MenuItem.Icon.LOCK`.
 
 |Index|Icon name|Example|
 |--:|-|:-:|

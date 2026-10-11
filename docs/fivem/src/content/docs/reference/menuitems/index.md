@@ -4,9 +4,7 @@ title: "MenuItems"
 
 ## Menu items
 
-Menu items are the rows inside a [Menu](../menu/). There are six types, and all of them inherit the standard [MenuItem](menuitem/) class, so everything on that page (text, description, icons, enabled state, `ItemData`, …) applies to every item type.
-
-Adding an item to a menu is always the same:
+Menu items are the rows inside a [Menu](../menu/). All six types inherit [MenuItem](menuitem/), so everything on that page applies to every type. Add any item with:
 
 ```cs
 menu.AddMenuItem(item);
@@ -18,15 +16,15 @@ menu.AddMenuItem(item);
 
 |Type|What it does|Left / right does|
 |-|-|-|
-|[MenuItem](menuitem/)|A plain button. Also used as a submenu button when you bind a menu to it.|Right presses the item, left goes back.|
+|[MenuItem](menuitem/)|A plain button. Also used to open a submenu.|Right presses the item, left goes back.|
 |[MenuCheckboxItem](menucheckboxitem/)|A button with a checkbox on the right.|Right toggles the checkbox.|
-|[MenuListItem](menulistitem/)|Picks one value out of a fixed list of strings.|Moves through the list (wraps around).|
-|[MenuDynamicListItem](menudynamiclistitem/)|Like a list item, but a callback decides what the next value is. Use this for endless or expensive-to-build lists.|Calls your callback for the new value.|
-|[MenuSliderItem](menuslideritem/)|A slider with a minimum and maximum position.|Moves the slider (does not wrap).|
-|[SeparatorMenuItem](separatormenuitem/)|A centred heading that labels the rows under it. Pressing it does nothing.|Nothing.|
+|[MenuListItem](menulistitem/)|Picks one value out of a fixed list of strings.|Moves through the list, wrapping around.|
+|[MenuDynamicListItem](menudynamiclistitem/)|A callback returns the next value. For endless or expensive lists.|Calls your callback for the new value.|
+|[MenuSliderItem](menuslideritem/)|A slider between a minimum and maximum position.|Moves the slider, without wrapping.|
+|[SeparatorMenuItem](separatormenuitem/)|A centred heading for the rows under it. Pressing it does nothing.|Nothing.|
 
 :::note
-`RightIcon` and `Label` are unavailable on the item types that use the right side of the row themselves. Each page lists its own limitations.
+`RightIcon` and `Label` are unavailable on types that draw their own content on the right. Each page lists its limitations.
 :::
 
 ----
@@ -76,7 +74,7 @@ menu.AddMenuItem(new SeparatorMenuItem("Section heading"));
 
 ### Reacting to menu items
 
-Every item type raises its own event on the parent menu. `OnItemSelect` only fires for plain `MenuItem`s — see [Events](../events/#which-event-fires-for-which-item) for the full list.
+Each item type raises its own event on the parent menu. `OnItemSelect` only fires for plain `MenuItem`s. See [Events](../events/#which-event-fires-for-which-item) for the full list.
 
 ```cs
 menu.OnItemSelect += (_menu, _item, _index) => { /* plain buttons */ };

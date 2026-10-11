@@ -4,7 +4,7 @@ title: "MenuCheckboxItem"
 
 ## MenuCheckboxItem
 
-A menu item with 'checkbox' functionality and a forced checkbox icon on the right.
+A menu item with a checkbox on the right.
 
 ----
 
@@ -16,7 +16,7 @@ bool checkedValue = false;
 MenuCheckboxItem item = new MenuCheckboxItem("Checkbox Text", "Checkbox description.", checkedValue);
 
 // Set the style:
-item.Style = CheckboxStyle.Cross;
+item.Style = MenuCheckboxItem.CheckboxStyle.Cross;
 
 // Add a menu item to a menu:
 menu.AddMenuItem(item);
@@ -24,7 +24,7 @@ menu.AddMenuItem(item);
 
 #### Reacting to a checkbox
 
-Toggling a checkbox raises the [OnCheckboxChange](../../events/#oncheckboxchange) event on its parent menu. `Checked` has already been updated by the time your handler runs, and the `newCheckedState` parameter holds the same value.
+Toggling raises [OnCheckboxChange](../../events/#oncheckboxchange) on the parent menu. `Checked` is already updated when your handler runs, and `newCheckedState` holds the same value.
 
 ```cs
 MenuCheckboxItem godMode = new MenuCheckboxItem("God mode", "Makes you invincible.", false);
@@ -40,12 +40,12 @@ menu.OnCheckboxChange += (_menu, _item, _index, _checked) =>
 ```
 
 :::note
-A checkbox can be toggled with the select control **and** with the right control, so do not assume [OnItemSelect](../../events/#onitemselect) will fire. It never fires for checkbox items.
+Both select and right toggle a checkbox. [OnItemSelect](../../events/#onitemselect) never fires for checkbox items.
 :::
 
 #### A locked checkbox
 
-Disabled checkboxes are greyed out and can not be toggled, which is useful for showing a state the user is not allowed to change.
+A disabled checkbox is greyed out and cannot be toggled.
 
 ```cs
 menu.AddMenuItem(new MenuCheckboxItem("Premium feature", "Only available to donators.", false)
@@ -59,85 +59,41 @@ menu.AddMenuItem(new MenuCheckboxItem("Premium feature", "Only available to dona
 
 ### Constructors
 
-----
+|Constructor|Description|
+|-|-|
+|`MenuCheckboxItem(string text)`|Unchecked, no description.|
+|`MenuCheckboxItem(string text, bool _checked)`|No description, with the given checked state.|
+|`MenuCheckboxItem(string text, string description)`|Unchecked, with a description.|
+|`MenuCheckboxItem(string text, string description, bool _checked)`|With a description and the given checked state.|
 
-#### MenuCheckboxItem(string text)
-
-Creates an unchecked checkbox without a description.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|text|string|The text displayed on the left side of the item.|
-
-----
-
-#### MenuCheckboxItem(string text, bool _checked)
-
-Creates a checkbox without a description, with the given checked state.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|text|string|The text displayed on the left side of the item.|
-|_checked|boolean|The initial checked state.|
-
-----
-
-#### MenuCheckboxItem(string text, string description)
-
-Creates an unchecked checkbox with a description.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|text|string|The text displayed on the left side of the item.|
-|description|string|The description shown below the menu while this item is selected.|
-
-----
-
-#### MenuCheckboxItem(string text, string description, bool _checked)
-
-Creates a checkbox with a description and the given checked state.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|text|string|The text displayed on the left side of the item.|
-|description|string|The description shown below the menu while this item is selected.|
-|_checked|boolean|The initial checked state.|
+`text` is drawn on the left side of the row. `description` is shown below the menu while the item is highlighted.
 
 ----
 
 ### Properties
 
 :::note
-All standard MenuItem class properties are inherited.
-The MenuItem properties **RightIcon** and **Label** are not available for MenuCheckboxItems.
+**RightIcon** and **Label** are not available for MenuCheckboxItems.
 :::
 
-|Property|Type|Default value|Description|Optional|
-|---|---|---|---|---|
-|Checked|boolean|false|The checked state for the checkbox.|**No**|
-|Style|[CheckboxStyle](#checkbox-styles)|`CheckboxStyle.Tick`|The style of this checkbox item when it is "checked".|**No**|
+|Property|Type|Default value|Description|
+|---|---|---|---|
+|Checked|bool|false|The checked state.|
+|Style|[CheckboxStyle](#checkbox-styles)|`CheckboxStyle.Tick`|What the checkbox shows when checked.|
 
 ----
 
 ### Methods
 
-_There are no methods available for MenuCheckboxItems._
+MenuCheckboxItem has no methods of its own.
 
 ----
 
 ### Checkbox Styles
 
-Available checkbox syltes:
+The enum is `MenuCheckboxItem.CheckboxStyle`.
 
-|Style|Available in which game?|Default style|Example|
-|-|-|-|:-:|
-|CheckboxStyle.Tick|FiveM|Yes|![Style](https://vespura.com/hi/i/20-04-18_13-31-21_ri30C_3284.png)|
-|CheckboxStyle.Cross|FiveM|No|![Style](https://vespura.com/hi/i/20-04-18_13-31-56_yoG5Z_3285.png)|
+|Style|Default|Example|
+|-|-|:-:|
+|CheckboxStyle.Tick|Yes|![Style](https://vespura.com/hi/i/20-04-18_13-31-21_ri30C_3284.png)|
+|CheckboxStyle.Cross|No|![Style](https://vespura.com/hi/i/20-04-18_13-31-56_yoG5Z_3285.png)|

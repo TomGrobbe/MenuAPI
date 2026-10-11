@@ -4,25 +4,21 @@ title: "MenuTicks"
 
 ## MenuTicks
 
-A "tick" is just a loop that runs over and over while your resource is alive. Most of what a menu does is a tick: drawing itself, watching for a key press, reacting to the arrow keys. FiveM runs these once per frame, so around 60 times a second.
+MenuAPI runs its per frame work in named loops, each with a condition. When the condition is false the loop **ends completely**, it does not keep running and return early. With every menu closed, almost nothing runs.
 
-That is fine when a menu is on screen. It is a waste when nothing is open, and for most players nothing is open almost all of the time.
-
-So MenuAPI keeps its loops in a small scheduler. Every loop has a name and a condition, and when the condition is not met the loop **stops completely**. It does not keep running and returning early, it ends. That means a closed menu really does cost nothing.
-
-`MenuTicks` is the window into that scheduler. You can look, but you cannot touch: **only MenuAPI itself can add, start or stop a loop here.** This is not a general purpose tick registry for your own code to hook into, it exists so MenuAPI can manage its own work and so you can see what it is doing.
+`MenuTicks` is read only. **Only MenuAPI itself can add, start or stop a tick.** It is not a general purpose tick registry for your own code.
 
 ----
 
 ### Seeing what is running
 
-The quickest way is the console command. It is named after your resource, because two resources that both ship MenuAPI would otherwise fight over the same command name:
+The console command carries your resource name, so two resources that ship MenuAPI do not clash:
 
 ```
 menuapi:yourresourcename:ticks
 ```
 
-With every menu closed you should see something like this:
+With every menu closed:
 
 ```
 [MenuAPI] 10 ticks registered:
@@ -38,7 +34,7 @@ With every menu closed you should see something like this:
 [MenuAPI]   Menu.Toggle (per frame): running
 ```
 
-Only the one that watches for the menu being opened is running, plus the scheduler's own bookkeeping. Open a menu and the other eight flip to `running`. Close every menu and they stop again.
+Opening a menu flips the other eight to `running`. Closing every menu stops them again.
 
 ----
 
@@ -46,26 +42,24 @@ Only the one that watches for the menu being opened is running, plus the schedul
 
 |Name|Rate|Runs while|
 |---|---|---|
-|Menu.Scheduler|per frame|Always. Notices that a menu opened or closed and switches the rest on or off to match. Its body is a single check on a flag, so it costs nothing when nothing changed.|
-|Menu.Layout|every 500ms|A menu is open. Reads the screen size and safe zone, so the menu follows when the player changes them.|
-|Menu.Textures|every 250ms|A menu is open. Streams the game textures the menu page still needs, like a banner texture you set yourself, and releases them once every menu is closed.|
-|Menu.Draw|per frame|A menu is open. Sends the menu to its [NUI page](../../nui/) whenever something changed, and disables the game controls that would otherwise fight with the menu. Hides the page when the last menu closes.|
-|Menu.InstructionalButtons|per frame|A menu is open. Draws the button hints along the bottom of the screen.|
-|Menu.InstructionalButtonsData|every 300ms|A menu is open. Works out which hints to show and which key icons go with them, so the per frame tick above only has to draw.|
-|Menu.Select|per frame|A menu is open. Handles select and back, including the mouse buttons.|
-|Menu.Navigate|per frame|A menu is open. Handles up, down, left and right, including holding a key to repeat.|
-|Menu.OnscreenKeyboard|per frame|A menu is open. Watches for the game's text input box so the menu does not react to you typing.|
-|Menu.Toggle|per frame|Always. Watches for the menu toggle key, on the keyboard and on a controller. It reads a flag that the key binding sets rather than asking the game anything, so an idle frame costs nothing.|
+|Menu.Scheduler|per frame|Always. Switches the other ticks on or off when a menu opens or closes. Costs one flag check when nothing changed.|
+|Menu.Layout|every 500ms|A menu is open. Reads screen size and safe zone.|
+|Menu.Textures|every 250ms|A menu is open. Streams game textures the menu needs, like your own banner texture, and releases them once every menu is closed.|
+|Menu.Draw|per frame|A menu is open. Sends changes to the [NUI page](../../nui/) and disables conflicting game controls. Hides the page when the last menu closes.|
+|Menu.InstructionalButtons|per frame|A menu is open. Draws the button hints.|
+|Menu.InstructionalButtonsData|every 300ms|A menu is open. Works out which hints and key icons to show.|
+|Menu.Select|per frame|A menu is open. Handles select and back, including mouse buttons.|
+|Menu.Navigate|per frame|A menu is open. Handles up, down, left and right, including hold to repeat.|
+|Menu.OnscreenKeyboard|per frame|A menu is open. Stops the menu reacting while the game's text input box is open.|
+|Menu.Toggle|per frame|Always. Watches for the menu toggle key on keyboard and controller. Reads a flag set by the key binding, so an idle frame costs no natives.|
 
-`Menu.Scheduler` waits a frame on purpose. Opening a submenu closes the parent and opens the child in one go, so reacting to each half on its own would briefly see "no menu is open" and throw away the button hints and menu textures, only to rebuild them an instant later. Waiting one frame lets a close and an open that belong together cancel each other out.
+`Menu.Scheduler` waits one frame before switching ticks. Opening a submenu closes the parent and opens the child in one go, and the delay stops that from tearing down and rebuilding the button hints and textures.
 
-Some things are deliberately **not** conditions here: whether the game is paused, whether the screen has faded out, whether the player is dead or switching. Those change from one frame to the next with nothing to announce them, so the loops keep running and simply draw nothing on the frames where they should not. Making them conditions would mean re-checking everything every frame, which is exactly the cost this whole design removes.
+Pause menu, screen fade, death and player switch are **not** tick conditions. The loops keep running and draw nothing on those frames.
 
 ----
 
 ### Reading it from code
-
-Useful if your resource has its own debug overlay and you want MenuAPI's loops in it.
 
 ```cs
 using MenuAPI;
@@ -73,27 +67,29 @@ using MenuAPI;
 // Everything MenuAPI has registered, running or not.
 foreach (MenuTickHandle tick in MenuTicks.Handles)
 {
-    API.Log.Info($"{tick.Name} at {tick.Rate} is {(tick.IsRunning ? "running" : "stopped")}");
+    Debug.WriteLine($"{tick.Name} at {tick.Rate} is {(tick.IsRunning ? "running" : "stopped")}");
 }
 
 // Or let MenuAPI format the lines for you.
 foreach (string line in MenuTicks.Describe())
 {
-    API.Log.Info(line);
+    Debug.WriteLine(line);
 }
 
 // Or just dump the lot to the console.
 MenuTicks.Dump();
 ```
 
-To keep something on screen up to date, subscribe to `Changed`:
+On Enhanced, use `API.Log.Info` instead of `Debug.WriteLine`.
+
+To keep a debug overlay up to date, subscribe to `Changed`:
 
 ```cs
 MenuTicks.Changed += () => _needsRedraw = true;
 ```
 
 :::caution
-Do not do real work straight from `Changed`. Opening or closing a menu flips several ticks at once, and the event fires once **per tick that changed**, so you would redraw five times for one menu opening. Set a flag like the example above and act on it once.
+`Changed` fires once **per tick that changed**, so opening a menu raises it eight times. Set a flag and act on it once.
 :::
 
 ----
@@ -102,14 +98,14 @@ Do not do real work straight from `Changed`. Opening or closing a menu flips sev
 
 |Member|Type|Description|
 |---|---|---|
-|Handles|IReadOnlyList&lt;MenuTickHandle&gt;|(Getter only) Every tick MenuAPI has registered, running or not.|
-|Changed|event Action|Fires whenever a tick starts or stops. See the warning above about coalescing.|
+|Handles|IReadOnlyList&lt;MenuTickHandle&gt;|(Getter only) Every registered tick, running or not.|
+|Changed|event Action|Fires whenever a tick starts or stops.|
 |Describe()|IEnumerable&lt;string&gt;|One `"name (rate): running"` line per tick.|
-|Dump()|void|Writes every one of those lines to the console. This is what the console command calls.|
+|Dump()|void|Writes those lines to the console. The console command calls this.|
 
 ### MenuTickHandle
 
-One registered tick. You can only ever read one of these, never create or control one.
+Read only, you cannot create or control one.
 
 |Member|Type|Description|
 |---|---|---|
@@ -117,11 +113,13 @@ One registered tick. You can only ever read one of these, never create or contro
 |Rate|MenuTickRate|How long it waits between iterations.|
 |IsRunning|boolean|Whether its loop is alive right now.|
 
+A tick that throws five times in a row logs an error and stops until a menu next opens or closes.
+
 ### MenuTickRate
 
 |Member|Type|Description|
 |---|---|---|
 |Milliseconds|long|The wait between iterations. `0` means once per frame.|
-|ToString()|string|Either `"per frame"` or something like `"every 100ms"`.|
+|ToString()|string|`"per frame"` or something like `"every 100ms"`.|
 
-The wait happens **after** an iteration finishes rather than on a fixed timer, so a slow iteration delays the next one instead of overlapping with it.
+The wait starts **after** an iteration finishes, so a slow iteration delays the next one instead of overlapping it.

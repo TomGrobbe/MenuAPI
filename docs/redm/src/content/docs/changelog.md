@@ -6,13 +6,17 @@ title: "Changelog"
 
 ## 4.0.0
 
-MenuAPI now has one version number for everything. The RedM, FiveM Enhanced and FiveM Legacy packages always come out together, with the same version. That is why RedM jumps from 3.2 to 4.0, even though very little changed for RedM itself.
+One version number for all packages. RedM, FiveM Enhanced and FiveM Legacy are released together, which is why RedM jumps from 3.2 to 4.0.
 
 ### The toggle key works again
 
-The built in toggle key never opened a menu in RedM. MenuAPI checked the key against the control numbers FiveM uses, and RedM controls are hashes, so every RedM key failed that check without any error. Now any RedM control works, and setting it to `(Control)0` turns the key off. See [The menu toggle key](../reference/menucontroller/#the-menu-toggle-key).
+The toggle key never opened a menu in RedM, because MenuAPI validated it against FiveM's control numbers. Any RedM control works now. See [The menu toggle key](../reference/menucontroller/#the-menu-toggle-key).
 
-Nothing else changed, so updating from 3.x needs no code changes.
+:::caution
+If your resource opens its menus itself, the toggle key now opens your main menu too. Set `MenuController.MenuToggleKey = (Control)0` to turn it off.
+:::
+
+No other code changes are needed when updating from 3.x.
 
 ---------------
 

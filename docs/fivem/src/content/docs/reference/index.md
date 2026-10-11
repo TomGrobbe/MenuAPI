@@ -4,9 +4,7 @@ title: "API Reference"
 
 ## API Reference
 
-A full reference of every public class, property, method and event in MenuAPI.
-
-If you have not set up MenuAPI yet, start at [Setup](../setup/).
+Every public class, property, method and event in MenuAPI. Not set up yet? Start at [Setup](../setup/).
 
 ----
 
@@ -14,30 +12,27 @@ If you have not set up MenuAPI yet, start at [Setup](../setup/).
 
 |Class|What it is|
 |-|-|
-|[Menu](menu/)|A single menu: a banner, a subtitle, a list of items and a description box. This is also where all [events](events/) live.|
-|[MenuController](menucontroller/)|The static controller that draws your menus and handles all controls. You register your menus here.|
+|[Menu](menu/)|A single menu: banner, subtitle, items and description box. Also where all [events](events/) live.|
+|[MenuController](menucontroller/)|The static controller that registers, draws and controls your menus.|
 |[Pagination](pagination/)|Splitting a long menu into pages, moved between with left and right.|
-|[Menu Items](menuitems/)|Everything you can put inside a menu: buttons, checkboxes, lists, dynamic lists and sliders.|
-|[Events](events/)|Every event a menu can raise, with the parameters they pass to your handler.|
-|[MenuTicks](ticks/)|A read only look at the loops MenuAPI runs, and when each one is switched off.|
+|[Menu Items](menuitems/)|Buttons, checkboxes, lists, dynamic lists and sliders.|
+|[Events](events/)|Every event a menu can raise, with its parameters.|
+|[MenuTicks](ticks/)|A read only view of the loops MenuAPI runs, and when each one stops.|
 
 ----
 
 ### Quick start
 
-This is a complete, working menu. Everything else in this reference builds on these few calls.
-
-The examples in this reference are written for Enhanced. On Legacy, replace the two `CitizenFX.FiveM` lines with `using CitizenFX.Core;` and `IScript` with `BaseScript`. Everything else is the same. [Setup](../setup/#4-make-your-first-menu) shows both side by side.
+Examples in this reference use Legacy names (`BaseScript`, `Debug.WriteLine`). [Setup](../setup/#4-make-your-first-menu) shows the Enhanced equivalents.
 
 ```cs
 using System.Collections.Generic;
-using CitizenFX.FiveM.Client;
-using CitizenFX.FiveM.Shared.Script;
+using CitizenFX.Core;
 using MenuAPI;
 
 namespace MyResource
 {
-    public class MyMenu : IScript
+    public class MyMenu : BaseScript
     {
         public MyMenu()
         {

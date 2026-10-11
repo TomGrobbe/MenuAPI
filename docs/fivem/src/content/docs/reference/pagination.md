@@ -4,9 +4,7 @@ title: "Pagination"
 
 ## Pagination
 
-A normal menu shows a sliding window of up to ten items and you scroll through the rest with up and down. That works fine for twenty items. It stops working somewhere around a hundred, and it is hopeless at a thousand, because getting to the bottom means holding the down key for a very long time.
-
-Pagination splits the menu into **pages** instead. You pick how many items belong on one page, and left and right move between those pages.
+Pagination splits a long menu into **pages** of a fixed size. Left and right move between pages.
 
 ```cs
 Menu menu = new Menu("Online Players", "Page 1 / 42");
@@ -16,18 +14,16 @@ MenuController.AddMenu(menu);
 menu.SetPageSize(48);
 ```
 
-Turning pagination on does not change how many items fit on screen. Those are two separate things stacked on top of each other:
+The page and the visible window are separate:
 
-1. **The page** decides *which* items the menu is currently working with. With a page size of 48, page 3 is items 97 to 144.
-2. **The window** ([MaxItemsOnScreen](../menu/#setmaxitemsonscreenint-max), up to 10) decides how many of those 48 you can see at once. Up and down still scroll through the page exactly like they always did.
-
-So a page of 48 items with the default window of 10 gives you five screens worth of scrolling before you reach the end of the page, and then left or right takes you to the next 48.
+1. **The page** decides *which* items the menu works with. With a page size of 48, page 3 is items 97 to 144.
+2. **The window** ([MaxItemsOnScreen](../menu/#setmaxitemsonscreenint-max), up to 10) decides how many of those you see at once. Up and down scroll within the page as usual.
 
 ----
 
 ### What left and right do
 
-This is the one behaviour change to be aware of. In a menu that is **not** paginated, left and right on a plain button mean "go back" and "select". In a paginated menu they mean "previous page" and "next page" instead.
+In a paginated menu, left and right on a plain button mean "previous page" and "next page" instead of "go back" and "select".
 
 |Item type|Left / right in a paginated menu|
 |-|-|
@@ -37,11 +33,9 @@ This is the one behaviour change to be aware of. In a menu that is **not** pagin
 |[MenuDynamicListItem](../menuitems/menudynamiclistitem/)|Unchanged, still changes the value.|
 |[MenuSliderItem](../menuitems/menuslideritem/)|Unchanged, still moves the slider.|
 
-Items that hold a value keep their arrows, because there is nothing else those arrows could mean on them. Everything else pages.
+A disabled row (`Enabled = false`) does not block paging.
 
-A locked row (`Enabled = false`) does not block paging. Turning the page is something the menu does, not something the highlighted row does, so it works wherever the cursor happens to be sitting.
-
-Holding left or right repeats more slowly than it does on a slider, and it never speeds up. Without that, holding the key for a second would fly past hundreds of pages.
+Holding left or right repeats the page turn every 250ms after a 400ms first delay, and never speeds up.
 
 ----
 
@@ -49,17 +43,17 @@ Holding left or right repeats more slowly than it does on a slider, and it never
 
 |Property|Type|Default value|Description|
 |-|-|-|-|
-|PageSize|int|0|(Getter only) How many items fit on one page. `0` means the menu is not paginated. Use [SetPageSize()](#setpagesizeint-size) to change it.|
-|Paginated|boolean|false|(Getter only) Whether this menu is split into pages. Shorthand for `PageSize > 0`.|
-|PageIndex|int|0|(Getter only) The page currently being shown, counting from **0**. So the first page is `0`, and you add 1 to it when you show it to a player.|
-|PageCount|int|1|(Getter only) How many pages there are. Always at least 1, so an empty menu still reads as "page 1 of 1".|
-|WrapPages|boolean|true|Whether moving left on the first page jumps to the last page, and moving right on the last page jumps back to the first.|
-|ShowPageInstructionalButtons|boolean|true|Whether the previous/next page hints are drawn at the bottom of the screen. Only ever drawn when the menu is paginated, there is more than one page, and the highlighted row is not a list or a slider. On those rows left and right change the value instead of turning the page, so the [change value hint](../menu/#instructional-buttons) is shown there.|
-|PreviousPageButtonText|string|"Previous page"|The text next to the previous page hint.|
-|NextPageButtonText|string|"Next page"|The text next to the next page hint.|
+|PageSize|int|0|(Getter only) Items per page. `0` means not paginated. Use [SetPageSize()](#setpagesizeint-size) to change it.|
+|Paginated|boolean|false|(Getter only) Shorthand for `PageSize > 0`.|
+|PageIndex|int|0|(Getter only) The current page, counting from **0**.|
+|PageCount|int|1|(Getter only) Number of pages. Always at least 1, even for an empty menu.|
+|WrapPages|boolean|true|Whether paging past the last page goes to the first, and the other way round.|
+|ShowPageInstructionalButtons|boolean|true|Whether the previous/next page hints are drawn. Only shown when the menu is paginated, has more than one page, and the highlighted row is not a list or slider. Those rows show the [change value hint](../menu/#instructional-buttons) instead.|
+|PreviousPageButtonText|string|"Previous page"|Text of the previous page hint.|
+|NextPageButtonText|string|"Next page"|Text of the next page hint.|
 
 :::note
-`Size`, `CurrentIndex`, `GetMenuItems()` and `GetCurrentMenuItem()` all describe **the current page**, not the whole menu. If you need the total, that is `PageCount * PageSize` at most, or just keep your own list of whatever you put in the menu.
+`Size`, `CurrentIndex`, `GetMenuItems()` and `GetCurrentMenuItem()` describe **the current page**, not the whole menu. Keep your own list if you need the total.
 :::
 
 ----
@@ -70,15 +64,13 @@ Holding left or right repeats more slowly than it does on a slider, and it never
 
 #### SetPageSize(int size)
 
-Splits the menu into pages of `size` items. Pass `0` or less to turn pagination off again.
-
-Resets the menu to the first page and puts the cursor back at the top.
+Splits the menu into pages of `size` items. `0` or less turns pagination off. Resets to the first page and puts the cursor at the top.
 
 ##### Parameters
 
 |Parameter|Type|Description|
 |-|-|-|
-|size|int|How many items belong on one page. `0` or less turns pagination off.|
+|size|int|Items per page. `0` or less turns pagination off.|
 
 ##### Return value
 
@@ -95,7 +87,7 @@ menu.SetPageSize(0);
 
 #### GoToPage(int pageIndex)
 
-Jumps straight to a page, counting from 0. Values outside the range are clamped, so this never wraps around.
+Jumps to a page, counting from 0. Out of range values are clamped, never wrapped.
 
 ##### Parameters
 
@@ -107,7 +99,7 @@ Jumps straight to a page, counting from 0. Values outside the range are clamped,
 
 |Type|Description|
 |-|-|
-|boolean|Whether the page actually changed. `false` if you were already on that page, or if the menu is not paginated.|
+|boolean|Whether the page changed. `false` if already on that page, or if the menu is not paginated.|
 
 ```cs
 // Back to the first page, for example after rebuilding the item list.
@@ -118,31 +110,31 @@ menu.GoToPage(0);
 
 #### NextPage()
 
-Goes to the next page. On the last page it wraps around to the first one, unless you turned [WrapPages](#properties) off.
+Goes to the next page. Wraps to the first page unless [WrapPages](#properties) is off.
 
 ##### Return value
 
 |Type|Description|
 |-|-|
-|boolean|Whether the page actually changed.|
+|boolean|Whether the page changed.|
 
 ----
 
 #### PreviousPage()
 
-Goes to the previous page. On the first page it wraps around to the last one, unless you turned [WrapPages](#properties) off.
+Goes to the previous page. Wraps to the last page unless [WrapPages](#properties) is off.
 
 ##### Return value
 
 |Type|Description|
 |-|-|
-|boolean|Whether the page actually changed.|
+|boolean|Whether the page changed.|
 
 ----
 
 ### The OnPageChange event
 
-Fires whenever the page changes, however it changed: a key press, or your own call to `GoToPage`, `NextPage` or `PreviousPage`.
+Fires on every page change, from a key press or from `GoToPage`, `NextPage` or `PreviousPage`.
 
 ```cs
 public delegate void PageChangedEvent(Menu menu, int oldPage, int newPage, bool wrapped);
@@ -151,11 +143,9 @@ public delegate void PageChangedEvent(Menu menu, int oldPage, int newPage, bool 
 |Parameter|Type|Description|
 |-|-|-|
 |menu|Menu|The menu the page changed in.|
-|oldPage|int|The page it was on, counting from 0.|
-|newPage|int|The page it is on now, counting from 0.|
-|wrapped|boolean|Whether the move rolled past the first or last page and came out the other end.|
-
-The `wrapped` flag is there so you can tell the player what happened. Jumping from page 42 straight back to page 1 looks like a bug if nothing says otherwise.
+|oldPage|int|The previous page, counting from 0.|
+|newPage|int|The new page, counting from 0.|
+|wrapped|boolean|Whether the move wrapped past the first or last page.|
 
 ```cs
 menu.OnPageChange += (_menu, _oldPage, _newPage, _wrapped) =>
@@ -175,7 +165,7 @@ menu.OnPageChange += (_menu, _oldPage, _newPage, _wrapped) =>
 
 ### Rebuilding the items
 
-Adding, removing, sorting and filtering all keep working, and the pages recalculate themselves. If you swap out the whole list, send the menu back to the first page afterwards, otherwise the player is left on page 30 of a list that now has three pages (which is clamped, but still not where you want them).
+Adding, removing, sorting and filtering keep working and the pages recalculate. A page index that falls out of range is clamped to the last page, so call `GoToPage(0)` after replacing the whole list.
 
 ```cs
 menu.ClearMenuItems();
@@ -190,7 +180,7 @@ menu.MenuSubtitle = $"Page 1 / {menu.PageCount}";
 ```
 
 :::caution
-[FilterMenuItems()](../menu/#filtermenuitemsfuncmenuitem-bool-predicate) runs **before** pagination, not after. Filtering 500 items down to 12 with a page size of 48 leaves you with a single page, not twelve pages with holes in them. That is almost always what you want, but it does mean a filter changes how many pages there are.
+[FilterMenuItems()](../menu/#filtermenuitemsfuncmenuitem-bool-predicate) runs **before** pagination. Filtering 500 items down to 12 with a page size of 48 leaves a single page, so a filter changes `PageCount`.
 :::
 
 ----

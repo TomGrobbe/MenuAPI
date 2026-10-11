@@ -4,34 +4,27 @@ title: "MenuAPI Documentation"
 
 ## MenuAPI documentation
 
-Welcome to the **MenuAPI** documentation.
+Docs for MenuAPI 4.0 and newer on FiveM, for both Legacy and Enhanced. See [Setup](setup/) to get started.
 
-These docs cover MenuAPI 4.0 and newer, for FiveM. They work for both FiveM runtimes, Enhanced and Legacy, because MenuAPI is the same on both. [Setup](setup/) explains which one you have.
+On MenuAPI 3.x or older? See the [3.x docs](../legacy/). Making a RedM resource? See the [RedM docs](../redm/).
 
-Still on MenuAPI 3.x or older? Those docs are kept [here](../legacy/). Making a RedM resource? See the [RedM docs](../redm/).
-
-:::tip
-**Please choose a category on the left to get started.**
-:::
-
-## Most noticeable features
-- Left & Right aligned menus are supported, and can be changed at any time during runtime. They'll both scale with the safezone size automatically.
-- If the screen resolution is too small, the menu will automatically display fewer items at a time to make sure it never goes off-screen. (note, very long item descriptions can still cause part of the menu to go off screen in rare cases)
-- Almost all menu items support left and right badges/icons.
-- Menu items can have left and right text.
-- Menu items can be disabled if you don't want users to interact with them.
-- The menu API handles all controls for you. Every menu control, on the keyboard, on a controller and on the mouse, is a proper FiveM key binding, so players can rebind all of them from their own settings menu. The one thing that stays fixed is the shape of the controller toggle: it is a 400ms hold rather than a tap, so it does not fight with the game's own interaction menu.
-- Multiple checkbox designs supported.
-- You can prevent users from exiting the menu using the normal ESC/backspace/cancel controls. (only do this for important menus where you need progress saved or something like that, and always have a button to exit the menu! Be nice to your users!)
+## Features
+- Left and right aligned menus, switchable at runtime, both following the safezone size.
+- Fewer items are shown on small resolutions so the menu stays on screen. Very long descriptions can still overflow.
+- Left and right icons and text on most items.
+- Disabled items.
+- Every control (keyboard, controller, mouse) is a FiveM key binding that players can rebind. The controller toggle is a 400ms hold so it doesn't clash with the game's interaction menu.
+- Several checkbox styles.
+- Optionally stop players from closing a menu with the back key. Always give them another way out.
 
 
 ## Some examples
-Here are some examples of what you can expect to be able to achieve with this API (if you put some time into it). Most of these screenshots are taken from vMenu after it was converted to this MenuAPI. Some are taken from the example menu provided with MenuAPI.
+Screenshots from vMenu and the MenuAPI test menu.
 
 <details>
 <summary>Makeup &amp; Hair color panels, and also opacity panels.</summary>
 
-They actually are just list items but you can toggle these panels to appear below the description box if you want them enabled
+These are list items with a panel shown below the description.
 
 ![](https://www.vespura.com/hi/i/2018-12-15_19-35_84470_391.png)
 ![](https://www.vespura.com/hi/i/2018-12-15_19-38_b6ca4_392.png)
@@ -49,11 +42,11 @@ They actually are just list items but you can toggle these panels to appear belo
 <details>
 <summary>Slider items</summary>
 
-You can have your own custom colors. Both background and foreground bar colors are fully customizable.
+Background and bar colours are customizable.
 
 ![](https://www.vespura.com/hi/i/2018-12-15_19-46_420c5_397.png)
 
-Optionally you can also choose from 29 different sprites to appear on either side of the slider.
+Optional icons on either side of the slider.
 
 </details>
 
@@ -67,8 +60,6 @@ Optionally you can also choose from 29 different sprites to appear on either sid
 <details>
 <summary>Menus without banners</summary>
 
-You can create a menu without a banner if you prefer that.
-
 ![](https://www.vespura.com/hi/i/2018-12-15_19-55_aea95_399.png)
 
 </details>
@@ -77,11 +68,7 @@ You can create a menu without a banner if you prefer that.
 <details>
 <summary>Customizable instructional buttons (per menu)</summary>
 
-Each menu can have it's own set of instructional buttons. By default every menu has one setup for 'select' and 'cancel/back'. But you can remove those if you don't need them.
-
-You can also disable the instructional buttons all together if you want to handle that yourself.
-
-Instructional buttons instantly update if the user switches between keyboard/mouse and controller.
+Each menu has its own instructional buttons, select and back by default. They can be removed or turned off, and they switch between keyboard and controller instantly.
 
 ![](https://www.vespura.com/hi/i/2018-12-15_19-56_bc2c4_400.png)
 
@@ -89,11 +76,9 @@ Instructional buttons instantly update if the user switches between keyboard/mou
 
 
 <details>
-<summary>Did somebody say icons?</summary>
+<summary>Icons</summary>
 
-We've got plenty of those! (They don't even fit on one page, seriously there are 29 icons to choose from.)
-
-You can also use icons even when you have text on the right side of an item, the text will move over for your icon automatically.
+Icons work next to right side text, the text moves over automatically.
 
 ![](https://www.vespura.com/hi/i/2018-12-15_20-01_32cc2_401.png)
 

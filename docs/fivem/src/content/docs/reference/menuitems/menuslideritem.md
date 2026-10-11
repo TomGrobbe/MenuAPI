@@ -62,104 +62,54 @@ menu.OnSliderItemSelect += (_menu, _sliderItem, _sliderPosition, _itemIndex) =>
 ```
 
 :::note
-Sliders do **not** wrap around. Pressing left at `Min` or right at `Max` plays the error sound and does not raise [OnSliderPositionChange](../../events/#onsliderpositionchange).
+Sliders do **not** wrap around. Left at `Min` or right at `Max` plays the error sound and does not raise [OnSliderPositionChange](../../events/#onsliderpositionchange).
 :::
 
 ----
 
 ### Constructors
 
+|Constructor|Description|
+|-|-|
+|`MenuSliderItem(string name, int min, int max, int startPosition)`|No description, no divider.|
+|`MenuSliderItem(string name, int min, int max, int startPosition, bool showDivider)`|No description.|
+|`MenuSliderItem(string name, string description, int min, int max, int startPosition)`|No divider.|
+|`MenuSliderItem(string name, string description, int min, int max, int startPosition, bool showDivider)`|All options set.|
+
+|Parameter|Type|Description|
+|-|-|-|
+|name|string|The text on the left side of the item.|
+|description|string|Shown below the menu while the item is highlighted.|
+|min|int|The lowest position. Must be lower than `max`.|
+|max|int|The highest position.|
+|startPosition|int|The starting position, between `min` and `max` inclusive.|
+|showDivider|bool|Draws a white divider line in the middle of the slider. Defaults to false.|
+
 :::note
-`Min` and `Max` can only be set through a constructor; they are read-only afterwards. `Position` can be changed at any time.
+`Min` and `Max` can only be set through a constructor. `Position` can be changed at any time. A `Position` outside `Min` to `Max` is reset to `(Max - Min) / 2` when the row is drawn.
 :::
-
-----
-
-#### MenuSliderItem(string name, int min, int max, int startPosition)
-
-Creates a slider without a description and without the divider line.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|name|string|The text displayed on the left side of the item.|
-|min|int|The minimum slider position. Must be 0 or higher, and lower than `max`.|
-|max|int|The maximum slider position. Must be higher than `min`.|
-|startPosition|int|The position the slider starts at. Should be between `min` and `max` (inclusive).|
-
-----
-
-#### MenuSliderItem(string name, int min, int max, int startPosition, bool showDivider)
-
-Creates a slider without a description.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|name|string|The text displayed on the left side of the item.|
-|min|int|The minimum slider position.|
-|max|int|The maximum slider position.|
-|startPosition|int|The position the slider starts at.|
-|showDivider|boolean|Whether to draw the white divider line in the middle of the slider.|
-
-----
-
-#### MenuSliderItem(string name, string description, int min, int max, int startPosition)
-
-Creates a slider with a description and without the divider line.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|name|string|The text displayed on the left side of the item.|
-|description|string|The description shown below the menu while this item is selected.|
-|min|int|The minimum slider position.|
-|max|int|The maximum slider position.|
-|startPosition|int|The position the slider starts at.|
-
-----
-
-#### MenuSliderItem(string name, string description, int min, int max, int startPosition, bool showDivider)
-
-Creates a slider with all options set.
-
-##### Parameters
-
-|Parameter|Type|Description|
-|-|-|-|
-|name|string|The text displayed on the left side of the item.|
-|description|string|The description shown below the menu while this item is selected.|
-|min|int|The minimum slider position.|
-|max|int|The maximum slider position.|
-|startPosition|int|The position the slider starts at.|
-|showDivider|boolean|Whether to draw the white divider line in the middle of the slider.|
 
 ----
 
 ### Properties
 
 :::note
-All standard MenuItem class properties are inherited.
-The MenuItem properties **LeftIcon**, **RightIcon** and **Label** are not available for MenuSliderItems.
-MenuSliderItems are only available in FiveM.
+**LeftIcon**, **RightIcon** and **Label** are not available for MenuSliderItems. Use `SliderLeftIcon` and `SliderRightIcon` instead.
 :::
 
-|Property|Type|Default value|Description|Optional|
-|---|---|---|---|---|
-|Min|int|0|The minimum slider range, value must be an integer equal to or higher than 0, but less than the Max parameter.|**No**|
-|Max|int|10|The maximum slider range, value must be an integer higher than the min value.|**No**|
-|ShowDivider|boolean|false|Whether or not to show the white divider line in the middle of the slider.|Yes|
-|Position|int|0|The default slider position, value must be an integer between the Min and Max value (inclusive).|**No**|
-|SliderLeftIcon|[Icon](../menuitem/#icons)|Icon.NONE|An icon to show on the left side of the slider.|Yes|
-|SliderRightIcon|[Icon](../menuitem/#icons)|Icon.NONE|An icon to show on the right side of the slider.|Yes|
-|BackgroundColor|[System.Drawing.Color](https://docs.microsoft.com/en-us/dotnet/api/system.drawing.color?view=netframework-4.8)|System.Drawing.Color.FromArgb(255,&nbsp;24,&nbsp;93,&nbsp;151)|The slider background color.|Yes|
-|BarColor|[System.Drawing.Color](https://docs.microsoft.com/en-us/dotnet/api/system.drawing.color?view=netframework-4.8)|System.Drawing.Color.FromArgb(255,&nbsp;53,&nbsp;165,&nbsp;223)|The slider bar color.|Yes|
+|Property|Type|Default value|Description|
+|---|---|---|---|
+|Min|int|`min` argument|Read only. The lowest position.|
+|Max|int|`max` argument|Read only. The highest position.|
+|Position|int|`startPosition` argument|The current position.|
+|ShowDivider|bool|false|Draws a white divider line in the middle of the slider.|
+|SliderLeftIcon|[Icon](../menuitem/#icons)|Icon.NONE|Icon on the left side of the slider.|
+|SliderRightIcon|[Icon](../menuitem/#icons)|Icon.NONE|Icon on the right side of the slider.|
+|BackgroundColor|[System.Drawing.Color](https://docs.microsoft.com/en-us/dotnet/api/system.drawing.color?view=netframework-4.8)|System.Drawing.Color.FromArgb(255,&nbsp;24,&nbsp;93,&nbsp;151)|The slider background color.|
+|BarColor|[System.Drawing.Color](https://docs.microsoft.com/en-us/dotnet/api/system.drawing.color?view=netframework-4.8)|System.Drawing.Color.FromArgb(255,&nbsp;53,&nbsp;165,&nbsp;223)|The slider bar color.|
 
 ----
 
 ### Methods
 
-_There are no methods available for MenuSliderItems._
+MenuSliderItem has no methods of its own.

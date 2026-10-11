@@ -52,7 +52,7 @@ export default defineConfig({
         { label: 'Basic Info', link: '/' },
         { label: 'Setup', link: '/setup/' },
         { label: 'How menus are drawn', link: '/nui/' },
-        { label: 'Migration guide', link: '/migration/' },
+        { label: 'Migration Guide (v4)', link: '/migration/' },
         {
           label: 'API Reference',
           items: [

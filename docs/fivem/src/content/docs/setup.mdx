@@ -6,28 +6,13 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Setup
 
-_This page is for resource developers. If you run a server and just want menus, you do not install MenuAPI yourself. It comes inside the resources that use it._
-
-Setting up MenuAPI takes four steps. Each one is explained below, so take them one at a time.
-
-----
-
 ### Which version do I need?
 
-FiveM can run C# scripts in two different ways. These are called **runtimes**, which is simply the engine that runs your C# code inside the game.
-
-- **Enhanced** is the newer runtime. Your project targets .NET 10 and uses the `CitizenFX.FiveM.Client` library.
-- **Legacy** is the original runtime that has been around for years. Your project targets .NET Framework 4.5.2 and uses the `CitizenFX.Core` library.
-
-Not sure which one you have? Open your project file (the `.csproj`). If it says `net10.0`, you are on Enhanced. If it says `net452`, you are on Legacy.
-
-MenuAPI works exactly the same on both, with the same features and the same version number. The only differences are the package name and a few lines at the top of your scripts. Wherever this site shows two tabs, pick yours once and every page remembers it.
+Starting at v4.0.0 there are two versions for FiveM: Legacy and Enhanced. Legacy is for FiveM for GTA V (.NET Framework 4.5.2, `CitizenFX.Core`). Enhanced is for FiveM for GTA V Enhanced (.NET 10, `CitizenFX.FiveM.Client`). Both have the same features and the same version number.
 
 ----
 
 ### 1. Add MenuAPI to your project
-
-The easiest way is NuGet, which is the package manager .NET uses to download libraries for you. Run this in the folder of your project:
 
 <Tabs syncKey="runtime">
   <TabItem label="Enhanced">
@@ -36,7 +21,7 @@ The easiest way is NuGet, which is the package manager .NET uses to download lib
 dotnet add package MenuAPI.FiveM.Enhanced
 ```
 
-You can also find it on [nuget.org](https://www.nuget.org/packages/MenuAPI.FiveM.Enhanced/).
+[MenuAPI.FiveM.Enhanced on nuget.org](https://www.nuget.org/packages/MenuAPI.FiveM.Enhanced/)
 
   </TabItem>
   <TabItem label="Legacy">
@@ -45,20 +30,18 @@ You can also find it on [nuget.org](https://www.nuget.org/packages/MenuAPI.FiveM
 dotnet add package MenuAPI.FiveM
 ```
 
-You can also find it on [nuget.org](https://www.nuget.org/packages/MenuAPI.FiveM/).
+[MenuAPI.FiveM on nuget.org](https://www.nuget.org/packages/MenuAPI.FiveM/)
 
   </TabItem>
 </Tabs>
 
-Prefer not to use NuGet? Download the zip for your runtime from the [GitHub releases](https://github.com/TomGrobbe/MenuAPI/releases), add `MenuAPI.dll` as a reference in your project, and copy the `menuapi` folder from the zip next to your resource's files.
-
-Either way, when you build your resource you get `MenuAPI.dll` and a folder called `menuapi` in your output. That folder holds the files that draw the menu. Do not change anything in it, it is replaced every time you update.
+Your build output gets `MenuAPI.dll` and a `menuapi` folder. Don't edit that folder, it's replaced on every update.
 
 ----
 
 ### 2. Add the page the menu is drawn on
 
-MenuAPI draws its menus with **NUI**. NUI is a small web page that FiveM shows on top of the game, and MenuAPI builds the menu inside that page. Your resource needs one such page, so create a file called `index.html` next to your `fxmanifest.lua` and paste this into it:
+Menus are drawn with NUI. Create `index.html` next to your `fxmanifest.lua`:
 
 ```html
 <!DOCTYPE html>
@@ -84,13 +67,11 @@ MenuAPI draws its menus with **NUI**. NUI is a small web page that FiveM shows o
 </html>
 ```
 
-Copy it exactly. [How menus are drawn](../nui/) explains why each part is there, in case you want to add your own things to the page.
+See [How menus are drawn](../nui/) if you want to add your own things to the page.
 
 ----
 
-### 3. Tell FiveM about the files
-
-FiveM only sends files to players when your `fxmanifest.lua` lists them. Add these lines to it:
+### 3. Add the files to your fxmanifest
 
 ```lua
 ui_page 'index.html'
@@ -102,13 +83,11 @@ files {
 }
 ```
 
-`ui_page` tells FiveM which page to show. The `files` list makes sure players download MenuAPI itself, the page, and everything in the `menuapi` folder. If your manifest already has a `files` list, add the three lines to it instead of making a second one.
+If you already have a `files` list, add the three lines to it.
 
 ----
 
 ### 4. Make your first menu
-
-Now you can use MenuAPI in your scripts. This is the smallest possible menu:
 
 <Tabs syncKey="runtime">
   <TabItem label="Enhanced">
@@ -150,12 +129,12 @@ public class MyMenu : BaseScript
   </TabItem>
 </Tabs>
 
-Start your resource and press <kbd>M</kbd> in game. Your menu opens. That key can be changed, see [Key bindings](../reference/keybindings/).
+Press <kbd>M</kbd> in game to open it. Players can change that key, see [Key bindings](../reference/keybindings/).
 
-From here, the [API Reference](../reference/) shows everything else you can do, and the example menu in the [repository](https://github.com/TomGrobbe/MenuAPI/tree/main/TestMenu) shows every item type in action.
+The [API Reference](../reference/) has everything else. The [TestMenu](https://github.com/TomGrobbe/MenuAPI/tree/main/TestMenu) in the repository uses every item type.
 
 ----
 
 ### Something not working?
 
-Most problems come from step 2 or step 3. The table at the bottom of [How menus are drawn](../nui/#when-something-is-wrong) lists what each symptom means.
+See [When something is wrong](../nui/#when-something-is-wrong).
