@@ -294,12 +294,6 @@ namespace MenuAPI
         {
             if (!MenuToggleKeyIsValid)
             {
-                if (!loggedInvalidToggleKey)
-                {
-                    loggedInvalidToggleKey = true;
-                    Debug.WriteLine($"[{GetCurrentResourceName()}] [MenuAPI] The menu toggle key is turned off (MenuToggleKey is {(uint)MenuToggleKey}), so the key never opens a menu.");
-                }
-
                 await Delay(1_500);
                 return;
             }
@@ -307,42 +301,26 @@ namespace MenuAPI
             ProcessToggleMenuButtonRedM();
             await Task.FromResult(0);
         }
-
-        private static bool loggedInvalidToggleKey;
-
         private void ProcessToggleMenuButtonRedM()
         {
             DisableControlAction(0, (uint)MenuToggleKey, true);
-
-            if (!IsDisabledControlJustReleased(0, (uint)MenuToggleKey))
+            if (
+                !IsPauseMenuActive() &&
+                IsScreenFadedIn() &&
+                !IsAnyMenuOpen() &&
+                !DisableMenuButtons &&
+                !IsEntityDead(PlayerPedId()) &&
+                IsDisabledControlJustReleased(0, (uint)MenuToggleKey)
+            )
             {
-                return;
-            }
-
-            Debug.WriteLine($"[{GetCurrentResourceName()}] [MenuAPI] Toggle key {MenuToggleKey} (0x{(uint)MenuToggleKey:X8}) released, trying to open the menu.");
-
-            string blockedBy =
-                IsPauseMenuActive() ? "the pause menu is open" :
-                !IsScreenFadedIn() ? "the screen is not faded in" :
-                IsAnyMenuOpen() ? "a menu is already open" :
-                DisableMenuButtons ? "MenuController.DisableMenuButtons is true" :
-                IsEntityDead(PlayerPedId()) ? "the player is dead" :
-                null;
-
-            if (blockedBy != null)
-            {
-                Debug.WriteLine($"[{GetCurrentResourceName()}] [MenuAPI] Not opening the menu, because {blockedBy}.");
-                return;
-            }
-
-            if (MainMenu != null)
-            {
-                Debug.WriteLine($"[{GetCurrentResourceName()}] [MenuAPI] Opening {MainMenu.MenuTitle}.");
-                MainMenu.OpenMenu();
-            }
-            else
-            {
-                Debug.WriteLine($"[ERROR] [{GetCurrentResourceName()}] [MenuAPI] MainMenu is null, so we can't open it! Make sure that MenuController.MainMenu is set to a valid Menu which is not null!");
+                if (MainMenu != null)
+                {
+                    MainMenu.OpenMenu();
+                }
+                else
+                {
+                    Debug.WriteLine($"[ERROR] [{GetCurrentResourceName()}] [MenuAPI] MainMenu is null, so we can't open it! Make sure that MenuController.MainMenu is set to a valid Menu which is not null!");
+                }
             }
         }
 
