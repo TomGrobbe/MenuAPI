@@ -91,7 +91,6 @@ MenuController.BindMenuItem(menu, submenu, submenuButton);
 |Index|int|-1|Read only. Position of the item in its menu, or -1 when it is not in a menu.|
 |Selected|bool|false|Read only. Whether the item is highlighted. Always false when it is not in a menu.|
 |ParentMenu|Menu|null|The menu holding this item. Mainly used internally.|
-|PositionOnScreen|int|0|Read only. The item's current position on screen.|
 |ItemData|dynamic|null|Your own data, see [Attaching your own data](#attaching-your-own-data).|
 
 #### Footnotes

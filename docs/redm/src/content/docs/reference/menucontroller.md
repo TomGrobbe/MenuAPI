@@ -64,8 +64,8 @@ All properties are **static**.
 |---|---|---|---|---|
 |MainMenu|Menu|Null|The menu that is opened when the user presses the [menu toggle key](#the-menu-toggle-key). This is set automatically to the first menu you register, but you can change it at any time.|Yes|
 |Menus|List&lt;[Menu](../menu/)&gt;|(empty)|(Getter only) Every menu that has been registered with [AddMenu()](#addmenumenu-menu) or [AddSubmenu()](#addsubmenumenu-parent-menu-child).|Yes|
-|MenuToggleKey|Control|Control.PlayerMenu|The control that opens [MainMenu](#properties). See [The menu toggle key](#the-menu-toggle-key).|Yes|
-|MenuToggleKeyIsValid|boolean|true|(Getter only) False when `MenuToggleKey` is `(Control)0`, which turns the toggle key off. See [The menu toggle key](#the-menu-toggle-key).|Yes|
+|MenuToggleKey|Control|Control.PlayerMenu|The control that opens [MainMenu](#properties) when no menu is open. It does not close menus. See [The menu toggle key](#the-menu-toggle-key).|Yes|
+|MenuToggleKeyIsValid|boolean|true|(Getter only) False when `MenuToggleKey` is `(Control)0` or `(Control)(-1)`, which turns the toggle key off. See [The menu toggle key](#the-menu-toggle-key).|Yes|
 |DisableMenuButtons|boolean|false|When true, all menu controls are ignored. The menu stays on screen, it just does not respond to input. Useful while you are doing something that should not be interrupted.|Yes|
 |AreMenuButtonsEnabled|boolean|false|(Getter only) Whether menu controls are currently being processed. This is false when no menu is open, the pause menu is active, the screen is faded out, the player is dead, or `DisableMenuButtons` is true.|Yes|
 |DontOpenAnyMenu|boolean|false|When true, menus stop being drawn and can not be opened. Menus with [IgnoreDontOpenMenus](../menu/#properties) set to true are excluded.|Yes|
@@ -73,8 +73,8 @@ All properties are **static**.
 |DisableBackButton|boolean|false|When true, the back/cancel control does nothing at all, not even in submenus.|Yes|
 |NavigateMenuUsingArrows|boolean|true|When true, pressing left on an item that has no left/right behaviour goes back to the parent menu.|Yes|
 |SetDrawOrder|boolean|true|Whether MenuAPI sets the script graphics draw order while drawing. Turn this off if the menu draws over (or under) your own UI in the wrong order.|Yes|
-|EnableManualGCs|boolean|true|Whether MenuAPI triggers a manual garbage collect every 60 seconds while no menu is open. Turn this off if your resource manages GCs itself.|Yes|
-|ScreenWidth|float|-|(Getter only) The width of the screen, scaled to a 1080p height. The RedM build assumes a fixed 16:9 aspect ratio.|Yes|
+|EnableManualGCs|boolean|true|Whether MenuAPI triggers a manual garbage collect at most every 60 seconds while a menu is open. Turn this off if your resource manages GCs itself.|Yes|
+|ScreenWidth|float|-|(Getter only) Always 1080.|Yes|
 |ScreenHeight|float|1080f|(Getter only) The height of the screen. This is always 1080.|Yes|
 
 :::caution

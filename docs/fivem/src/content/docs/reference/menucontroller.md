@@ -72,8 +72,6 @@ public class MyMenus : IScript
 |PreventExitingMenu|boolean|false|When true, back and the toggle key can not close a top level menu. Submenus can still go back to their parent. Give the player a button that closes the menu.|
 |DisableBackButton|boolean|false|When true, back does nothing, in submenus too.|
 |NavigateMenuUsingArrows|boolean|true|When true, left on an item without left/right behaviour acts like back.|
-|ScreenWidth|float|1920f|Getter only. 1080 times the screen aspect ratio.|
-|ScreenHeight|float|1080f|Getter only. Always 1080.|
 
 ----
 

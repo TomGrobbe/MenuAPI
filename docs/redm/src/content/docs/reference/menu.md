@@ -113,8 +113,8 @@ RedM supports a smaller feature set than FiveM. Members that only exist in the F
 |---|---|---|---|---|
 |MenuTitle|string|-|The text displayed on the menu banner. If this is null or empty, no banner is drawn.|Yes|
 |MenuSubtitle|string|Null|The text displayed in the subtitle bar below the banner.|Yes|
-|HeaderTexture|KeyValuePair&lt;string,&nbsp;string&gt;|(empty)|A custom banner image. The `Key` is the streamed texture dictionary, the `Value` is the texture name. The texture dictionary is requested for you. When this is not set, the default banner is used.|Yes|
-|CounterPreText|string|Null|Text placed in front of the `current / total` counter in the top right of the subtitle bar. Setting this forces the counter to be shown, even when all items already fit on screen.|Yes|
+|HeaderTexture|KeyValuePair&lt;string,&nbsp;string&gt;|(empty)|Has no effect in RedM, the default banner is always drawn.|Yes|
+|CounterPreText|string|Null|Has no effect in RedM, the counter always shows `current of total`.|Yes|
 |Visible|boolean|false|Whether this menu is currently being drawn. Prefer [OpenMenu()](#openmenu) and [CloseMenu()](#closemenu), because those also trigger the open/close events (and enable/disable the UI prompts).|Yes|
 |EnableInstructionalButtons|boolean|true|Whether the instructional buttons (UI prompts) for this menu are shown while the menu is open.|Yes|
 |IgnoreDontOpenMenus|boolean|false|When true, this menu keeps being drawn even while [MenuController.DontOpenAnyMenu](../menucontroller/#properties) is set to true.|Yes|

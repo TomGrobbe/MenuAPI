@@ -37,6 +37,8 @@ These only existed for the old drawing code. Delete any line that uses them.
 - `Menu.MenuItemsYOffset`
 - On `MenuItem` subclasses: the protected `Width`, `RowHeight`, `GetSpriteSize()` and `GetSpriteX()`. `GetSpriteColour()` now returns a `System.Drawing.Color`.
 
+These still compile with an obsolete warning, but nothing uses them anymore: `Menu.Position`, `Menu.SplitString()`, `MenuItem.PositionOnScreen`, `MenuController.ScreenWidth` and `MenuController.ScreenHeight`.
+
 ----
 
 ## Coming from Enhanced 1.x

@@ -138,7 +138,6 @@ Menu menu3 = new Menu(null, "Only a subtitle, no banner.");
 |ViewIndexOffset|int|0|(Getter only) Index of the first visible item.|
 |ParentMenu|Menu|Null|(Getter only) The parent menu, or null. Set by [MenuController.AddSubmenu()](../menucontroller/#addsubmenumenu-parent-menu-child).|
 |LeftAligned|boolean|true|(Getter only) Shortcut for [MenuController.MenuAlignment](../menucontroller/#menu-alignment).|
-|Position|KeyValuePair&lt;float,&nbsp;float&gt;|(0f,&nbsp;0f)|(Getter only) Not used. It is never updated and always returns `(0f, 0f)`.|
 |WeaponStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) Set with [SetWeaponStats()](#setweaponstatsfloat-damage-float-firerate-float-accuracy-float-range).|
 |WeaponComponentStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) Set with [SetWeaponComponentStats()](#setweaponcomponentstatsfloat-damage-float-firerate-float-accuracy-float-range).|
 |VehicleStats|float[]|{&nbsp;0f,&nbsp;0f,&nbsp;0f,&nbsp;0f&nbsp;}|(Getter only) Set with [SetVehicleStats()](#setvehiclestatsfloat-topspeed-float-acceleration-float-braking-float-traction).|

@@ -18,7 +18,13 @@ Everything below, which used to be Enhanced only, now works on Legacy too: NUI m
 Native drawing is gone. Every resource needs the `index.html` page and the manifest lines from [Setup](../setup/). `MenuController.RenderMode` still compiles but does nothing. See the [Migration Guide (v4)](../migration/).
 :::
 
+`Menu.Position`, `Menu.SplitString()`, `MenuItem.PositionOnScreen`, `MenuController.ScreenWidth` and `MenuController.ScreenHeight` are obsolete, nothing uses them anymore.
+
 Only title fonts 0, 1, 2, 4 and 7 render. Other font ids, including fonts registered with `RegisterFontId`, fall back to the item font.
+
+### Packages
+
+The packages now include the XML docs, so your editor shows a description for every public member. The `menuapi` web files now also reach the build output in old `packages.config` projects.
 
 ### Turning off the toggle key
 
