@@ -1,48 +1,50 @@
-# MenuAPI documentation (FiveM Enhanced)
+# MenuAPI documentation
 
-The MenuAPI docs for **FiveM Enhanced**, built with [Astro Starlight](https://starlight.astro.build/)
-and a custom "cartoon" theme (shared with the vMenu docs). This branch (`fivem-enhanced`) owns only
-the Enhanced doc set; the Legacy and RedM doc sets live on their own branches.
+This folder holds the MenuAPI documentation websites. Each site is built with [Astro Starlight](https://starlight.astro.build/), a tool that turns a folder of Markdown files into a website. They all share a custom "cartoon" look, the same one the vMenu docs use.
 
-The docs are published into the hub repo (`TomGrobbe/TomGrobbe.github.io`) and served at:
+## What is where
 
-| URL | Content |
-| --- | --- |
-| `/menuapi/enhanced/`, `/mapi/enhanced/` | FiveM (Enhanced) docs |
+| Folder | Website address | What it is |
+| --- | --- | --- |
+| `fivem/` | `/menuapi/fivem/` | The docs for MenuAPI 4.0 and newer on FiveM. One site covers both FiveM runtimes, Enhanced and Legacy. |
+| `redm/` | `/menuapi/redm/` | The docs for MenuAPI on RedM. |
+| `archive/legacy-v3/` | `/menuapi/legacy/` | The old docs for MenuAPI 3.x and older on FiveM. These are frozen, so please don't change them. Every page shows a banner that points people to the new FiveM docs. |
+| `landing/` | `/menuapi/` | The page where people pick between FiveM and RedM. It's a single html file. |
+| `tools/forward-pages.mjs` | `/menuapi/enhanced/` | A small script that fills the old Enhanced address with forwarding pages. Anyone with an old link to an Enhanced page lands on the same page in the new FiveM docs. |
 
-`/mapi/` is kept for backwards compatibility with the old documentation URLs.
+Everything is also published a second time under `/mapi/` instead of `/menuapi/`. That was the address of the very first docs, and it's kept so old links keep working.
 
-## Layout
+## Enhanced and Legacy on one site
 
-- `docs/enhanced/`: the Astro Starlight project for the FiveM Enhanced docs.
+MenuAPI works the same on both FiveM runtimes, so the FiveM site describes them together. Where the two differ, a page shows two tabs, one for Enhanced and one for Legacy. Once a reader picks a tab, every other page remembers that choice.
 
-Its base path is env-driven (`DOCS_BASE`) so it can be built for both the `/menuapi` and `/mapi` prefixes.
+Tabs only work in `.mdx` files, which are Markdown files that can also use components. To add tabs to a page, rename it from `.md` to `.mdx` and copy how `fivem/src/content/docs/setup.mdx` does it. The `syncKey="runtime"` part is what makes the choice carry over between pages.
 
-## Local development
+## Working on the docs
 
-Requires Node 20.19+ or 22.12+.
+You need Node 20.19 or newer, or Node 22.12 or newer.
 
 ```sh
-cd docs/enhanced
+cd docs/fivem   # or docs/redm
 npm install
 npm run dev
 ```
 
-## How it deploys
+`npm run dev` starts a local copy of the site and prints its address. The page reloads by itself whenever you save a file.
 
-`.github/workflows/docs.yml` builds the Enhanced project twice (once per prefix) and pushes the
-result into the hub repo under `/menuapi/enhanced/` and `/mapi/enhanced/` only. It runs on pushes to
-`fivem-enhanced` that touch `docs/**`, and via the manual **Run workflow** button.
+## How it gets published
 
-Because the Legacy/RedM docs deploy from a different branch into the *same* hub repo, this workflow
-only ever replaces the `enhanced/` subfolders; it never wipes the whole `/menuapi` or `/mapi` prefix.
-The other branch's deploy is likewise scoped to its own subfolders, so the two never clobber each other.
+`.github/workflows/docs.yml` publishes the docs. It runs whenever something in `docs/` changes on the `main` branch. You can also start it yourself with the **Run workflow** button on the Actions tab.
 
-## One-time setup
+The workflow does the following:
 
-1. Add a **`HUB_DEPLOY_TOKEN`** secret to this repo (a fine-grained token scoped to the
-   `TomGrobbe/TomGrobbe.github.io` repo with Contents: Read and write).
-2. Leave this repo's own GitHub Pages **off** (docs are served from the hub site).
+1. It builds the three sites twice, once for `/menuapi/` and once for `/mapi/`. Astro writes the address into every link, which is why each address needs its own build.
+2. It adds the landing page and the forwarding pages.
+3. It copies everything into the hub repository, `TomGrobbe/TomGrobbe.github.io`. That one repository serves all the docs sites. Only the `menuapi/` and `mapi/` folders are replaced there, and everything else in the hub, like the vMenu docs, is left alone.
 
-The `.github/workflows/build.yml` pipeline ignores `docs/**`, so documentation commits never trigger
-a package build.
+Changes that only touch `docs/` never start a package build. `build.yml` ignores this folder.
+
+## One time setup
+
+1. This repository needs a secret called **`HUB_DEPLOY_TOKEN`**. It's a GitHub token that can write to the `TomGrobbe/TomGrobbe.github.io` repository (Contents: Read and write). vMenu uses the same kind of token, but secrets are per repository, so it has to be added here too.
+2. Leave GitHub Pages turned **off** for this repository. The hub site serves the docs instead.
