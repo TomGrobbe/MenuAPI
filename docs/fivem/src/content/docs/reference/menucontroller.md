@@ -64,8 +64,8 @@ public class MyMenus : IScript
 |DefaultTitleAlignment|[TitleAlignmentOption](../menu/#header-styling)|TitleAlignmentOption.Center|Banner title alignment for menus that do not set [MenuTitleAlignment](../menu/#header-styling).|
 |DefaultShowHeaderGlare|boolean|false|GTA Online's moving banner glow, for menus that do not set [ShowHeaderGlare](../menu/#header-styling).|
 |MenuToggleKeyDefault|string|"M"|The keyboard toggle key for players who never rebound it. Set it in your constructor. See [Changing the default toggle key](../keybindings/#changing-the-default-toggle-key).|
-|EnableMenuToggleKeyOnController|boolean|true|Whether the controller toggle works. It is a 400ms hold on the back/select button by default, and the player can rebind the button.|
-|EnableMenuToggleKey|boolean|true|Whether MenuAPI registers the keyboard toggle key. Set it in your constructor, because it is read when the key mappings are registered one tick after MenuAPI starts. It does not affect the controller toggle. See [The menu toggle key](#the-menu-toggle-key).|
+|EnableMenuToggleKeyOnController|boolean|true|Whether the controller toggle works, while `EnableMenuToggleKey` is true. It is a 400ms hold on the back/select button by default, and the player can rebind the button.|
+|EnableMenuToggleKey|boolean|true|Whether MenuAPI registers its toggle key, on keyboard and controller. Set it in your constructor, because it is read when the key mappings are registered one tick after MenuAPI starts. See [The menu toggle key](#the-menu-toggle-key).|
 |DisableMenuButtons|boolean|false|When true, the open menu stays on screen but ignores all input, including the toggle key.|
 |AreMenuButtonsEnabled|boolean|false|Getter only. False when no menu is open, the pause menu is open, the screen is faded out, a player switch is in progress, the player is dead, the F8 console is open, or `DisableMenuButtons` is true.|
 |DontOpenAnyMenu|boolean|false|When true, open menus are closed, the toggle key does nothing and no menu is drawn or takes input. A menu with [IgnoreDontOpenMenus](../menu/#properties) set to true is not closed, but it is still hidden until this is false again.|
@@ -279,7 +279,7 @@ MenuController.MenuToggleKeyDefault = "F5";
 - Pressing it while a menu is open closes that menu, unless [PreventExitingMenu](#properties) is true.
 - When [MainMenu](#properties) is null, the first registered menu opens. With no menus, nothing happens.
 
-To open menus yourself, call [Menu.OpenMenu()](../menu/#openmenu) from your own command or key mapping and set [EnableMenuToggleKey](#properties) to false in your constructor. That only turns off the keyboard key, set [EnableMenuToggleKeyOnController](#properties) to false too to turn off the controller hold.
+To open menus yourself, call [Menu.OpenMenu()](../menu/#openmenu) from your own command or key mapping and set [EnableMenuToggleKey](#properties) to false in your constructor. That turns off the toggle on keyboard and controller.
 
 :::caution[Coming from the older MenuAPI?]
 `MenuController.MenuToggleKey` and `MenuController.MenuToggleKeyIsValid` are **gone**, the key is now the player's choice. Use `MenuToggleKeyDefault` to pick the key players start with, or set `EnableMenuToggleKey` to false where you used to set the key to `-1`. See the [Migration Guide (v4)](../../migration/#the-menu-toggle-key-is-the-players-choice-now).

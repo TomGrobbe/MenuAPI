@@ -22,7 +22,7 @@ Only title fonts 0, 1, 2, 4 and 7 render. Other font ids, including fonts regist
 
 ### Turning off the toggle key
 
-New: [MenuController.EnableMenuToggleKey](../reference/menucontroller/#properties). Set it to `false` when your resource opens its menus itself. It turns off the keyboard key, `EnableMenuToggleKeyOnController` turns off the controller hold.
+New: [MenuController.EnableMenuToggleKey](../reference/menucontroller/#properties). Set it to `false` when your resource opens its menus itself. It turns off the toggle on keyboard and controller.
 
 ---------------
 

@@ -13,8 +13,7 @@ between sessions and servers.
 `MenuController.MenuToggleKey` (a fixed `Control`) and `MenuController.MenuToggleKeyIsValid` are **gone**,
 because the key is now the player's choice. To open a menu from your own code, call
 [Menu.OpenMenu()](../menu/#openmenu) and set [MenuController.EnableMenuToggleKey](../menucontroller/#properties)
-to false. That only turns off the keyboard key, set `EnableMenuToggleKeyOnController` to false too to turn off
-the controller hold.
+to false. That turns off the toggle on keyboard and controller.
 :::
 
 ----
@@ -82,7 +81,7 @@ menu has always used.
 The toggle is a **hold**: keep Back / View down for 400ms to open the menu, and again to close it. A tap of
 that button is the game's own interaction menu. Rebinding the toggle to another button keeps the hold.
 
-Set [EnableMenuToggleKeyOnController](../menucontroller/#properties) to false to turn off the controller toggle.
+Set [EnableMenuToggleKeyOnController](../menucontroller/#properties) to false to turn off only the controller toggle.
 
 ----
 
@@ -176,7 +175,7 @@ menuapi:<your-resource-name>:down:mouse
 +menuapi:<your-resource-name>:back:alt
 ```
 
-The keyboard `toggle` command only exists while `EnableMenuToggleKey` is true. Keys from `AddKeyBinding()` follow
+The `toggle` commands only exist while `EnableMenuToggleKey` is true. Keys from `AddKeyBinding()` follow
 the same pattern, `+menuapi:<your-resource-name>:<name>` plus `:pad` when they have a controller button.
 
 A `+` marks a hold command: FiveM runs `+command` on press and `-command` on release. The wheel commands have no

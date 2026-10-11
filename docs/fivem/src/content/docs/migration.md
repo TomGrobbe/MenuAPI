@@ -102,10 +102,9 @@ MenuController.MenuToggleKey = (Control)(-1);
 
 // After
 MenuController.EnableMenuToggleKey = false;
-MenuController.EnableMenuToggleKeyOnController = false;
 ```
 
-Set these in your script's constructor, they're read one tick after MenuAPI starts. See [Key bindings](../reference/keybindings/).
+Set it in your script's constructor, it's read one tick after MenuAPI starts. See [Key bindings](../reference/keybindings/).
 
 ### Custom controls are key bindings now
 

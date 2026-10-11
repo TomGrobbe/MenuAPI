@@ -91,9 +91,9 @@ public partial class MenuController
     public static bool EnableMenuToggleKeyOnController { get; set; } = true;
 
     /// <summary>
-    /// Whether MenuAPI's own keyboard key opens and closes <see cref="MainMenu"/>. Turn it off when your
-    /// resource opens its menus itself. Must be set before the first tick, so from your resource's
-    /// constructor, because the key is only registered with FiveM when this is on.
+    /// Whether MenuAPI's own toggle key opens and closes <see cref="MainMenu"/>, on keyboard and controller.
+    /// Turn it off when your resource opens its menus itself. Must be set before the first tick, so from your
+    /// resource's constructor, because the key is only registered with FiveM when this is on.
     /// </summary>
     public static bool EnableMenuToggleKey { get; set; } = true;
 
@@ -152,11 +152,19 @@ public partial class MenuController
         Right
     }
 
+    private static bool initialized;
+
     /// <summary>
-    /// Constructor
+    /// Starts MenuAPI. The runtime calls this itself, calling it again does nothing.
     /// </summary>
     public void Initialize()
     {
+        if (initialized)
+        {
+            return;
+        }
+        initialized = true;
+
         MenuTicks.Initialize();
 
         SpritePreload.Initialize();
@@ -497,7 +505,7 @@ public partial class MenuController
     /// <returns></returns>
     private static void ProcessToggleMenuButton()
     {
-        MenuInput.PollControllerToggleHold(EnableMenuToggleKeyOnController);
+        MenuInput.PollControllerToggleHold(EnableMenuToggleKey && EnableMenuToggleKeyOnController);
 
         // Drained every frame, so a press from while the menu could not open does not open it later.
         // Checked before anything else so an idle frame costs nothing: with no press the game state
