@@ -22,7 +22,7 @@ Tabs only work in `.mdx` files, which are Markdown files that can also use compo
 
 ## Working on the docs
 
-You need Node 20.19 or newer, or Node 22.12 or newer.
+You need Node 22.12 or newer.
 
 ```sh
 cd docs/fivem   # or docs/redm
