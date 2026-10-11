@@ -111,7 +111,7 @@ Registers `child` if needed and sets its [ParentMenu](../menu/#properties) to `p
 
 Makes `menuItem` a submenu button: selecting it closes `parentMenu` and opens `childMenu`. Calls [AddSubmenu()](#addsubmenumenu-parent-menu-child) for you.
 
-Binding the same item again replaces its menu. The old menu is removed, unless another item still opens it or it is [MainMenu](#properties).
+Binding the same item again replaces its menu. The old menu stays registered.
 
 ```cs
 Menu menu = new Menu("Main Menu", "Subtitle");
@@ -148,7 +148,7 @@ MenuController.RemoveMenu(submenu);
 ```
 
 :::note
-Removing a submenu button with [RemoveMenuItem()](../menu/#removemenuitemmenuitem-item) or [ClearMenuItems()](../menu/#clearmenuitems) already removes the menu behind it.
+Removing a submenu button with [RemoveMenuItem()](../menu/#removemenuitemmenuitem-item) or [ClearMenuItems()](../menu/#clearmenuitems) keeps the menu behind it. Call `RemoveMenu()` for a submenu you no longer need.
 :::
 
 ----

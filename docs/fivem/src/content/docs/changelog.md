@@ -4,6 +4,14 @@ title: "Changelog"
 
 ---------------
 
+## 4.0.1
+
+### Submenus survive a refresh
+
+Clearing or removing a submenu button no longer removes its submenu. A list that was cleared and rebuilt with buttons for the same submenu, like an online players list, showed that submenu empty and without its events. Call [MenuController.RemoveMenu()](../reference/menucontroller/#removemenumenu-menu) for a submenu you no longer need.
+
+---------------
+
 ## 4.0.0
 
 One version number for everything. FiveM Enhanced, FiveM Legacy and RedM are released together with the same version, which is why Enhanced jumps from 1.x to 4.0.

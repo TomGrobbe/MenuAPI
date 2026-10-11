@@ -1003,8 +1003,8 @@ public class Menu
     /// Removes all menu items.
     /// </summary>
     /// <remarks>
-    /// A row that opened a menu takes that menu with it, because nothing can reach it once the row is
-    /// gone. Rebind the row to keep it.
+    /// Menus the rows opened stay registered, so new rows can be bound to them again. Remove one you no
+    /// longer need with <see cref="MenuController.RemoveMenu(Menu)"/>.
     /// </remarks>
     public void ClearMenuItems(bool dontResetIndex)
     {
@@ -1218,7 +1218,6 @@ public class Menu
         // no longer has.
         FilterItems.Remove(item);
 
-        // Nothing can reach the menu this row opened now that the row is gone.
         MenuController.Unbind(item);
 
         item.ParentMenu = null;

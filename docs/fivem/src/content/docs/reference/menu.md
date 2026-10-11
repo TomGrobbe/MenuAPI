@@ -241,7 +241,7 @@ The index counts every item, including those a filter hides. An index past the e
 
 #### MoveMenuItem(MenuItem item, int index)
 
-Moves an item already in this menu. Unlike remove and add, a submenu button keeps its submenu. The highlighted item stays highlighted, except in a paginated menu. An active filter is updated too.
+Moves an item already in this menu. Unlike remove and add, a submenu button stays bound to its submenu. The highlighted item stays highlighted, except in a paginated menu. An active filter is updated too.
 
 The index counts every item, including those a filter hides. Does nothing if the item is not in this menu.
 
@@ -256,8 +256,8 @@ The index counts every item, including those a filter hides. Does nothing if the
 
 Removes the item at the index and corrects the current index so the highlight does not jump. Does nothing if the index is out of range.
 
-:::caution
-Removing a submenu button also removes its submenu. To keep it, bind it to another button with [BindMenuItem()](../menucontroller/#bindmenuitemmenu-parentmenu-menu-childmenu-menuitem-menuitem) first.
+:::note
+Removing a submenu button keeps its submenu. Bind it to a new button whenever you like, or remove it with [RemoveMenu()](../menucontroller/#removemenumenu-menu) when you no longer need it.
 :::
 
 |Parameter|Type|Description|
@@ -268,7 +268,7 @@ Removing a submenu button also removes its submenu. To keep it, bind it to anoth
 
 #### RemoveMenuItem(MenuItem item)
 
-Removes the item and clears its `ParentMenu`. Does nothing if the item is not in this menu. A submenu button takes its submenu with it, as above.
+Removes the item and clears its `ParentMenu`. Does nothing if the item is not in this menu. A submenu button keeps its submenu, as above.
 
 |Parameter|Type|Description|
 |-|-|-|
@@ -278,7 +278,7 @@ Removes the item and clears its `ParentMenu`. Does nothing if the item is not in
 
 #### ClearMenuItems()
 
-Removes all items and resets the index and scroll position. Submenus only reachable through the removed buttons are removed too.
+Removes all items and resets the index and scroll position. Submenus of the removed buttons are kept, so you can bind new buttons to them.
 
 ----
 

@@ -282,13 +282,6 @@ public partial class MenuController
     {
         AddSubmenu(parentMenu, childMenu);
 
-        // Pointing the row at something else leaves whatever it opened before unreachable through it,
-        // so that one goes unless another row still opens it.
-        if (MenuButtons.TryGetValue(menuItem, out var previous) && !ReferenceEquals(previous, childMenu))
-        {
-            Unbind(menuItem);
-        }
-
         MenuButtons[menuItem] = childMenu;
     }
 
@@ -405,7 +398,8 @@ public partial class MenuController
     }
 
     /// <summary>
-    /// Forgets the menu <paramref name="item"/> opened, and removes that menu when no other row opens it.
+    /// Forgets the menu <paramref name="item"/> opened. During a <see cref="RemoveMenu(Menu)"/>, that menu
+    /// goes too when no other row opens it.
     /// </summary>
     internal static void Unbind(MenuItem item, HashSet<Menu>? removed = null)
     {
@@ -416,8 +410,10 @@ public partial class MenuController
 
         MenuButtons.Remove(item);
 
-        // Checked after the entry is gone, so a row bound twice to the same menu keeps it.
-        if (StillBound(child) || ReferenceEquals(MainMenu, child))
+        // Clearing rows and binding new ones to the same submenu is how a list refreshes, so only an
+        // explicit RemoveMenu takes submenus along. Checked after the entry is gone, so a row bound
+        // twice to the same menu keeps it.
+        if (removed is null || StillBound(child) || ReferenceEquals(MainMenu, child))
         {
             return;
         }

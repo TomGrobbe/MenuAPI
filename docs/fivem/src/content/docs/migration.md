@@ -52,6 +52,10 @@ These still compile with an obsolete warning, but nothing uses them anymore: `Me
 MenuController.RenderMode = MenuRenderMode.Nui;
 ```
 
+### Removing a submenu button keeps the submenu
+
+`ClearMenuItems()`, `RemoveMenuItem()` and binding a button to another menu no longer remove the submenu behind the button. Call `MenuController.RemoveMenu()` for a submenu you no longer need.
+
 ### GlareTuning is removed
 
 The `GlareTuning` class is gone. Delete any code that uses it.
