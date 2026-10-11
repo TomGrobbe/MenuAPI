@@ -1,14 +1,10 @@
 name: CI
 
-# Builds all three packages from this one branch and publishes them to nuget.org as pre-releases.
-# Never tags and never creates a GitHub release. The file keeps the name build.yml on purpose:
-# nuget.org trusted publishing is tied to the workflow file name.
+# Keeps the name build.yml on purpose, nuget.org trusted publishing is tied to the workflow file name.
+# main releases, develop publishes prereleases, everything else only builds. See .github/scripts/version.sh.
 
 on:
   push:
-    branches:
-      - concept
-      - main
     paths-ignore:
       - 'docs/**'
       - '.github/workflows/docs.yml'
@@ -17,68 +13,74 @@ on:
       - 'docs/**'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish a prerelease to nuget.org (ignored on main and develop)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+# Releases never cancel each other, so two runs on main can't race for the same version.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.ref == 'refs/heads/main' && 'release' || format('{0}-{1}', github.workflow, github.ref) }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-
-  # The version every pre-release counts up to. Bump these by hand until real releases come back.
-  ENHANCED_BASE: 2.0.0
-  LEGACY_BASE: 4.0.0
-  REDM_BASE: 3.3.0
+  VERSION_FLOOR: 4.0.0
 
 jobs:
-  build:
-    name: Build
-    runs-on: windows-latest
+  version:
+    name: Version
+    runs-on: ubuntu-latest
 
     outputs:
-      enhanced: ${{ steps.version.outputs.enhanced }}
-      legacy: ${{ steps.version.outputs.legacy }}
-      redm: ${{ steps.version.outputs.redm }}
+      kind: ${{ steps.version.outputs.kind }}
+      version: ${{ steps.version.outputs.version }}
+      assembly: ${{ steps.version.outputs.assembly }}
+      previous: ${{ steps.version.outputs.previous }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # Dotted <label>.<run> so NuGet compares the run number as a number, run-123 would sort below run-57.
-      - name: Set versions
+      - name: Work out the version
         id: version
         shell: bash
         env:
           EVENT: ${{ github.event_name }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
           BRANCH: ${{ github.ref_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PUBLISH_INPUT: ${{ inputs.publish }}
+          ACTOR: ${{ github.actor }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
-          if [ "$EVENT" = "pull_request" ]; then
-            LABEL="pr${PR_NUMBER}"
-          else
-            LABEL=$(printf '%s' "$BRANCH" | tr -c 'A-Za-z0-9' '-' | sed -E 's/-+/-/g; s/^-|-$//g')
-          fi
-          SUFFIX="${LABEL}.${{ github.run_number }}"
+          bash .github/scripts/version.sh | tee version.txt
           {
-            echo "enhanced=$ENHANCED_BASE-$SUFFIX"
-            echo "legacy=$LEGACY_BASE-$SUFFIX"
-            echo "redm=$REDM_BASE-$SUFFIX"
-          } >> "$GITHUB_OUTPUT"
-          {
-            echo "## Pre-release versions"
+            echo "## Version"
             echo ""
-            echo "| Package | Version |"
+            echo "| | |"
             echo "| --- | --- |"
-            echo "| MenuAPI.FiveM.Enhanced | \`$ENHANCED_BASE-$SUFFIX\` |"
-            echo "| MenuAPI.FiveM | \`$LEGACY_BASE-$SUFFIX\` |"
-            echo "| MenuAPI.RedM | \`$REDM_BASE-$SUFFIX\` |"
-            echo ""
-            echo "Nothing is tagged or released."
+            sed -E 's/^([a-z]+)=(.*)$/| \1 | `\2` |/' version.txt
           } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build
+    needs: version
+    runs-on: windows-latest
+
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      ASSEMBLY: ${{ needs.version.outputs.assembly }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -90,7 +92,7 @@ jobs:
         shell: bash
         run: npm ci
 
-      # Everything, both frameworks and the TestMenu, so a break anywhere fails the run.
+      # Everything, both frameworks and the TestMenus, so a break anywhere fails the run.
       - name: Build FiveM solution
         shell: bash
         run: dotnet build MenuAPI.FiveM.slnx -c Release
@@ -99,13 +101,12 @@ jobs:
         shell: bash
         run: dotnet build redm/MenuAPI.RedM.slnx -c Release
 
-      # Packing builds again, once per package, so each one gets its own version stamped in.
+      # Packing builds again, once per package, so each one gets the version stamped in.
       - name: Pack Enhanced
         shell: bash
         run: |
-          VERSION="${{ steps.version.outputs.enhanced }}"
           dotnet pack MenuAPI/MenuAPI.csproj -c Release -p:MenuApiFlavor=Enhanced \
-            -p:Version="$VERSION" -p:AssemblyVersion="$ENHANCED_BASE" -p:FileVersion="$ENHANCED_BASE" \
+            -p:Version="$VERSION" -p:AssemblyVersion="$ASSEMBLY" -p:FileVersion="$ASSEMBLY" \
             -o nupkgs
 
       - name: Zip Enhanced
@@ -114,14 +115,13 @@ jobs:
           New-Item -ItemType Directory -Force -Path zips | Out-Null
           $outDir = 'MenuAPI/bin/Release/net10.0'
           Copy-Item README.md "$outDir/README.md" -Force
-          Compress-Archive -Path "$outDir/*" -DestinationPath "zips/MenuAPI-${{ steps.version.outputs.enhanced }}-FiveM-Enhanced.zip" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "zips/MenuAPI-$env:VERSION-FiveM-Enhanced.zip" -Force
 
       - name: Pack Legacy
         shell: bash
         run: |
-          VERSION="${{ steps.version.outputs.legacy }}"
           dotnet pack MenuAPI/MenuAPI.csproj -c Release -p:MenuApiFlavor=Legacy \
-            -p:Version="$VERSION" -p:AssemblyVersion="$LEGACY_BASE" -p:FileVersion="$LEGACY_BASE" \
+            -p:Version="$VERSION" -p:AssemblyVersion="$ASSEMBLY" -p:FileVersion="$ASSEMBLY" \
             -o nupkgs
 
       - name: Zip Legacy
@@ -129,14 +129,13 @@ jobs:
         run: |
           $outDir = 'MenuAPI/bin/Release/net452'
           Copy-Item README.md "$outDir/README.md" -Force
-          Compress-Archive -Path "$outDir/*" -DestinationPath "zips/MenuAPI-${{ steps.version.outputs.legacy }}-FiveM.zip" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "zips/MenuAPI-$env:VERSION-FiveM.zip" -Force
 
       - name: Pack RedM
         shell: bash
         run: |
-          VERSION="${{ steps.version.outputs.redm }}"
           dotnet pack redm/MenuAPI/MenuAPI.csproj -c Release \
-            -p:Version="$VERSION" -p:AssemblyVersion="$REDM_BASE" -p:FileVersion="$REDM_BASE" \
+            -p:Version="$VERSION" -p:AssemblyVersion="$ASSEMBLY" -p:FileVersion="$ASSEMBLY" \
             -o nupkgs
 
       - name: Zip RedM
@@ -144,22 +143,19 @@ jobs:
         run: |
           $outDir = 'redm/MenuAPI/bin/Release/net452'
           Copy-Item README.md "$outDir/README.md" -Force
-          Compress-Archive -Path "$outDir/*" -DestinationPath "zips/MenuAPI-${{ steps.version.outputs.redm }}-RedM.zip" -Force
+          Compress-Archive -Path "$outDir/*" -DestinationPath "zips/MenuAPI-$env:VERSION-RedM.zip" -Force
 
-      # Profiling build, slower than the normal one, so it only ships as a workflow artifact and never to nuget.org.
+      # Profiling build, slower than the normal one, so it only ships as a zip and never to nuget.org.
       - name: Pack NativeHooks
         shell: bash
         run: |
-          VERSION="${{ steps.version.outputs.enhanced }}"
           dotnet pack MenuAPI/MenuAPI.csproj -c NativeHooks \
-            -p:Version="$VERSION" -p:AssemblyVersion="$ENHANCED_BASE" -p:FileVersion="$ENHANCED_BASE" \
+            -p:Version="$VERSION" -p:AssemblyVersion="$ASSEMBLY" -p:FileVersion="$ASSEMBLY" \
             -o nupkgs-nativehooks
 
       - name: Zip NativeHooks
         shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path zips | Out-Null
-          Compress-Archive -Path 'nupkgs-nativehooks/*.nupkg' -DestinationPath "zips/MenuAPI-${{ steps.version.outputs.enhanced }}-NativeHooks-NuGet.zip" -Force
+        run: Compress-Archive -Path 'nupkgs-nativehooks/*.nupkg' -DestinationPath "zips/MenuAPI-$env:VERSION-NativeHooks-NuGet.zip" -Force
 
       - name: Upload NuGet packages
         uses: actions/upload-artifact@v4
@@ -173,11 +169,135 @@ jobs:
           name: zips
           path: zips/*.zip
 
-  # Pushes only. Pull requests and dependabot runs have no business publishing, and cannot get an id-token anyway.
+  release:
+    name: GitHub release
+    needs: [version, build]
+    if: needs.version.outputs.kind == 'release'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    outputs:
+      url: ${{ steps.release.outputs.url }}
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ needs.version.outputs.version }}
+      PREVIOUS: ${{ needs.version.outputs.previous }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download zips
+        uses: actions/download-artifact@v4
+        with:
+          name: zips
+          path: release-assets
+
+      # A hand written intro for a release can sit in .github/release-notes/<version>.md.
+      - name: Write release notes
+        shell: bash
+        run: |
+          RANGE="${PREVIOUS:+$PREVIOUS..}$GITHUB_SHA"
+          LIMIT=100
+          TOTAL=$(git rev-list --count --no-merges "$RANGE")
+
+          breaking() {
+            local sha subject note
+            for sha in $(git log "$RANGE" --no-merges --format='%H'); do
+              subject=$(git log -1 "$sha" --format='%s')
+              note=$(git log -1 "$sha" --format='%b' \
+                | awk '/^BREAKING[ -]CHANGE:/ { flag = 1; sub(/^BREAKING[ -]CHANGE:[[:space:]]*/, "") } flag' \
+                | paste -sd ' ' - \
+                | sed 's/[[:space:]]*$//')
+              if [ -z "$note" ] && ! echo "$subject" | grep -qE '^[a-zA-Z]+(\([^)]*\))?!:'; then
+                continue
+              fi
+              echo "> - \`$(git log -1 "$sha" --format='%h')\` $subject"
+              if [ -n "$note" ]; then
+                echo ">   $note"
+              fi
+            done
+          }
+          breaking > breaking.txt
+
+          {
+            if [ -f ".github/release-notes/$VERSION.md" ]; then
+              cat ".github/release-notes/$VERSION.md"
+              echo ""
+            fi
+
+            if [ -s breaking.txt ]; then
+              echo "> [!WARNING]"
+              echo "> **This release contains breaking changes.** Read these before updating."
+              echo ">"
+              cat breaking.txt
+              echo ""
+            fi
+
+            echo "## Downloads"
+            echo ""
+            echo "Every package has the same version. Pick the one for your server."
+            echo ""
+            echo "| Server | NuGet package | Zip |"
+            echo "| --- | --- | --- |"
+            echo "| FiveM with the Enhanced runtime (.NET 10) | \`MenuAPI.FiveM.Enhanced\` | \`MenuAPI-$VERSION-FiveM-Enhanced.zip\` |"
+            echo "| FiveM with the Legacy runtime (.NET Framework 4.5.2) | \`MenuAPI.FiveM\` | \`MenuAPI-$VERSION-FiveM.zip\` |"
+            echo "| RedM | \`MenuAPI.RedM\` | \`MenuAPI-$VERSION-RedM.zip\` |"
+            echo ""
+            echo "## Changes since ${PREVIOUS:-the beginning}"
+            echo ""
+            git log "$RANGE" --no-merges -n "$LIMIT" --pretty=format:'- `%h` %s'
+            echo ""
+            if [ "$TOTAL" -gt "$LIMIT" ]; then
+              echo "- ...and $((TOTAL - LIMIT)) more."
+            fi
+            echo ""
+            echo "## Notes"
+            echo ""
+            echo "The NativeHooks zip is a profiling build of Enhanced, packed as a NuGet package you can install from a local folder feed. It is slower than the normal build and is not published to nuget.org. You only need it when profiling."
+            echo ""
+            echo "Docs: [FiveM](https://docs.vespura.com/menuapi/fivem), [RedM](https://docs.vespura.com/menuapi/redm)."
+          } > release_notes.md
+
+          cat release_notes.md
+
+      - name: Tag and release
+        id: release
+        shell: bash
+        run: |
+          TAG="v$VERSION"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG already exists. Remove it, or bump the version with +semver."
+            exit 1
+          fi
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "$TAG"
+
+          gh release create "$TAG" --verify-tag --title "MenuAPI v$VERSION" --notes-file release_notes.md release-assets/*.zip
+
+          URL=$(gh release view "$TAG" --json url --jq .url)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Released [MenuAPI v$VERSION]($URL)." >> "$GITHUB_STEP_SUMMARY"
+
+  # After the release on main, so a failed tag never leaves packages on nuget.org without a release.
   publish:
-    name: Publish pre-release NuGet packages
-    needs: build
-    if: github.event_name == 'push' && github.actor != 'dependabot[bot]'
+    name: Publish to NuGet
+    needs: [version, build, release]
+    if: >-
+      always()
+      && needs.build.result == 'success'
+      && (needs.version.outputs.kind == 'prerelease'
+          || (needs.version.outputs.kind == 'release' && needs.release.result == 'success'))
     runs-on: ubuntu-latest
 
     permissions:
@@ -205,3 +325,115 @@ jobs:
               --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
               --skip-duplicate
           done
+
+  notify:
+    name: Discord
+    needs: [version, build, release, publish]
+    if: always() && (needs.version.outputs.kind == 'release' || needs.version.outputs.kind == 'prerelease')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Discord message
+        shell: bash
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          KIND: ${{ needs.version.outputs.kind }}
+          VERSION: ${{ needs.version.outputs.version }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          RELEASE_RESULT: ${{ needs.release.result }}
+          NUGET_RESULT: ${{ needs.publish.result }}
+          RELEASE_URL: ${{ needs.release.outputs.url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_WEBHOOK_URL not configured, skipping."
+            exit 0
+          fi
+
+          icon() {
+            case "$1" in
+              success)   echo "✅" ;;
+              cancelled) echo "⚠️" ;;
+              skipped)   echo "⏭️" ;;
+              *)         echo "❌" ;;
+            esac
+          }
+
+          FAILED=false
+          CANCELLED=false
+          for RESULT in "$BUILD_RESULT" "$RELEASE_RESULT" "$NUGET_RESULT"; do
+            case "$RESULT" in
+              cancelled) CANCELLED=true ;;
+              success|skipped) ;;
+              *) FAILED=true ;;
+            esac
+          done
+
+          if [ "$CANCELLED" = "true" ]; then
+            COLOR=16776960
+            STATUS_TEXT="Build cancelled."
+          elif [ "$FAILED" = "true" ]; then
+            COLOR=13632027
+            STATUS_TEXT="Build FAILED!"
+          elif [ "$KIND" = "release" ]; then
+            COLOR=4502298
+            STATUS_TEXT="New release published."
+          else
+            COLOR=7506394
+            STATUS_TEXT="New prerelease published."
+          fi
+
+          if [ "$KIND" = "release" ]; then
+            TITLE="MenuAPI v$VERSION"
+          else
+            TITLE="MenuAPI $VERSION (prerelease)"
+          fi
+
+          if [ -n "$RELEASE_URL" ]; then
+            LINK_NAME="GitHub Release"
+            LINK_URL="$RELEASE_URL"
+          else
+            LINK_NAME="Build Run"
+            LINK_URL="$RUN_URL"
+          fi
+
+          SHA="${{ github.sha }}"
+
+          # Discord rejects field values over 1024 characters, squash merges easily get there.
+          COMMIT_SUBJECT=$(printf '%s' "${COMMIT_MSG:-Manual run}" | head -n 1)
+          if [ "${#COMMIT_SUBJECT}" -gt 256 ]; then
+            COMMIT_SUBJECT="${COMMIT_SUBJECT:0:253}..."
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg  title      "$TITLE" \
+            --arg  desc       "$STATUS_TEXT" \
+            --argjson color   "$COLOR" \
+            --arg  actor      "${{ github.actor }}" \
+            --arg  actor_url  "https://github.com/${{ github.actor }}" \
+            --arg  build      "$(icon "$BUILD_RESULT") $BUILD_RESULT" \
+            --arg  nuget      "$(icon "$NUGET_RESULT") $NUGET_RESULT" \
+            --arg  branch     "${{ github.ref_name }}" \
+            --arg  link_name  "$LINK_NAME" \
+            --arg  link_url   "$LINK_URL" \
+            --arg  short_sha  "${SHA:0:7}" \
+            --arg  commit_url "https://github.com/${{ github.repository }}/commit/$SHA" \
+            --arg  commit_msg "$COMMIT_SUBJECT" \
+            '{
+              embeds: [{
+                title:       $title,
+                description: $desc,
+                color:       $color,
+                author: { name: ("Committed by " + $actor), url: $actor_url },
+                fields: [
+                  { name: "Build",    value: $build,  inline: true },
+                  { name: "NuGet",    value: $nuget,  inline: true },
+                  { name: "Branch",   value: $branch, inline: true },
+                  { name: $link_name, value: ("[Link](" + $link_url + ")"), inline: true },
+                  { name: "Commit",   value: ("[`" + $short_sha + "`](" + $commit_url + ") " + $commit_msg), inline: false }
+                ]
+              }]
+            }')
+
+          curl -fsSL -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL"
