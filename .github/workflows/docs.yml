@@ -86,5 +86,13 @@ jobs:
             echo "No documentation changes to publish."
           else
             git commit -m "Deploy MenuAPI docs"
-            git push origin main
+            # The vMenu docs push to the same hub, so a push can lose the race and needs a rebase.
+            for attempt in 1 2 3; do
+              if git push origin main; then
+                exit 0
+              fi
+              git pull --rebase origin main
+            done
+            echo "::error::Could not push to the hub after 3 attempts."
+            exit 1
           fi

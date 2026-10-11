@@ -22,7 +22,7 @@ bump_for() {
     echo minor
     return
   fi
-  for sha in $(git rev-list "$range"); do
+  for sha in $(git rev-list --no-merges "$range"); do
     if ! git log -1 --format=%B "$sha" | grep -qiE '\+semver:[[:space:]]*(none|skip)'; then
       echo patch
       return
@@ -66,18 +66,24 @@ PREVIOUS=$(git tag --list 'v[0-9]*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort
 
 if [ -n "$PREVIOUS" ]; then
   RANGE="$PREVIOUS..HEAD"
+  COMMITS=$(git rev-list --count "$RANGE")
   BUMP=$(bump_for "$RANGE")
   NEXT=$(at_least "$(next_version "${PREVIOUS#v}" "$BUMP")" "$FLOOR")
 else
+  COMMITS=1
   BUMP=patch
   NEXT="$FLOOR"
 fi
 
 if [ "$KIND" = "release" ]; then
-  if [ "$BUMP" = "none" ]; then
+  if [ "$COMMITS" -eq 0 ]; then
+    KIND=build
+    NOTE="Nothing new since $PREVIOUS, so nothing is released."
+    VERSION="$NEXT-$LABEL.$RUN_NUMBER"
+  elif [ "$BUMP" = "none" ]; then
     KIND=build
     NOTE="Every commit since $PREVIOUS says +semver: none, so nothing is released."
-    VERSION="${PREVIOUS#v}"
+    VERSION="$NEXT-$LABEL.$RUN_NUMBER"
   else
     NOTE="Release, $BUMP bump from ${PREVIOUS:-nothing}."
     VERSION="$NEXT"

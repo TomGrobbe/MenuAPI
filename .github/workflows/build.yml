@@ -5,6 +5,8 @@ name: CI
 
 on:
   push:
+    # Without a branch filter, pushing a tag would start a full build too.
+    branches: ['**']
     paths-ignore:
       - 'docs/**'
       - '.github/workflows/docs.yml'
@@ -22,10 +24,10 @@ on:
 permissions:
   contents: read
 
-# Releases never cancel each other, so two runs on main can't race for the same version.
+# main and develop never cancel a running build, so a release or prerelease is never cut off halfway.
 concurrency:
   group: ${{ github.ref == 'refs/heads/main' && 'release' || format('{0}-{1}', github.workflow, github.ref) }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
 
 env:
   DOTNET_NOLOGO: true
@@ -207,6 +209,12 @@ jobs:
           LIMIT=100
           TOTAL=$(git rev-list --count --no-merges "$RANGE")
 
+          # The first 4.x release does not descend from the last 3.x tag, so a commit list would hold all of history.
+          HISTORY=true
+          if [ -n "$PREVIOUS" ] && ! git merge-base --is-ancestor "$PREVIOUS" "$GITHUB_SHA"; then
+            HISTORY=false
+          fi
+
           breaking() {
             local sha subject note
             for sha in $(git log "$RANGE" --no-merges --format='%H'); do
@@ -224,7 +232,11 @@ jobs:
               fi
             done
           }
-          breaking > breaking.txt
+          if [ "$HISTORY" = "true" ]; then
+            breaking > breaking.txt
+          else
+            : > breaking.txt
+          fi
 
           {
             if [ -f ".github/release-notes/$VERSION.md" ]; then
@@ -250,14 +262,16 @@ jobs:
             echo "| FiveM with the Legacy runtime (.NET Framework 4.5.2) | \`MenuAPI.FiveM\` | \`MenuAPI-$VERSION-FiveM.zip\` |"
             echo "| RedM | \`MenuAPI.RedM\` | \`MenuAPI-$VERSION-RedM.zip\` |"
             echo ""
-            echo "## Changes since ${PREVIOUS:-the beginning}"
-            echo ""
-            git log "$RANGE" --no-merges -n "$LIMIT" --pretty=format:'- `%h` %s'
-            echo ""
-            if [ "$TOTAL" -gt "$LIMIT" ]; then
-              echo "- ...and $((TOTAL - LIMIT)) more."
+            if [ "$HISTORY" = "true" ]; then
+              echo "## Changes since ${PREVIOUS:-the beginning}"
+              echo ""
+              git log "$RANGE" --no-merges -n "$LIMIT" --pretty=format:'- `%h` %s'
+              echo ""
+              if [ "$TOTAL" -gt "$LIMIT" ]; then
+                echo "- ...and $((TOTAL - LIMIT)) more."
+              fi
+              echo ""
             fi
-            echo ""
             echo "## Notes"
             echo ""
             echo "The NativeHooks zip is a profiling build of Enhanced, packed as a NuGet package you can install from a local folder feed. It is slower than the normal build and is not published to nuget.org. You only need it when profiling."
@@ -267,23 +281,26 @@ jobs:
 
           cat release_notes.md
 
+      # GitHub creates the tag together with the release, so a failed run never leaves a tag without a release.
+      # Safe to re-run: an existing release for this commit gets its notes and zips replaced.
       - name: Tag and release
         id: release
         shell: bash
         run: |
           TAG="v$VERSION"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}"
 
-          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "::error::Tag $TAG already exists. Remove it, or bump the version with +semver."
+          TAGGED=$(git ls-remote --tags origin "refs/tags/$TAG" | cut -f1)
+          if [ -n "$TAGGED" ] && [ "$TAGGED" != "$GITHUB_SHA" ]; then
+            echo "::error::Tag $TAG already exists on another commit. Remove it, or bump the version with +semver."
             exit 1
           fi
-          git tag "$TAG" "$GITHUB_SHA"
-          git push origin "$TAG"
 
-          gh release create "$TAG" --verify-tag --title "MenuAPI v$VERSION" --notes-file release_notes.md release-assets/*.zip
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "MenuAPI v$VERSION" --notes-file release_notes.md --draft=false
+            gh release upload "$TAG" release-assets/*.zip --clobber
+          else
+            gh release create "$TAG" --target "$GITHUB_SHA" --title "MenuAPI v$VERSION" --notes-file release_notes.md release-assets/*.zip
+          fi
 
           URL=$(gh release view "$TAG" --json url --jq .url)
           echo "url=$URL" >> "$GITHUB_OUTPUT"
@@ -294,7 +311,7 @@ jobs:
     name: Publish to NuGet
     needs: [version, build, release]
     if: >-
-      always()
+      !cancelled()
       && needs.build.result == 'success'
       && (needs.version.outputs.kind == 'prerelease'
           || (needs.version.outputs.kind == 'release' && needs.release.result == 'success'))
@@ -318,18 +335,24 @@ jobs:
 
       - name: Push packages
         shell: bash
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: |
           for package in packages/*.nupkg; do
             dotnet nuget push "$package" \
               --source https://api.nuget.org/v3/index.json \
-              --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+              --api-key "$NUGET_API_KEY" \
               --skip-duplicate
           done
 
   notify:
     name: Discord
     needs: [version, build, release, publish]
-    if: always() && (needs.version.outputs.kind == 'release' || needs.version.outputs.kind == 'prerelease')
+    if: >-
+      !cancelled()
+      && (needs.version.outputs.kind == 'release'
+          || needs.version.outputs.kind == 'prerelease'
+          || (needs.version.result == 'failure' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')))
     runs-on: ubuntu-latest
 
     steps:
@@ -340,11 +363,16 @@ jobs:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
           KIND: ${{ needs.version.outputs.kind }}
           VERSION: ${{ needs.version.outputs.version }}
+          VERSION_RESULT: ${{ needs.version.result }}
           BUILD_RESULT: ${{ needs.build.result }}
           RELEASE_RESULT: ${{ needs.release.result }}
           NUGET_RESULT: ${{ needs.publish.result }}
           RELEASE_URL: ${{ needs.release.outputs.url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
         run: |
           if [ -z "$DISCORD_WEBHOOK_URL" ]; then
             echo "DISCORD_WEBHOOK_URL not configured, skipping."
@@ -362,7 +390,7 @@ jobs:
 
           FAILED=false
           CANCELLED=false
-          for RESULT in "$BUILD_RESULT" "$RELEASE_RESULT" "$NUGET_RESULT"; do
+          for RESULT in "$VERSION_RESULT" "$BUILD_RESULT" "$RELEASE_RESULT" "$NUGET_RESULT"; do
             case "$RESULT" in
               cancelled) CANCELLED=true ;;
               success|skipped) ;;
@@ -384,7 +412,9 @@ jobs:
             STATUS_TEXT="New prerelease published."
           fi
 
-          if [ "$KIND" = "release" ]; then
+          if [ -z "$VERSION" ]; then
+            TITLE="MenuAPI ($BRANCH)"
+          elif [ "$KIND" = "release" ]; then
             TITLE="MenuAPI v$VERSION"
           else
             TITLE="MenuAPI $VERSION (prerelease)"
@@ -398,8 +428,6 @@ jobs:
             LINK_URL="$RUN_URL"
           fi
 
-          SHA="${{ github.sha }}"
-
           # Discord rejects field values over 1024 characters, squash merges easily get there.
           COMMIT_SUBJECT=$(printf '%s' "${COMMIT_MSG:-Manual run}" | head -n 1)
           if [ "${#COMMIT_SUBJECT}" -gt 256 ]; then
@@ -410,15 +438,15 @@ jobs:
             --arg  title      "$TITLE" \
             --arg  desc       "$STATUS_TEXT" \
             --argjson color   "$COLOR" \
-            --arg  actor      "${{ github.actor }}" \
-            --arg  actor_url  "https://github.com/${{ github.actor }}" \
+            --arg  actor      "$ACTOR" \
+            --arg  actor_url  "https://github.com/$ACTOR" \
             --arg  build      "$(icon "$BUILD_RESULT") $BUILD_RESULT" \
             --arg  nuget      "$(icon "$NUGET_RESULT") $NUGET_RESULT" \
-            --arg  branch     "${{ github.ref_name }}" \
+            --arg  branch     "$BRANCH" \
             --arg  link_name  "$LINK_NAME" \
             --arg  link_url   "$LINK_URL" \
             --arg  short_sha  "${SHA:0:7}" \
-            --arg  commit_url "https://github.com/${{ github.repository }}/commit/$SHA" \
+            --arg  commit_url "https://github.com/$REPO/commit/$SHA" \
             --arg  commit_msg "$COMMIT_SUBJECT" \
             '{
               embeds: [{
