@@ -9,6 +9,10 @@ using static CitizenFX.Core.Native.Hash;
 
 namespace MenuAPI
 {
+    /// <summary>
+    /// A single menu with a banner, a subtitle, a list of <see cref="MenuItem"/>s and its own instructional buttons.
+    /// Register it with <see cref="MenuController.AddMenu(Menu)"/> before opening it.
+    /// </summary>
     public class Menu
     {
         #region Setting up events
@@ -151,7 +155,6 @@ namespace MenuAPI
         /// <summary>
         /// Triggered when a <see cref="MenuItem"/> is selected.
         /// </summary>
-        /// <param name="menu">The <see cref="Menu"/> in which this event occurred.</param>
         /// <param name="menuItem">The <see cref="MenuItem"/> that was selected.</param>
         /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuItem"/>.</param>
         internal virtual void ItemSelectedEvent(MenuItem menuItem, int itemIndex)
@@ -162,10 +165,9 @@ namespace MenuAPI
         /// <summary>
         /// Triggered when a <see cref="MenuCheckboxItem"/> was toggled.
         /// </summary>
-        /// <param name="menu">The <see cref="Menu"/> in which this event occurred.</param>
         /// <param name="menuItem">The <see cref="MenuCheckboxItem"/> that was toggled.</param>
         /// <param name="itemIndex">The <see cref="MenuItem.Index"/> of this <see cref="MenuCheckboxItem"/>.</param>
-        /// <param name="newCheckedState">The new <see cref="MenuCheckboxItem.Checked"/> state of this <see cref="MenuCheckboxItem"/>.</param>
+        /// <param name="_checked">The new <see cref="MenuCheckboxItem.Checked"/> state of this <see cref="MenuCheckboxItem"/>.</param>
         internal virtual void CheckboxChangedEvent(MenuCheckboxItem menuItem, int itemIndex, bool _checked)
         {
             OnCheckboxChange?.Invoke(this, menuItem, itemIndex, _checked);
@@ -255,6 +257,9 @@ namespace MenuAPI
         #endregion
 
         #region constants or readonlys
+        /// <summary>
+        /// The width of a menu, in pixels on a 1080p screen.
+        /// </summary>
         public const float Width = 300F;
         #endregion
 
@@ -265,6 +270,9 @@ namespace MenuAPI
 
         private bool visible = false;
 
+        /// <summary>
+        /// The index of the first item that is visible on screen.
+        /// </summary>
         public int ViewIndexOffset { get; private set; } = 0;
 
         private List<MenuItem> VisibleMenuItems
@@ -291,18 +299,40 @@ namespace MenuAPI
         #endregion
 
         #region Public Variables
+        /// <summary>
+        /// The text on the menu banner. When this is null or empty, no banner is drawn.
+        /// </summary>
         public string MenuTitle { get; set; }
 
+        /// <summary>
+        /// The text in the subtitle bar below the banner. Null or empty hides the subtitle text.
+        /// </summary>
         public string MenuSubtitle { get; set; }
 
+        /// <summary>
+        /// A custom banner image, with the texture dictionary as the key and the texture name as the value.
+        /// The RedM build does not read this yet, the default banner is always drawn.
+        /// </summary>
         public KeyValuePair<string, string> HeaderTexture { get; set; } = new KeyValuePair<string, string>();
 
+        /// <summary>
+        /// When true, this menu stays open while <see cref="MenuController.DontOpenAnyMenu"/> is true.
+        /// </summary>
         public bool IgnoreDontOpenMenus { get; set; } = false;
 
+        /// <summary>
+        /// How many items are visible on screen at a time. Defaults to 10, use <see cref="SetMaxItemsOnScreen(int)"/> to change it.
+        /// </summary>
         public int MaxItemsOnScreen { get; internal set; } = 10;
 
+        /// <summary>
+        /// The number of items in this menu. While a filter is active, only the items that passed the filter are counted.
+        /// </summary>
         public int Size => filterActive ? FilterItems.Count : MenuItems.Count;
 
+        /// <summary>
+        /// Whether this menu is currently drawn. Prefer <see cref="OpenMenu"/> and <see cref="CloseMenu"/>, which also trigger the open and close events and toggle the UI prompts.
+        /// </summary>
         public bool Visible
         {
             get
@@ -323,16 +353,34 @@ namespace MenuAPI
             }
         }
 
+        /// <summary>
+        /// The x and y position of the top left corner of the menu, in pixels on a 1080p screen.
+        /// </summary>
         public KeyValuePair<float, float> Position { get; private set; } = new KeyValuePair<float, float>(0f, 20f);
 
+        /// <summary>
+        /// The y offset in pixels of the first menu item, measured from the top of the menu. Recalculated every frame while the menu is drawn.
+        /// </summary>
         public float MenuItemsYOffset { get; private set; } = 0f;
 
+        /// <summary>
+        /// Text meant to go in front of the item counter. The RedM build does not draw it yet.
+        /// </summary>
         public string CounterPreText { get; set; }
 
+        /// <summary>
+        /// The menu that the back control returns to, or null if this menu has no parent. Set by <see cref="MenuController.AddSubmenu(Menu, Menu)"/>.
+        /// </summary>
         public Menu ParentMenu { get; internal set; } = null;
 
+        /// <summary>
+        /// The index of the highlighted item. Use <see cref="RefreshIndex(int)"/> to change it.
+        /// </summary>
         public int CurrentIndex { get { return index; } internal set { index = MathUtil.Clamp(value, 0, Math.Max(0, Size - 1)); } }
 
+        /// <summary>
+        /// Whether the <see cref="InstructionalButtons"/> are shown as UI prompts while this menu is open.
+        /// </summary>
         public bool EnableInstructionalButtons { get; set; } = true;
 
         /// <summary>
@@ -352,7 +400,13 @@ namespace MenuAPI
         /// </summary>
         public float[] VehicleUpgradeStats { get; private set; } = new float[4] { 0f, 0f, 0f, 0f };
 
+        /// <summary>
+        /// Has no effect in RedM, the weapon stats panel is never drawn.
+        /// </summary>
         public bool ShowWeaponStatsPanel { get; set; } = false;
+        /// <summary>
+        /// Has no effect in RedM, the vehicle stats panel is never drawn.
+        /// </summary>
         public bool ShowVehicleStatsPanel { get; set; } = false;
 
         private readonly string[] weaponStatNames = new string[4] { "PM_DAMAGE", "PM_FIRERATE", "PM_ACCURACY", "PM_RANGE" };
@@ -361,6 +415,10 @@ namespace MenuAPI
         private bool filterActive = false;
 
 
+        /// <summary>
+        /// The UI prompts shown while this menu is open. Defaults to select, back and up / down.
+        /// Call <see cref="InstructionalButton.Dispose"/> on a prompt you remove, or it can get stuck on screen.
+        /// </summary>
         public List<InstructionalButton> InstructionalButtons = new List<InstructionalButton>() {
             new InstructionalButton(
                 new Control[1]
@@ -386,6 +444,9 @@ namespace MenuAPI
             )
         };
 
+        /// <summary>
+        /// A native UI prompt that shows one or more controls with a line of text next to them.
+        /// </summary>
         public class InstructionalButton
         {
             //private long text;
@@ -394,10 +455,10 @@ namespace MenuAPI
             private int promptHandle;
 
             /// <summary>
-            /// Constructor
+            /// Creates a new prompt for one or more controls.
             /// </summary>
-            /// <param name="control"></param>
-            /// <param name="text"></param>
+            /// <param name="controls">The controls this prompt listens for. Pass more than one to show a combination.</param>
+            /// <param name="text">The text shown next to the prompt.</param>
             public InstructionalButton(Control[] controls, string text)
             {
                 this.controls = controls;
@@ -463,18 +524,42 @@ namespace MenuAPI
             }
 
             //public long GetTextHandle() => text;
+            /// <summary>
+            /// Returns the text of this prompt.
+            /// </summary>
             public string GetTextString() => textString;
+            /// <summary>
+            /// Returns the controls this prompt listens for.
+            /// </summary>
             public Control[] GetControls() => controls;
         }
 
+        /// <summary>
+        /// How a <see cref="ButtonPressHandler"/> checks its control.
+        /// </summary>
         public enum ControlPressCheckType
         {
+            /// <summary>
+            /// Triggers once, on the frame the control is released.
+            /// </summary>
             JUST_RELEASED,
+            /// <summary>
+            /// Triggers once, on the frame the control is pressed down.
+            /// </summary>
             JUST_PRESSED,
+            /// <summary>
+            /// Triggers every frame while the control is not held down.
+            /// </summary>
             RELEASED,
+            /// <summary>
+            /// Triggers every frame while the control is held down.
+            /// </summary>
             PRESSED
         }
 
+        /// <summary>
+        /// Runs your own function when a control is pressed while this menu is open. Add it to <see cref="ButtonPressHandlers"/>.
+        /// </summary>
         public struct ButtonPressHandler
         {
             // The control to listen for.
@@ -486,6 +571,13 @@ namespace MenuAPI
             // Whether or not the control needs to be disabled if the menu is visible.
             internal bool disableControl;
 
+            /// <summary>
+            /// Creates a new button press handler.
+            /// </summary>
+            /// <param name="control">The control to listen for.</param>
+            /// <param name="pressType">How the control is checked.</param>
+            /// <param name="function">The function to run. It receives the menu and the control that triggered it.</param>
+            /// <param name="disableControl">Whether the control is disabled for the game while this menu is open, so only your function reacts to it.</param>
             public ButtonPressHandler(Control control, ControlPressCheckType pressType, Action<Menu, Control> function, bool disableControl)
             {
                 this.control = control;
@@ -494,6 +586,9 @@ namespace MenuAPI
                 this.disableControl = disableControl;
             }
         }
+        /// <summary>
+        /// Custom control handlers that run while this menu is open and <see cref="MenuController.DisableMenuButtons"/> is false.
+        /// </summary>
         public List<ButtonPressHandler> ButtonPressHandlers = new List<ButtonPressHandler>();
 
         #endregion
@@ -532,7 +627,16 @@ namespace MenuAPI
         /// Resets the index to 0
         /// </summary>
         public void RefreshIndex() => RefreshIndex(0, 0);
+        /// <summary>
+        /// Highlights the item at <paramref name="index"/> and scrolls the menu so that item is visible.
+        /// </summary>
+        /// <param name="index">The index of the item to highlight.</param>
         public void RefreshIndex(int index) => RefreshIndex(index, index > MaxItemsOnScreen ? index - MaxItemsOnScreen : 0);
+        /// <summary>
+        /// Highlights the item at <paramref name="index"/> and makes the item at <paramref name="viewOffset"/> the first one on screen.
+        /// </summary>
+        /// <param name="index">The index of the item to highlight.</param>
+        /// <param name="viewOffset">The index of the item drawn at the top of the menu.</param>
         public void RefreshIndex(int index, int viewOffset) { CurrentIndex = index; ViewIndexOffset = viewOffset; }
 
         /// <summary>
@@ -661,7 +765,7 @@ namespace MenuAPI
         /// <summary>
         /// Triggers the <see cref="ItemSelectedEvent(MenuItem, int)"/> event function.
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="item"></param>
         public void SelectItem(MenuItem item)
         {
             if (item == null)
@@ -823,7 +927,7 @@ namespace MenuAPI
         }
 
         /// <summary>
-        /// If the item is a <see cref="MenuListItem"/> or a <see cref="MenuSliderItem"/> then it'll go left if possible.
+        /// If the item is a <see cref="MenuListItem"/> or a <see cref="MenuDynamicListItem"/> then it'll go left if possible.
         /// </summary>
         public void GoLeft()
         {
@@ -844,7 +948,7 @@ namespace MenuAPI
         }
 
         /// <summary>
-        /// If the item is a <see cref="MenuListItem"/> or a <see cref="MenuSliderItem"/> then it'll go right if possible.
+        /// If the item is a <see cref="MenuListItem"/> or a <see cref="MenuDynamicListItem"/> then it'll go right if possible.
         /// </summary>
         public void GoRight()
         {

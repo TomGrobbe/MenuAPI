@@ -3,6 +3,7 @@
   <!-- Shared settings (framework, CitizenFX reference, ...) live in ../Directory.Build.props. -->
   <PropertyGroup>
     <TargetName>MenuAPI</TargetName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <AssemblyTitle>MenuAPI RedM</AssemblyTitle>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>

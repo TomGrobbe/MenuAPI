@@ -4,21 +4,57 @@ using static CitizenFX.Core.Native.API;
 
 namespace MenuAPI
 {
+    /// <summary>
+    /// A menu item that lets the user scroll through a list of strings with left and right.
+    /// </summary>
     public class MenuListItem : MenuItem
     {
+        /// <summary>
+        /// The index of the selected entry in <see cref="ListItems"/>. Wraps around when it goes out of range.
+        /// </summary>
         public int ListIndex { get; set; } = 0;
+        /// <summary>
+        /// The strings the user can scroll through. When empty, an N/A entry is added so the item can still be drawn.
+        /// </summary>
         public List<string> ListItems { get; set; } = new List<string>();
+        /// <summary>
+        /// Hides the left and right arrows while this item is not highlighted. Defaults to false.
+        /// </summary>
         public bool HideArrowsWhenNotSelected { get; set; } = false;
+        /// <summary>
+        /// Has no effect in RedM, the opacity panel is never drawn.
+        /// </summary>
         public bool ShowOpacityPanel { get; set; } = false;
+        /// <summary>
+        /// Has no effect in RedM, the color panel is never drawn.
+        /// </summary>
         public bool ShowColorPanel { get; set; } = false;
+        /// <summary>
+        /// Has no effect in RedM, the color panel is never drawn.
+        /// </summary>
         public ColorPanelType ColorPanelColorType = ColorPanelType.Hair;
+        /// <summary>
+        /// The color palettes of the color panel. Kept for FiveM compatibility, RedM does not draw the panel.
+        /// </summary>
         public enum ColorPanelType
         {
+            /// <summary>
+            /// The hair color palette.
+            /// </summary>
             Hair,
+            /// <summary>
+            /// The makeup color palette.
+            /// </summary>
             Makeup
         }
+        /// <summary>
+        /// The number of entries in <see cref="ListItems"/>.
+        /// </summary>
         public int ItemsCount => ListItems.Count;
 
+        /// <summary>
+        /// Returns the selected entry of <see cref="ListItems"/>, or null when <see cref="ListIndex"/> is out of range.
+        /// </summary>
         public string GetCurrentSelection()
         {
             if (ItemsCount > 0 && ListIndex >= 0 && ListIndex < ItemsCount)
@@ -28,7 +64,20 @@ namespace MenuAPI
             return null;
         }
 
+        /// <summary>
+        /// Creates a new <see cref="MenuListItem"/>.
+        /// </summary>
+        /// <param name="text">The text on the left side of the item.</param>
+        /// <param name="items">The strings the user can scroll through.</param>
+        /// <param name="index">The index of the entry selected at the start.</param>
         public MenuListItem(string text, List<string> items, int index) : this(text, items, index, null) { }
+        /// <summary>
+        /// Creates a new <see cref="MenuListItem"/> with a description.
+        /// </summary>
+        /// <param name="text">The text on the left side of the item.</param>
+        /// <param name="items">The strings the user can scroll through.</param>
+        /// <param name="index">The index of the entry selected at the start.</param>
+        /// <param name="description">The text shown below the menu while this item is highlighted.</param>
         public MenuListItem(string text, List<string> items, int index, string description) : base(text, description)
         {
             ListItems = items;

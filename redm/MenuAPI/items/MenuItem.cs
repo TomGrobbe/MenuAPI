@@ -7,26 +7,80 @@ using static CitizenFX.Core.Native.Hash;
 
 namespace MenuAPI
 {
+    /// <summary>
+    /// A basic menu button with text, an optional label and icons. Every other item type inherits from this class.
+    /// </summary>
     public class MenuItem
     {
+        /// <summary>
+        /// The icons that can be drawn on the left or right side of a <see cref="MenuItem"/>.
+        /// </summary>
         public enum Icon
         {
+            /// <summary>
+            /// No icon.
+            /// </summary>
             NONE,
+            /// <summary>
+            /// A padlock.
+            /// </summary>
             LOCK,
+            /// <summary>
+            /// A tick mark.
+            /// </summary>
             TICK,
+            /// <summary>
+            /// A circle.
+            /// </summary>
             CIRCLE,
+            /// <summary>
+            /// A horse saddle.
+            /// </summary>
             SADDLE,
+            /// <summary>
+            /// An orange star, shown darker while the item is disabled.
+            /// </summary>
             STAR,
+            /// <summary>
+            /// An arrow pointing left.
+            /// </summary>
             ARROW_LEFT,
+            /// <summary>
+            /// An arrow pointing right. Commonly used on submenu buttons.
+            /// </summary>
             ARROW_RIGHT,
+            /// <summary>
+            /// The invite sent icon.
+            /// </summary>
             INVITE_SENT,
+            /// <summary>
+            /// A square selection box.
+            /// </summary>
             SELECTION_BOX
         }
+        /// <summary>
+        /// The text on the left side of the item.
+        /// </summary>
         public string Text { get; set; }
+        /// <summary>
+        /// Text shown on the right side of the item. Not available on every item type.
+        /// </summary>
         public string Label { get; set; }
+        /// <summary>
+        /// The icon on the left side of the item. Defaults to <see cref="Icon.NONE"/>.
+        /// </summary>
         public Icon LeftIcon { get; set; }
+        /// <summary>
+        /// The icon on the right side of the item. Defaults to <see cref="Icon.NONE"/>. Not available on every item type.
+        /// </summary>
         public Icon RightIcon { get; set; }
+        /// <summary>
+        /// When false, the item is greyed out and selecting it only plays an error sound. Defaults to true.
+        /// </summary>
         public bool Enabled { get; set; } = true;
+        /// <summary>
+        /// Text shown below the menu while this item is highlighted. Long text is wrapped onto new lines of about 50 characters, and null is ignored.
+        /// </summary>
         public string Description
         {
             get
@@ -62,14 +116,35 @@ namespace MenuAPI
             }
         }
         private string _description;
+        /// <summary>
+        /// The position of this item in its menu, or -1 when it is not in a menu.
+        /// </summary>
         public int Index { get { if (ParentMenu != null) return ParentMenu.GetMenuItems().IndexOf(this); return -1; } } //{ get; internal set; }
+        /// <summary>
+        /// Whether this item is the highlighted item of its menu. False when it is not in a menu.
+        /// </summary>
         public bool Selected { get { if (ParentMenu != null) { return ParentMenu.CurrentIndex == Index; } return false; } }
+        /// <summary>
+        /// The menu this item was added to. Set by <see cref="Menu.AddMenuItem(MenuItem)"/>.
+        /// </summary>
         public Menu ParentMenu { get; set; }
+        /// <summary>
+        /// The index this item had when it was added to its menu.
+        /// </summary>
         public int PositionOnScreen { get; internal set; }
+        /// <summary>
+        /// The width of an item in pixels on a 1080p screen, the same as <see cref="Menu.Width"/>.
+        /// </summary>
         protected const float Width = Menu.Width;
+        /// <summary>
+        /// The height of one item row in pixels on a 1080p screen.
+        /// </summary>
         protected const float RowHeight = 38f;
 
         // Allows you to attach data to a menu item if you want to identify the menu item without having to put identification info in the visible text or description.
+        /// <summary>
+        /// Any data you want to attach to this item, so you can identify it without putting that in the visible text or description.
+        /// </summary>
         public dynamic ItemData { get; set; }
 
         /// <summary>
@@ -175,7 +250,7 @@ namespace MenuAPI
         }
 
         /// <summary>
-        /// Get the sprite color for the provided icon depending on the current state of the item (Enabled & selected values).
+        /// Get the sprite color for the provided icon depending on the current state of the item (Enabled &amp; selected values).
         /// </summary>
         /// <param name="icon"></param>
         /// <param name="selected"></param>

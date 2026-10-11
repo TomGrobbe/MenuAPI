@@ -7,11 +7,23 @@ using static CitizenFX.Core.Native.API;
 
 namespace MenuAPI
 {
+    /// <summary>
+    /// Draws every registered <see cref="Menu"/> and handles all menu controls. It starts by itself when MenuAPI.dll is loaded, so you only use its static members.
+    /// </summary>
     public class MenuController : BaseScript
     {
+        /// <summary>
+        /// Every menu registered with <see cref="AddMenu(Menu)"/> or <see cref="AddSubmenu(Menu, Menu)"/>.
+        /// </summary>
         public static List<Menu> Menus { get; protected set; } = new List<Menu>();
         internal static HashSet<Menu> VisibleMenus { get; } = new HashSet<Menu>();
+        /// <summary>
+        /// The streamed texture dictionary used for the default menu sprites.
+        /// </summary>
         public const string _texture_dict = "menu_textures";
+        /// <summary>
+        /// The texture name used for the default menu banner.
+        /// </summary>
         public const string _header_texture = "translate_bg_1a";
         private static List<string> menuTextureAssets = new List<string>()
         {
@@ -21,9 +33,21 @@ namespace MenuAPI
         };
 
         private static float AspectRatio => 16 / 9;
+        /// <summary>
+        /// The screen width that menu sizes are scaled against, in pixels. Always 1080 in the RedM build.
+        /// </summary>
         public static float ScreenWidth => 1080 * AspectRatio;
+        /// <summary>
+        /// The screen height that menu sizes are scaled against, in pixels. Always 1080.
+        /// </summary>
         public static float ScreenHeight => 1080;
+        /// <summary>
+        /// When true, all menu controls are ignored. The menu stays on screen but does not respond to input.
+        /// </summary>
         public static bool DisableMenuButtons { get; set; } = false;
+        /// <summary>
+        /// Whether menu controls are processed right now. False when no menu is open, the screen is faded out, the pause menu is open, the player is dead, or <see cref="DisableMenuButtons"/> is true.
+        /// </summary>
         public static bool AreMenuButtonsEnabled =>
             IsAnyMenuOpen() &&
             IsScreenFadedIn() &&
@@ -31,21 +55,51 @@ namespace MenuAPI
             !DisableMenuButtons &&
             !IsEntityDead(PlayerPedId());
 
+        /// <summary>
+        /// When true, pressing left on an item with no left and right behaviour goes back to the parent menu.
+        /// </summary>
         public static bool NavigateMenuUsingArrows { get; set; } = true;
+        /// <summary>
+        /// Whether MenuAPI runs a garbage collection once a minute while menus are drawn. Turn this off if your resource manages that itself.
+        /// </summary>
         public static bool EnableManualGCs { get; set; } = true;
+        /// <summary>
+        /// When true, open menus are closed and no menu is drawn, except menus with <see cref="Menu.IgnoreDontOpenMenus"/> set.
+        /// </summary>
         public static bool DontOpenAnyMenu { get; set; } = false;
+        /// <summary>
+        /// When true, the back control can not close a menu that has no parent. Submenus can still go back.
+        /// </summary>
         public static bool PreventExitingMenu { get; set; } = false;
+        /// <summary>
+        /// When true, the back control does nothing at all, not even in submenus.
+        /// </summary>
         public static bool DisableBackButton { get; set; } = false;
+        /// <summary>
+        /// Whether MenuAPI sets the script graphics draw order while drawing. Turn this off if the menu layers wrongly with your own UI.
+        /// </summary>
         public static bool SetDrawOrder { get; set; } = true;
         // RedM controls are hashes, not GTA's 0 to 402 indexes, so only 0 and -1 mean "no key".
+        /// <summary>
+        /// False when <see cref="MenuToggleKey"/> is 0 or -1, which turns the toggle key off.
+        /// </summary>
         public static bool MenuToggleKeyIsValid => (uint)MenuToggleKey != 0 && (uint)MenuToggleKey != uint.MaxValue;
+        /// <summary>
+        /// The control that opens <see cref="MainMenu"/> when no menu is open. Defaults to <see cref="Control.PlayerMenu"/>.
+        /// </summary>
         public static Control MenuToggleKey { get; set; }
             = Control.PlayerMenu;
 
+        /// <summary>
+        /// Has no effect in RedM, there is no separate controller handling for the toggle key.
+        /// </summary>
         public static bool EnableMenuToggleKeyOnController { get; set; } = true;
 
         internal static Dictionary<MenuItem, Menu> MenuButtons { get; private set; } = new Dictionary<MenuItem, Menu>();
 
+        /// <summary>
+        /// The menu that the <see cref="MenuToggleKey"/> opens. Set to the first menu you register, but it can be changed at any time.
+        /// </summary>
         public static Menu MainMenu { get; set; } = null;
 
 
@@ -170,7 +224,7 @@ namespace MenuAPI
 
         #region Process Menu Buttons
         /// <summary>
-        /// Process the select & go back/cancel buttons.
+        /// Process the select &amp; go back/cancel buttons.
         /// </summary>
         /// <returns></returns>
         private async Task ProcessMainButtons()

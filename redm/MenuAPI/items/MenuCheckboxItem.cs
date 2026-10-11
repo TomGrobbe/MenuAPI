@@ -3,12 +3,27 @@ using static CitizenFX.Core.Native.API;
 
 namespace MenuAPI
 {
+    /// <summary>
+    /// A menu item with a checkbox that toggles when the item is selected.
+    /// </summary>
     public class MenuCheckboxItem : MenuItem
     {
+        /// <summary>
+        /// Whether the checkbox is checked. Defaults to false.
+        /// </summary>
         public bool Checked { get; set; } = false;
+        /// <summary>
+        /// How the checkbox looks when checked. Defaults to <see cref="CheckboxStyle.Tick"/>.
+        /// </summary>
         public CheckboxStyle Style { get; set; } = CheckboxStyle.Tick;
+        /// <summary>
+        /// The ways a checked <see cref="MenuCheckboxItem"/> can look.
+        /// </summary>
         public enum CheckboxStyle
         {
+            /// <summary>
+            /// A tick mark inside the box.
+            /// </summary>
             Tick
         }
 
@@ -18,7 +33,7 @@ namespace MenuAPI
         /// <param name="text"></param>
         public MenuCheckboxItem(string text) : this(text, null) { }
         /// <summary>
-        /// Creates a basic <see cref="MenuCheckboxItem"/> and sets the checked state to <param name="_checked"></param>'s state.
+        /// Creates a basic <see cref="MenuCheckboxItem"/> and sets the checked state to <paramref name="_checked"/>.
         /// </summary>
         /// <param name="text"></param>
         /// <param name="_checked"></param>
