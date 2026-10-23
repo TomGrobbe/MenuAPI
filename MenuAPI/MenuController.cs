@@ -24,7 +24,7 @@ public partial class MenuController
 
     private const long TextureRefreshIntervalMs = 250;
 
-    private const long InstructionalButtonsConfigureIntervalMs = 300;
+    private const long InstructionalButtonsConfigureIntervalMs = 50;
 
     private static float AspectRatio => Native.GetScreenAspectRatio(false);
     /// <summary>1080 times the screen aspect ratio. Only the old native drawing used this, nothing reads it anymore.</summary>
@@ -143,13 +143,9 @@ public partial class MenuController
     /// </summary>
     public static Menu? MainMenu { get; set; } = null;
 
-    internal static int _scale = Native.RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
-
     private static Menu? _instructionalButtonsMenu;
 
     private static MenuItem? _instructionalButtonsItem;
-
-    private const string IconSeparator = "%b_998%";
 
     private static MenuAlignmentOption _alignment = MenuAlignmentOption.Left;
     /// <summary>
@@ -232,7 +228,7 @@ public partial class MenuController
         MenuTicks.Register("Menu.InstructionalButtons", DrawInstructionalButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
             onStopped: () =>
             {
-                DisposeInstructionalButtonsScaleform();
+                HideInstructionalButtons();
                 InstructionalButtonIcons.Clear();
             });
 
@@ -1132,54 +1128,47 @@ public partial class MenuController
         !FrameState.IsDead &&
         !FrameState.IsPlayerSwitchInProgress;
 
+    // The page keeps the bar on screen until it is told otherwise, so every frame has to check whether
+    // it should still be there. Anything that covers the game, like the pause menu, hides it.
     internal static void DrawInstructionalButtons()
     {
         Menu? menu = GetCurrentMenu();
 
-        if (menu == null || !CanShowInstructionalButtons(menu) || !Native.HasScaleformMovieLoaded(_scale))
+        if (menu == null || !CanShowInstructionalButtons(menu))
         {
+            HideInstructionalButtons();
+
             return;
         }
 
         if (!ReferenceEquals(menu, _instructionalButtonsMenu) ||
             !ReferenceEquals(menu.GetCurrentMenuItem(), _instructionalButtonsItem))
         {
-            FillInstructionalButtonSlots(menu);
+            FillInstructionalButtons(menu);
         }
-
-        Native.DrawScaleformMovieFullscreen(_scale, 255, 255, 255, 255, 0);
     }
 
     // On a slow loop: what an icon looks like only changes when the player swaps between keyboard
-    // and controller or rebinds a key. Drawing the bar still has to happen every frame.
-    internal static async Task ConfigureInstructionalButtons()
+    // and controller or rebinds a key.
+    internal static void ConfigureInstructionalButtons()
     {
         Menu? menu = GetCurrentMenu();
 
         if (menu == null || !CanShowInstructionalButtons(menu))
         {
-            DisposeInstructionalButtonsScaleform();
+            HideInstructionalButtons();
 
             return;
         }
 
-        if (!Native.HasScaleformMovieLoaded(_scale))
-        {
-            _scale = Native.RequestScaleformMovie("INSTRUCTIONAL_BUTTONS");
-
-            while (!Native.HasScaleformMovieLoaded(_scale))
-            {
-                await Runtime.Delay(0);
-            }
-        }
-
-        FillInstructionalButtonSlots(menu);
+        FillInstructionalButtons(menu);
     }
 
     private static bool CanShowInstructionalButtons(Menu menu)
     {
         return menu.Visible &&
             menu.EnableInstructionalButtons &&
+            !FrameState.IsPauseMenuActive &&
             !FrameState.IsPlayerSwitchInProgress &&
             !FrameState.IsDead &&
             FrameState.IsScreenFadedIn &&
@@ -1187,38 +1176,33 @@ public partial class MenuController
             FrameState.OnscreenKeyboard != 0;
     }
 
-    private static void FillInstructionalButtonSlots(Menu menu)
+    private static void FillInstructionalButtons(Menu menu)
     {
-        Native.BeginScaleformMovieMethod(_scale, "CLEAR_ALL");
-        Native.EndScaleformMovieMethod();
-
         InstructionalButtonIcons.Refresh();
 
-        int slot = 0;
+        InstructionalButtonsNui.Begin();
 
         if (menu.ShowSelectInstructionalButton)
         {
-            SetInstructionalButtonSlot(slot++, MenuInput.GetSelectButton(), menu.SelectButtonText);
+            InstructionalButtonsNui.Add(MenuInput.GetSelectButton(), menu.SelectButtonText);
         }
         if (menu.ShowBackInstructionalButton)
         {
-            SetInstructionalButtonSlot(slot++, MenuInput.GetBackButton(), menu.BackButtonText);
+            InstructionalButtonsNui.Add(MenuInput.GetBackButton(), menu.BackButtonText);
         }
 
         MenuItem? currentItem = menu.GetCurrentMenuItem();
 
         if (menu.ShowChangeValueInstructionalButton && ChangesValueWithLeftRight(currentItem))
         {
-            SetInstructionalButtonSlot(
-                slot++,
-                $"{MenuInput.GetLeftButton()}{IconSeparator}{MenuInput.GetRightButton()}",
-                menu.ChangeValueButtonText);
+            // Button strings read right to left, the same as the ones the game builds.
+            InstructionalButtonsNui.Add($"{MenuInput.GetRightButton()}%{MenuInput.GetLeftButton()}", menu.ChangeValueButtonText);
         }
         // Only worth a hint when there is more than one page to move between.
         else if (menu.Paginated && menu.ShowPageInstructionalButtons && menu.PageCount > 1)
         {
-            SetInstructionalButtonSlot(slot++, MenuInput.GetLeftButton(), menu.PreviousPageButtonText);
-            SetInstructionalButtonSlot(slot++, MenuInput.GetRightButton(), menu.NextPageButtonText);
+            InstructionalButtonsNui.Add(MenuInput.GetLeftButton(), menu.PreviousPageButtonText);
+            InstructionalButtonsNui.Add(MenuInput.GetRightButton(), menu.NextPageButtonText);
         }
 
         for (int i = 0; i < menu.KeyBindingHandlers.Count; i++)
@@ -1239,18 +1223,16 @@ public partial class MenuController
                 continue;
             }
 
-            SetInstructionalButtonSlot(slot++, icon, entry.ButtonText);
+            InstructionalButtonsNui.Add(icon, entry.ButtonText);
         }
 
         for (int i = 0; i < menu.CustomInstructionalButtons.Count; i++)
         {
             Menu.InstructionalButton button = menu.CustomInstructionalButtons[i];
-            SetInstructionalButtonSlot(slot++, button.controlString, button.instructionText);
+            InstructionalButtonsNui.Add(button.controlString, button.instructionText);
         }
 
-        Native.BeginScaleformMovieMethod(_scale, "DRAW_INSTRUCTIONAL_BUTTONS");
-        Native.ScaleformMovieMethodAddParamInt(0);
-        Native.EndScaleformMovieMethod();
+        InstructionalButtonsNui.Send();
 
         _instructionalButtonsMenu = menu;
         _instructionalButtonsItem = currentItem;
@@ -1259,22 +1241,11 @@ public partial class MenuController
     private static bool ChangesValueWithLeftRight(MenuItem? item) =>
         item is MenuListItem or MenuSliderItem or MenuDynamicListItem && item.Enabled;
 
-    private static void SetInstructionalButtonSlot(int slot, string buttonString, string text)
+    private static void HideInstructionalButtons()
     {
-        Native.BeginScaleformMovieMethod(_scale, "SET_DATA_SLOT");
-        Native.ScaleformMovieMethodAddParamInt(slot);
-        Native.PushScaleformMovieMethodParameterString(buttonString);
-        Native.PushScaleformMovieMethodParameterString(text);
-        Native.EndScaleformMovieMethod();
-    }
-
-    private static void DisposeInstructionalButtonsScaleform()
-    {
-        if (Native.HasScaleformMovieLoaded(_scale))
-        {
-            Native.SetScaleformMovieAsNoLongerNeeded(ref _scale);
-        }
+        InstructionalButtonsNui.Hide();
 
         _instructionalButtonsMenu = null;
+        _instructionalButtonsItem = null;
     }
 }
