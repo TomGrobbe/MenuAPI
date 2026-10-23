@@ -46,8 +46,8 @@ Opening a menu flips the other eight to `running`. Closing every menu stops them
 |Menu.Layout|every 500ms|A menu is open. Reads screen size and safe zone.|
 |Menu.Textures|every 250ms|A menu is open. Streams game textures the menu needs, like your own banner texture, and releases them once every menu is closed.|
 |Menu.Draw|per frame|A menu is open. Sends changes to the [NUI page](../../nui/) and disables conflicting game controls. Hides the page when the last menu closes.|
-|Menu.InstructionalButtons|per frame|A menu is open. Draws the button hints.|
-|Menu.InstructionalButtonsData|every 300ms|A menu is open. Works out which hints and key icons to show.|
+|Menu.InstructionalButtons|per frame|A menu is open. Hides the button hints when something covers the game, like the pause menu, and shows them again after.|
+|Menu.InstructionalButtonsData|every 50ms|A menu is open. Works out which hints and key icons to show, and sends them to the [NUI page](../../nui/) when they changed.|
 |Menu.Select|per frame|A menu is open. Handles select and back, including mouse buttons.|
 |Menu.Navigate|per frame|A menu is open. Handles up, down, left and right, including hold to repeat.|
 |Menu.OnscreenKeyboard|per frame|A menu is open. Stops the menu reacting while the game's text input box is open.|

@@ -4,6 +4,27 @@ title: "Changelog"
 
 ---------------
 
+## 4.1.0
+
+### Instructional buttons are drawn with NUI
+
+The button hints in the bottom right are now drawn on your NUI page, just like the menu, instead of with the game's own button bar. They look the same as the game's, they hide while the pause menu is open, and a theme can now change their colours, fonts, sizes and spacing. See [Theming](../reference/theming/#instructional-buttons) for every setting.
+
+Button strings in `CustomInstructionalButtons` work the same as before. Every icon the game can hand out is supported, including mouse movement, the mouse wheel, every controller button and the keyboard keys of the German, French, Italian and Spanish layouts.
+
+### Upgrading
+
+You do **not** have to change your `index.html` or your `fxmanifest.lua`. The button bar lives in `menuapi.min.js` and `menuapi.min.css`, which your page already loads for the menu, and it adds itself to the page.
+
+What you do need is the new version of the files in the `menuapi` folder, because the old ones do not know about the button bar. Without them your menus still work, but the button hints are gone.
+
+- **Using the NuGet package?** Update the package and build your resource. The new files are copied into the `menuapi` folder for you.
+- **Using the zip?** Replace the whole `menuapi` folder of your resource with the one from the new zip, next to the new `MenuAPI.dll`.
+
+If your theme stylesheet only sets `#menuapi` tokens, nothing changes for you. The button bar keeps the game's look until your theme sets `#menuapi-buttons` tokens too.
+
+---------------
+
 ## 4.0.1
 
 ### Submenus survive a refresh

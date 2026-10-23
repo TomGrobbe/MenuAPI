@@ -572,6 +572,8 @@ MenuController.AddSubmenu(menu, vehicleMenu);
 
 The button hints in the bottom right. Each menu has its own set, and they switch instantly between keyboard and controller.
 
+They are drawn on your [NUI page](../../nui/), just like the menu itself, so a [theme](../theming/#instructional-buttons) can recolour them. You do not have to change your `index.html` for them, `menuapi.js` adds them to the page by itself.
+
 Every menu has **select** and **back**, plus **change value** while the highlighted row is a list, dynamic list or slider (not when it is disabled). All three follow the player's [key bindings](../keybindings/). Give [AddKeyBinding()](#addkeybinding) a `buttonText` to add a hint for your own key, which follows the bindings too.
 
 ```cs
@@ -607,15 +609,22 @@ For hints MenuAPI knows nothing about, such as a button combination, add a raw b
 |controlString|string|The raw button string, e.g. from `GetControlInstructionalButton()`.|
 |instructionText|string|The text next to the button.|
 
-```cs
-// Show the up + down buttons with the text 'Move'.
-string buttons = GetControlInstructionalButton(0, (int)Control.FrontendUp, 1)
-               + GetControlInstructionalButton(0, (int)Control.FrontendDown, 1);
+A button string is a list of icons with a `%` between each one. It works the same way as in the game itself, which means it is read **from right to left**: the last icon in the string is drawn first. Put `b_998` between two icons to draw a `+` between them.
 
-menu.CustomInstructionalButtons.Add(new Menu.InstructionalButton(buttons, "Move"));
+```cs
+string up = GetControlInstructionalButton(0, (int)Control.FrontendUp, 1);
+string down = GetControlInstructionalButton(0, (int)Control.FrontendDown, 1);
+
+// Shows the up and down buttons, in that order, with the text 'Move'.
+menu.CustomInstructionalButtons.Add(new Menu.InstructionalButton($"{down}%{up}", "Move"));
+
+// Shows 'up + down', for two buttons that have to be pressed together.
+menu.CustomInstructionalButtons.Add(new Menu.InstructionalButton($"{down}%b_998%{up}", "Both"));
 ```
 
 On Enhanced the third parameter of `GetControlInstructionalButton` is a `bool`, so pass `true` instead of `1`.
+
+An icon MenuAPI does not recognise is left out, just like the game does. To find out which one it was, type `nui_devtools` in the F8 console and look at the console of your resource's page.
 
 ----
 
