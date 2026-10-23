@@ -543,50 +543,7 @@
         }));
     }
 
-    let themeUrl = null;
-    let themeLink = null;
-
-    function applyTheme(url) {
-        url = url || null;
-
-        if (url === themeUrl) {
-            return;
-        }
-
-        themeUrl = url;
-
-        const previous = themeLink;
-
-        if (!url) {
-            themeLink = null;
-            previous?.remove();
-
-            return;
-        }
-
-        const link = document.createElement("link");
-
-        link.rel = "stylesheet";
-        link.id = "menuapi-theme";
-        link.href = url;
-
-        const drop = () => {
-            if (previous !== themeLink) {
-                previous?.remove();
-            }
-        };
-
-        link.addEventListener("load", drop, { once: true });
-        link.addEventListener("error", drop, { once: true });
-
-        themeLink = link;
-
-        document.head.append(link);
-    }
-
     function render(data) {
-        applyTheme(data.theme);
-
         if (!data.visible) {
             root.hidden = true;
             setGlare(false);
@@ -653,6 +610,66 @@
         } else if (data.type === "menuapi:palette") {
             palette = data.colours;
             applyPalette();
+        }
+    });
+})();
+
+// The theme belongs to the whole page rather than to the menu, so hiding the menu never takes it away.
+(() => {
+    let themeUrl = null;
+    let themeLink = null;
+
+    function applyTheme(url) {
+        url = url || null;
+
+        if (url === themeUrl) {
+            return;
+        }
+
+        themeUrl = url;
+
+        const previous = themeLink;
+
+        if (!url) {
+            themeLink = null;
+            previous?.remove();
+
+            return;
+        }
+
+        const link = document.createElement("link");
+
+        link.rel = "stylesheet";
+        link.id = "menuapi-theme";
+        link.href = url;
+
+        const drop = () => {
+            if (previous !== themeLink) {
+                previous?.remove();
+            }
+        };
+
+        link.addEventListener("load", drop, { once: true });
+        link.addEventListener("error", drop, { once: true });
+
+        themeLink = link;
+
+        document.head.append(link);
+    }
+
+    window.addEventListener("message", event => {
+        let data = event.data;
+
+        if (typeof data === "string") {
+            try {
+                data = JSON.parse(data);
+            } catch {
+                return;
+            }
+        }
+
+        if (data?.type === "menuapi" && data.visible) {
+            applyTheme(data.theme);
         }
     });
 })();
