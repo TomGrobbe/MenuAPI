@@ -147,6 +147,8 @@ public partial class MenuController
 
     private static MenuItem? _instructionalButtonsItem;
 
+    private static bool _instructionalButtonsShown;
+
     private static MenuAlignmentOption _alignment = MenuAlignmentOption.Left;
     /// <summary>
     /// Which side of the screen menus are drawn on. Right is not supported on 17:9 and wider screens,
@@ -225,7 +227,7 @@ public partial class MenuController
         MenuTicks.Register("Menu.Draw", ProcessMenus, MenuTickRate.PerFrame, IsAnyMenuOpen,
             onStopped: MenuNui.Hide);
 
-        MenuTicks.Register("Menu.InstructionalButtons", DrawInstructionalButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
+        MenuTicks.Register("Menu.InstructionalButtons", DrawInstructionalButtons, MenuTickRate.PerFrame, AnyInstructionalButtons,
             onStopped: () =>
             {
                 HideInstructionalButtons();
@@ -233,7 +235,7 @@ public partial class MenuController
             });
 
         MenuTicks.Register("Menu.InstructionalButtonsData", ConfigureInstructionalButtons,
-            MenuTickRate.Every(InstructionalButtonsConfigureIntervalMs), IsAnyMenuOpen);
+            MenuTickRate.Every(InstructionalButtonsConfigureIntervalMs), AnyInstructionalButtons);
 
         MenuTicks.Register("Menu.Select", ProcessMainButtons, MenuTickRate.PerFrame, IsAnyMenuOpen,
             // Nothing drains input while every menu is closed, so a menu has to open from a clean
@@ -1128,47 +1130,48 @@ public partial class MenuController
         !FrameState.IsDead &&
         !FrameState.IsPlayerSwitchInProgress;
 
+    // Global instructional buttons stay up with every menu closed, so these ticks cannot stop with the menu.
+    private static bool AnyInstructionalButtons() => IsAnyMenuOpen() || GlobalInstructionalButtons.AnyShown;
+
     // The page keeps the bar on screen until it is told otherwise, so every frame has to check whether
     // it should still be there. Anything that covers the game, like the pause menu, hides it.
     internal static void DrawInstructionalButtons()
     {
-        Menu? menu = GetCurrentMenu();
-
-        if (menu == null || !CanShowInstructionalButtons(menu))
+        if (!CanShowInstructionalButtons())
         {
             HideInstructionalButtons();
 
             return;
         }
 
-        if (!ReferenceEquals(menu, _instructionalButtonsMenu) ||
-            !ReferenceEquals(menu.GetCurrentMenuItem(), _instructionalButtonsItem))
+        Menu? menu = MenuWithInstructionalButtons();
+
+        if (!_instructionalButtonsShown ||
+            GlobalInstructionalButtons.ConsumeChanged() ||
+            !ReferenceEquals(menu, _instructionalButtonsMenu) ||
+            !ReferenceEquals(menu?.GetCurrentMenuItem(), _instructionalButtonsItem))
         {
             FillInstructionalButtons(menu);
         }
     }
 
     // On a slow loop: what an icon looks like only changes when the player swaps between keyboard
-    // and controller or rebinds a key.
+    // and controller or rebinds a key, and row text given as a function is read again here.
     internal static void ConfigureInstructionalButtons()
     {
-        Menu? menu = GetCurrentMenu();
-
-        if (menu == null || !CanShowInstructionalButtons(menu))
+        if (!CanShowInstructionalButtons())
         {
             HideInstructionalButtons();
 
             return;
         }
 
-        FillInstructionalButtons(menu);
+        FillInstructionalButtons(MenuWithInstructionalButtons());
     }
 
-    private static bool CanShowInstructionalButtons(Menu menu)
+    private static bool CanShowInstructionalButtons()
     {
-        return menu.Visible &&
-            menu.EnableInstructionalButtons &&
-            !FrameState.IsPauseMenuActive &&
+        return !FrameState.IsPauseMenuActive &&
             !FrameState.IsPlayerSwitchInProgress &&
             !FrameState.IsDead &&
             FrameState.IsScreenFadedIn &&
@@ -1176,12 +1179,39 @@ public partial class MenuController
             FrameState.OnscreenKeyboard != 0;
     }
 
-    private static void FillInstructionalButtons(Menu menu)
+    private static Menu? MenuWithInstructionalButtons()
+    {
+        Menu? menu = GetCurrentMenu();
+
+        return menu is { Visible: true, EnableInstructionalButtons: true } ? menu : null;
+    }
+
+    private static void FillInstructionalButtons(Menu? menu)
     {
         InstructionalButtonIcons.Refresh();
 
         InstructionalButtonsNui.Begin();
 
+        MenuItem? currentItem = menu?.GetCurrentMenuItem();
+
+        if (menu != null)
+        {
+            InstructionalButtonsNui.BeginRow("menu");
+            AddMenuInstructionalButtons(menu, currentItem);
+            InstructionalButtonsNui.EndRow();
+        }
+
+        GlobalInstructionalButtons.WriteShown(Native.IsHudHidden());
+
+        InstructionalButtonsNui.Send();
+
+        _instructionalButtonsMenu = menu;
+        _instructionalButtonsItem = currentItem;
+        _instructionalButtonsShown = true;
+    }
+
+    private static void AddMenuInstructionalButtons(Menu menu, MenuItem? currentItem)
+    {
         if (menu.ShowSelectInstructionalButton)
         {
             InstructionalButtonsNui.Add(MenuInput.GetSelectButton(), menu.SelectButtonText);
@@ -1190,8 +1220,6 @@ public partial class MenuController
         {
             InstructionalButtonsNui.Add(MenuInput.GetBackButton(), menu.BackButtonText);
         }
-
-        MenuItem? currentItem = menu.GetCurrentMenuItem();
 
         if (menu.ShowChangeValueInstructionalButton && ChangesValueWithLeftRight(currentItem))
         {
@@ -1231,11 +1259,6 @@ public partial class MenuController
             Menu.InstructionalButton button = menu.CustomInstructionalButtons[i];
             InstructionalButtonsNui.Add(button.controlString, button.instructionText);
         }
-
-        InstructionalButtonsNui.Send();
-
-        _instructionalButtonsMenu = menu;
-        _instructionalButtonsItem = currentItem;
     }
 
     private static bool ChangesValueWithLeftRight(MenuItem? item) =>
@@ -1247,5 +1270,6 @@ public partial class MenuController
 
         _instructionalButtonsMenu = null;
         _instructionalButtonsItem = null;
+        _instructionalButtonsShown = false;
     }
 }

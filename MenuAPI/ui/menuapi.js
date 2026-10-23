@@ -860,7 +860,6 @@
             document.body.append(bar);
         }
 
-        bar.hidden = true;
         rescale();
 
         return bar;
@@ -1022,19 +1021,10 @@
         return node;
     }
 
-    function render(data) {
-        const target = getBar();
+    const rows = new Map();
 
-        if (!data.visible) {
-            target.hidden = true;
-            target.replaceChildren();
-
-            return;
-        }
-
-        target.style.setProperty("--menuapi-buttons-inset", data.inset ?? 0.05);
-
-        target.replaceChildren(...(data.buttons ?? []).map(button => {
+    function items(buttons) {
+        return buttons.map(button => {
             const item = element("div", "menuapi-buttons__item");
             const text = String(button.text ?? "").replace(TEXT_TOKEN, "");
 
@@ -1045,9 +1035,87 @@
             item.append(icons(button.buttons));
 
             return item;
-        }));
+        });
+    }
 
-        target.hidden = target.childElementCount === 0;
+    function moveTime(node) {
+        const value = getComputedStyle(node).getPropertyValue("--menuapi-buttons-move-duration").trim();
+        const time = value.endsWith("ms") ? parseFloat(value) : parseFloat(value) * 1000;
+
+        return Number.isFinite(time) ? time : 250;
+    }
+
+    // Pinned where it was and faded out, so the rows around it can move into its place meanwhile.
+    function leave(row, rect, frame, scale) {
+        row.style.right = `${(frame.right - rect.right) / scale}px`;
+        row.style.bottom = `${(frame.bottom - rect.bottom) / scale}px`;
+        row.classList.add("menuapi-buttons__bar--leaving");
+
+        setTimeout(() => row.remove(), moveTime(row) + 50);
+    }
+
+    function render(data) {
+        const target = getBar();
+        const wanted = data.visible ? (data.rows ?? []).filter(row => row.buttons?.length) : [];
+
+        if (data.visible) {
+            target.style.setProperty("--menuapi-buttons-inset", data.inset ?? 0.05);
+        }
+
+        // Rows are measured on screen, where the bar is scaled, but moved inside it, where it is not.
+        const frame = target.getBoundingClientRect();
+        const scale = target.offsetHeight > 0 ? frame.height / target.offsetHeight : 1;
+        const before = new Map([...rows].map(([id, row]) => [id, row.getBoundingClientRect()]));
+        const kept = new Set(wanted.map(row => row.id));
+
+        for (const [id, row] of rows) {
+            if (!kept.has(id)) {
+                leave(row, before.get(id), frame, scale);
+                rows.delete(id);
+            }
+        }
+
+        const entering = [];
+
+        for (const entry of wanted) {
+            let row = rows.get(entry.id);
+
+            if (!row) {
+                row = element("div", "menuapi-buttons__bar menuapi-buttons__bar--entering");
+                rows.set(entry.id, row);
+                entering.push(row);
+            }
+
+            row.replaceChildren(...items(entry.buttons));
+            target.append(row);
+        }
+
+        // Every row that was already there jumps back to where it was drawn, then slides to its new place.
+        for (const [id, row] of rows) {
+            const rect = before.get(id);
+
+            if (!rect) {
+                continue;
+            }
+
+            const shift = (rect.bottom - row.getBoundingClientRect().bottom) / scale;
+
+            if (Math.abs(shift) < 0.5) {
+                continue;
+            }
+
+            row.style.transition = "none";
+            row.style.transform = `translateY(${shift}px)`;
+            row.getBoundingClientRect();
+            row.style.transition = "";
+            row.style.transform = "";
+        }
+
+        target.getBoundingClientRect();
+
+        for (const row of entering) {
+            row.classList.remove("menuapi-buttons__bar--entering");
+        }
     }
 
     window.addEventListener("message", event => {

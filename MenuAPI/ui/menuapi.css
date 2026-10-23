@@ -601,6 +601,8 @@
   --menuapi-buttons-item-gap: 7px;
   --menuapi-buttons-item-direction: row;
   --menuapi-buttons-separator: none;
+  --menuapi-buttons-row-gap: 5px;
+  --menuapi-buttons-move-duration: 250ms;
 
   --menuapi-buttons-font: "GTA Chalet", "Helvetica Neue", Arial, sans-serif;
   --menuapi-buttons-font-size: 18px;
@@ -644,18 +646,12 @@
   max-width: calc((100vw - var(--menuapi-buttons-inset) * 200vw) / var(--menuapi-buttons-scale));
 
   display: flex;
-  flex-direction: row-reverse;
-  flex-wrap: wrap-reverse;
-  align-items: center;
-  padding: var(--menuapi-buttons-padding);
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: var(--menuapi-buttons-row-gap);
 
   transform-origin: bottom right;
   transform: scale(var(--menuapi-buttons-scale));
-
-  background: var(--menuapi-buttons-bg);
-  border: var(--menuapi-buttons-border);
-  border-radius: var(--menuapi-buttons-radius);
-  box-shadow: var(--menuapi-buttons-shadow);
 
   pointer-events: none;
 
@@ -669,6 +665,35 @@
 
 #menuapi-buttons[hidden] {
   display: none;
+}
+
+/* One row of hints. The open menu's row is the bottom one, rows a resource shows itself stack above. */
+.menuapi-buttons__bar {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap-reverse;
+  align-items: center;
+  max-width: 100%;
+  padding: var(--menuapi-buttons-padding);
+
+  background: var(--menuapi-buttons-bg);
+  border: var(--menuapi-buttons-border);
+  border-radius: var(--menuapi-buttons-radius);
+  box-shadow: var(--menuapi-buttons-shadow);
+
+  transition:
+    transform var(--menuapi-buttons-move-duration) ease,
+    opacity var(--menuapi-buttons-move-duration) ease;
+}
+
+.menuapi-buttons__bar--entering {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.menuapi-buttons__bar--leaving {
+  position: absolute;
+  opacity: 0;
 }
 
 .menuapi-buttons__item {

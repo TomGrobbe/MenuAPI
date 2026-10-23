@@ -50,6 +50,8 @@ internal static class Native
 
     internal static bool IsHudComponentActive(int id) => Cfx.IsHudComponentActive(id);
 
+    internal static bool IsHudHidden() => Cfx.IsHudHidden();
+
     internal static bool IsPauseMenuActive() => Cfx.IsPauseMenuActive();
 
     internal static bool IsPauseMenuRestarting() => Cfx.IsPauseMenuRestarting();

@@ -9,15 +9,29 @@ internal static class InstructionalButtonsNui
     private static readonly NuiJson _json = new();
     private static string? _sent;
 
+    // The safe zone is read here rather than from MenuLayout, which only keeps it up to date while a
+    // menu is open, and rows can be on screen without one.
     internal static void Begin()
     {
         _json.Reset()
             .Object()
             .Prop("type", MessageType)
             .Prop("visible", true)
-            .Prop("inset", (1f - MenuLayout.SafeZone) / 2f)
+            .Prop("inset", (1f - Native.GetSafeZoneSize()) / 2f)
             .Prop("theme", NuiTuning.ThemeUrl)
+            .Array("rows");
+    }
+
+    internal static void BeginRow(string id)
+    {
+        _json.Object()
+            .Prop("id", id)
             .Array("buttons");
+    }
+
+    internal static void EndRow()
+    {
+        _json.EndArray().EndObject();
     }
 
     internal static void Add(string? buttons, string? text)
