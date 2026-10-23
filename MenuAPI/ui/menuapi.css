@@ -576,3 +576,363 @@
 .menuapi-stat__value {
   background: var(--menuapi-stat-value);
 }
+
+:where(#menuapi-buttons, #menuapi-buttons *) {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* The default values are the game's own instructional buttons. A theme overrides any of them. */
+#menuapi-buttons {
+  --menuapi-buttons-inset: 0.05;
+  --menuapi-buttons-scale: 1;
+
+  --menuapi-buttons-bg: rgb(0 0 0 / 85%);
+  --menuapi-buttons-border: none;
+  --menuapi-buttons-shadow: none;
+  --menuapi-buttons-radius: 4px;
+  --menuapi-buttons-offset-x: 0px;
+  --menuapi-buttons-offset-y: 0px;
+  --menuapi-buttons-padding: 0 6px;
+  --menuapi-buttons-height: 40px;
+  --menuapi-buttons-item-padding: 0 10px;
+  --menuapi-buttons-item-gap: 7px;
+  --menuapi-buttons-item-direction: row;
+  --menuapi-buttons-separator: none;
+  --menuapi-buttons-row-gap: 5px;
+  --menuapi-buttons-move-duration: 250ms;
+
+  --menuapi-buttons-font: "GTA Chalet", "Helvetica Neue", Arial, sans-serif;
+  --menuapi-buttons-font-size: 18px;
+  --menuapi-buttons-font-weight: normal;
+  --menuapi-buttons-text: rgb(255 255 255);
+  --menuapi-buttons-text-transform: none;
+
+  --menuapi-buttons-key-size: 25px;
+  --menuapi-buttons-key-gap: 4px;
+  --menuapi-buttons-key-radius: 3px;
+  --menuapi-buttons-key-padding: 0 4px;
+  --menuapi-buttons-key-bg: rgb(240 240 240);
+  --menuapi-buttons-key-text: rgb(0 0 0);
+  --menuapi-buttons-key-border: none;
+  --menuapi-buttons-key-shadow: none;
+  --menuapi-buttons-key-font: Arial, "Helvetica Neue", sans-serif;
+  --menuapi-buttons-key-font-size: 15px;
+  --menuapi-buttons-key-font-weight: normal;
+
+  --menuapi-buttons-pad: rgb(58 58 58);
+  --menuapi-buttons-pad-text: rgb(255 255 255);
+  --menuapi-buttons-a: rgb(110 180 60);
+  --menuapi-buttons-b: rgb(222 90 90);
+  --menuapi-buttons-x: rgb(40 160 220);
+  --menuapi-buttons-y: rgb(236 196 30);
+
+  --menuapi-buttons-mouse: rgb(255 255 255);
+  --menuapi-buttons-mouse-lines: rgb(0 0 0);
+  --menuapi-buttons-mouse-highlight: rgb(140 140 140);
+
+  --menuapi-buttons-plus: var(--menuapi-buttons-text);
+  --menuapi-buttons-unbound: rgb(224 50 50);
+  --menuapi-buttons-missing: rgb(255 0 0);
+  --menuapi-buttons-spinner: rgb(235 235 235);
+  --menuapi-buttons-spinner-alt: rgb(240 160 30);
+  --menuapi-buttons-spinner-speed: 1s;
+
+  position: fixed;
+  right: calc(var(--menuapi-buttons-inset) * 100vw + var(--menuapi-buttons-offset-x));
+  bottom: calc(var(--menuapi-buttons-inset) * 100vh + var(--menuapi-buttons-offset-y));
+  max-width: calc((100vw - var(--menuapi-buttons-inset) * 200vw) / var(--menuapi-buttons-scale));
+
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: var(--menuapi-buttons-row-gap);
+
+  transform-origin: bottom right;
+  transform: scale(var(--menuapi-buttons-scale));
+
+  pointer-events: none;
+
+  font-family: var(--menuapi-buttons-font);
+  font-size: var(--menuapi-buttons-font-size);
+  font-weight: var(--menuapi-buttons-font-weight);
+  text-transform: var(--menuapi-buttons-text-transform);
+  line-height: 1;
+  color: var(--menuapi-buttons-text);
+}
+
+#menuapi-buttons[hidden] {
+  display: none;
+}
+
+/* One row of hints. The open menu's row is the bottom one, rows a resource shows itself stack above. */
+.menuapi-buttons__bar {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap-reverse;
+  align-items: center;
+  max-width: 100%;
+  padding: var(--menuapi-buttons-padding);
+
+  background: var(--menuapi-buttons-bg);
+  border: var(--menuapi-buttons-border);
+  border-radius: var(--menuapi-buttons-radius);
+  box-shadow: var(--menuapi-buttons-shadow);
+
+  transition:
+    transform var(--menuapi-buttons-move-duration) ease,
+    opacity var(--menuapi-buttons-move-duration) ease;
+}
+
+.menuapi-buttons__bar--entering {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.menuapi-buttons__bar--leaving {
+  position: absolute;
+  max-width: none;
+  opacity: 0;
+}
+
+.menuapi-buttons__item {
+  display: flex;
+  flex-direction: var(--menuapi-buttons-item-direction);
+  align-items: center;
+  gap: var(--menuapi-buttons-item-gap);
+  min-height: var(--menuapi-buttons-height);
+  padding: var(--menuapi-buttons-item-padding);
+  white-space: nowrap;
+}
+
+/* The bar runs right to left, so the next item in the markup is the one on the left. */
+.menuapi-buttons__item + .menuapi-buttons__item {
+  border-right: var(--menuapi-buttons-separator);
+}
+
+.menuapi-buttons__keys {
+  display: flex;
+  align-items: center;
+  gap: var(--menuapi-buttons-key-gap);
+}
+
+.menuapi-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--menuapi-buttons-key-size);
+  height: var(--menuapi-buttons-key-size);
+  text-transform: none;
+}
+
+.menuapi-key--cap {
+  flex-direction: column;
+  padding: var(--menuapi-buttons-key-padding);
+  border: var(--menuapi-buttons-key-border);
+  border-radius: var(--menuapi-buttons-key-radius);
+  box-shadow: var(--menuapi-buttons-key-shadow);
+  background: var(--menuapi-buttons-key-bg);
+  color: var(--menuapi-buttons-key-text);
+  font-family: var(--menuapi-buttons-key-font);
+  font-size: var(--menuapi-buttons-key-font-size);
+  font-weight: var(--menuapi-buttons-key-font-weight);
+  letter-spacing: -0.02em;
+}
+
+.menuapi-key--wide {
+  min-width: calc(var(--menuapi-buttons-key-size) * 1.84);
+}
+
+.menuapi-key--tall {
+  height: calc(var(--menuapi-buttons-key-size) * 1.24);
+}
+
+.menuapi-key--small {
+  font-size: calc(var(--menuapi-buttons-key-font-size) * 0.73);
+}
+
+.menuapi-key--two-lines {
+  font-size: calc(var(--menuapi-buttons-key-font-size) * 0.7);
+  line-height: 0.95;
+}
+
+.menuapi-key__line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.menuapi-key__icon {
+  display: inline-flex;
+}
+
+.menuapi-key__icon svg {
+  height: 1.1em;
+  width: auto;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.menuapi-key--two-lines .menuapi-key__icon svg {
+  height: 1em;
+}
+
+.menuapi-key--tall .menuapi-key__icon svg {
+  height: calc(var(--menuapi-buttons-key-size) * 0.88);
+}
+
+.menuapi-key--wide .menuapi-key__icon svg {
+  height: calc(var(--menuapi-buttons-key-size) * 0.64);
+}
+
+/* Numpad keys carry a small key grid in the top left corner and the symbol in the bottom right. */
+.menuapi-key--numpad {
+  position: relative;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0 3px 2px 0;
+  font-size: calc(var(--menuapi-buttons-key-font-size) * 0.93);
+}
+
+.menuapi-key--numpad::before {
+  content: "";
+  position: absolute;
+  top: 12%;
+  left: 12%;
+  width: 28%;
+  height: 28%;
+  background: var(--menuapi-buttons-key-text);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7'%3E%3Cpath d='M0 0h2v2H0zM2.5 0h2v2h-2zM5 0h2v2H5zM0 2.5h2v2H0zM2.5 2.5h2v2h-2zM5 2.5h2v2H5zM0 5h2v2H0zM2.5 5h2v2h-2zM5 5h2v2H5z'/%3E%3C/svg%3E") no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7'%3E%3Cpath d='M0 0h2v2H0zM2.5 0h2v2h-2zM5 0h2v2H5zM0 2.5h2v2H0zM2.5 2.5h2v2h-2zM5 2.5h2v2H5zM0 5h2v2H0zM2.5 5h2v2h-2zM5 5h2v2H5z'/%3E%3C/svg%3E") no-repeat;
+}
+
+.menuapi-key--numpad .menuapi-key__icon svg {
+  height: calc(var(--menuapi-buttons-key-size) * 0.52);
+}
+
+.menuapi-key--unbound {
+  color: var(--menuapi-buttons-unbound);
+  font-weight: bold;
+}
+
+.menuapi-key--plus {
+  min-width: calc(var(--menuapi-buttons-key-size) * 0.48);
+  color: var(--menuapi-buttons-plus);
+  font-size: calc(var(--menuapi-buttons-key-size) * 0.88);
+  font-weight: bold;
+}
+
+.menuapi-key--missing {
+  width: calc(var(--menuapi-buttons-key-size) * 1.84);
+  background: var(--menuapi-buttons-missing);
+}
+
+.menuapi-key--shoulder {
+  padding: var(--menuapi-buttons-key-padding);
+  border-radius: calc(var(--menuapi-buttons-key-radius) + 1px);
+  background: var(--menuapi-buttons-pad);
+  color: var(--menuapi-buttons-pad-text);
+  font-family: var(--menuapi-buttons-key-font);
+  font-size: var(--menuapi-buttons-key-font-size);
+}
+
+.menuapi-key--glyph svg {
+  display: block;
+  width: auto;
+  height: var(--menuapi-buttons-key-size);
+  overflow: visible;
+}
+
+.menuapi-key--glyph .p {
+  fill: var(--menuapi-buttons-pad);
+}
+
+.menuapi-key--glyph .w {
+  fill: var(--menuapi-buttons-pad-text);
+}
+
+.menuapi-key--glyph .ws {
+  fill: none;
+  stroke: var(--menuapi-buttons-pad-text);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.menuapi-key--glyph .mb,
+.menuapi-key--glyph .mw {
+  fill: var(--menuapi-buttons-mouse);
+  stroke: var(--menuapi-buttons-mouse-lines);
+  stroke-width: 0.8;
+}
+
+.menuapi-key--glyph .mh,
+.menuapi-key--glyph .mw--on {
+  fill: var(--menuapi-buttons-mouse-highlight);
+}
+
+.menuapi-key--glyph .ml {
+  fill: none;
+  stroke: var(--menuapi-buttons-mouse-lines);
+  stroke-width: 0.8;
+}
+
+.menuapi-key--glyph .mt {
+  fill: var(--menuapi-buttons-mouse-lines);
+  font-weight: bold;
+}
+
+.menuapi-key--glyph text {
+  font-family: var(--menuapi-buttons-key-font);
+  text-anchor: middle;
+}
+
+.menuapi-key--glyph .face--a {
+  fill: var(--menuapi-buttons-a);
+}
+
+.menuapi-key--glyph .face--b {
+  fill: var(--menuapi-buttons-b);
+}
+
+.menuapi-key--glyph .face--x {
+  fill: var(--menuapi-buttons-x);
+}
+
+.menuapi-key--glyph .face--y {
+  fill: var(--menuapi-buttons-y);
+}
+
+.menuapi-spinner {
+  width: calc(var(--menuapi-buttons-key-size) * 0.8);
+  height: calc(var(--menuapi-buttons-key-size) * 0.8);
+  border-radius: 50%;
+  background: conic-gradient(transparent 0deg, var(--menuapi-buttons-spinner) 270deg, transparent 270deg);
+  -webkit-mask: radial-gradient(circle, transparent 55%, #000 57%);
+  mask: radial-gradient(circle, transparent 55%, #000 57%);
+  animation: menuapi-spin var(--menuapi-buttons-spinner-speed) linear infinite;
+}
+
+.menuapi-spinner--crescent {
+  -webkit-mask: radial-gradient(circle at 62% 50%, transparent 38%, #000 40%);
+  mask: radial-gradient(circle at 62% 50%, transparent 38%, #000 40%);
+}
+
+.menuapi-spinner--ring--alt {
+  background: conic-gradient(transparent 0deg, var(--menuapi-buttons-spinner-alt) 270deg, transparent 270deg);
+}
+
+.menuapi-spinner--ccw {
+  background: conic-gradient(transparent 90deg, var(--menuapi-buttons-spinner) 90deg, transparent 360deg);
+  animation-direction: reverse;
+}
+
+@keyframes menuapi-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

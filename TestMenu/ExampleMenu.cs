@@ -319,6 +319,27 @@ public partial class ExampleMenu
         menu6.AddMenuItem(showBackButton);
         menu6.AddMenuItem(selectButtonText);
 
+        // Global instructional buttons belong to the resource instead of a menu, so they stay on screen with
+        // every menu closed. They stack above the menu's own row, and slide down into its place when it closes.
+        GlobalInstructionalButtons movementButtons = new GlobalInstructionalButtons()
+            .Add("Forward / Backward", (int)Control.MoveUpOnly, (int)Control.MoveDownOnly)
+            .AddCombination("Sprint", (int)Control.Sprint, (int)Control.MoveUpOnly)
+            .Add(() => $"Jump, it is {DateTime.Now:HH:mm:ss}", (int)Control.Jump);
+        GlobalInstructionalButtons cameraButtons = new GlobalInstructionalButtons()
+            .Add("Look around", (int)Control.LookLeftRight)
+            .Add("Zoom", (int)Control.CursorScrollUp, (int)Control.CursorScrollDown);
+
+        MenuCheckboxItem showMovementButtons = new MenuCheckboxItem(
+            "Show global movement hints",
+            "Shows GlobalInstructionalButtons, which stay when you close the menu. The clock in them updates by itself."
+        );
+        MenuCheckboxItem showCameraButtons = new MenuCheckboxItem(
+            "Show global camera hints",
+            "A second set of GlobalInstructionalButtons, stacked above the first one."
+        );
+        menu6.AddMenuItem(showMovementButtons);
+        menu6.AddMenuItem(showCameraButtons);
+
         menu6.OnCheckboxChange += (_menu, _item, _index, _checked) =>
         {
             if (_item == showSelectButton)
@@ -328,6 +349,19 @@ public partial class ExampleMenu
             else if (_item == showBackButton)
             {
                 _menu.ShowBackInstructionalButton = _checked;
+            }
+            else if (_item == showMovementButtons || _item == showCameraButtons)
+            {
+                GlobalInstructionalButtons buttons = _item == showMovementButtons ? movementButtons : cameraButtons;
+
+                if (_checked)
+                {
+                    buttons.Show();
+                }
+                else
+                {
+                    buttons.Hide();
+                }
             }
         };
         menu6.OnListIndexChange += (_menu, _listItem, _oldIndex, _newIndex, _itemIndex) =>

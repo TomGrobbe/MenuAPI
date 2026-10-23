@@ -8,13 +8,7 @@ namespace MenuAPI;
 // this class wins over anything a using pulls in, so those calls land here on Legacy unchanged.
 internal static class Native
 {
-    internal static bool BeginScaleformMovieMethod(int scaleform, string method) => Cfx.BeginScaleformMovieMethod(scaleform, method);
-
     internal static void DisableControlAction(int padIndex, int control, bool disable) => Cfx.DisableControlAction(padIndex, control, disable);
-
-    internal static void DrawScaleformMovieFullscreen(int scaleform, int r, int g, int b, int a, int unk) => Cfx.DrawScaleformMovieFullscreen(scaleform, r, g, b, a, unk);
-
-    internal static void EndScaleformMovieMethod() => Cfx.EndScaleformMovieMethod();
 
     internal static string GetControlInstructionalButton(int padIndex, int control, bool unk) => Cfx.GetControlInstructionalButton(padIndex, control, unk ? 1 : 0);
 
@@ -48,8 +42,6 @@ internal static class Native
 
     internal static float GetScreenAspectRatio(bool b) => Cfx.GetScreenAspectRatio(b);
 
-    internal static bool HasScaleformMovieLoaded(int scaleform) => Cfx.HasScaleformMovieLoaded(scaleform);
-
     internal static bool HasStreamedTextureDictLoaded(string dict) => Cfx.HasStreamedTextureDictLoaded(dict);
 
     internal static bool IsControlEnabled(int padIndex, int control) => Cfx.IsControlEnabled(padIndex, control);
@@ -57,6 +49,8 @@ internal static class Native
     internal static bool IsControlPressed(int padIndex, int control) => Cfx.IsControlPressed(padIndex, control);
 
     internal static bool IsHudComponentActive(int id) => Cfx.IsHudComponentActive(id);
+
+    internal static bool IsHudHidden() => Cfx.IsHudHidden();
 
     internal static bool IsPauseMenuActive() => Cfx.IsPauseMenuActive();
 
@@ -85,22 +79,14 @@ internal static class Native
 
     internal static void ProfilerExitScope() => Cfx.ProfilerExitScope();
 
-    internal static void PushScaleformMovieMethodParameterString(string value) => Cfx.PushScaleformMovieMethodParameterString(value);
-
     internal static void RegisterKeyMapping(string commandString, string description, string defaultMapper, string defaultParameter) =>
         Cfx.RegisterKeyMapping(commandString, description, defaultMapper, defaultParameter);
 
     internal static void RegisterNuiCallbackType(string callbackType) => Cfx.RegisterNuiCallbackType(callbackType);
 
-    internal static int RequestScaleformMovie(string scaleformName) => Cfx.RequestScaleformMovie(scaleformName);
-
     internal static void RequestStreamedTextureDict(string textureDict, bool p1) => Cfx.RequestStreamedTextureDict(textureDict, p1);
 
-    internal static void ScaleformMovieMethodAddParamInt(int value) => Cfx.ScaleformMovieMethodAddParamInt(value);
-
     internal static bool SendNuiMessage(string jsonString) => Cfx.SendNuiMessage(jsonString);
-
-    internal static void SetScaleformMovieAsNoLongerNeeded(ref int scaleformHandle) => Cfx.SetScaleformMovieAsNoLongerNeeded(ref scaleformHandle);
 
     internal static void SetStreamedTextureDictAsNoLongerNeeded(string textureDict) => Cfx.SetStreamedTextureDictAsNoLongerNeeded(textureDict);
 

@@ -14,7 +14,8 @@ an image file that replaces the picture at the top of a menu.
 Your stylesheet loads after MenuAPI's, so it wins on equal specificity without `!important`. Tokens
 you do not set keep their default.
 
-Themes are for recolouring only. Moving or resizing things is not supported.
+Themes are for recolouring the menu, moving or resizing it is not supported. The
+[instructional buttons](#instructional-buttons) are the exception, their sizes and spacing are tokens too.
 
 ## Write one
 
@@ -129,6 +130,97 @@ Use `Menu.MenuTitleFont`.
 | `--menuapi-panel-text` | menu text colour |
 | `--menuapi-panel-swatch-selected` | `rgb(255 255 255)` |
 | `--menuapi-panel-opacity-bar` | `rgb(136 136 136)` |
+
+### Instructional buttons
+
+The button hints in the bottom right have their own element, so these tokens go on `#menuapi-buttons`
+instead of `#menuapi`. The defaults copy the game's own button bar. The same theme file can hold both,
+and the hints keep the theme even while no menu is open.
+
+```css
+#menuapi-buttons {
+  --menuapi-buttons-bg: rgb(12 18 38 / 90%);
+  --menuapi-buttons-radius: 12px;
+  --menuapi-buttons-key-bg: rgb(84 148 255);
+  --menuapi-buttons-key-text: rgb(255 255 255);
+  --menuapi-buttons-item-direction: row-reverse;
+}
+```
+
+**The bar**
+
+| Token | Default |
+| --- | --- |
+| `--menuapi-buttons-bg` | `rgb(0 0 0 / 85%)` |
+| `--menuapi-buttons-border` | `none` |
+| `--menuapi-buttons-shadow` | `none` |
+| `--menuapi-buttons-radius` | `4px` |
+| `--menuapi-buttons-padding` | `0 6px` |
+| `--menuapi-buttons-height` | `40px`, the height of one row of hints |
+| `--menuapi-buttons-row-gap` | `5px`, the space between two rows stacked on top of each other, see [GlobalInstructionalButtons](../globalinstructionalbuttons/) |
+| `--menuapi-buttons-move-duration` | `250ms`, how long a row takes to slide or fade in and out |
+| `--menuapi-buttons-offset-x` | `0px`, moves the bar left from the safe zone edge |
+| `--menuapi-buttons-offset-y` | `0px`, moves the bar up from the safe zone edge |
+
+**Each hint**
+
+| Token | Default |
+| --- | --- |
+| `--menuapi-buttons-item-padding` | `0 10px` |
+| `--menuapi-buttons-item-gap` | `7px`, the space between the text and its icons |
+| `--menuapi-buttons-item-direction` | `row`, text first. `row-reverse` puts the icons first |
+| `--menuapi-buttons-separator` | `none`, a border drawn between two hints, for example `1px solid white` |
+
+**Text**
+
+| Token | Default |
+| --- | --- |
+| `--menuapi-buttons-font` | `"GTA Chalet", "Helvetica Neue", Arial, sans-serif` |
+| `--menuapi-buttons-font-size` | `18px` |
+| `--menuapi-buttons-font-weight` | `normal` |
+| `--menuapi-buttons-text` | `rgb(255 255 255)` |
+| `--menuapi-buttons-text-transform` | `none`, `uppercase` makes every hint upper case |
+
+**Keyboard keys**
+
+| Token | Default |
+| --- | --- |
+| `--menuapi-buttons-key-size` | `25px`, every icon is sized from this |
+| `--menuapi-buttons-key-gap` | `4px`, the space between two icons of one hint |
+| `--menuapi-buttons-key-radius` | `3px` |
+| `--menuapi-buttons-key-padding` | `0 4px` |
+| `--menuapi-buttons-key-bg` | `rgb(240 240 240)` |
+| `--menuapi-buttons-key-text` | `rgb(0 0 0)` |
+| `--menuapi-buttons-key-border` | `none` |
+| `--menuapi-buttons-key-shadow` | `none` |
+| `--menuapi-buttons-key-font` | `Arial, "Helvetica Neue", sans-serif` |
+| `--menuapi-buttons-key-font-size` | `15px` |
+| `--menuapi-buttons-key-font-weight` | `normal` |
+
+**Controller and mouse**
+
+| Token | Default |
+| --- | --- |
+| `--menuapi-buttons-pad` | `rgb(58 58 58)`, the sticks, d-pad, bumpers and triggers |
+| `--menuapi-buttons-pad-text` | `rgb(255 255 255)`, the letters and arrows on them |
+| `--menuapi-buttons-a` | `rgb(110 180 60)` |
+| `--menuapi-buttons-b` | `rgb(222 90 90)` |
+| `--menuapi-buttons-x` | `rgb(40 160 220)` |
+| `--menuapi-buttons-y` | `rgb(236 196 30)` |
+| `--menuapi-buttons-mouse` | `rgb(255 255 255)` |
+| `--menuapi-buttons-mouse-lines` | `rgb(0 0 0)` |
+| `--menuapi-buttons-mouse-highlight` | `rgb(140 140 140)`, the pressed mouse button |
+
+**Everything else**
+
+| Token | Default |
+| --- | --- |
+| `--menuapi-buttons-plus` | the text colour, the `+` between two buttons that go together |
+| `--menuapi-buttons-unbound` | `rgb(224 50 50)`, the `???` of a key that is not bound |
+| `--menuapi-buttons-missing` | `rgb(255 0 0)`, the PlayStation tilt icons, which the game has no picture for either |
+| `--menuapi-buttons-spinner` | `rgb(235 235 235)` |
+| `--menuapi-buttons-spinner-alt` | `rgb(240 160 30)`, the orange spinner |
+| `--menuapi-buttons-spinner-speed` | `1s`, the time one turn takes |
 
 ## Out of reach
 
