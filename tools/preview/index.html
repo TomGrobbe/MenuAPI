@@ -53,6 +53,18 @@
                 return [c(5), c(3), c(1)];
             })
         }, "*");
+
+        window.postMessage({
+            type: "menuapi:buttons",
+            visible: true,
+            inset: 0.05,
+            buttons: [
+                { buttons: "b_1003", text: "Select" },
+                { buttons: "b_1004", text: "Back" },
+                { buttons: "b_197%b_196", text: "Change Value" },
+                { buttons: "t_E", text: "Interact" },
+            ]
+        }, "*");
     </script>
 </body>
 
