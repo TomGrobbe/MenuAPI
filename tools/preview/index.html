@@ -58,11 +58,22 @@
             type: "menuapi:buttons",
             visible: true,
             inset: 0.05,
-            buttons: [
-                { buttons: "b_1003", text: "Select" },
-                { buttons: "b_1004", text: "Back" },
-                { buttons: "b_197%b_196", text: "Change Value" },
-                { buttons: "t_E", text: "Interact" },
+            rows: [
+                {
+                    id: "menu",
+                    buttons: [
+                        { buttons: "b_1003", text: "Select" },
+                        { buttons: "b_1004", text: "Back" },
+                        { buttons: "b_197%b_196", text: "Change Value" },
+                    ]
+                },
+                {
+                    id: "row1",
+                    buttons: [
+                        { buttons: "t_E%b_998%t_Q", text: "Change Speed" },
+                        { buttons: "t_H", text: "Follow Cam: On" },
+                    ]
+                },
             ]
         }, "*");
     </script>
