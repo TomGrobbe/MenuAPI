@@ -693,6 +693,7 @@
 
 .menuapi-buttons__bar--leaving {
   position: absolute;
+  max-width: none;
   opacity: 0;
 }
 

@@ -1045,8 +1045,13 @@
         return Number.isFinite(time) ? time : 250;
     }
 
-    // Pinned where it was and faded out, so the rows around it can move into its place meanwhile.
-    function leave(row, rect, frame, scale) {
+    // Pinned where it was and faded out, so the rows around it can move into its place meanwhile. The size
+    // is pinned too: out of the flow it would otherwise wrap to the width of the bar, which is nothing once
+    // it was the last row. The extra pixel is there because a row fixed to exactly its own width still
+    // wraps its last hint, rounding leaves it a fraction short.
+    function leave(row, size, rect, frame, scale) {
+        row.style.width = `${parseFloat(size.width) + 1}px`;
+        row.style.height = size.height;
         row.style.right = `${(frame.right - rect.right) / scale}px`;
         row.style.bottom = `${(frame.bottom - rect.bottom) / scale}px`;
         row.classList.add("menuapi-buttons__bar--leaving");
@@ -1064,13 +1069,15 @@
 
         // Rows are measured on screen, where the bar is scaled, but moved inside it, where it is not.
         const frame = target.getBoundingClientRect();
-        const scale = target.offsetHeight > 0 ? frame.height / target.offsetHeight : 1;
+        const scale = parseFloat(getComputedStyle(target).getPropertyValue("--menuapi-buttons-scale")) || 1;
         const before = new Map([...rows].map(([id, row]) => [id, row.getBoundingClientRect()]));
         const kept = new Set(wanted.map(row => row.id));
 
         for (const [id, row] of rows) {
             if (!kept.has(id)) {
-                leave(row, before.get(id), frame, scale);
+                const style = getComputedStyle(row);
+
+                leave(row, { width: style.width, height: style.height }, before.get(id), frame, scale);
                 rows.delete(id);
             }
         }
