@@ -61,6 +61,7 @@ export default defineConfig({
             { label: 'MenuController', link: '/reference/menucontroller/' },
             { label: 'Pagination', link: '/reference/pagination/' },
             { label: 'Key bindings', link: '/reference/keybindings/' },
+            { label: 'Global instructional buttons', link: '/reference/globalinstructionalbuttons/' },
             { label: 'Theming and banners', link: '/reference/theming/' },
             {
               label: 'Menu Items',

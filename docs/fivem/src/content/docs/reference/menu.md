@@ -574,6 +574,8 @@ The button hints in the bottom right. Each menu has its own set, and they switch
 
 They are drawn on your [NUI page](../../nui/), just like the menu itself, so a [theme](../theming/#instructional-buttons) can recolour them. You do not have to change your `index.html` for them, `menuapi.js` adds them to the page by itself.
 
+Need hints that are not tied to a menu, or that stay up after it closes? Use [GlobalInstructionalButtons](../globalinstructionalbuttons/).
+
 Every menu has **select** and **back**, plus **change value** while the highlighted row is a list, dynamic list or slider (not when it is disabled). All three follow the player's [key bindings](../keybindings/). Give [AddKeyBinding()](#addkeybinding) a `buttonText` to add a hint for your own key, which follows the bindings too.
 
 ```cs

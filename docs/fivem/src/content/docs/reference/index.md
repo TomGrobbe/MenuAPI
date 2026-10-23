@@ -15,6 +15,7 @@ Every public class, property, method and event in MenuAPI. Not set up yet? Start
 |[Menu](menu/)|A single menu: banner, subtitle, items and description box. Also where all [events](events/) live.|
 |[MenuController](menucontroller/)|The static controller that registers, draws and controls your menus.|
 |[Pagination](pagination/)|Splitting a long menu into pages, moved between with left and right.|
+|[GlobalInstructionalButtons](globalinstructionalbuttons/)|Button hints that belong to your resource instead of a menu, shown with or without a menu open.|
 |[Menu Items](menuitems/)|Buttons, checkboxes, lists, dynamic lists and sliders.|
 |[Events](events/)|Every event a menu can raise, with its parameters.|
 |[MenuTicks](ticks/)|A read only view of the loops MenuAPI runs, and when each one stops.|

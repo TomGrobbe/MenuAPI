@@ -12,6 +12,10 @@ The button hints in the bottom right are now drawn on your NUI page, just like t
 
 Button strings in `CustomInstructionalButtons` work the same as before. Every icon the game can hand out is supported, including mouse movement, the mouse wheel, every controller button and the keyboard keys of the German, French, Italian and Spanish layouts.
 
+### Global instructional buttons
+
+New: [GlobalInstructionalButtons](../reference/globalinstructionalbuttons/). Button hints that belong to your resource instead of a menu, for anything you like, for example a noclip. They show with or without a menu open, until you hide them. Up to 5 sets stack on top of the menu's own row, and slide down into its place when the menu closes. Hint text can be a function, so it updates by itself.
+
 ### Upgrading
 
 You do **not** have to change your `index.html` or your `fxmanifest.lua`. The button bar lives in `menuapi.min.js` and `menuapi.min.css`, which your page already loads for the menu, and it adds itself to the page.

@@ -157,6 +157,8 @@ and the hints keep the theme even while no menu is open.
 | `--menuapi-buttons-radius` | `4px` |
 | `--menuapi-buttons-padding` | `0 6px` |
 | `--menuapi-buttons-height` | `40px`, the height of one row of hints |
+| `--menuapi-buttons-row-gap` | `5px`, the space between two rows stacked on top of each other, see [GlobalInstructionalButtons](../globalinstructionalbuttons/) |
+| `--menuapi-buttons-move-duration` | `250ms`, how long a row takes to slide or fade in and out |
 | `--menuapi-buttons-offset-x` | `0px`, moves the bar left from the safe zone edge |
 | `--menuapi-buttons-offset-y` | `0px`, moves the bar up from the safe zone edge |
 
