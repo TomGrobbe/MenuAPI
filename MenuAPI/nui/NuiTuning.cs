@@ -97,6 +97,7 @@ public static class NuiTuning
         if (string.Equals(_theme, name, StringComparison.OrdinalIgnoreCase))
         {
             MenuNui.Invalidate();
+            MenuNui.SendTheme();
         }
     }
 
@@ -114,6 +115,7 @@ public static class NuiTuning
         }
 
         MenuNui.Invalidate();
+        MenuNui.SendTheme();
 
         return true;
     }
@@ -131,6 +133,7 @@ public static class NuiTuning
             _theme = null;
 
             MenuNui.Invalidate();
+            MenuNui.SendTheme();
 
             return;
         }
@@ -148,6 +151,7 @@ public static class NuiTuning
         _theme = name;
 
         MenuNui.Invalidate();
+        MenuNui.SendTheme();
     }
 
     internal static string? ThemeUrl =>
@@ -165,6 +169,7 @@ public static class NuiTuning
         _theme = null;
 
         MenuNui.Invalidate();
+        MenuNui.SendTheme();
     }
 
     /// <summary>The current text size, brightness and weight as one readable line, for debug output.</summary>

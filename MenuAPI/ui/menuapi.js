@@ -614,8 +614,8 @@
     });
 })();
 
-// The theme belongs to the whole page, the menu and the instructional buttons share it. It is only
-// changed by something on screen, so hiding one of them never takes the theme away from the other.
+// The theme belongs to the whole page, the menu and the instructional buttons share it. Hiding one of
+// them never takes the theme away from the other, only a theme message or something on screen changes it.
 (() => {
     let themeUrl = null;
     let themeLink = null;
@@ -669,7 +669,9 @@
             }
         }
 
-        if ((data?.type === "menuapi" || data?.type === "menuapi:buttons") && data.visible) {
+        if (data?.type === "menuapi:theme") {
+            applyTheme(data.theme);
+        } else if ((data?.type === "menuapi" || data?.type === "menuapi:buttons") && data.visible) {
             applyTheme(data.theme);
         }
     });

@@ -48,11 +48,14 @@ internal static class SpritePreload
     {
         switch (Text(body, "stage"))
         {
+            // Sent on both, because the page can report ready before the script that applies themes has loaded.
             case "ready":
+                MenuNui.ResendTheme();
                 Begin();
                 break;
 
             case "done":
+                MenuNui.ResendTheme();
                 Complete(body);
                 break;
         }

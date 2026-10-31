@@ -17,6 +17,9 @@ internal static class MenuNui
     private static string? _sent;
     private static readonly NuiJson _snapshot = new();
     private static readonly NuiJson _glare = new();
+    private static readonly NuiJson _themeJson = new();
+    private static bool _themeSent;
+    private static string? _sentTheme;
     private static bool _dirty = true;
     private static readonly List<string> _pendingTextures = new();
     private static float _heading = float.NaN;
@@ -26,6 +29,39 @@ internal static class MenuNui
     private static MenuListItem.ColorPanelType? _palette;
 
     internal static void Invalidate() => _dirty = true;
+
+    // The menu snapshot only carries the theme while a menu is open, so a change made with every menu closed
+    // would otherwise wait for the next open.
+    internal static void SendTheme()
+    {
+        var theme = NuiTuning.ThemeUrl;
+
+        if (_themeSent && theme == _sentTheme)
+        {
+            return;
+        }
+
+        _themeSent = true;
+        _sentTheme = theme;
+
+        var json = _themeJson
+            .Reset()
+            .Object()
+            .Prop("type", "menuapi:theme")
+            .Prop("theme", theme)
+            .EndObject()
+            .ToString();
+
+        Native.SendNuiMessage(json);
+    }
+
+    // Anything sent before the page loaded was lost.
+    internal static void ResendTheme()
+    {
+        _themeSent = false;
+
+        SendTheme();
+    }
 
     internal static void Change<T>(ref T field, T value)
     {
