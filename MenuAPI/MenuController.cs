@@ -150,37 +150,11 @@ public partial class MenuController
     private static bool _instructionalButtonsShown;
 
     private static MenuAlignmentOption _alignment = MenuAlignmentOption.Left;
-    /// <summary>
-    /// Which side of the screen menus are drawn on. Right is not supported on 17:9 and wider screens,
-    /// there it stays <see cref="MenuAlignmentOption.Left"/> and an error is logged.
-    /// </summary>
+    /// <summary>Which side of the screen menus are drawn on.</summary>
     public static MenuAlignmentOption MenuAlignment
     {
-        get
-        {
-            return _alignment;
-        }
-        set
-        {
-            if (AspectRatio < 1.888888888888889f)
-            {
-                // alignment can be whatever the resource wants it to be because this aspect ratio is supported.
-                MenuNui.Change(ref _alignment, value);
-            }
-            // right aligned menus are not supported for aspect ratios 17:9 or 21:9.
-            else
-            {
-                // no matter what the new value would've been, the aspect ratio does not support right aligned menus,
-                // so (re)set it to be left aligned.
-                MenuNui.Change(ref _alignment, MenuAlignmentOption.Left);
-
-                // In case the value was being changed to be right aligned, notify the user properly.
-                if (value == MenuAlignmentOption.Right)
-                {
-                    Runtime.Log.Error($"[MenuAPI ({Native.GetCurrentResourceName()})] Right aligned menus are not supported for aspect ratios 17:9 or 21:9, left aligned will be used instead.");
-                }
-            }
-        }
+        get => _alignment;
+        set => MenuNui.Change(ref _alignment, value);
     }
 
     /// <summary>Which side of the screen menus are drawn on.</summary>
