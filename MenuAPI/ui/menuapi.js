@@ -1025,6 +1025,8 @@
 
     const rows = new Map();
 
+    const MINIMAP_GAP = 16;
+
     function items(buttons) {
         return buttons.map(button => {
             const item = element("div", "menuapi-buttons__item");
@@ -1039,6 +1041,54 @@
             return item;
         });
     }
+
+    // A row stops short of the minimap, which is a quarter of the screen height wide, or of the theme's
+    // share of the screen, whichever is less.
+    function wrap(row) {
+        const target = getBar();
+        const scale = parseFloat(getComputedStyle(target).getPropertyValue("--menuapi-buttons-scale")) || 1;
+        const hints = [...row.querySelectorAll(".menuapi-buttons__item")];
+        const probe = element("div", "menuapi-buttons__line");
+
+        probe.append(...hints);
+        row.replaceChildren(probe);
+
+        const box = getComputedStyle(probe);
+        const chrome = parseFloat(box.paddingLeft) + parseFloat(box.paddingRight)
+            + parseFloat(box.borderLeftWidth) + parseFloat(box.borderRightWidth);
+        const bar = getComputedStyle(target);
+        const inset = parseFloat(bar.getPropertyValue("--menuapi-buttons-inset")) || 0;
+        const share = parseFloat(bar.getPropertyValue("--menuapi-buttons-max-width")) || 1;
+        const minimap = inset + 1 / (4 * (window.innerWidth / window.innerHeight));
+        const room = Math.min(
+            window.innerWidth * share,
+            window.innerWidth * (1 - inset - minimap) - MINIMAP_GAP * scale) / scale;
+
+        const lines = [[]];
+        let used = chrome;
+
+        for (const hint of hints) {
+            const width = hint.getBoundingClientRect().width / scale;
+
+            if (lines[lines.length - 1].length > 0 && used + width > room) {
+                lines.push([]);
+                used = chrome;
+            }
+
+            lines[lines.length - 1].push(hint);
+            used += width;
+        }
+
+        row.replaceChildren(...lines.map(group => {
+            const line = element("div", "menuapi-buttons__line");
+
+            line.append(...group);
+
+            return line;
+        }));
+    }
+
+    window.addEventListener("resize", () => rows.forEach(wrap));
 
     function moveTime(node) {
         const value = getComputedStyle(node).getPropertyValue("--menuapi-buttons-move-duration").trim();
@@ -1097,6 +1147,7 @@
 
             row.replaceChildren(...items(entry.buttons));
             target.append(row);
+            wrap(row);
         }
 
         // Every row that was already there jumps back to where it was drawn, then slides to its new place.

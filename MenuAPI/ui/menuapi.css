@@ -602,6 +602,7 @@
   --menuapi-buttons-item-direction: row;
   --menuapi-buttons-separator: none;
   --menuapi-buttons-row-gap: 5px;
+  --menuapi-buttons-max-width: 0.8;
   --menuapi-buttons-move-duration: 250ms;
 
   --menuapi-buttons-font: "GTA Chalet", "Helvetica Neue", Arial, sans-serif;
@@ -670,16 +671,9 @@
 /* One row of hints. The open menu's row is the bottom one, rows a resource shows itself stack above. */
 .menuapi-buttons__bar {
   display: flex;
-  flex-direction: row-reverse;
-  flex-wrap: wrap-reverse;
-  align-items: center;
-  max-width: 100%;
-  padding: var(--menuapi-buttons-padding);
-
-  background: var(--menuapi-buttons-bg);
-  border: var(--menuapi-buttons-border);
-  border-radius: var(--menuapi-buttons-radius);
-  box-shadow: var(--menuapi-buttons-shadow);
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: var(--menuapi-buttons-row-gap);
 
   transition:
     transform var(--menuapi-buttons-move-duration) ease,
@@ -697,7 +691,21 @@
   opacity: 0;
 }
 
+/* A row that does not fit is split into lines, each in its own box, so a short line stays short. */
+.menuapi-buttons__line {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  padding: var(--menuapi-buttons-padding);
+
+  background: var(--menuapi-buttons-bg);
+  border: var(--menuapi-buttons-border);
+  border-radius: var(--menuapi-buttons-radius);
+  box-shadow: var(--menuapi-buttons-shadow);
+}
+
 .menuapi-buttons__item {
+  flex-shrink: 0;
   display: flex;
   flex-direction: var(--menuapi-buttons-item-direction);
   align-items: center;
@@ -707,7 +715,7 @@
   white-space: nowrap;
 }
 
-/* The bar runs right to left, so the next item in the markup is the one on the left. */
+/* A line runs right to left, so the next item in the markup is the one on the left. */
 .menuapi-buttons__item + .menuapi-buttons__item {
   border-right: var(--menuapi-buttons-separator);
 }
