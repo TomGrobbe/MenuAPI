@@ -232,10 +232,6 @@ menu.OnCheckboxChange += (_menu, _item, _index, _checked) =>
 };
 ```
 
-:::caution
-Right alignment is not supported on 17:9 and wider aspect ratios. There the value is forced to `MenuAlignmentOption.Left` and an error is logged. Read the property back, or use [Menu.LeftAligned](../menu/#properties), to get the alignment actually in use.
-:::
-
 ----
 
 ### Header styling defaults
